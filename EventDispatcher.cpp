@@ -1,0 +1,85 @@
+#include "EventDispatcher.h"
+#include "CapEngineException.h"
+#include <memory>
+
+using namespace CapEngine;
+using namespace std;
+
+EventDispatcher::EventDispatcher(int queuedelay) : queueDelayCount(queuedelay) {
+  auto_ptr<vector<subscription> > subscribersPtr(new vector<subscription>());
+  auto_ptr<vector<SDL_Event*> > eventQueuePtr(new vector<SDL_Event*>());
+  subscribers = subscribersPtr.release();
+  eventQueue = eventQueuePtr.release();
+}
+
+EventDispatcher::~EventDispatcher(){
+  delete subscribers;
+  delete eventQueue;
+}
+
+void EventDispatcher::subscribe(IEventSubscriber* subscriber_in, int subscriptionMask){
+  if(subscriber_in == NULL){
+    throw new CapEngineException("Error registering event subscriber:  Event subcriber is null");
+  }
+
+  if(subscriptionMask == 0x00){
+    return;
+  }
+  
+  subscription newSubscription;
+  newSubscription.subscriber = subscriber_in;
+  newSubscription.subscriptionType = subscriptionMask;
+  subscribers->push_back(newSubscription);
+}
+
+void EventDispatcher::enqueue(SDL_Event* event){
+  eventQueue->push_back(event);
+}
+
+void EventDispatcher::flushQueue(){
+  vector<subscription>::iterator subscriberIter = subscribers->begin();
+  vector<SDL_Event*>::iterator eventIter = eventQueue->begin();
+  while(eventIter != eventQueue->end()){
+    while(subscriberIter != subscribers->end()){
+      SDL_Event* curEvent = *eventIter;
+      subscription* curSubscription = &(*subscriberIter);
+      // check to see if subscriber subscribes to current event types
+      switch(curEvent->type){
+      case SDL_KEYDOWN:
+	if(curSubscription->subscriptionType & keyboardEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+      case SDL_KEYUP:
+	if(curSubscription->subscriptionType & keyboardEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+      case SDL_MOUSEMOTION:
+	if(curSubscription->subscriptionType & mouseEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+      case SDL_MOUSEBUTTONDOWN | SDL_MOUSEBUTTONUP:
+	if(curSubscription->subscriptionType & mouseEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+
+      }
+      subscriberIter++;
+    }
+    delete *eventIter;
+    eventIter++;
+  }
+  eventQueue->erase(eventQueue->begin(), eventQueue->end());
+}
+
+bool EventDispatcher::hasEvents(){
+  if(eventQueue->size() > 0){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
