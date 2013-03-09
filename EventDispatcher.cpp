@@ -40,39 +40,46 @@ void EventDispatcher::flushQueue(){
   vector<subscription>::iterator subscriberIter = subscribers->begin();
   vector<SDL_Event*>::iterator eventIter = eventQueue->begin();
   while(eventIter != eventQueue->end()){
+    SDL_Event* curEvent = *eventIter;
     while(subscriberIter != subscribers->end()){
-      SDL_Event* curEvent = *eventIter;
       subscription* curSubscription = &(*subscriberIter);
       // check to see if subscriber subscribes to current event types
       switch(curEvent->type){
       case SDL_KEYDOWN:
 	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
 	}
 	break;
       case SDL_KEYUP:
 	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
 	}
 	break;
       case SDL_MOUSEMOTION:
 	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
 	}
 	break;
       case SDL_MOUSEBUTTONDOWN | SDL_MOUSEBUTTONUP:
 	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	}
+	break;
+      case SDL_QUIT:
+	if(curSubscription->subscriptionType & systemEvent){
+	  (curSubscription->subscriber)->receiveEvent(copyEvent( curEvent), nullptr);
 	}
 	break;
 
       }
       subscriberIter++;
     }
-    delete *eventIter;
+    //delete *eventIter;
     eventIter++;
+    delete curEvent;
   }
-  eventQueue->erase(eventQueue->begin(), eventQueue->end());
+  //eventQueue->erase(eventQueue->begin(), eventQueue->end());
+  eventQueue->clear();
 }
 
 bool EventDispatcher::hasEvents(){
@@ -82,4 +89,17 @@ bool EventDispatcher::hasEvents(){
   else{
     return false;
   }
+}
+
+void EventDispatcher::getEvents(){
+  SDL_Event event;
+  while(SDL_PollEvent(&event)){
+    enqueue(copyEvent(&event));
+  }
+}
+
+SDL_Event* EventDispatcher::copyEvent(SDL_Event* event){
+  unique_ptr<SDL_Event> copy(new SDL_Event);
+  memcpy(reinterpret_cast<void*>(copy.get()), reinterpret_cast<void*>(event), sizeof(SDL_Event));
+  return copy.release();
 }

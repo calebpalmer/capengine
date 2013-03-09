@@ -17,10 +17,15 @@
 #include "vector.h"
 #include "Time.h"
 #include "EventDispatcher.h"
+#include "IEventSubscriber.h"
 #include "collision.h"
 #include "fontmanager.h"
 #include "numbergenerator.h"
 #include "soundplayer.h"
 #include "pcm.h"
+#include "logger.h"
+#include "tileset.h"
+#include "map2d.h"
+#include "filesystem.h"
 
 #endif

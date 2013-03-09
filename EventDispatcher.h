@@ -11,6 +11,7 @@
 namespace CapEngine {
   const int mouseEvent =  0x01;
   const int keyboardEvent = 0x02;
+  const int systemEvent = 0x04;
   
   // Class to recieve game events and dispatch them to subscribed parties
   class EventDispatcher{
@@ -26,6 +27,7 @@ namespace CapEngine {
 
     EventDispatcher(const EventDispatcher&){}
     EventDispatcher& operator=(const EventDispatcher&){return *this;}
+    SDL_Event* copyEvent(SDL_Event* event);
 
   public:
     EventDispatcher(int queueDelay = 0);
@@ -35,6 +37,7 @@ namespace CapEngine {
     void enqueue(SDL_Event* event);
     void flushQueue();
     bool hasEvents();
+    void getEvents();
     
   };
 

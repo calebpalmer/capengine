@@ -1,18 +1,20 @@
-# (setq compile-command "(cd ~/Projects/games/pong/src && make)")
+# (setq compile-command "(cd ~/Projects/games/capengine && make)")
 all: libcapengine.so
 
+FLOATTYPE=float
 PLATFORM=UNIX
 CC=g++
-CPP=g++
+CPP=g++	
 INCLUDE=./src
-CFLAGS= -g -Wall -D$(PLATFORM) -DDEBUG -std=c++11 -pedantic `sdl-config --cflags`
+CFLAGS=  -DFLOATTYPE=$(FLOATTYPE) -g -Wall -D$(PLATFORM)  -DDEBUG -std=c++11 -pedantic `sdl-config --cflags`
 LIBS= `sdl-config --cflags --libs` -lSDL_image -lboost_system -lboost_filesystem
 #CFLAGS= -O3 -D$(PLATFORM) -DDEBUG
 
 #CAPEngine
-libcapengine.so: Point2d.o Vector2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o
-	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Vector2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
-	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o -lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o
+	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
+	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o \
+	-lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
 
 capcommon.o: capcommon.h capcommon.cpp
 	$(CPP) $(CFLAGS) -o capcommon.o -c capcommon.cpp  -fPIC
@@ -55,6 +57,18 @@ soundplayer.o: soundplayer.h soundplayer.cpp pcm.h CapEngineException.h
 
 pcm.o: pcm.h pcm.cpp CapEngineException.h
 	$(CPP) $(CFLAGS) -o pcm.o -c pcm.cpp -fPIC
+
+filesystem.o: filesystem.cpp filesystem.h
+	$(CPP) $(CFLAGS) -o filesystem.o -c filesystem.cpp -fPIC
+
+tileset.o: tileset.cpp tileset.h
+	$(CPP) $(CFLAGS) -o tileset.o -c tileset.cpp -fPIC
+
+map2d.o: map2d.cpp map2d.h
+	$(CPP) $(CFLAGS) -o map2d.o -c map2d.cpp -fPIC
+
+logger.o: logger.cpp logger.h
+	$(CPP) $(CFLAGS) -o logger.o -c logger.cpp -fPIC
 
 .PHONEY: clean tests tags
 

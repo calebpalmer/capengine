@@ -30,7 +30,7 @@ Vector::Vector(const Vector& vec){
   this->d = vec.d;
 }
 
-//constructor taking a PolarVector as input
+//constructor taking a PolarVector as input, creates a vector on the xy plane
 Vector::Vector(const PolarVector& pVecIn){
   x = pVecIn.mag * cos(DEGTORAD(pVecIn.deg));
   y = pVecIn.mag * sin(DEGTORAD(pVecIn.deg));
@@ -103,7 +103,7 @@ void Vector::setD(real dIn) {
   \param vec2
   \return Vector
  */
-Vector Vector::operator+(const Vector& vec2){
+Vector Vector::operator+(const Vector& vec2) const{
   return Vector(x + vec2.getX(), y + vec2.getY(), z + vec2.getZ());
 }
 
@@ -113,7 +113,7 @@ Vector Vector::operator+(const Vector& vec2){
   \param vec2
   \return Vector
  */
-Vector Vector::operator-(const Vector& vec2){
+Vector Vector::operator-(const Vector& vec2) const{
   return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
 }
 
@@ -125,11 +125,11 @@ Vector Vector::operator-(const Vector& vec2){
   \return
   \li the distance of this from vec.
  */
-real Vector::distance(const Vector& vec) const{
+real CapEngine::distance(const Vector& vec1, const Vector& vec2){
   // sqrt (x*x + y*y
-  real xdelta = x - vec.getX();
-  real ydelta = y - vec.getY();
-  real zdelta = z - vec.getZ();
+  real xdelta = vec1.getX() - vec2.getX();
+  real ydelta = vec1.getY() - vec2.getY();
+  real zdelta = vec1.getZ() - vec2.getZ();
   return sqrt(xdelta * xdelta + ydelta * ydelta + zdelta * zdelta);
 }
 
@@ -150,7 +150,7 @@ void Vector::scale(real factor){
   \li the magnitude of the vector
  */
 real Vector::magnitude() const{
-  return distance(Vector(0,0,0));
+  return distance(*this, Vector(0,0,0));
 }
 
 /*
@@ -158,10 +158,10 @@ real Vector::magnitude() const{
   \return 
   \li ptr to a normalized Vector
  */
-Vector* Vector::normalize() const{
+Vector& Vector::normalize() const{
   real mag = this->magnitude();
   auto_ptr<Vector> normalVec(new Vector(x/mag, y/mag, z/mag));
-  return normalVec.release();
+  return *(normalVec.release());
 }
 
 /*
@@ -174,9 +174,9 @@ if < 0 -> theta between 90 and 180
   \return 
   \li the dot product
  */
-real Vector::dotProduct(const Vector& vec) const{
-  return (x * vec.getX() + y * vec.getY() + z * vec.getZ());
-}
+real CapEngine::dotProduct(const Vector& vec1, const Vector& vec2){
+    return (vec1.getX() * vec2.getX() + vec1.getY() * vec2.getY() + vec1.getZ() * vec2.getZ());
+  }
 
 /*
   \fn calculate the crossProduct of this vector and passed vector
@@ -184,28 +184,39 @@ real Vector::dotProduct(const Vector& vec) const{
   \return
   \li the cross product of the two vectors
 */
-Vector* Vector::crossProduct(const Vector& vec) const{
-  real newx = y*vec.getZ() + z*vec.getY();
-  real newy = z*vec.getX() + x*vec.getZ();
-  real newz = x*vec.getY() + y*vec.getX();
+Vector& CapEngine::crossProduct(const Vector& vec1, const Vector& vec2){
+    real newx = vec1.getY()*vec2.getZ() + vec1.getZ()*vec2.getY();
+    real newy = vec1.getZ()*vec2.getX() + vec1.getX()*vec2.getZ();
+    real newz = vec1.getX()*vec2.getY() + vec1.getY()*vec2.getX();
   
-  unique_ptr<Vector> retVal(new Vector(newx, newy, newz));
-  return retVal.release();
+    unique_ptr<Vector> retVal(new Vector(newx, newy, newz));
+    return *(retVal.release());
 }
 
 /*
   \fn calculate the projected vector of this onto vec
-  TODO
   \param vec the vector to be projected onto
   \return
   \li the project vector of this onto vec
  */
-Vector* Vector::projectedVector(const Vector& vec) const{
-  real dotProduct = this->dotProduct(vec);
-  real magVec = vec.magnitude();
-  unique_ptr<Vector> retVal(new Vector(vec));
-  retVal->scale( dotProduct / (magVec * magVec) );
-  return retVal.release();
+Vector& CapEngine::projectedVector(const Vector& vec1, const Vector& vec2){
+  real dotProd = CapEngine::dotProduct(vec1, vec2);
+  real magVec = vec2.magnitude();
+  unique_ptr<Vector> retVal(new Vector(vec2));
+  retVal->scale( dotProd / (magVec * magVec) );
+  return *(retVal.release());
+}
+
+/*
+  \fn calculate the perpendicular of the projected vector of this onto vec
+  \param vec the vector to be projected onto
+  \return
+  \li the project vector of this onto vec
+ */
+Vector& projectedPerpendicularVector(const Vector& vec1, const Vector& vec2){
+  unique_ptr<Vector> pVector(&(CapEngine::projectedVector(vec1, vec2)));
+  unique_ptr<Vector> retVal(new Vector(vec2 - *pVector));
+  return *(retVal.release());
 }
 
 /*
@@ -214,10 +225,10 @@ Vector* Vector::projectedVector(const Vector& vec) const{
   \return
   \li the angle
  */
-real Vector::angle(const Vector& vec) const{
+real angle(const Vector& vec1, const Vector& vec2){
   // acos (vec.x - x / distance)
-  real distance = this->distance(vec);
-  real xDelta = x - vec.getX();
+  real distance = CapEngine::distance(vec1, vec2);
+  real xDelta = vec1.getX() - vec2.getX();
   real radAngle = acos(distance / xDelta);
   return RADTODEG(radAngle);
 }
@@ -225,11 +236,10 @@ real Vector::angle(const Vector& vec) const{
 //! Not implemented for 2d vectors.  Throws exception.
 /*!
  */
-Vector* Vector::surfaceNormal(const Vector& vec) const{
-  unique_ptr<Vector> temp(this->crossProduct(vec));
-  unique_ptr<Vector> retVal(temp->normalize());
-  return retVal.release();
-  
+Vector& surfaceNormal(const Vector& vec1, const Vector& vec2){
+  Vector& temp = CapEngine::crossProduct(vec1, vec2);
+  Vector& retVal = temp.normalize();
+  return retVal;
 }
 
 //! return a PolarVector version of current vector

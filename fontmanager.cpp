@@ -10,7 +10,7 @@ namespace CapEngine {
   //! Font Manager constructor
   /*! initialise SDL_ttf
    */
-  FontManager::FontManager(const VideoManager& vManagerIn) : vManager(&vManagerIn){
+  FontManager::FontManager(){
     if (TTF_Init() != 0){
       throw new CapEngineException("Unable to initialise SDL_ttf");
     }

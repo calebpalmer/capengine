@@ -25,11 +25,17 @@ namespace CapEngine {
 
   class VideoManager {
     SDL_Surface *mainSurface;
-      
-  public:
-    //default constructor for the VideoManager class
-    VideoManager();
+    static VideoManager* instance;
 
+    // private for singleton
+    VideoManager();
+    VideoManager(const VideoManager& videoManager);
+    VideoManager& operator=(const VideoManager& videoManager);
+
+  public:
+    bool initialized;
+    
+    static VideoManager& getInstance();
     void initSystem(Screen_t screenConfig);
     Surface* loadImage(std::string fileName) const;
     void setColorKey(Surface* surface) const;
@@ -40,6 +46,8 @@ namespace CapEngine {
     void getWindowResolution(int* width, int* height) const;
     real getSurfaceWidth(const Surface* surface) const;
     real getSurfaceHeight(const Surface* surface) const;
+    Surface* createSurface(int width, int height);
+    void blitSurface(Surface& sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface& destSurface, int x, int y);
     
   };
 

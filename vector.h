@@ -31,30 +31,39 @@ namespace CapEngine{
     void setY(real yIn);
     void setZ(real zIn);
     void setD(real dIn);
-    Vector operator+(const Vector& vec);
-    Vector operator-(const Vector& vec);
-    real distance(const Vector& vec) const;
+    Vector& operator=(const Vector& vec);  //TODO
+    bool operator==(const Vector& vec) const; //TODO
+    bool operator!=(const Vector& vec) const; //TODO
+    Vector operator/(const Vector& vec) const;//TODO
+    Vector operator+(const Vector& vec) const;
+    Vector operator-(const Vector& vec) const;
+    Vector operator/(real scalar) const;//TODO
+    Vector operator*(real scalar) const;//TODO
+    Vector& operator+=(const Vector& vec);//TODO
+    Vector& operator-=(const Vector& vec);//TODO
+    Vector& operator*=(real scalar);//TODO
+    Vector& operator/=(real scalar);//TODO
+    real operator*(const Vector& vec) const;  //TODO Dot Product
     void scale(real factor);
     real magnitude() const;
-    Vector* normalize() const;
-    real dotProduct(const Vector& vec) const;
-    Vector* crossProduct(const Vector& vec) const;
-    Vector* projectedVector(const Vector& vec) const; //TODO
-    real angle(const Vector& vec) const;
-    Vector* surfaceNormal(const Vector& vec) const;
+    Vector& normalize() const;
     PolarVector* toPolarVector() const;
-
-  private:
     
     real x;
     real y;
     real z;
     real d;
-    
-  private:
-    Vector& operator=(const Vector&){return *this;}
-    
 
   };
+
+  Vector& crossProduct(const Vector& vec1, const Vector& vec2);
+  real dotProduct(const Vector& vec1, const Vector& vec2);
+  Vector& projectedVector(const Vector& vec1, const Vector& vec2); 
+  Vector& projectedPerpendicularVector(const Vector& vec1, const Vector& vec2); 
+  Vector& surfaceNormal(const Vector& vec1, const Vector& vec2);
+  real distance(const Vector& vec1, const Vector& vec2);
+  real angle(const Vector& vec1, const Vector& vec2);
+
+    
 }
 #endif

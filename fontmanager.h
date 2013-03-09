@@ -11,13 +11,11 @@ namespace CapEngine {
 
   class FontManager{
   public:
-    FontManager(const VideoManager& vManager);
+    FontManager();
     ~FontManager();
     Surface* getTextSurface(const std::string& font, const std::string& text, int fontSize
 			    ,int surfaceWidth=0, int surfaceHeight=0) const; 
 
-  private:
-    const VideoManager* vManager;
   }; //FontManager
 
 } //CapEngine

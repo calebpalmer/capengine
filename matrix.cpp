@@ -3,6 +3,7 @@
 #include "trigonometry.h"
 
 #include <cmath>
+#include <memory>
 
 using namespace CapEngine;
 using namespace std;
@@ -28,25 +29,25 @@ float* Matrix::getGLMatrix() const{
   
   unique_ptr<float> matrix(new float[16]);
   
-  matrix.get()[0] = vectors[0]->getX();
-  matrix.get()[1] = vectors[0]->getY();
-  matrix.get()[2] = vectors[0]->getZ();
-  matrix.get()[3] = vectors[0]->getD();
+  matrix.get()[0] = vectors[0]->x;
+  matrix.get()[1] = vectors[0]->y;
+  matrix.get()[2] = vectors[0]->z;
+  matrix.get()[3] = vectors[0]->d;
 
-  matrix.get()[4] = vectors[1]->getX();
-  matrix.get()[5] = vectors[1]->getY();
-  matrix.get()[6] = vectors[1]->getZ();
-  matrix.get()[7] = vectors[1]->getD();
+  matrix.get()[4] = vectors[1]->x;
+  matrix.get()[5] = vectors[1]->y;
+  matrix.get()[6] = vectors[1]->z;
+  matrix.get()[7] = vectors[1]->d;
 
-  matrix.get()[8] = vectors[2]->getX();
-  matrix.get()[9] = vectors[2]->getY();
-  matrix.get()[10] = vectors[2]->getZ();
-  matrix.get()[11] = vectors[2]->getD();
+  matrix.get()[8] = vectors[2]->x;
+  matrix.get()[9] = vectors[2]->y;
+  matrix.get()[10] = vectors[2]->z;
+  matrix.get()[11] = vectors[2]->d;
 
-  matrix.get()[12] = vectors[3]->getX();
-  matrix.get()[13] = vectors[3]->getY();
-  matrix.get()[14] = vectors[3]->getZ();
-  matrix.get()[15] = vectors[3]->getD();
+  matrix.get()[12] = vectors[3]->x;
+  matrix.get()[13] = vectors[3]->y;
+  matrix.get()[14] = vectors[3]->z;
+  matrix.get()[15] = vectors[3]->d;
     
   return matrix.release();
 
@@ -188,5 +189,53 @@ Matrix& Matrix::operator*(const Matrix& right){
 
   unique_ptr<Matrix> newMatrix(new Matrix(*column1.release(), *column2.release(), *column3.release(), *column4.release()));
   return *newMatrix.release();
+}
+
+Vector& Matrix::getColumnVector(int index) const{
+  if(index > 3 || index < 0){
+    throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
+  }
+
+  int x, y, z, d = 0;
+  switch(index){
+  case 0:
+    x = vectors[0]->x;
+    y = vectors[1]->x;
+    z = vectors[2]->x;
+    d = vectors[3]->x;
+    break;
+  case 1:
+    x = vectors[0]->y;
+    y = vectors[1]->y;
+    z = vectors[2]->y;
+    d = vectors[3]->y;
+    break;
+  case 2:
+    x = vectors[0]->z;
+    y = vectors[1]->z;
+    z = vectors[2]->z;
+    d = vectors[3]->z;
+    break;
+  case 3:
+    x = vectors[0]->d;
+    y = vectors[1]->d;
+    z = vectors[2]->d;
+    d = vectors[3]->d;
+    break;
+  default:
+    throw CapEngineException("Invalid index");
+    break;
+  }
+  unique_ptr<Vector> retVector(new Vector(x, y, z, d));
+  return *(retVector.release());
+}
+
+Vector& Matrix::getRowVector(int index) const{
+  if(index > 3 || index < 0){
+    throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
+  }
+  
+  unique_ptr<Vector> retVector(new Vector(*vectors[index]));
+  return *(retVector.release());
 }
 
