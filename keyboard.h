@@ -1,4 +1,4 @@
-#fndef KEYBOARD_H
+#ifndef KEYBOARD_H
 #define KEYBOARD_H
 
 #include <map>
@@ -23,7 +23,7 @@ namespace CapEngine{
     };
 
     std::map<Keys, KeyInfo> keyMap;
-  }
+  };
 }
 
 #endif
