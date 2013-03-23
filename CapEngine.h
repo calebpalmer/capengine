@@ -28,5 +28,6 @@
 #include "map2d.h"
 #include "filesystem.h"
 #include "timestep.h"
+#include "keyboard.h"
 
 #endif
