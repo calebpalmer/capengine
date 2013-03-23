@@ -11,9 +11,9 @@ LIBS= `sdl-config --cflags --libs` -lSDL_image -lboost_system -lboost_filesystem
 #CFLAGS= -O3 -D$(PLATFORM) -DDEBUG
 
 #CAPEngine
-libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o
 	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
-	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o \
+	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
 	-lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
 
 capcommon.o: capcommon.h capcommon.cpp
@@ -69,6 +69,9 @@ map2d.o: map2d.cpp map2d.h
 
 logger.o: logger.cpp logger.h
 	$(CPP) $(CFLAGS) -o logger.o -c logger.cpp -fPIC
+
+timestep.o: timestep.cpp timestep.h
+	$(CPP) $(CFLAGS) -o timestep.o -c timestep.cpp -fPIC
 
 .PHONEY: clean tests tags
 

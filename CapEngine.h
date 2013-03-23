@@ -27,5 +27,6 @@
 #include "tileset.h"
 #include "map2d.h"
 #include "filesystem.h"
+#include "timestep.h"
 
 #endif
