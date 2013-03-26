@@ -29,6 +29,17 @@ VideoManager& VideoManager::getInstance(){
 }
 
 Surface* VideoManager::loadImage(string filePath) const{
+  int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+  int initted=IMG_Init(flags);
+
+  if( initted & flags != flags) {
+    ostringstream error_message;
+    error_message <<"could not init SDL_Image" << endl;
+    error_message<<"Reason: " << IMG_GetError() << endl;
+    throw CapEngineException(error_message.str());
+  }
+
+
   SDL_Surface* tempSurface = NULL;
   SDL_Surface* optimizedSurface = NULL;
   tempSurface = IMG_Load(filePath.c_str());
@@ -44,7 +55,7 @@ Surface* VideoManager::loadImage(string filePath) const{
   }
 
   setColorKey(tempSurface);
-  optimizedSurface = SDL_DisplayFormat(tempSurface);
+  optimizedSurface = SDL_DisplayFormatAlpha(tempSurface);
   if(optimizedSurface == 0){
     cerr << "Unable to get optimized surface" << endl;
     cerr << "SDL Error: " << SDL_GetError() << endl;

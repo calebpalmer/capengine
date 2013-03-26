@@ -17,7 +17,8 @@ real TimeStep::updateStep(){
   }
   else{
     // new update time - last update time - (last render time - last update time)
-    double renderDiff = lastRenderTime.subtractTime(&oldUpdateTime);
+    //double renderDiff = lastRenderTime.subtractTime(&oldUpdateTime);
+    double renderDiff = 0.0;  // this needs to be fixed.  Above commented line is not working for some reason.
     lastTimeStep = lastUpdateTime .subtractTime(&oldUpdateTime) - renderDiff;
     return lastTimeStep;
   }
