@@ -117,6 +117,19 @@ Vector Vector::operator-(const Vector& vec2) const{
   return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
 }
 
+/*
+  \fn operator= definition
+  \param vec1
+  \param vec2
+  \return Vector
+ */
+Vector& Vector::operator=(const Vector& vec){
+  this->x = vec.x;
+  this->y = vec.y;
+  this->z = vec.z;
+  this->d = vec.d;
+}
+
 
 /*
   \fn calculate the distance from the given Vector
