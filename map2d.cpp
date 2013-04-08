@@ -165,3 +165,29 @@ string Map2D::toString(){
   }
 	return output.str();
 }
+
+unique_ptr<Rectangle>  Map2D::getTileMBR(int index){
+  int tilesWide = width / tileSet->tileWidth;
+  int xpos = tileSet->tileWidth * (index % tilesWide);
+  int ypos = tileSet->tileHeight * (index / tilesWide);
+  
+  return unique_ptr<Rectangle>(new Rectangle(xpos, ypos, tileSet->tileWidth, tileSet->tileHeight));
+}
+
+vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
+  // do brute force search for collisions of all map MBRs
+  vector<CollisionTup> collisions;
+  
+  for(size_t i = 0; i < tiles.size();  i++){
+    unique_ptr<Rectangle> tileMBR = getTileMBR(i);
+    CollisionType collisionType = detectMBRCollision(mbr, *tileMBR);
+    if(collisionType != COLLISION_NONE){
+      CollisionTup collision;
+      collision.collisionType = collisionType;
+      collision.tile = tiles[i];
+      collisions.push_back(collision);
+    }
+  }
+  
+  return collisions;
+}

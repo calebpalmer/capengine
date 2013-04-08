@@ -2,6 +2,9 @@
 
 using namespace CapEngine;
 
+Rectangle::Rectangle(){}
+Rectangle::Rectangle(real xIn,real yIn, real widthIn, real heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
+
 CollisionType CapEngine::detectMBRCollision(const Rectangle& r1, const Rectangle& r2){
   real top1, top2, bottom1, bottom2, right1, right2, left1, left2;
   left1 = r1.x;

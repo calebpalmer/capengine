@@ -6,6 +6,7 @@
 
 #include "tileset.h"
 #include "captypes.h"
+#include "collision.h"
 
 namespace CapEngine{
   
@@ -17,14 +18,19 @@ namespace CapEngine{
 
     Map2D(const Map2D& map);
     Map2D& operator=(const Map2D& map);
-
     void readTiles(std::ifstream& stream);
     void drawSurface();
+    std::unique_ptr<Rectangle> getTileMBR(int index);
 
   public:
     struct TileTup{
       Tile* tile;
       unsigned int index;
+    };
+
+    struct CollisionTup{
+      Tile* tile;
+      CollisionType collisionType;
     };
 
     std::vector<TileTup*> tiles;
@@ -35,6 +41,8 @@ namespace CapEngine{
     Map2D(const std::string mapConfigPath, bool loadVideo = true);
     ~Map2D();
     std::string toString();
+    std::vector<CollisionTup> getCollisions(const Rectangle& mbr);
+    
   };
 
 }

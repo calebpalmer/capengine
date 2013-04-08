@@ -53,6 +53,14 @@ TileSet::TileSet(const string& configPath, bool loadVideo) {
       stringstream temp(value);
       temp >> this->tileCount;
     }
+    else if(parameter == "tile_height"){
+      stringstream temp(value);
+      temp >> this->tileHeight;
+    }
+    else if(parameter == "tile_width"){
+      stringstream temp(value);
+      temp >> this->tileWidth;
+    }
     else if(parameter == "tiles"){
       break;
     }
@@ -71,6 +79,7 @@ TileSet::TileSet(const string& configPath, bool loadVideo) {
     Tile& tile = parseTile(line);
     tiles.push_back(&tile);
   }
+
   //// Load surface
   if(loadVideo){
     VideoManager& videoManager = VideoManager::getInstance();
@@ -140,11 +149,25 @@ Tile& TileSet::parseTile(const string& line){
   tempStream.clear();
   tempStream >> height;
 
+  // parse type
+  int type;
+  position = line.find(",", oldPosition);
+ if(position == string::npos){
+    stringstream errorMessage;
+    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    throw CapEngineException(errorMessage.str());
+  }
+  temp = line.substr(oldPosition, position);
+  tempStream.str(temp);
+  tempStream.clear();
+  tempStream >> type;
+
   unique_ptr<Tile> tile(new Tile);
   tile->xpos = x;
   tile->ypos = y;
   tile->width = width;
   tile->height = height;
+  tile->type = static_cast<TileType>(type);
   return *(tile.release());
 }
 

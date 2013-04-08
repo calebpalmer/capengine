@@ -9,12 +9,18 @@
 #include "VideoManager.h"
 
 namespace CapEngine{
+  enum TileType{
+    TILE_NORMAL,
+    TILE_SOLID
+  };
+
   class Tile {
   public:
     int xpos;
     int ypos;
     int width;
     int height;
+    TileType type;
   };
 
 
@@ -23,6 +29,8 @@ namespace CapEngine{
     std::string configFilepath;
     std::string surfaceFilepath;
     unsigned int tileCount;
+    unsigned int tileWidth;
+    unsigned int tileHeight;
     std::vector<Tile*> tiles;
     
   public:  // public functions

@@ -46,7 +46,7 @@ EventDispatcher.o: EventDispatcher.cpp EventDispatcher.h
 matrix.o: matrix.h matrix.cpp vector.h CapEngine.h
 	$(CPP) $(CFLAGS) -o matrix.o -c matrix.cpp -fPIC
 
-collision.o: collision.h collision.cpp CapEngine.h
+collision.o: collision.h collision.cpp
 	$(CPP) $(CFLAGS) -o collision.o -c collision.cpp -fPIC
 
 numbergenerator.o: numbergenerator.h numbergenerator.cpp
@@ -64,7 +64,7 @@ filesystem.o: filesystem.cpp filesystem.h
 tileset.o: tileset.cpp tileset.h
 	$(CPP) $(CFLAGS) -o tileset.o -c tileset.cpp -fPIC
 
-map2d.o: map2d.cpp map2d.h
+map2d.o: map2d.cpp map2d.h collision.h
 	$(CPP) $(CFLAGS) -o map2d.o -c map2d.cpp -fPIC
 
 logger.o: logger.cpp logger.h
