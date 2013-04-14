@@ -184,7 +184,7 @@ vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
     if(collisionType != COLLISION_NONE){
       CollisionTup collision;
       collision.collisionType = collisionType;
-      collision.tile = tiles[i];
+      collision.tile = tiles[i]->tile;
       collisions.push_back(collision);
     }
   }

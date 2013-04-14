@@ -7,7 +7,7 @@
 using namespace CapEngine;
 using namespace std;
 
-CapEngine::SoundPlayer CapEngine::SoundPlayer::instance;
+CapEngine::SoundPlayer* CapEngine::SoundPlayer::instance;
 
 SoundPlayer::SoundPlayer(){
   SDL_AudioSpec targetFormat;
@@ -41,7 +41,11 @@ SoundPlayer::~SoundPlayer(){
 
  */
 SoundPlayer& SoundPlayer::getSoundPlayer(){
-  return instance;
+  if(instance == nullptr){
+    instance = new SoundPlayer;
+  }
+
+    return *instance;
 }
 
 //! the audio callback for SDL to fill audio buffer

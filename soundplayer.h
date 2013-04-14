@@ -34,7 +34,7 @@ namespace CapEngine{
 
   private:
     SoundPlayer();
-    static SoundPlayer instance;
+    static SoundPlayer* instance;
 
     
     SoundCollection sounds;
