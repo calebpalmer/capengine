@@ -29,5 +29,6 @@
 #include "filesystem.h"
 #include "timestep.h"
 #include "keyboard.h"
+#include "scanconvert.h"
 
 #endif

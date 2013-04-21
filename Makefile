@@ -11,9 +11,10 @@ LIBS= `sdl-config --cflags --libs` -lSDL_image -lboost_system -lboost_filesystem
 #CFLAGS= -O3 -D$(PLATFORM) -DDEBUG
 
 #CAPEngine
-libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o
 	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
 	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
+	scanconvert.o \
 	-lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
 
 capcommon.o: capcommon.h capcommon.cpp
@@ -72,6 +73,9 @@ logger.o: logger.cpp logger.h
 
 timestep.o: timestep.cpp timestep.h
 	$(CPP) $(CFLAGS) -o timestep.o -c timestep.cpp -fPIC
+
+scanconvert.o: scanconvert.cpp scanconvert.h
+	$(CPP) $(CFLAGS) -o scanconvert.o -c scanconvert.cpp -fPIC
 
 .PHONEY: clean tests tags
 
