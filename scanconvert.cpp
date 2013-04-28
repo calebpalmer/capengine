@@ -33,6 +33,16 @@ namespace {
     SDL_LockSurface(surface);
 
     float slope = (float)(y1 - y0) / (float)(x1 - x0);
+    if(x0 > x1) { //swap positions . We want to always increment in positve x direction
+      int temp;
+      temp = x0;
+      x0 = x1;
+      x1 = temp;
+
+      temp = y0;
+      y0 = y1;
+      y1 = temp;
+    }
 
     if( slope > 1.0 || slope < -1.0){  // increment over y
       float lastx = x0;
