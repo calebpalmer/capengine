@@ -26,39 +26,6 @@ namespace {
     return pixel;
   }
 
-  void writePixel(CapEngine::Surface* surface, int x, int y){
-
-    // TODO convert cartesian coordinates to screen coordinates
-
-    //int offset = surface->pitch * y + x;
-    // convert to screen coordinates
-    int yNew = surface->h - y;
-    //int yNew = y;
-    int offset = (surface->pitch / surface->format->BytesPerPixel) * yNew + x;
-	
-    void* pixel;
-    if(surface->format->BytesPerPixel == 2){
-      pixel = malloc(2);
-      *(Uint16*)pixel = createUint16Pixel(surface->format, scanR, scanG, scanB);
-      ((Uint16*)surface->pixels)[offset] = *(Uint16*)pixel;
-    }
-    else if(surface->format->BytesPerPixel == 3){
-      pixel = malloc(4);
-      *(Uint32*)pixel = createUint32Pixel(surface->format, scanR, scanG, scanB);
-      ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
-    }
-    else if(surface->format->BytesPerPixel == 4){
-      pixel = malloc(4);
-      *(Uint32*)pixel = createUint32Pixel(surface->format, scanR, scanG, scanB);
-      ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
-    }
-    else{
-      throw CapEngineException("Unsupported pixel format");
-    }
-    
-    free(pixel);
-  }
-
   void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface){
     // lock the surface for writing
     // TODO need to clip the coordinates to fit the screen
@@ -113,4 +80,38 @@ void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* sur
   }
   drawLineBasicIncremental(x0, y0, x1, y1, surface);
 }
+
+void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
+
+  // convert to screen coordinates
+  int yNew = surface->h - y;
+
+  // calculate offset into pixel buffer
+  int offset = (surface->pitch / surface->format->BytesPerPixel) * yNew + x;
+	
+  void* pixel;
+  if(surface->format->BytesPerPixel == 2){
+    pixel = malloc(2);
+    *(Uint16*)pixel = createUint16Pixel(surface->format, scanR, scanG, scanB);
+    ((Uint16*)surface->pixels)[offset] = *(Uint16*)pixel;
+  }
+  else if(surface->format->BytesPerPixel == 3){
+    pixel = malloc(4);
+    *(Uint32*)pixel = createUint32Pixel(surface->format, scanR, scanG, scanB);
+    ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
+  }
+  else if(surface->format->BytesPerPixel == 4){
+    pixel = malloc(4);
+    *(Uint32*)pixel = createUint32Pixel(surface->format, scanR, scanG, scanB);
+    ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
+  }
+  else{
+    free(pixel);
+    throw CapEngineException("Unsupported pixel format");
+  }
+    
+  free(pixel);
+}
+
+
 

@@ -4,6 +4,8 @@
 // \brief - the header file for the Vector class
 // \author - Caleb Palmer
 
+//TODO change Vector& return values to Vector
+
 #include <memory>
 
 #include "captypes.h"
@@ -63,7 +65,5 @@ namespace CapEngine{
   Vector& surfaceNormal(const Vector& vec1, const Vector& vec2);
   real distance(const Vector& vec1, const Vector& vec2);
   real angle(const Vector& vec1, const Vector& vec2);
-
-    
 }
 #endif

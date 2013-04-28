@@ -10,6 +10,7 @@ namespace CapEngine {
   static Uint8 scanB = 0xff;
 
   void drawLine(int x0, int y0, int x1, int y1, Surface* surface);
+  void writePixel(CapEngine::Surface* surface, int x, int y);
 
 }
 #endif // SCANCONVERT_H
