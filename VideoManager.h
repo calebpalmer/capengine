@@ -18,14 +18,17 @@ namespace CapEngine {
     int width;
     int height;
     int pDepth;
+    bool opengl;
   };
 
-  const Screen_t defaultScreen = {1280,800,32};
+  const Screen_t defaultScreen = {1280,800,32,false};
 
 
   class VideoManager {
     SDL_Surface *mainSurface;
     static VideoManager* instance;
+    Screen_t currentScreenConfig;
+    void (*reshapeFunc)(int, int);
 
     // private for singleton
     VideoManager();
@@ -48,7 +51,9 @@ namespace CapEngine {
     real getSurfaceHeight(const Surface* surface) const;
     Surface* createSurface(int width, int height);
     void blitSurface(Surface& sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface& destSurface, int x, int y);
-    
+    //opengl support
+    void setReshapeFunc(void (*func)(int x, int y));
+    void callReshapeFunc(int w, int h);
   };
 
 }

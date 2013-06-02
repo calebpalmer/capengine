@@ -12,7 +12,7 @@ Logger* Logger::instance = nullptr;
 
 Logger::Logger(){
   outputStream = &cout;
-  currentLevel = Logger::CERROR;
+  currentLevel = Logger::CDEBUG;
 }
 
 Logger::~Logger(){

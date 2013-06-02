@@ -8,6 +8,9 @@
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_image.h>
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include "captypes.h"
 #include "capcommon.h"
 #include "CapEngineException.h"

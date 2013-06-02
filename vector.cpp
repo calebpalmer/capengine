@@ -117,6 +117,7 @@ Vector Vector::operator-(const Vector& vec2) const{
   return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
 }
 
+// TODO: fix this so that it returns a proper value
 /*
   \fn operator= definition
   \param vec1

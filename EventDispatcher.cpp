@@ -1,9 +1,12 @@
 #include "EventDispatcher.h"
 #include "CapEngineException.h"
+#include "VideoManager.h"
 #include <memory>
 
 using namespace CapEngine;
 using namespace std;
+
+unique_ptr<EventDispatcher> EventDispatcher::instance = unique_ptr<EventDispatcher>(new EventDispatcher());
 
 EventDispatcher::EventDispatcher(int queuedelay) : queueDelayCount(queuedelay) {
   auto_ptr<vector<subscription> > subscribersPtr(new vector<subscription>());
@@ -41,6 +44,11 @@ void EventDispatcher::flushQueue(){
   vector<SDL_Event*>::iterator eventIter = eventQueue->begin();
   while(eventIter != eventQueue->end()){
     SDL_Event* curEvent = *eventIter;
+    if(curEvent->type == SDL_VIDEORESIZE){
+      int w = ((SDL_ResizeEvent*)curEvent)->h;
+      int h = ((SDL_ResizeEvent*)curEvent)->h;
+      VideoManager::getInstance().callReshapeFunc(w, h);
+    }
     while(subscriberIter != subscribers->end()){
       subscription* curSubscription = &(*subscriberIter);
       // check to see if subscriber subscribes to current event types
@@ -70,7 +78,6 @@ void EventDispatcher::flushQueue(){
 	  (curSubscription->subscriber)->receiveEvent(copyEvent( curEvent), nullptr);
 	}
 	break;
-
       }
       subscriberIter++;
     }
@@ -102,4 +109,11 @@ SDL_Event* EventDispatcher::copyEvent(SDL_Event* event){
   unique_ptr<SDL_Event> copy(new SDL_Event);
   memcpy(reinterpret_cast<void*>(copy.get()), reinterpret_cast<void*>(event), sizeof(SDL_Event));
   return copy.release();
+}
+
+EventDispatcher& EventDispatcher::getInstance(){
+  if(instance.get() == nullptr){
+    instance.reset(new EventDispatcher());
+  }
+  return *(instance.get());
 }

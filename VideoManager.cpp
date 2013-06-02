@@ -9,6 +9,7 @@
 #include <SDL/SDL_image.h>
 
 #include "logger.h"
+#include "EventDispatcher.h"
 
 using namespace std;
 using namespace CapEngine;
@@ -32,7 +33,7 @@ Surface* VideoManager::loadImage(string filePath) const{
   int flags = IMG_INIT_JPG | IMG_INIT_PNG;
   int initted=IMG_Init(flags);
 
-  if( initted & flags != flags) {
+  if( (initted & flags) != flags) {
     ostringstream error_message;
     error_message <<"could not init SDL_Image" << endl;
     error_message<<"Reason: " << IMG_GetError() << endl;
@@ -85,13 +86,46 @@ void VideoManager::initSystem(Screen_t screenConfig){
     cerr << "Unable to initialize SDL. Shutting down." << endl;
     shutdown();
   }
+  
+  Uint32 flags;
+  if(screenConfig.opengl){
+    flags = SDL_OPENGL | SDL_RESIZABLE;
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,        8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,      8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,       8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,      8);
+ 
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,      16);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE,        32);
+ 
+    // These cause error "Couldn't find matching GLX visual" 
+    // when calling SDL_SetVideoMode
+    //SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE,    8);
+    //SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE,    8);
+    //SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
+    //SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
+ 
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  2);
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+  }
+  else{
+    flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ANYFORMAT | SDL_RESIZABLE;
+  }
 
-  mainSurface = SDL_SetVideoMode(screenConfig.width, screenConfig.height, screenConfig.pDepth, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ANYFORMAT);
+  mainSurface = SDL_SetVideoMode(screenConfig.width, screenConfig.height, screenConfig.pDepth, flags);
   //mainSurface = SDL_SetVideoMode(screenConfig.width, screenConfig.height, screenConfig.pDepth, SDL_SWSURFACE);
   if(mainSurface == NULL){
-    cerr << "Error initializing window" << endl;
+    ostringstream errorMsg;
+    errorMsg << "Error initializing window: " << SDL_GetError() << endl;
+    Logger::getInstance().log(errorMsg.str(), Logger::CERROR);
     shutdown();
   }
+
+  currentScreenConfig = screenConfig;
+
+  // initialize EventDispatcher singleton so that reshape function gets called
+  EventDispatcher::getInstance();
 
   initialized = true;
 }
@@ -101,7 +135,12 @@ void VideoManager::shutdown(){
 }
 
 void VideoManager::drawScreen(){
-  SDL_Flip(mainSurface);
+  if(currentScreenConfig.opengl){
+    SDL_GL_SwapBuffers();
+  }
+  else{
+    SDL_Flip(mainSurface);
+  }
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
@@ -206,4 +245,17 @@ void VideoManager::blitSurface(Surface& sourceSurface, int srcX, int srcY, int s
   dstLocation.y = y;
 
   SDL_BlitSurface(&sourceSurface, &srcLocation, &destSurface, &dstLocation);
+}
+
+void VideoManager::setReshapeFunc(void (*func)(int x, int y)){
+  reshapeFunc = func;
+}
+
+ void VideoManager::callReshapeFunc(int w, int h){
+   if(reshapeFunc == nullptr){
+     throw CapEngineException("No reshape function set"); 
+   }
+   if(currentScreenConfig.opengl){
+     reshapeFunc(w, h);
+  }
 }
