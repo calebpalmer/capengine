@@ -44,10 +44,12 @@ void EventDispatcher::flushQueue(){
   vector<SDL_Event*>::iterator eventIter = eventQueue->begin();
   while(eventIter != eventQueue->end()){
     SDL_Event* curEvent = *eventIter;
+
+    // Call the reshape function if SDL is being used
     if(curEvent->type == SDL_VIDEORESIZE){
       int w = ((SDL_ResizeEvent*)curEvent)->h;
       int h = ((SDL_ResizeEvent*)curEvent)->h;
-      VideoManager::getInstance().callReshapeFunc(w, h);
+      VideoManager::getInstance().callReshapeFunc(w, h); 
     }
     while(subscriberIter != subscribers->end()){
       subscription* curSubscription = &(*subscriberIter);
