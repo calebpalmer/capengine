@@ -40,3 +40,8 @@ void Time::reset(){
     throw new CapEngineException("Unable to get current time");
   }
 }
+
+Time& Time::operator=(const Time& timeToCopy){ 
+  this->time = timeToCopy.time;
+  return *this; 
+}

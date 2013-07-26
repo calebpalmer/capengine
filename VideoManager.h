@@ -11,6 +11,8 @@
 #include <SDL/SDL_image.h>
 #include "captypes.h"
 #include "CapEngineException.h"
+#include "Time.h"
+#include "fontmanager.h"
 
 namespace CapEngine {
 
@@ -21,23 +23,18 @@ namespace CapEngine {
     bool opengl;
   };
 
+  class FontManager;
+
   const Screen_t defaultScreen = {1280,800,32,false};
 
 
   class VideoManager {
-    SDL_Surface *mainSurface;
-    static VideoManager* instance;
-    Screen_t currentScreenConfig;
-    void (*reshapeFunc)(int, int);
-
     // private for singleton
     VideoManager();
     VideoManager(const VideoManager& videoManager);
     VideoManager& operator=(const VideoManager& videoManager);
 
   public:
-    bool initialized;
-    
     static VideoManager& getInstance();
     void initSystem(Screen_t screenConfig);
     Surface* loadImage(std::string fileName) const;
@@ -54,6 +51,21 @@ namespace CapEngine {
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
     void callReshapeFunc(int w, int h);
+    void displayFPS(bool on, const std::string& ttfFontPath="");
+
+  public:
+    bool initialized;
+    
+  private:
+    SDL_Surface *mainSurface;
+    static VideoManager* instance; //singleton
+    Screen_t currentScreenConfig;
+    void (*reshapeFunc)(int, int); //for opengl resize functions
+    CapEngine::Time lastRenderTime;
+    float fps;
+    std::unique_ptr<CapEngine::FontManager> up_fontManager;
+    bool showFPS;
+    std::string ttfFontPath;
   };
 
 }

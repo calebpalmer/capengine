@@ -11,16 +11,11 @@
 namespace CapEngine {
 
   class Time {
-  private:
-    Time& operator=(const Time&){ return *this; }
-
-  protected:
-    struct timeval time;
-  
   public:
     Time();
     ~Time();
     Time(const Time& updateTime);
+    Time& operator=(const Time& time);
 	
     //Subtract time from this and return microseconds
     //@param timeToSubtract - subtract this from current time object
@@ -34,7 +29,12 @@ namespace CapEngine {
     // set Time to currentTime
     void reset();
 
+  private:
+    struct timeval time;
+
   };
+
+  
 
 }
 #endif

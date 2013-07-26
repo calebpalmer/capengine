@@ -16,7 +16,7 @@ using namespace CapEngine;
 
 VideoManager* VideoManager::instance = nullptr;
 
-VideoManager::VideoManager(){
+VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false) {
   mainSurface = nullptr;
   initialized = false;
 }
@@ -135,12 +135,25 @@ void VideoManager::shutdown(){
 }
 
 void VideoManager::drawScreen(){
+  if(showFPS){
+    string sFPS = to_string(fps);
+    int fontSize = 14;
+    Surface* fpsSurface = up_fontManager->getTextSurface(ttfFontPath, sFPS, fontSize);
+    
+     int x = 15;
+     int y = 15;
+    drawSurface(x, y, fpsSurface);
+  }
   if(currentScreenConfig.opengl){
     SDL_GL_SwapBuffers();
   }
   else{
     SDL_Flip(mainSurface);
   }
+  Time currentTime;
+  double elapsedTime = currentTime.subtractTime(&lastRenderTime);
+  lastRenderTime = currentTime;
+  fps = 1 / (elapsedTime * 0.001);
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
@@ -258,4 +271,9 @@ void VideoManager::setReshapeFunc(void (*func)(int x, int y)){
    if(currentScreenConfig.opengl){
      reshapeFunc(w, h);
   }
+}
+
+void VideoManager::displayFPS(bool on, const string& ttfFontPath){
+  showFPS = on;
+  this->ttfFontPath = ttfFontPath;
 }
