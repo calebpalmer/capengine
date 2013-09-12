@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 #include <SDL/SDL_image.h>
 
@@ -14,19 +15,21 @@
 using namespace std;
 using namespace CapEngine;
 
-VideoManager* VideoManager::instance = nullptr;
+bool VideoManager::instantiated = false;
 
 VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false) {
+  assert(instantiated == false);
+  instantiated = true;
   mainSurface = nullptr;
   initialized = false;
 }
 
-VideoManager& VideoManager::getInstance(){
-  if(instance == nullptr){
-    unique_ptr<VideoManager> sp_VideoManager(new VideoManager);
-    instance = sp_VideoManager.release();
-  }
-  return *instance;
+VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager()), showFPS(false) {
+  assert(instantiated == false);
+  instantiated = true;
+  mainSurface = nullptr;
+  initialized = false;
+  logger = loggerIn;
 }
 
 Surface* VideoManager::loadImage(string filePath) const{
@@ -47,7 +50,7 @@ Surface* VideoManager::loadImage(string filePath) const{
 
   ostringstream logString;
   logString << "Loaded surface from file "  << filePath;
-  Logger::getInstance().log(logString.str(), Logger::CDEBUG);
+  logger->log(logString.str(), Logger::CDEBUG);
 
   if (tempSurface == NULL){
     cerr << "Unable to load surface" << endl;
@@ -118,14 +121,16 @@ void VideoManager::initSystem(Screen_t screenConfig){
   if(mainSurface == NULL){
     ostringstream errorMsg;
     errorMsg << "Error initializing window: " << SDL_GetError() << endl;
-    Logger::getInstance().log(errorMsg.str(), Logger::CERROR);
+    logger->log(errorMsg.str(), Logger::CERROR);
     shutdown();
   }
 
   currentScreenConfig = screenConfig;
 
-  // initialize EventDispatcher singleton so that reshape function gets called
-  EventDispatcher::getInstance();
+  // initialise logger if necessary
+  if(logger == nullptr){
+    logger = new Logger();
+  }
 
   initialized = true;
 }
@@ -241,7 +246,7 @@ Surface* VideoManager::createSurface(int width, int height){
   
   ostringstream logString;
   logString << "Created new surface with dimensions " << width << "x" << height;
-  Logger::getInstance().log(logString.str(), Logger::CDEBUG);
+  logger->log(logString.str(), Logger::CDEBUG);
   
   return optimizedSurface;
 }

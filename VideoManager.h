@@ -13,6 +13,7 @@
 #include "CapEngineException.h"
 #include "Time.h"
 #include "fontmanager.h"
+#include "logger.h"
 
 namespace CapEngine {
 
@@ -30,12 +31,12 @@ namespace CapEngine {
 
   class VideoManager {
     // private for singleton
-    VideoManager();
     VideoManager(const VideoManager& videoManager);
     VideoManager& operator=(const VideoManager& videoManager);
 
   public:
-    static VideoManager& getInstance();
+    VideoManager();    
+    VideoManager(Logger* loggerIn);
     void initSystem(Screen_t screenConfig);
     Surface* loadImage(std::string fileName) const;
     void setColorKey(Surface* surface) const;
@@ -58,7 +59,8 @@ namespace CapEngine {
     
   private:
     SDL_Surface *mainSurface;
-    static VideoManager* instance; //singleton
+    Logger* logger;
+    static bool instantiated; //singleton
     Screen_t currentScreenConfig;
     void (*reshapeFunc)(int, int); //for opengl resize functions
     CapEngine::Time lastRenderTime;

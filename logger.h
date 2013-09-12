@@ -8,10 +8,9 @@
 namespace CapEngine {
   
   class Logger {
-    static Logger* instance;
+    static bool instantiated;
     std::ostream* outputStream;
 
-    Logger();
     Logger(const Logger& logger);
     Logger& operator=(const Logger& logger);
     
@@ -24,8 +23,8 @@ namespace CapEngine {
     
     LogLevel currentLevel;
 
+    Logger();
     ~Logger();
-    static Logger& getInstance();
     void log(const std::string& message, LogLevel level);
     void setOutput(std::ostream& stream);
     

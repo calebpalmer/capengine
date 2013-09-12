@@ -7,6 +7,7 @@
 #include "tileset.h"
 #include "captypes.h"
 #include "collision.h"
+#include "VideoManager.h"
 
 namespace CapEngine{
   
@@ -15,6 +16,9 @@ namespace CapEngine{
     std::string configPath;
     std::string tileSetPath;
     std::unique_ptr<TileSet> tileSet;
+    Logger logger;
+    VideoManager* videoManager;
+    
 
     Map2D(const Map2D& map);
     Map2D& operator=(const Map2D& map);
@@ -38,7 +42,7 @@ namespace CapEngine{
     unsigned int width;
     unsigned int height;
 
-    Map2D(const std::string mapConfigPath, bool loadVideo = true);
+    Map2D(const std::string mapConfigPath, VideoManager* videoManagerIn = nullptr);
     ~Map2D();
     std::string toString();
     std::vector<CollisionTup> getCollisions(const Rectangle& mbr);

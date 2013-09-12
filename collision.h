@@ -20,10 +20,21 @@ namespace CapEngine{
     COLLISION_NONE,
     COLLISION_GENERAL,
     COLLISION_ONX,
-    COLLISION_ONY
+    COLLISION_ONY,
+    COLLISION_LEFT,
+    COLLISION_RIGHT,
+    COLLISION_TOP,
+    COLLISION_BOTTOM
   };
 
-  CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
+enum CollisionClass{
+  COLLISION_WALL,
+  COLLISION_PROJECTILE,
+  COLLISION_ENTITY
+};
+
+ CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
+ CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
 
 }
 #endif //COLLISION_H

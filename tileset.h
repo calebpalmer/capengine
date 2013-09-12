@@ -25,6 +25,7 @@ namespace CapEngine{
 
 
   class TileSet {
+    VideoManager* videoManager;
   public:
     std::string configFilepath;
     std::string surfaceFilepath;
@@ -37,7 +38,7 @@ namespace CapEngine{
     Surface* surface;
 
     ~TileSet();
-    TileSet(const std::string& configPath, bool loadVideo = false);
+    TileSet(const std::string& configPath, VideoManager* videoManagerIn = nullptr);
     bool tileExists(unsigned int index);
     Tile& getTile(unsigned int index);
       

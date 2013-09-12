@@ -12,7 +12,7 @@ using namespace std;
 
 TileSet::~TileSet(){
   if(surface != nullptr){
-    VideoManager::getInstance().closeSurface(surface);
+    videoManager->closeSurface(surface);
   }
   vector<Tile*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
@@ -20,7 +20,7 @@ TileSet::~TileSet(){
   }
 }
 
-TileSet::TileSet(const string& configPath, bool loadVideo) {
+TileSet::TileSet(const string& configPath, VideoManager* videoManagerIn) {
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(configPath)){
     throw CapEngineException(configPath + " is not a valid path");
@@ -81,13 +81,13 @@ TileSet::TileSet(const string& configPath, bool loadVideo) {
   }
 
   //// Load surface
-  if(loadVideo){
-    VideoManager& videoManager = VideoManager::getInstance();
-    if(videoManager.initialized == false){
+  videoManager = videoManagerIn;
+  if(videoManager){
+    if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
   
-    surface = videoManager.loadImage(surfaceFilepath);
+    surface = videoManager->loadImage(surfaceFilepath);
   }
   validate();
   configIn.close();

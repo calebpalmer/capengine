@@ -7,14 +7,13 @@
 #include "CapEngineException.h"
 #include "filesystem.h"
 #include "logger.h"
-#include "VideoManager.h"
 
 using namespace CapEngine;
 using namespace std;
 
 Map2D::~Map2D(){
-  if(surface != nullptr){
-    VideoManager::getInstance().closeSurface(surface);
+  if(surface != nullptr && videoManager != nullptr){
+    videoManager->closeSurface(surface);
   }
   vector<TileTup*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
@@ -22,7 +21,11 @@ Map2D::~Map2D(){
   }
 }
 
-Map2D::Map2D(const string mapConfigPath,  bool loadVideo) : tileSet(nullptr) {
+Map2D::Map2D(const string mapConfigPath,  VideoManager* videoManagerIn) : tileSet(nullptr) {
+  if(videoManagerIn != nullptr){
+    videoManager = videoManagerIn;
+  }
+  
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(mapConfigPath)){
     throw CapEngineException(mapConfigPath + " is not a valid path");
@@ -44,7 +47,7 @@ Map2D::Map2D(const string mapConfigPath,  bool loadVideo) : tileSet(nullptr) {
     position = line.find("=");
 
     if(position == string::npos || position == 0){
-      Logger::getInstance().log("Invalid Line", Logger::CWARNING);
+      logger.log("Invalid Line", Logger::CWARNING);
       break;
     }
 
@@ -67,7 +70,7 @@ Map2D::Map2D(const string mapConfigPath,  bool loadVideo) : tileSet(nullptr) {
       setCurrentDir(mapPath);
       //      string tilesetPath = stripPath(configPath) + "/" + value;
       this->tileSetPath = value;
-      tileSet.reset(new TileSet(this->tileSetPath, loadVideo));
+      tileSet.reset(new TileSet(this->tileSetPath, videoManager));
       setCurrentDir(prevPath);
     }
     else if(parameter == "tiles"){
@@ -75,27 +78,25 @@ Map2D::Map2D(const string mapConfigPath,  bool loadVideo) : tileSet(nullptr) {
     }
     else{
       // log warning
-      Logger& logger = Logger::getInstance();
       logger.log("Invalid parameter: " + parameter, Logger::CWARNING);
     }
       
   }
   configStream.close();
 
-  if(loadVideo){
+  if(videoManager != nullptr){
     // load and draw surface
-    VideoManager& videoManager = VideoManager::getInstance();
-    if(videoManager.initialized == false){
+    if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
-    surface = videoManager.createSurface(width, height);
+    surface = videoManager->createSurface(width, height);
     drawSurface();
   }
   ostringstream logString;
   logString << "loaded map from " << mapConfigPath << endl
 	    << " using tileset " << tileSet->configFilepath << endl
 	    << " with " << tiles.size() << " tiles loaded " << endl;
-  Logger::getInstance().log(logString.str(), Logger::CDEBUG);
+  logger.log(logString.str(), Logger::CDEBUG);
 }
 
 void Map2D::readTiles(ifstream& stream){
@@ -130,8 +131,7 @@ void Map2D::readTiles(ifstream& stream){
 
 void Map2D::drawSurface(){
   unsigned int xRes, yRes = 0;
-  VideoManager& videoManager = VideoManager::getInstance();
-  if(videoManager.initialized == false){
+  if(videoManager->initialized == false){
     throw CapEngineException("VideoManager not initialized");
   }
   vector<TileTup*>::iterator iter;
@@ -140,10 +140,10 @@ void Map2D::drawSurface(){
       xRes = 0;
       yRes += (*iter)->tile->height;
     }
-    videoManager.blitSurface(*(tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, *surface, xRes, yRes);
+    videoManager->blitSurface(*(tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, *surface, xRes, yRes);
     xRes += (*iter)->tile->width;
   }
-  Logger::getInstance().log("Drew consolidate map surface", Logger::CDEBUG);
+  logger.log("Drew consolidate map surface", Logger::CDEBUG);
 }
 
 string Map2D::toString(){

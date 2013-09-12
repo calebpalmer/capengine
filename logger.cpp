@@ -8,7 +8,7 @@
 using namespace CapEngine;
 using namespace std;
 
-Logger* Logger::instance = nullptr;
+bool Logger::instantiated = false;
 
 Logger::Logger(){
   outputStream = &cout;
@@ -32,14 +32,6 @@ string Logger::getLevelDescription(Logger::LogLevel level){
   default:
     throw CapEngineException("Unknown logging level");
   }
-}
-
-Logger& Logger::getInstance(){
-  if(instance == nullptr){
-    unique_ptr<Logger> sp_logger(new Logger());
-    instance = sp_logger.release();
-  }
-  return *instance;
 }
 
 void Logger::log(const string& message, LogLevel level){

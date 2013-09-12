@@ -25,3 +25,24 @@ CollisionType CapEngine::detectMBRCollision(const Rectangle& r1, const Rectangle
   return COLLISION_GENERAL;
   
 }
+
+CollisionType CapEngine::detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2){
+  // assumes window coordinate system
+  if(r1.x < r2.x){
+    return COLLISION_LEFT;
+  }
+  if(r1.x + r1.width > r2.x + r2.width){
+    return COLLISION_RIGHT;
+  }
+  if(r1.y < r2.y){
+    return COLLISION_TOP;
+  }
+  if(r1.y + r1.height > r2.y + r2.height){
+    return COLLISION_BOTTOM;
+  }
+
+  return COLLISION_NONE;
+  
+}
+
+
