@@ -17,7 +17,8 @@ using namespace CapEngine;
 
 bool VideoManager::instantiated = false;
 
-VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false) {
+VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
+			     , logger(nullptr){
   assert(instantiated == false);
   instantiated = true;
   mainSurface = nullptr;
@@ -84,6 +85,11 @@ void VideoManager::drawSurface(int x, int y, Surface* source, Rect* rect) const{
 
 void VideoManager::initSystem(Screen_t screenConfig){
   mainSurface = NULL;
+
+  // initialise logger if necessary
+  if(logger == nullptr){
+    logger = new Logger();
+  }
   
   if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) == -1){
     cerr << "Unable to initialize SDL. Shutting down." << endl;
@@ -126,11 +132,6 @@ void VideoManager::initSystem(Screen_t screenConfig){
   }
 
   currentScreenConfig = screenConfig;
-
-  // initialise logger if necessary
-  if(logger == nullptr){
-    logger = new Logger();
-  }
 
   initialized = true;
 }
