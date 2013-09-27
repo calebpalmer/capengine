@@ -8,7 +8,7 @@ using namespace CapEngine;
 
 Time::Time(){
   if(gettimeofday(&time, NULL) == -1){
-    throw new CapEngineException("Unable to get current time");
+    throw CapEngineException("Unable to get current time");
   }
 }
 
@@ -29,7 +29,7 @@ double Time::subtractTime(const Time* timeToSubtract){
 double Time::elapsedTime(){
   timeval curTime;
   if(gettimeofday(&curTime, NULL) == -1){
-    throw new CapEngineException("Unable to get current time");
+    throw CapEngineException("Unable to get current time");
   }
   
   return ((curTime.tv_sec * 1000) + (curTime.tv_usec / 1000)) - ((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -37,11 +37,21 @@ double Time::elapsedTime(){
 
 void Time::reset(){
    if(gettimeofday(&time, NULL) == -1){
-    throw new CapEngineException("Unable to get current time");
+    throw CapEngineException("Unable to get current time");
   }
 }
 
 Time& Time::operator=(const Time& timeToCopy){ 
   this->time = timeToCopy.time;
   return *this; 
+}
+
+double CapEngine::currentTime(){
+  struct timeval time;
+   
+  if(gettimeofday(&time, NULL) == -1){
+    throw CapEngineException("Unable to get current time");
+  }
+
+  return (time.tv_sec * 1000) + (time.tv_usec / 1000);
 }

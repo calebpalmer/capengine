@@ -33,8 +33,8 @@ namespace CapEngine {
     struct timeval time;
 
   };
-
   
+    double currentTime();
 
 }
 #endif
