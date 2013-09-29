@@ -1,3 +1,4 @@
+
 # (setq compile-command "(cd ~/Projects/games/capengine && make)")
 all: libcapengine.so
 

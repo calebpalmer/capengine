@@ -125,10 +125,12 @@ Vector Vector::operator-(const Vector& vec2) const{
   \return Vector
  */
 Vector& Vector::operator=(const Vector& vec){
-  this->x = vec.x;
-  this->y = vec.y;
-  this->z = vec.z;
-  this->d = vec.d;
+  Vector newVector;
+  x = vec.x;
+  y = vec.y;
+  z = vec.z;
+  d = vec.d;
+  return *this;
 }
 
 

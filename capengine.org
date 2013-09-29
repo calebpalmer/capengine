@@ -1,0 +1,3 @@
+
+* create unit test infrastructure
+** TODO Create unit test for vector addition with component < 1.0
