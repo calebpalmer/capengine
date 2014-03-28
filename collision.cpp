@@ -46,3 +46,14 @@ CollisionType CapEngine::detectMBRCollisionInterior(const Rectangle& r1, const R
 }
 
 
+Relation CapEngine::MBRRelate(const Rectangle& r1, const Rectangle& r2) {
+  if(detectMBRCollision(r1, r2) != COLLISION_NONE){
+    return TOUCH;
+  }
+  
+  if(detectMBRCollisionInterior(r1, r2) != COLLISION_NONE){
+    return OUTSIDE;
+  }
+  
+  return INSIDE;
+}

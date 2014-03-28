@@ -27,14 +27,21 @@ namespace CapEngine{
     COLLISION_BOTTOM
   };
 
-enum CollisionClass{
-  COLLISION_WALL,
-  COLLISION_PROJECTILE,
-  COLLISION_ENTITY
-};
+  enum Relation {
+    OUTSIDE,
+    INSIDE,
+    TOUCH
+  };
+
+  enum CollisionClass{
+    COLLISION_WALL,
+    COLLISION_PROJECTILE,
+    COLLISION_ENTITY
+  };
 
  CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
  CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
+ Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
 
 }
 #endif //COLLISION_H
