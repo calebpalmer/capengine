@@ -22,7 +22,11 @@ namespace CapEngine {
 
   Surface* FontManager::getTextSurface(const std::string& font, const std::string& text
 				       ,int fontSize, int surfaceWidth, int surfaceHeight) const{
-    
+    return getTextSurface(font, text, fontSize, 0, 0, 0);
+  }
+
+  Surface* FontManager::getTextSurface(const std::string& font, const std::string& text, int fontSize
+				       , Uint8 r, Uint8 g, Uint8 b) const {
     TTF_Font* fontFace;
     string fontPath(font);
     fontFace = TTF_OpenFont(font.c_str(), fontSize);
@@ -35,9 +39,9 @@ namespace CapEngine {
 
     SDL_Surface* fontSurface;
     SDL_Color fontColor;
-    fontColor.r = 0;
-    fontColor.g = 0;
-    fontColor.b = 0;
+    fontColor.r = r;
+    fontColor.g = g;
+    fontColor.b = b;
   
     fontSurface = TTF_RenderText_Solid(fontFace, text.c_str(), fontColor);
     if(fontSurface == 0){
@@ -48,6 +52,7 @@ namespace CapEngine {
 
     TTF_CloseFont(fontFace);
     return fontSurface;
+
 
   }
 }

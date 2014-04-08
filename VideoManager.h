@@ -52,7 +52,7 @@ namespace CapEngine {
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
     void callReshapeFunc(int w, int h);
-    void displayFPS(bool on, const std::string& ttfFontPath="");
+    void displayFPS(bool on, const std::string& ttfFontPath="", Uint8 r = 0, Uint8 g = 0, Uint8 b = 0);
 
   public:
     bool initialized;
@@ -66,8 +66,12 @@ namespace CapEngine {
     CapEngine::Time lastRenderTime;
     float fps;
     std::unique_ptr<CapEngine::FontManager> up_fontManager;
+
     bool showFPS;
     std::string ttfFontPath;
+    Uint8 fpsColourR;
+    Uint8 fpsColourG;
+    Uint8 fpsColourB;
   };
 
 }

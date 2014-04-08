@@ -15,6 +15,8 @@ namespace CapEngine {
     ~FontManager();
     Surface* getTextSurface(const std::string& font, const std::string& text, int fontSize
 			    ,int surfaceWidth=0, int surfaceHeight=0) const; 
+    Surface* getTextSurface(const std::string& font, const std::string& text, int fontSize
+			    , Uint8 r, Uint8 g, Uint8 b) const; 
 
   }; //FontManager
 

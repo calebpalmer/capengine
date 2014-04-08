@@ -144,10 +144,10 @@ void VideoManager::drawScreen(){
   if(showFPS){
     string sFPS = to_string(fps);
     int fontSize = 14;
-    Surface* fpsSurface = up_fontManager->getTextSurface(ttfFontPath, sFPS, fontSize);
+    Surface* fpsSurface = up_fontManager->getTextSurface(ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
     
-     int x = 15;
-     int y = 15;
+    int x = 15;
+    int y = 15;
     drawSurface(x, y, fpsSurface);
   }
   if(currentScreenConfig.opengl){
@@ -279,7 +279,10 @@ void VideoManager::setReshapeFunc(void (*func)(int x, int y)){
   }
 }
 
-void VideoManager::displayFPS(bool on, const string& ttfFontPath){
+void VideoManager::displayFPS(bool on, const string& ttfFontPath, Uint8 r, Uint8 g, Uint8 b){
   showFPS = on;
   this->ttfFontPath = ttfFontPath;
+  this->fpsColourR = r;
+  this->fpsColourG = g;
+  this->fpsColourB = b;
 }
