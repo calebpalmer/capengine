@@ -1,10 +1,8 @@
 all: runtest
 
-PLATFORM=UNIX
-CPP=g++
-INCLUDE=-I../
-CFLAGS= -g -Wall -D$(PLATFORM) -DDEBUG 
-LIBS=-lcppunit
+include ../Makefile.defs
+
+LIBS += -lcppunit
 
 runtest: test
 	chmod 755 test
@@ -12,13 +10,13 @@ runtest: test
 
 objects = test.o
 
-test: $(objects)
+test: $(objects) vectortest.h xml_parser_test.h
 	$(CPP) $(CFLAGS) -o test $(objects) ../libcapengine.so $(LIBS)
 
 all: $(objects)
 
 $(objects): %.o: %.cpp
-	$(CC) -c $(CFLAGS) $(INCLUDE) $< -o $@
+	$(CPP) -c $(CFLAGS) $(INCLUDE) $< -o $@
 
 .PHONEY: clean
 

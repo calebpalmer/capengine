@@ -1,3 +1,39 @@
-
 * create unit test infrastructure
-** TODO Create unit test for vector addition with component < 1.0
+** TODO Create unit test for vector addition with component < 1.
+* TODO Create ResourceManager class for managing and drawing images
+- have functions for simple draw, and draw from a sprite sheet (given row, and frame)
+- have a simple load that loads to a map with a given int id.
+- have a load that loads from an XML file.
+* TODO Update to SDL 2.0
+* libxml
+** Questions
+*** TODO What is the lifecycle and ownership of xmlNodePtrs
+** useful types
+*** xmlDocPtr
+*** xmlNodePtr
+**** xmlChildenNode 
+An array of child xmlNodePtrs
+**** next 
+retrieve the next node
+*** xmlChar
+*** xmlXPathObjectPtr
+*** xmlXPathContextPtr
+*** xmlNodeSetPtr
+*** xmlAttrPtr
+*** xmlCharEncodingHandler
+** useful functions
+*** xmlParseFile()
+*** xmlDocGetRootElement()
+*** xmlStrcmp()
+*** xmlNodeListGetString()
+*** xmlXPathNewContext()
+*** xmlXPathEvalExpression()
+*** xmlXPathNodeIsEmpty()
+*** xmlNewTextChild()
+*** xmlSaveFormatFile()
+*** xmlNewProp()
+*** xmlGetProp()
+** Destruction functions
+*** xmlFreeDoc()
+*** xmlXPathFreeObject()
+*** xmlCleanupParser()

@@ -1,0 +1,9 @@
+FLOATTYPE=float
+PLATFORM=UNIX
+CC=g++
+CPP=g++	
+#INCLUDES=-I/usr/include/libxml2
+INCLUDES=
+CFLAGS=  -DFLOATTYPE=$(FLOATTYPE) -g -Wall -D$(PLATFORM)  -DDEBUG -std=c++11 -pedantic `sdl-config --cflags` `xml2-config --cflags` $(INCLUDES)
+LIBS= `sdl-config --cflags --libs` `xml2-config --libs` -lSDL_image -lboost_system -lboost_filesystem
+#CFLAGS= -O3 -D$(PLATFORM) -DDEBUG

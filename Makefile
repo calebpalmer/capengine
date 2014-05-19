@@ -2,20 +2,13 @@
 # (setq compile-command "(cd ~/Projects/games/capengine && make)")
 all: libcapengine.so
 
-FLOATTYPE=float
-PLATFORM=UNIX
-CC=g++
-CPP=g++	
-INCLUDE=./src
-CFLAGS=  -DFLOATTYPE=$(FLOATTYPE) -g -Wall -D$(PLATFORM)  -DDEBUG -std=c++11 -pedantic `sdl-config --cflags`
-LIBS= `sdl-config --cflags --libs` -lSDL_image -lboost_system -lboost_filesystem
-#CFLAGS= -O3 -D$(PLATFORM) -DDEBUG
+include Makefile.defs
 
 #CAPEngine
-libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o xml_parser.o
 	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
 	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
-	scanconvert.o \
+	scanconvert.o xml_parser.o \
 	-lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
 
 capcommon.o: capcommon.h capcommon.cpp
@@ -78,6 +71,9 @@ timestep.o: timestep.cpp timestep.h
 scanconvert.o: scanconvert.cpp scanconvert.h
 	$(CPP) $(CFLAGS) -o scanconvert.o -c scanconvert.cpp -fPIC
 
+xml_parser.o: xml_parser.cpp xml_parser.h
+	$(CPP) $(CFLAGS) -o xml_parser.o -c xml_parser.cpp -fPIC
+
 .PHONEY: clean tests tags
 
 clean:
@@ -90,7 +86,7 @@ tests:
 	cd test && $(MAKE)
 
 tags:
-	cd .. && ctags -e -R . && ctags -e -R /usr/include/SDL -a
+	ctags -e -R . && ctags -e -R /usr/include/SDL -a
 
 install:
 	install -m 775 libcapengine.so /usr/lib/
