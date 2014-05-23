@@ -10,6 +10,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace CapEngine;
 using namespace std;
@@ -19,15 +20,20 @@ class XmlParserTest : public CppUnit::TestFixture {
   XmlParser* parser;
 
  public:
+   XmlParserTest() : CppUnit::TestFixture(){ 
+    // because setup() / teardown() is not being called.  I don't know why.
+    string xmlFile("test.xml");
+    parser = new XmlParser(xmlFile);      
+  }
 
-  virtual void setup() {
+  void setup() {
     cout << "setup called" << endl;
     string xmlFile("test.xml");
     parser = new XmlParser(xmlFile);  
     CPPUNIT_ASSERT(parser != nullptr);
   }
 
-  virtual void teardown() {
+  void teardown() {
     delete parser;
   }
 
@@ -40,10 +46,42 @@ class XmlParserTest : public CppUnit::TestFixture {
     XmlNode node = parser->getRoot();
     CPPUNIT_ASSERT(parser->getNodeName(node) == "tests");
   }
+
+  void testGetNodeChildren(){
+    XmlNode root = parser->getRoot();
+    vector<XmlNode> nodes = parser->getNodeChildren(root);
+    CPPUNIT_ASSERT(nodes.size() == 2);
+  }
+
+  void testGetNextNode(){
+    XmlNode root = parser->getRoot();
+    vector<XmlNode> nodes = parser->getNodeChildren(root);
+    XmlNode node1 = nodes[0];
+    XmlNode node2 = nodes[1];
+    XmlNode nextNode = parser->getNextNode(node1);
+    CPPUNIT_ASSERT(node2 == nextNode);
+  }
+
+  void testGetStringValue(){
+    XmlNode root = parser->getRoot();
+    vector<XmlNode> nodes = parser->getNodeChildren(root);
+    XmlNode node1 = nodes[0];
+    string textValue = parser->getStringValue(node1);
+    CPPUNIT_ASSERT(textValue == "value1");
+
+    XmlNode node2 = nodes[1];
+    string textValue2 = parser->getStringValue(node2);
+    cout << textValue2 << endl;
+    CPPUNIT_ASSERT(textValue2 == "value2");
+
+  }
   
   CPPUNIT_TEST_SUITE(XmlParserTest);
   CPPUNIT_TEST(testGetRoot);
   CPPUNIT_TEST(testRootNodeName);
+  CPPUNIT_TEST(testGetNodeChildren);
+  //CPPUNIT_TEST(testGetNextNode);
+  CPPUNIT_TEST(testGetStringValue);
   CPPUNIT_TEST_SUITE_END();
 
 

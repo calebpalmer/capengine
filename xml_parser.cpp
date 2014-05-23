@@ -1,8 +1,10 @@
 #include "xml_parser.h"
 
 #include "CapEngineException.h"
+#include "capcommon.h"
 
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 using namespace CapEngine;
@@ -67,7 +69,9 @@ vector<XmlNode> XmlParser::getNodeChildren(XmlNode node){
   vector<XmlNode> children;
   XmlNode currentChild = node->xmlChildrenNode;
   while(currentChild != nullptr){
-    children.push_back(currentChild);
+    if(currentChild->type == XML_ELEMENT_NODE){
+      children.push_back(currentChild);
+    }
     currentChild = currentChild->next;
   }
 
@@ -80,6 +84,7 @@ XmlNode XmlParser::getNextNode(XmlNode node){
 
 string XmlParser::getStringValue(XmlNode node){
   string value = (char *)xmlNodeListGetString(mpDoc, node->xmlChildrenNode, 1);
+  value = strip(value);
   return value;
 }
 
