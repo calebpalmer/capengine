@@ -96,7 +96,7 @@ string XmlParser::getAttribute(XmlNode node, const string key){
   return retVal;
 }
 
-bool nodeNameCompare(XmlNode node, const std::string name){
+bool XmlParser::nodeNameCompare(XmlNode node, const std::string name){
   if(!xmlStrcmp(node->name, (const xmlChar *)name.c_str() )){
     return true;
   }

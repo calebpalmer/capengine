@@ -75,13 +75,29 @@ class XmlParserTest : public CppUnit::TestFixture {
     CPPUNIT_ASSERT(textValue2 == "value2");
 
   }
+
+  void testGetAttribute(){
+    XmlNode root = parser->getRoot();
+    vector<XmlNode> nodes = parser->getNodeChildren(root);
+    XmlNode node1 = nodes[0];
+    string attValue = parser->getAttribute(node1, "id");
+    CPPUNIT_ASSERT(attValue == "1");
+  }
+
+  void testNodeNameCompare(){
+    XmlNode node = parser->getRoot();
+    CPPUNIT_ASSERT(parser->nodeNameCompare(node, "tests") && !(parser->nodeNameCompare(node, "test")));
+  }
+  
   
   CPPUNIT_TEST_SUITE(XmlParserTest);
   CPPUNIT_TEST(testGetRoot);
   CPPUNIT_TEST(testRootNodeName);
   CPPUNIT_TEST(testGetNodeChildren);
-  //CPPUNIT_TEST(testGetNextNode);
+  //CPPUNIT_TEST(testGetNextNode);  // I'm not sure how I want this to behave
   CPPUNIT_TEST(testGetStringValue);
+  CPPUNIT_TEST(testGetAttribute);
+  CPPUNIT_TEST(testNodeNameCompare);
   CPPUNIT_TEST_SUITE_END();
 
 
