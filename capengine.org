@@ -1,6 +1,7 @@
 * create unit test infrastructure
-** TODO Create unit test for vector addition with component < 1.
-* TODO Create ResourceManager class for managing and drawing images
+** DONE Create unit test for vector addition with component < 1.
+   CLOSED: [2014-05-25 Sun 20:23]
+* TODO Create AssetManager class for managing and drawing images
 - have functions for simple draw, and draw from a sprite sheet (given row, and frame)
 - have a simple load that loads to a map with a given int id.
 - have a load that loads from an XML file.
@@ -37,3 +38,7 @@ retrieve the next node
 *** xmlFreeDoc()
 *** xmlXPathFreeObject()
 *** xmlCleanupParser()
+* journal
+[2014-05-25 Sun] Worked on AssetManager
+- Added support for loading sounds
+- Next I need to add test cases for loading images and loading sounds

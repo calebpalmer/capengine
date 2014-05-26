@@ -7,9 +7,10 @@
 #include "../vector.h"
 
 class VectorTest : public CppUnit::TestFixture {
-  void setup() {}
+ public:
+  void setUp() {}
 
-  void teardown() {}
+  void tearDown() {}
 
   void testVectorAdditionLessThanOne(){
     CapEngine::Vector v1(1.0, 1.0, 1.0);

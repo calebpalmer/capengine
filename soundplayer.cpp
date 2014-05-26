@@ -25,10 +25,10 @@ SoundPlayer::SoundPlayer(){
     throw new CapEngineException(errorMsg.str());
   }
 
-  cout << "audio device format openned" << endl
-       << "frequency: " << audioFormat.freq << endl
-       << "channels: " << audioFormat.channels << endl
-       << "format: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16") << endl;
+  // cout << "audio device format openned" << endl
+  //      << "frequency: " << audioFormat.freq << endl
+  //      << "channels: " << audioFormat.channels << endl
+  //      << "format: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16") << endl;
 
 }
 

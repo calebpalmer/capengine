@@ -1,25 +1,44 @@
 #include "asset_manager.h"
 
+#include <vector>
 #include <sstream>
+#include <memory>
 
 #include "CapEngineException.h"
+#include "xml_parser.h"
+
 
 using namespace std;
+using namespace CapEngine;
 
-AssetManager::AssetManage(VideoManager& videoManager, SoundPlayer& soundPlayer, string assetFile)
-  : mAssetFile(assetFile), mVideoManager(videoManager), mSoundPlayer(soundPlayer)
+AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, string assetFile)
+  : mVideoManager(videoManager), mSoundPlayer(soundPlayer), mAssetFile(assetFile)
 {
-  // read asset file and load images/sounds
+XmlParser parser(assetFile);
+}
+  
+  AssetManager::~AssetManager(){
+// free surfaces in texture map
+auto tIter = mTextureMap.begin();
+while(tIter != mTextureMap.end()){
+if(tIter->second.surface != nullptr){
+mVideoManager.closeSurface(tIter->second.surface);
 }
 
-AssetManager::~AssetManager(){
-  // free surfaces in texture map
-  // free sounds in sound map
+}
+// free sounds in sound map
+auto sIter = mSoundMap.begin();
+while(sIter != mSoundMap.end()){
+if(sIter->second.pcm != nullptr){
+delete sIter->second.pcm;
+}
+
+}
 }
 
 void AssetManager::loadTexture(int id, string path){
   Surface* tempSurface = mVideoManager.loadImage(path);
-  if(tempSurface == null_ptr){
+  if(tempSurface == nullptr){
     throw CapEngineException("Unable to load texture at " + path);
   }
 
@@ -28,6 +47,104 @@ void AssetManager::loadTexture(int id, string path){
     errorStream << "Texture under id " << id << " already exists.";
     throw CapEngineException(errorStream.str());
   }
+  
+  Texture texture;
+  texture.path = path;
+  texture.surface = tempSurface;
+  mTextureMap[id] = texture;
+}
 
-  mTextureMap[id] = tempSurface;
+void AssetManager::parseAssetFile(XmlParser& parser){
+  // get Textures nodes at /assets/textures/texture
+  vector<XmlNode> textures = parser.getNodes("/assets/textures/texture");
+  auto textureIter = textures.begin();
+  for( ; textureIter != textures.end(); textureIter++){
+    string id = parser.getAttribute(*textureIter, "id");
+    string path = parser.getStringValue(*textureIter);
+    
+    //convert id to int
+    istringstream idStream(id);
+    int tId;
+    idStream >> tId;
+    
+    Texture texture;
+    texture.path = path;
+    texture.surface = nullptr;
+
+    mTextureMap[tId] = texture;
+  }
+
+  // get sounds at /assets/sounds
+  vector<XmlNode> sounds = parser.getNodes("/assets/sounds/sound");
+  auto soundIter = sounds.begin();
+  for ( ; soundIter != sounds.end(); soundIter++){
+    string id = parser.getAttribute(*textureIter, "id");
+    string path = parser.getStringValue(*textureIter);
+    
+    //convert id to int
+    istringstream idStream(id);
+    int sId;
+    idStream >> sId;
+    
+    Sound  sound;
+    sound.path = path;
+    sound.pcm = nullptr;
+
+    mSoundMap[sId] = sound;
+  }
+  
+}
+
+Texture* AssetManager::getTexture(int id){
+  // throw error if texture has not been loaded
+  auto iter = mTextureMap.find(id);
+  if(iter == mTextureMap.end()){
+    ostringstream message;
+    message << "Texture with id " << id << " does not exist";
+    throw CapEngineException(message.str());
+  }
+
+  if(iter->second.surface == nullptr){
+    iter->second.surface = mVideoManager.loadImage(iter->second.path);
+    if(iter->second.surface == nullptr){
+      throw CapEngineException("Unable to load texture at " + iter->second.path);
+    }
+  }
+  return &(iter->second);
+
+}
+
+Sound* AssetManager::getSound(int id){
+  // throw error if texture has not been loaded
+  auto iter = mSoundMap.find(id);
+  if(iter == mSoundMap.end()){
+    ostringstream message;
+    message << "Sound with id " << id << " does not exist";
+    throw CapEngineException(message.str());
+  }
+
+  if(iter->second.pcm == nullptr){
+    unique_ptr<PCM> upPcm(new PCM(iter->second.path));
+    iter->second.pcm = upPcm.release();
+    if(iter->second.pcm == nullptr){
+      throw CapEngineException("Unable to load texture at " + iter->second.path);
+    }
+  }
+  return &(iter->second);
+}
+
+void AssetManager::loadSound(int id, string path){
+  unique_ptr<PCM> upTempPCM(new PCM(path));  // throws exception if failure
+
+  if(mSoundMap.find(id) != mSoundMap.end()){
+    ostringstream errorStream;
+    errorStream << "Sound under id " << id << " already exists.";
+    throw CapEngineException(errorStream.str());
+  }
+  
+  Sound sound;
+  sound.path = path;
+  sound.pcm = upTempPCM.release();
+  mSoundMap[id] = sound;
+
 }

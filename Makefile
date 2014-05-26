@@ -5,10 +5,10 @@ all: libcapengine.so
 include Makefile.defs
 
 #CAPEngine
-libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o xml_parser.o
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o xml_parser.o asset_manager.o
 	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
 	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
-	scanconvert.o xml_parser.o \
+	scanconvert.o xml_parser.o asset_manager.o \
 	-lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
 
 capcommon.o: capcommon.h capcommon.cpp
@@ -73,6 +73,9 @@ scanconvert.o: scanconvert.cpp scanconvert.h
 
 xml_parser.o: xml_parser.cpp xml_parser.h
 	$(CPP) $(CFLAGS) -o xml_parser.o -c xml_parser.cpp -fPIC
+
+asset_manager.o: asset_manager.cpp asset_manager.h
+	$(CPP) $(CFLAGS) -o asset_manager.o -c asset_manager.cpp -fPIC
 
 .PHONEY: clean tests tags
 

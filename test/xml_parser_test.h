@@ -1,5 +1,5 @@
-#ifndef XML_PARSER_TEST
-#define XML_PARSER_TEST
+#ifndef XML_PARSER_TEST_H
+#define XML_PARSER_TEST_H
 
 #include <cppunit/TestCase.h>
 #include <cppunit/TestSuite.h>
@@ -22,18 +22,17 @@ class XmlParserTest : public CppUnit::TestFixture {
  public:
    XmlParserTest() : CppUnit::TestFixture(){ 
     // because setup() / teardown() is not being called.  I don't know why.
-    string xmlFile("test.xml");
-    parser = new XmlParser(xmlFile);      
+    //string xmlFile("test.xml");
+    //parser = new XmlParser(xmlFile);      
   }
 
-  void setup() {
-    cout << "setup called" << endl;
+  void setUp() {
     string xmlFile("test.xml");
     parser = new XmlParser(xmlFile);  
     CPPUNIT_ASSERT(parser != nullptr);
   }
 
-  void teardown() {
+  void tearDown() {
     delete parser;
   }
 
@@ -71,7 +70,6 @@ class XmlParserTest : public CppUnit::TestFixture {
 
     XmlNode node2 = nodes[1];
     string textValue2 = parser->getStringValue(node2);
-    cout << textValue2 << endl;
     CPPUNIT_ASSERT(textValue2 == "value2");
 
   }
@@ -88,6 +86,11 @@ class XmlParserTest : public CppUnit::TestFixture {
     XmlNode node = parser->getRoot();
     CPPUNIT_ASSERT(parser->nodeNameCompare(node, "tests") && !(parser->nodeNameCompare(node, "test")));
   }
+
+  void testGetNodes(){
+    vector<XmlNode> nodes = parser->getNodes("//test");
+    CPPUNIT_ASSERT(nodes.size() == 2 && parser->getNodeName(nodes[0]) == "test" && parser->getNodeName(nodes[1]) == "test");
+  }
   
   
   CPPUNIT_TEST_SUITE(XmlParserTest);
@@ -98,9 +101,10 @@ class XmlParserTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testGetStringValue);
   CPPUNIT_TEST(testGetAttribute);
   CPPUNIT_TEST(testNodeNameCompare);
+  CPPUNIT_TEST(testGetNodes);
   CPPUNIT_TEST_SUITE_END();
 
 
 };
 
-#endif // XML_PARSER_TEST
+#endif // XML_PARSER_TEST_H
