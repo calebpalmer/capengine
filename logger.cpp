@@ -12,7 +12,7 @@ bool Logger::instantiated = false;
 
 Logger::Logger(){
   outputStream = &cout;
-  currentLevel = Logger::CDEBUG;
+  currentLevel = Logger::CNONE;
 }
 
 Logger::~Logger(){
@@ -20,6 +20,9 @@ Logger::~Logger(){
 
 string Logger::getLevelDescription(Logger::LogLevel level){
   switch(level){
+  case CNONE:
+    return "NONE";
+    break;
   case CDEBUG:
     return "DEBUG";
     break;

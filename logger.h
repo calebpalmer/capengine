@@ -18,7 +18,8 @@ namespace CapEngine {
     enum LogLevel {
       CDEBUG,
       CWARNING,
-      CERROR
+      CERROR,
+      CNONE,
     };
     
     LogLevel currentLevel;
