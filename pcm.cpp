@@ -64,13 +64,11 @@ void PCM::copySndFileToBuffer(SNDFILE* sndFile, SF_INFO sndInfo){
   }
 
   if((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8){
-    cout << "Sound file is PCM U8" << endl;
     for(size_t i = 0; i < bufSize; i++){
       buf.get()[i] = tempBuf.get()[i] + 128;
     }
   }
   else{
-    cout << "Sound file is PCM S16" << endl;
     memcpy(buf.get(), tempBuf.get(), bufSize);
   }
 }
@@ -96,16 +94,6 @@ SDL_AudioSpec PCM::sndFileToSDLAudioSpec(SF_INFO sndInfo){
   spec.channels = sndInfo.channels;
   //spec.samples *= spec.channels;
 
-  cout << endl << "sndfile specs" << endl 
-       << "samples " << sndInfo.frames << endl
-       << "channels " << sndInfo.channels << endl
-       << "freq " << sndInfo.samplerate << endl;
-
-  cout << endl << "audiospec specs" << endl
-       << "samples " << spec.samples << endl
-       << "channels " << spec.channels << endl
-       << "freq " << spec.freq << endl;
-
   return spec;
 }
 
@@ -118,15 +106,7 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec){
   memset(&cvt, 0, sizeof(cvt));
 
   SDL_AudioSpec obtainedSpec = SoundPlayer::getSoundPlayer().audioFormat;
-  if(obtainedSpec.format == AUDIO_U8){
-    cout << "device format is PCM U8" << endl;
-  }
-  else{
-    cout << "device format is PCM S16" << endl;
-  }
-  cout << "device freq: " << obtainedSpec.freq << endl;
-  cout << "device channels: " << obtainedSpec.channels << endl;
-  
+
   int ret = SDL_BuildAudioCVT(&cvt, sndSpec.format, sndSpec.channels
 			      , sndSpec.freq, obtainedSpec.format
 			      , obtainedSpec.channels, obtainedSpec.freq);
@@ -137,10 +117,6 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec){
     cvt.len = this->length;
     cvt.buf = (Uint8*)malloc(cvt.len * cvt.len_mult);
     
-    cout << "old length " << cvt.len << endl;
-    cout << "multiplier " << cvt.len_mult << endl;
-    cout << "length: " << length << endl;
-  
     memset(cvt.buf, obtainedSpec.silence, cvt.len * cvt.len_mult);
     memcpy(cvt.buf, buf.get(), cvt.len);
 
