@@ -138,6 +138,7 @@ void VideoManager::initSystem(Screen_t screenConfig){
 
 void VideoManager::shutdown(){
   SDL_Quit();
+  instantiated = false;
 }
 
 void VideoManager::drawScreen(){

@@ -42,3 +42,6 @@ retrieve the next node
 [2014-05-25 Sun] Worked on AssetManager
 - Added support for loading sounds
 - Next I need to add test cases for loading images and loading sounds
+[2014-05-26 Mon 06:47] 
+- Next I need to add test cases for loading images and loading sounds
+- Add support for sprite sheets

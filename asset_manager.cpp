@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <memory>
+#include <stdexcept>
 
 #include "CapEngineException.h"
 #include "xml_parser.h"
@@ -15,28 +16,29 @@ AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
   : mVideoManager(videoManager), mSoundPlayer(soundPlayer), mAssetFile(assetFile)
 {
 XmlParser parser(assetFile);
+ parseAssetFile(parser);
 }
   
-  AssetManager::~AssetManager(){
-// free surfaces in texture map
-auto tIter = mTextureMap.begin();
-while(tIter != mTextureMap.end()){
-if(tIter->second.surface != nullptr){
-mVideoManager.closeSurface(tIter->second.surface);
+AssetManager::~AssetManager(){
+  // free surfaces in texture map
+  auto tIter = mTextureMap.begin();
+  while(tIter != mTextureMap.end()){
+    if(tIter->second.surface != nullptr){
+      mVideoManager.closeSurface(tIter->second.surface);
+    }
+    tIter++;
+  }
+  // free sounds in sound map
+  auto sIter = mSoundMap.begin();
+  while(sIter != mSoundMap.end()){
+    if(sIter->second.pcm != nullptr){
+      delete sIter->second.pcm;
+    }
+    sIter++;
+  }
 }
 
-}
-// free sounds in sound map
-auto sIter = mSoundMap.begin();
-while(sIter != mSoundMap.end()){
-if(sIter->second.pcm != nullptr){
-delete sIter->second.pcm;
-}
-
-}
-}
-
-void AssetManager::loadTexture(int id, string path){
+void AssetManager::loadTexture(int id, string path, int frameWidth, int frameHeight){
   Surface* tempSurface = mVideoManager.loadImage(path);
   if(tempSurface == nullptr){
     throw CapEngineException("Unable to load texture at " + path);
@@ -51,6 +53,8 @@ void AssetManager::loadTexture(int id, string path){
   Texture texture;
   texture.path = path;
   texture.surface = tempSurface;
+  texture.frameWidth = frameWidth;
+  texture.frameHeight = frameHeight;
   mTextureMap[id] = texture;
 }
 
@@ -61,15 +65,35 @@ void AssetManager::parseAssetFile(XmlParser& parser){
   for( ; textureIter != textures.end(); textureIter++){
     string id = parser.getAttribute(*textureIter, "id");
     string path = parser.getStringValue(*textureIter);
+    string frameWidth = parser.getAttribute(*textureIter, "frameWidth");
+    string frameHeight = parser.getAttribute(*textureIter, "frameHeight");
     
     //convert id to int
     istringstream idStream(id);
     int tId;
     idStream >> tId;
-    
+
+    // stoi introduced in c++11
+    int fWidth, fHeight = 0;
+    try{
+      fWidth = stoi( frameWidth );
+    }
+    catch(const invalid_argument& e){
+      fWidth = 0;
+    }
+
+    try{
+      fHeight = stoi( frameHeight );
+    }
+    catch(const invalid_argument& e){
+      fWidth = 0;
+    }
+
     Texture texture;
     texture.path = path;
     texture.surface = nullptr;
+    texture.frameWidth = fWidth;
+    texture.frameHeight = fHeight;
 
     mTextureMap[tId] = texture;
   }
@@ -78,8 +102,8 @@ void AssetManager::parseAssetFile(XmlParser& parser){
   vector<XmlNode> sounds = parser.getNodes("/assets/sounds/sound");
   auto soundIter = sounds.begin();
   for ( ; soundIter != sounds.end(); soundIter++){
-    string id = parser.getAttribute(*textureIter, "id");
-    string path = parser.getStringValue(*textureIter);
+    string id = parser.getAttribute(*soundIter, "id");
+    string path = parser.getStringValue(*soundIter);
     
     //convert id to int
     istringstream idStream(id);

@@ -15,6 +15,8 @@ namespace CapEngine{
   struct Texture {
     std::string path;
     Surface* surface;
+    int frameWidth;
+    int frameHeight;
   };
 
   struct Sound {
@@ -29,7 +31,7 @@ namespace CapEngine{
     ~AssetManager();
     void draw(int id, Rect srcRect, Rect dstRect);
     void draw(int id, Rect srcRect, Rect dstRect, int row, int frame);
-    void loadTexture(int id, std::string path);
+    void loadTexture(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Texture* getTexture(int id); 
     void playSound(int id, bool repeat);
     void stopSound(int id);

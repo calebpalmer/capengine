@@ -91,8 +91,14 @@ string XmlParser::getStringValue(XmlNode node){
 string XmlParser::getAttribute(XmlNode node, const string key){
   xmlChar *value;
   value = xmlGetProp(node, (xmlChar *)key.c_str());
-  string retVal = (char *)value;
-  xmlFree(value);
+  string retVal;
+  if(value == nullptr){
+    retVal = "";
+  }
+  else{
+    retVal = (char *)value;
+    xmlFree(value);
+  }
   return retVal;
 }
 
