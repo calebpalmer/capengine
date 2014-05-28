@@ -83,6 +83,13 @@ void VideoManager::drawSurface(int x, int y, Surface* source, Rect* rect) const{
   
 }
 
+void VideoManager::drawSurface(Surface* source, Rect* srcRect, Rect* dstRect) const{
+
+  SDL_BlitSurface(source, srcRect, mainSurface, dstRect);
+  
+}
+
+
 void VideoManager::initSystem(Screen_t screenConfig){
   mainSurface = NULL;
 

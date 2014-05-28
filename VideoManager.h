@@ -42,6 +42,7 @@ namespace CapEngine {
     void setColorKey(Surface* surface) const;
     void closeSurface(Surface* surface) const;
     void drawSurface(int x, int y, Surface* source, Rect* rect=nullptr) const;
+    void drawSurface(Surface* source, Rect* srcRect, Rect* dstRect) const;
     void shutdown();
     void drawScreen();
     void getWindowResolution(int* width, int* height) const;
