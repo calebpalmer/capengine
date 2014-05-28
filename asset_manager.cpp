@@ -1,4 +1,4 @@
-#include "asset_manager.h"
+ #include "asset_manager.h"
 
 #include <vector>
 #include <sstream>
@@ -171,4 +171,37 @@ void AssetManager::loadSound(int id, string path){
   sound.pcm = upTempPCM.release();
   mSoundMap[id] = sound;
 
+}
+
+void AssetManager::draw(int id, Rect srcRect, Rect dstRect){
+  Texture* texture = this->getTexture(id);
+  mVideoManager.drawSurface(texture->surface, &srcRect, &dstRect);
+}
+
+void AssetManager::draw(int id, Rect dstRect, int row, int frame){
+  Texture* texture = this->getTexture(id);
+  real width, height;
+  width = mVideoManager.getSurfaceWidth(texture->surface);
+  height = mVideoManager.getSurfaceHeight(texture->surface);
+
+  if(texture->frameWidth == 0 || texture->frameHeight == 0){
+    throw CapEngineException("Texture does not contain frames");
+  }
+
+  if(frame * texture->frameWidth > width - texture->frameWidth){
+    throw CapEngineException("Frame out of bounds of texture");
+  }
+
+  if(row * texture->frameHeight > height - texture->frameHeight){
+    throw CapEngineException("Row out of bounds of texture");
+  }
+
+  Rect srcRect;
+  srcRect.x = frame * texture->frameWidth;
+  srcRect.y = row * texture->frameHeight;
+  srcRect.w = texture->frameWidth;
+  srcRect.h = texture->frameHeight;
+
+  mVideoManager.drawSurface(texture->surface, &srcRect, &dstRect);
+  
 }

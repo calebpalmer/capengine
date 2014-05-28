@@ -30,7 +30,7 @@ namespace CapEngine{
     AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::string assetFile);
     ~AssetManager();
     void draw(int id, Rect srcRect, Rect dstRect);
-    void draw(int id, Rect srcRect, Rect dstRect, int row, int frame);
+    void draw(int id, Rect dstRect, int row, int frame);
     void loadTexture(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Texture* getTexture(int id); 
     void playSound(int id, bool repeat);
