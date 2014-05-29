@@ -33,5 +33,7 @@
 #include "timestep.h"
 #include "keyboard.h"
 #include "scanconvert.h"
+#include "asset_manager.h"
+#include "xml_parser.h"
 
 #endif
