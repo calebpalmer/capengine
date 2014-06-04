@@ -61,28 +61,34 @@ void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len){
   SoundCollectionIter iter;
   Uint32 amount, position;
   for(iter = sounds.begin(); iter != sounds.end(); iter++){
-    if(((*iter)->currentPosition() + len) > (*iter)->getLength()){
-      amount = (*iter)->getLength() - (*iter)->currentPosition();
+    if(((*iter)->pcm->currentPosition() + len) > (*iter)->pcm->getLength()){
+      amount = (*iter)->pcm->getLength() - (*iter)->pcm->currentPosition();
     }
     else{
       amount = len;
     }
 
-    position = (*iter)->currentPosition();
-    Uint8* bufStart = &((*iter)->getBuf())[position];
+    position = (*iter)->pcm->currentPosition();
+    Uint8* bufStart = &((*iter)->pcm->getBuf())[position];
     SDL_MixAudio(stream, bufStart, amount, SDL_MIX_MAXVOLUME);
     
-    (*iter)->incrementPosition(amount);
+    (*iter)->pcm->incrementPosition(amount);
   }
 }
 
-void SoundPlayer::addSound(PCM* sound){
+long SoundPlayer::addSound(PCM* sound){
+  long id = idCounter++;
+  unique_ptr<PCMType> pSound(new PCMType());
+  pSound->id = id;
+  pSound->pcm = sound;
 
   SDL_LockAudio();
   cleanSounds();
   // resetting sound position
-  sounds.push_back(sound);
+  sounds.push_back(pSound.release());
   SDL_UnlockAudio();
+
+  return id;
 }
 
 //! set the state of the sound system
@@ -102,7 +108,8 @@ void SoundPlayer::cleanSounds(){
   SoundCollectionIter iter;
   iter = sounds.begin();
   while(iter != sounds.end()){
-    if(*iter == nullptr || ((*iter)->currentPosition() >= (*iter)->getLength())){
+    if(*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())){
+      delete ((*iter)->pcm);
       delete *iter;
       iter = sounds.erase(iter);
     }
@@ -127,4 +134,21 @@ SoundCollection& SoundPlayer::getSoundCollection(){
  */
 uint8_t SoundPlayer::getSilence() const{
   return audioFormat.silence;
+}
+
+void SoundPlayer::deleteSound(long id){
+  SoundCollectionIter iter;
+  iter = sounds.begin();
+  while(iter != sounds.end()){
+    if(((*iter)->id) == id){
+
+      delete ((*iter)->pcm);
+      delete *iter;
+      iter = sounds.erase(iter);
+      return;
+    }
+    else{
+      ++iter;
+    }
+  }
 }

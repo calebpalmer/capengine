@@ -15,8 +15,16 @@
 #define UNPAUSE 0
 #define PAUSE 1
 
-typedef std::vector<CapEngine::PCM*> SoundCollection;
-typedef std::vector<CapEngine::PCM*>::iterator SoundCollectionIter;
+
+struct PCMType {
+  long id;
+  CapEngine::PCM* pcm;
+};
+
+// Using vector instead of map because I'm expecting to iterate over the 
+// collection more then accessing by id
+typedef std::vector<PCMType*> SoundCollection;
+typedef std::vector<PCMType*>::iterator SoundCollectionIter;
 
 namespace CapEngine{
   void audioCallback(void *udata, Uint8 *stream, int len);
@@ -25,12 +33,13 @@ namespace CapEngine{
   public:
     friend class PCM;
     ~SoundPlayer();
-    void addSound(PCM* sound);
+    long addSound(PCM* sound);
     void cleanSounds();
     void setState(int state);
     SoundCollection& getSoundCollection();
     static SoundPlayer& getSoundPlayer();
     uint8_t getSilence() const;
+    void deleteSound(long id);
 
   private:
     SoundPlayer();
@@ -39,6 +48,7 @@ namespace CapEngine{
     
     SoundCollection sounds;
     SDL_AudioSpec audioFormat;
+    long idCounter;
     
 
   };
