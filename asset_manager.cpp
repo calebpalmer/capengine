@@ -1,4 +1,4 @@
- #include "asset_manager.h"
+#include "asset_manager.h"
 
 #include <vector>
 #include <sstream>
@@ -7,7 +7,6 @@
 
 #include "CapEngineException.h"
 #include "xml_parser.h"
-
 
 using namespace std;
 using namespace CapEngine;
@@ -173,12 +172,25 @@ void AssetManager::loadSound(int id, string path){
 
 }
 
-void AssetManager::draw(int id, Rect srcRect, Rect dstRect){
+void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
   Texture* texture = this->getTexture(id);
-  mVideoManager.drawSurface(texture->surface, &srcRect, &dstRect);
+
+  Rect srcRect;
+  srcRect.x = _srcRect.x;
+  srcRect.y = _srcRect.y;
+  srcRect.w = _srcRect.width;
+  srcRect.h = _srcRect.height;
+
+  Rect destRect;
+  destRect.x = _destRect.x;
+  destRect.y = _destRect.y;
+  destRect.w = _destRect.width;
+  destRect.h = _destRect.height;
+  
+  mVideoManager.drawSurface(texture->surface, &srcRect, &destRect);
 }
 
-void AssetManager::draw(int id, Rect dstRect, int row, int frame){
+void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
   Texture* texture = this->getTexture(id);
   real width, height;
   width = mVideoManager.getSurfaceWidth(texture->surface);
@@ -202,6 +214,19 @@ void AssetManager::draw(int id, Rect dstRect, int row, int frame){
   srcRect.w = texture->frameWidth;
   srcRect.h = texture->frameHeight;
 
-  mVideoManager.drawSurface(texture->surface, &srcRect, &dstRect);
+  Rect destRect;
+  destRect.x = _destRect.x;
+  destRect.y = _destRect.y;
+  destRect.w = _destRect.width;
+  destRect.h = _destRect.height;
+
+  mVideoManager.drawSurface(texture->surface, &srcRect, &destRect);
   
+}
+
+void AssetManager::playSound(int id, bool repeat){
+    // TODO implement repeat functionality
+    Sound* sound = getSound(id); 
+    unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
+    mSoundPlayer.addSound(upTempPCM.release());
 }
