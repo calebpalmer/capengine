@@ -76,10 +76,11 @@ void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len){
   }
 }
 
-long SoundPlayer::addSound(PCM* sound){
+long SoundPlayer::addSound(PCM* sound, bool repeat){
   long id = idCounter++;
   unique_ptr<PCMType> pSound(new PCMType());
   pSound->id = id;
+  pSound->repeat = repeat;
   pSound->pcm = sound;
 
   SDL_LockAudio();
@@ -109,9 +110,17 @@ void SoundPlayer::cleanSounds(){
   iter = sounds.begin();
   while(iter != sounds.end()){
     if(*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())){
-      delete ((*iter)->pcm);
-      delete *iter;
-      iter = sounds.erase(iter);
+      if(*iter != nullptr && (*iter)->repeat == false){
+	delete ((*iter)->pcm);
+	delete *iter;
+	iter = sounds.erase(iter);
+      }
+      else{
+	// if not null, set position back to beginning
+	if(*iter != nullptr){
+	  (*iter)->pcm->resetPosition();
+	}
+      }
     }
     else{
       ++iter;

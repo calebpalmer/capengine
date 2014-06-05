@@ -18,6 +18,7 @@
 
 struct PCMType {
   long id;
+  bool repeat;
   CapEngine::PCM* pcm;
 };
 
@@ -33,7 +34,7 @@ namespace CapEngine{
   public:
     friend class PCM;
     ~SoundPlayer();
-    long addSound(PCM* sound);
+    long addSound(PCM* sound, bool repeat=false);
     void cleanSounds();
     void setState(int state);
     SoundCollection& getSoundCollection();
