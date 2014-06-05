@@ -228,5 +228,5 @@ void AssetManager::playSound(int id, bool repeat){
     // TODO implement repeat functionality
     Sound* sound = getSound(id); 
     unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
-    mSoundPlayer.addSound(upTempPCM.release());
+    mSoundPlayer.addSound(upTempPCM.release(), repeat);
 }

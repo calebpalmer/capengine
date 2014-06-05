@@ -34,7 +34,7 @@ namespace CapEngine{
     void draw(int id, Rectangle dstRect, int row, int frame);
     void loadTexture(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Texture* getTexture(int id); 
-    void playSound(int id, bool repeat);
+    void playSound(int id, bool repeat=false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
     Sound* getSound(int id);
