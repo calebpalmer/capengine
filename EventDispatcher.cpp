@@ -75,7 +75,12 @@ void EventDispatcher::flushQueue(){
 	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
 	}
 	break;
-      case SDL_MOUSEBUTTONDOWN | SDL_MOUSEBUTTONUP:
+      case SDL_MOUSEBUTTONDOWN:
+	if(curSubscription->subscriptionType & mouseEvent){
+	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	}
+	break;
+      case SDL_MOUSEBUTTONUP:
 	if(curSubscription->subscriptionType & mouseEvent){
 	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
 	}
