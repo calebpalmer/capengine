@@ -42,6 +42,6 @@ namespace CapEngine{
  CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
  CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
  Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
-
+ Relation MBRRelate(int x, int y, const Rectangle& r);
 }
 #endif //COLLISION_H

@@ -57,3 +57,13 @@ Relation CapEngine::MBRRelate(const Rectangle& r1, const Rectangle& r2) {
   
   return INSIDE;
 }
+
+Relation CapEngine::MBRRelate(int x, int y, const Rectangle& r){
+  if((x >= r.x && x <= r.x + r.width) && (y >= r.y && y <= r.y + r.height)){
+    return INSIDE;
+  }
+  // should add case for touch at some point
+  else{
+    return OUTSIDE;
+  }
+}

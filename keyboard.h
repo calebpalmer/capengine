@@ -11,7 +11,10 @@ namespace CapEngine{
       CAP_KEYDOWN,
       CAP_KEYLEFT,
       CAP_KEYRIGHT,
-      CAP_SPACE
+      CAP_SPACE,
+      CAP_ENTER,
+      CAP_BACKSPACE,
+      CAP_ESCAPE
     };
 
     enum KeyState {
