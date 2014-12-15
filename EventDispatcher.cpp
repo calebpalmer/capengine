@@ -122,3 +122,15 @@ SDL_Event* EventDispatcher::copyEvent(SDL_Event* event){
   memcpy(reinterpret_cast<void*>(copy.get()), reinterpret_cast<void*>(event), sizeof(SDL_Event));
   return copy.release();
 }
+
+void EventDispatcher::unsubscribe(IEventSubscriber* subscriber_in){
+  auto i = subscribers->begin();
+  while(i != subscribers->end()){
+    if(i->subscriber == subscriber_in){
+      i = subscribers->erase(i);
+    }
+    else{
+      i++;
+    }
+  }
+}
