@@ -10,6 +10,7 @@
 #include "soundplayer.h"
 #include "xml_parser.h"
 #include "collision.h" // Rectangle definition
+#include "vector.h" 
 
 namespace CapEngine{
 
@@ -32,8 +33,11 @@ namespace CapEngine{
     ~AssetManager();
     void draw(int id, Rectangle srcRect, Rectangle dstRect);
     void draw(int id, Rectangle dstRect, int row, int frame);
+    void draw(int id, Vector position);
     void loadTexture(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Texture* getTexture(int id); 
+    int getTextureWidth(int id);
+    int getTextureHeight(int id);
     void playSound(int id, bool repeat=false);
     void stopSound(int id);
     void loadSound(int id, std::string path);

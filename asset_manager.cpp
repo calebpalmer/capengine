@@ -134,7 +134,22 @@ Texture* AssetManager::getTexture(int id){
     }
   }
   return &(iter->second);
+}
 
+int AssetManager::getTextureWidth(int id){
+  Texture* texture = this->getTexture(id);
+
+  int width;
+  width = mVideoManager.getSurfaceWidth(texture->surface);
+  return width;
+}
+
+int AssetManager::getTextureHeight(int id){
+  Texture* texture = this->getTexture(id);
+
+  int height;
+  height = mVideoManager.getSurfaceHeight(texture->surface);
+  return height;
 }
 
 Sound* AssetManager::getSound(int id){
@@ -188,6 +203,16 @@ void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
   destRect.h = _destRect.height;
   
   mVideoManager.drawSurface(texture->surface, &srcRect, &destRect);
+}
+
+void AssetManager::draw(int id, Vector position){
+  Texture* texture = this->getTexture(id);
+
+  Rect destRect;
+  destRect.x = position.x;
+  destRect.y = position.y;
+
+  mVideoManager.drawSurface(texture->surface, nullptr, &destRect);
 }
 
 void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
