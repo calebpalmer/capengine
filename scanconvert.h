@@ -9,7 +9,12 @@ namespace CapEngine {
   const Uint8 scanG = 0xff;
   const Uint8 scanB = 0xff;
 
-  void drawLine(int x0, int y0, int x1, int y1, Surface* surface);
+  enum EdgePattern {
+    SolidEdge,
+    StripedEdge
+  };
+
+  void drawLine(int x0, int y0, int x1, int y1, Surface* surface, EdgePattern pattern=SolidEdge);
   void writePixel(CapEngine::Surface* surface, int x, int y);
 
 }

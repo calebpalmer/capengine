@@ -26,9 +26,16 @@ namespace {
     return pixel;
   }
 
-  void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface){
+  void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern=SolidEdge){
     // lock the surface for writing
     // TODO need to clip the coordinates to fit the screen
+    bool drawPixel = true;
+    int flipWrite = -1;
+    if(pattern == StripedEdge)
+      {
+	flipWrite = 20;
+      }
+    
     
     SDL_LockSurface(surface);
 
@@ -47,6 +54,11 @@ namespace {
     if( slope > 1.0 || slope < -1.0){  // increment over y
       float lastx = x0;
       for(int i = y0; i <= y1;  i++){
+
+	if(flipWrite != -1 && i % flipWrite == 0){
+	  drawPixel = !drawPixel;
+	}
+	
 	int y = i;
 	int x;
 	if(y == y0){
@@ -56,14 +68,21 @@ namespace {
 	  lastx = lastx + (1.0f / slope);
 	  x = lastx;
 	}
-	
-	writePixel(surface, x, y);
+
+	if(drawPixel){
+	  writePixel(surface, x, y);
+	}
       }
     }
     
     else{  // increment over x
       float lasty = y0;
       for(int i = x0; i <= x1; i++){
+
+	if(flipWrite != -1 && i % flipWrite == 0){
+	  drawPixel = !drawPixel;
+	}
+
 	int x = i;
 	int y;
 	if(x == x0){
@@ -73,7 +92,9 @@ namespace {
 	  lasty = lasty + slope;
 	  y = lasty;
 	}
-	writePixel(surface, x, y);
+	if(drawPixel){
+	  writePixel(surface, x, y);
+	}
       }
     }
 
@@ -83,12 +104,12 @@ namespace {
 
 }
 
-void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* surface){
+void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern){
   // need to calculate intersection points if line needs to be clipped to fit surface
   if(surface == nullptr){
     throw CapEngineException("surface is null");
   }
-  drawLineBasicIncremental(x0, y0, x1, y1, surface);
+  drawLineBasicIncremental(x0, y0, x1, y1, surface, pattern);
 }
 
 void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
