@@ -17,5 +17,7 @@ namespace CapEngine {
   void drawLine(int x0, int y0, int x1, int y1, Surface* surface, EdgePattern pattern=SolidEdge);
   void writePixel(CapEngine::Surface* surface, int x, int y);
 
+  static int basicStippleLength = 10;
+
 }
 #endif // SCANCONVERT_H

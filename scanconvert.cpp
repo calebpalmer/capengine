@@ -33,7 +33,7 @@ namespace {
     int flipWrite = -1;
     if(pattern == StripedEdge)
       {
-	flipWrite = 20;
+	flipWrite = basicStippleLength;
       }
     
     
