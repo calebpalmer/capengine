@@ -1,12 +1,9 @@
 #ifndef EVENTDISPATCHER_H
 #define EVENTDISPATCHER_H
 
-//@brief - Header file for EventDispatcher Class
-//@author - Caleb Palmer
-
 #include <vector>
 #include <memory>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include "IEventSubscriber.h"
 #include "VideoManager.h"
 

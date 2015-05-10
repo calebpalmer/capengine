@@ -14,9 +14,9 @@
 
 namespace CapEngine{
 
-  struct Texture {
+  struct Image {
     std::string path;
-    Surface* surface;
+    Texture* texture;
     int frameWidth;
     int frameHeight;
   };
@@ -34,17 +34,17 @@ namespace CapEngine{
     void draw(int id, Rectangle srcRect, Rectangle dstRect);
     void draw(int id, Rectangle dstRect, int row, int frame);
     void draw(int id, Vector position);
-    void loadTexture(int id, std::string path, int frameWidth=0, int frameHeight=0);
-    Texture* getTexture(int id); 
-    int getTextureWidth(int id);
-    int getTextureHeight(int id);
+    void loadImage(int id, std::string path, int frameWidth=0, int frameHeight=0);
+    Image* getImage(int id); 
+    int getImageWidth(int id);
+    int getImageHeight(int id);
     void playSound(int id, bool repeat=false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
     Sound* getSound(int id);
 
   private: 
-    std::map<int, Texture> mTextureMap;
+    std::map<int, Image> mImageMap;
     std::map<int, Sound> mSoundMap;
     VideoManager& mVideoManager;
     SoundPlayer& mSoundPlayer;

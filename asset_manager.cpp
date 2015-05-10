@@ -19,11 +19,11 @@ XmlParser parser(assetFile);
 }
   
 AssetManager::~AssetManager(){
-  // free surfaces in texture map
-  auto tIter = mTextureMap.begin();
-  while(tIter != mTextureMap.end()){
-    if(tIter->second.surface != nullptr){
-      mVideoManager.closeSurface(tIter->second.surface);
+  // free textures in image map
+  auto tIter = mImageMap.begin();
+  while(tIter != mImageMap.end()){
+    if(tIter->second.texture != nullptr){
+      mVideoManager.closeTexture(tIter->second.texture);
     }
     tIter++;
   }
@@ -37,35 +37,35 @@ AssetManager::~AssetManager(){
   }
 }
 
-void AssetManager::loadTexture(int id, string path, int frameWidth, int frameHeight){
-  Surface* tempSurface = mVideoManager.loadImage(path);
-  if(tempSurface == nullptr){
-    throw CapEngineException("Unable to load texture at " + path);
+void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeight){
+  Texture* tempTexture = mVideoManager.loadImage(path);
+  if(tempTexture == nullptr){
+    throw CapEngineException("Unable to load image at " + path);
   }
 
-  if(mTextureMap.find(id) != mTextureMap.end()){
+  if(mImageMap.find(id) != mImageMap.end()){
     ostringstream errorStream;
-    errorStream << "Texture under id " << id << " already exists.";
+    errorStream << "Image under id " << id << " already exists.";
     throw CapEngineException(errorStream.str());
   }
   
-  Texture texture;
-  texture.path = path;
-  texture.surface = tempSurface;
-  texture.frameWidth = frameWidth;
-  texture.frameHeight = frameHeight;
-  mTextureMap[id] = texture;
+  Image image;
+  image.path = path;
+  image.texture = tempTexture;
+  image.frameWidth = frameWidth;
+  image.frameHeight = frameHeight;
+  mImageMap[id] = image;
 }
 
 void AssetManager::parseAssetFile(XmlParser& parser){
-  // get Textures nodes at /assets/textures/texture
-  vector<XmlNode> textures = parser.getNodes("/assets/textures/texture");
-  auto textureIter = textures.begin();
-  for( ; textureIter != textures.end(); textureIter++){
-    string id = parser.getAttribute(*textureIter, "id");
-    string path = parser.getStringValue(*textureIter);
-    string frameWidth = parser.getAttribute(*textureIter, "frameWidth");
-    string frameHeight = parser.getAttribute(*textureIter, "frameHeight");
+  // get Images nodes at /assets/images/image
+ vector<XmlNode> images = parser.getNodes("/assets/images/image");
+  auto imageIter = images.begin();
+  for( ; imageIter != images.end(); imageIter++){
+    string id = parser.getAttribute(*imageIter, "id");
+    string path = parser.getStringValue(*imageIter);
+    string frameWidth = parser.getAttribute(*imageIter, "frameWidth");
+    string frameHeight = parser.getAttribute(*imageIter, "frameHeight");
     
     //convert id to int
     istringstream idStream(id);
@@ -88,13 +88,13 @@ void AssetManager::parseAssetFile(XmlParser& parser){
       fWidth = 0;
     }
 
-    Texture texture;
-    texture.path = path;
-    texture.surface = nullptr;
-    texture.frameWidth = fWidth;
-    texture.frameHeight = fHeight;
+    Image image;
+    image.path = path;
+    image.texture = nullptr;
+    image.frameWidth = fWidth;
+    image.frameHeight = fHeight;
 
-    mTextureMap[tId] = texture;
+    mImageMap[tId] = image;
   }
 
   // get sounds at /assets/sounds
@@ -118,42 +118,42 @@ void AssetManager::parseAssetFile(XmlParser& parser){
   
 }
 
-Texture* AssetManager::getTexture(int id){
-  // throw error if texture has not been loaded
-  auto iter = mTextureMap.find(id);
-  if(iter == mTextureMap.end()){
+Image* AssetManager::getImage(int id){
+  // throw error if image has not been loaded
+  auto iter = mImageMap.find(id);
+  if(iter == mImageMap.end()){
     ostringstream message;
-    message << "Texture with id " << id << " does not exist";
+    message << "Image with id " << id << " does not exist";
     throw CapEngineException(message.str());
   }
 
-  if(iter->second.surface == nullptr){
-    iter->second.surface = mVideoManager.loadImage(iter->second.path);
-    if(iter->second.surface == nullptr){
-      throw CapEngineException("Unable to load texture at " + iter->second.path);
+  if(iter->second.texture == nullptr){
+    iter->second.texture = mVideoManager.loadImage(iter->second.path);
+    if(iter->second.texture == nullptr){
+      throw CapEngineException("Unable to load image at " + iter->second.path);
     }
   }
   return &(iter->second);
 }
 
-int AssetManager::getTextureWidth(int id){
-  Texture* texture = this->getTexture(id);
+int AssetManager::getImageWidth(int id){
+  Image* image = this->getImage(id);
 
   int width;
-  width = mVideoManager.getSurfaceWidth(texture->surface);
+  width = mVideoManager.getTextureWidth(image->texture);
   return width;
 }
 
-int AssetManager::getTextureHeight(int id){
-  Texture* texture = this->getTexture(id);
+int AssetManager::getImageHeight(int id){
+  Image* image = this->getImage(id);
 
   int height;
-  height = mVideoManager.getSurfaceHeight(texture->surface);
+  height = mVideoManager.getTextureHeight(image->texture);
   return height;
 }
 
 Sound* AssetManager::getSound(int id){
-  // throw error if texture has not been loaded
+  // throw error if image has not been loaded
   auto iter = mSoundMap.find(id);
   if(iter == mSoundMap.end()){
     ostringstream message;
@@ -165,7 +165,7 @@ Sound* AssetManager::getSound(int id){
     unique_ptr<PCM> upPcm(new PCM(iter->second.path));
     iter->second.pcm = upPcm.release();
     if(iter->second.pcm == nullptr){
-      throw CapEngineException("Unable to load texture at " + iter->second.path);
+      throw CapEngineException("Unable to load image at " + iter->second.path);
     }
   }
   return &(iter->second);
@@ -188,7 +188,7 @@ void AssetManager::loadSound(int id, string path){
 }
 
 void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
-  Texture* texture = this->getTexture(id);
+  Image* image = this->getImage(id);
 
   Rect srcRect;
   srcRect.x = _srcRect.x;
@@ -202,42 +202,42 @@ void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
   destRect.w = _destRect.width;
   destRect.h = _destRect.height;
   
-  mVideoManager.drawSurface(texture->surface, &srcRect, &destRect);
+  mVideoManager.drawTexture(image->texture, &srcRect, &destRect);
 }
 
 void AssetManager::draw(int id, Vector position){
-  Texture* texture = this->getTexture(id);
+  Image* image = this->getImage(id);
 
   Rect destRect;
   destRect.x = position.x;
   destRect.y = position.y;
 
-  mVideoManager.drawSurface(texture->surface, nullptr, &destRect);
+  mVideoManager.drawTexture(image->texture, nullptr, &destRect);
 }
 
 void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
-  Texture* texture = this->getTexture(id);
+  Image* image = this->getImage(id);
   real width, height;
-  width = mVideoManager.getSurfaceWidth(texture->surface);
-  height = mVideoManager.getSurfaceHeight(texture->surface);
+  width = mVideoManager.getTextureWidth(image->texture);
+  height = mVideoManager.getTextureHeight(image->texture);
 
-  if(texture->frameWidth == 0 || texture->frameHeight == 0){
-    throw CapEngineException("Texture does not contain frames");
+  if(image->frameWidth == 0 || image->frameHeight == 0){
+    throw CapEngineException("Image does not contain frames");
   }
 
-  if(frame * texture->frameWidth > width - texture->frameWidth){
-    throw CapEngineException("Frame out of bounds of texture");
+  if(frame * image->frameWidth > width - image->frameWidth){
+    throw CapEngineException("Frame out of bounds of image");
   }
 
-  if(row * texture->frameHeight > height - texture->frameHeight){
-    throw CapEngineException("Row out of bounds of texture");
+  if(row * image->frameHeight > height - image->frameHeight){
+    throw CapEngineException("Row out of bounds of image");
   }
 
   Rect srcRect;
-  srcRect.x = frame * texture->frameWidth;
-  srcRect.y = row * texture->frameHeight;
-  srcRect.w = texture->frameWidth;
-  srcRect.h = texture->frameHeight;
+  srcRect.x = frame * image->frameWidth;
+  srcRect.y = row * image->frameHeight;
+  srcRect.w = image->frameWidth;
+  srcRect.h = image->frameHeight;
 
   Rect destRect;
   destRect.x = _destRect.x;
@@ -245,7 +245,7 @@ void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
   destRect.w = _destRect.width;
   destRect.h = _destRect.height;
 
-  mVideoManager.drawSurface(texture->surface, &srcRect, &destRect);
+  mVideoManager.drawTexture(image->texture, &srcRect, &destRect);
   
 }
 

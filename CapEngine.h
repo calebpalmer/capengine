@@ -4,9 +4,9 @@
 //@brief - master include file for CapEngine
 //@author - Caleb Palmer
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>

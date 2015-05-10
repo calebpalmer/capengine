@@ -1,7 +1,7 @@
 #include "fontmanager.h"
 #include "CapEngineException.h"
 
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL_ttf.h>
 
 using namespace std;
 

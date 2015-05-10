@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sndfile.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <memory>
 
 namespace CapEngine {

@@ -51,9 +51,9 @@ void EventDispatcher::flushQueue(){
     SDL_Event* curEvent = *eventIter;
 
     // Call the reshape function if SDL is being used
-    if(curEvent->type == SDL_VIDEORESIZE){
-      int w = ((SDL_ResizeEvent*)curEvent)->h;
-      int h = ((SDL_ResizeEvent*)curEvent)->h;
+    if(curEvent->type == SDL_WINDOWEVENT_RESIZED){
+      int w = ((SDL_WindowEvent*)curEvent)->data1;
+      int h = ((SDL_WindowEvent*)curEvent)->data2;
       videoManager->callReshapeFunc(w, h); 
     }
     while(subscriberIter != subscribers->end()){

@@ -1,7 +1,7 @@
 #include "scanconvert.h"
 #include "CapEngineException.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <iostream>
 
 using namespace CapEngine;
