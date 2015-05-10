@@ -7,8 +7,8 @@
 #include <string>
 #include <memory>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "captypes.h"
 #include "CapEngineException.h"
 #include "Time.h"
@@ -38,28 +38,30 @@ namespace CapEngine {
     VideoManager();    
     VideoManager(Logger* loggerIn);
     void initSystem(Screen_t screenConfig);
-    Surface* loadImage(std::string fileName) const;
-    void setColorKey(Surface* surface) const;
-    void closeSurface(Surface* surface) const;
-    void drawSurface(int x, int y, Surface* source, Rect* rect=nullptr) const;
-    void drawSurface(Surface* source, Rect* srcRect, Rect* dstRect) const;
+    Texture* loadImage(std::string fileName) const;
+    void closeTexture(Texture* texture) const;
+    void drawTexture(int x, int y, Texture* texture, Rect* srcRect=nullptr) const;
+    void drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const;
     void shutdown();
     void drawScreen();
     void getWindowResolution(int* width, int* height) const;
-    real getSurfaceWidth(const Surface* surface) const;
-    real getSurfaceHeight(const Surface* surface) const;
-    Surface* createSurface(int width, int height);
-    void blitSurface(Surface& sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface& destSurface, int x, int y);
+    real getTextureWidth(Texture* texture) const;
+    real getTextureHeight(Texture* texture) const;
+    Texture* createTexture(int width, int height);
+    void blitTextures(Texture* sourceTexture, int srcX, int srcY,  int sourceWidth, int sourceHeight, Texture* destTexture, int x, int y);
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
     void callReshapeFunc(int w, int h);
     void displayFPS(bool on, const std::string& ttfFontPath="", Uint8 r = 0, Uint8 g = 0, Uint8 b = 0);
 
-  public:
     bool initialized;
-    
+
+  protected:
+    void setColorKey(Surface* surface) const;
+
   private:
-    SDL_Surface *mainSurface;
+    SDL_Window* m_pWindow;
+    SDL_Renderer* m_pRenderer;
     Logger* logger;
     static bool instantiated; //singleton
     Screen_t currentScreenConfig;

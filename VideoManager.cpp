@@ -7,7 +7,7 @@
 #include <sstream>
 #include <cassert>
 
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL_image.h>
 
 #include "logger.h"
 #include "EventDispatcher.h"
@@ -18,25 +18,68 @@ using namespace CapEngine;
 bool VideoManager::instantiated = false;
 
 VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
-			     , logger(nullptr){
+				  , logger(nullptr), m_pWindow(nullptr), m_pRenderer(nullptr)
+			     , initialized(false)
+{
   assert(instantiated == false);
   instantiated = true;
-  mainSurface = nullptr;
+  logger = new Logger();
+}
+
+VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager()), showFPS(false)
+					     , m_pWindow(nullptr), m_pRenderer(nullptr), logger(loggerIn), initialized(false)
+{
+  assert(instantiated == false);
+  instantiated = true;
   initialized = false;
 }
 
-VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager()), showFPS(false) {
-  assert(instantiated == false);
-  instantiated = true;
-  mainSurface = nullptr;
-  initialized = false;
-  logger = loggerIn;
+void VideoManager::initSystem(Screen_t screenConfig){
+  currentScreenConfig = screenConfig;
+  
+  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) == -1){
+    ostringstream errorMsg;
+    errorMsg << "Unable to initialize SDL. Shutting down." << endl;
+    logger->log(errorMsg.str(), Logger::CERROR);
+    shutdown();
+  }
+  
+  Uint32 flags;
+  if(screenConfig.opengl){
+    throw CapEngineException("OpenGL not implemented");
+  }
+  else{
+    flags = 0;
+  }
+
+  m_pWindow = SDL_CreateWindow("CapEngine", SDL_WINDOWPOS_UNDEFINED,
+			       SDL_WINDOWPOS_UNDEFINED, screenConfig.width, screenConfig.height, flags);
+
+  if(m_pWindow == nullptr){
+    ostringstream errorStream;
+    errorStream << "Error creating window: " << SDL_GetError();
+    throw CapEngineException(errorStream.str());
+  }
+
+
+  // Now create the 2d Renderer if OpenGL is not being used
+  if( !screenConfig.opengl ){
+    m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
+    if(m_pRenderer == nullptr){
+      ostringstream errorStream;
+      errorStream << "Error creating renderer:  " << SDL_GetError();
+
+      throw CapEngineException(errorStream.str());
+    }
+    SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
+  }
 }
 
-Surface* VideoManager::loadImage(string filePath) const{
+
+Texture* VideoManager::loadImage(string filePath) const{
+  // Try to initialise SDL_Image
   int flags = IMG_INIT_JPG | IMG_INIT_PNG;
   int initted=IMG_Init(flags);
-
   if( (initted & flags) != flags) {
     ostringstream error_message;
     error_message <<"could not init SDL_Image" << endl;
@@ -44,103 +87,47 @@ Surface* VideoManager::loadImage(string filePath) const{
     throw CapEngineException(error_message.str());
   }
 
-
+  // Load Surface
   SDL_Surface* tempSurface = NULL;
-  SDL_Surface* optimizedSurface = NULL;
   tempSurface = IMG_Load(filePath.c_str());
-
+  if(tempSurface == nullptr){
+    ostringstream errorMsg;
+    errorMsg << "Unable to load surface " << filePath << " - " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
+  }
   ostringstream logString;
   logString << "Loaded surface from file "  << filePath;
   logger->log(logString.str(), Logger::CDEBUG);
 
-  if (tempSurface == NULL){
-    cerr << "Unable to load surface" << endl;
-    cerr << "SDL Error: " << SDL_GetError() << endl;
-    return tempSurface;
-  }
-
   setColorKey(tempSurface);
-  optimizedSurface = SDL_DisplayFormatAlpha(tempSurface);
-  if(optimizedSurface == 0){
-    cerr << "Unable to get optimized surface" << endl;
-    cerr << "SDL Error: " << SDL_GetError() << endl;
-    return tempSurface;
-  }
-  
-  SDL_FreeSurface(tempSurface);
-  
-  return optimizedSurface;
-  
-}
 
-void VideoManager::drawSurface(int x, int y, Surface* source, Rect* rect) const{
-  
-  SDL_Rect location;
-  location.x = x;
-  location.y = y;
-
-  SDL_BlitSurface(source, rect, mainSurface, &location);
-  
-}
-
-void VideoManager::drawSurface(Surface* source, Rect* srcRect, Rect* dstRect) const{
-
-  SDL_BlitSurface(source, srcRect, mainSurface, dstRect);
-  
-}
-
-
-void VideoManager::initSystem(Screen_t screenConfig){
-  mainSurface = NULL;
-
-  // initialise logger if necessary
-  if(logger == nullptr){
-    logger = new Logger();
-  }
-  
-  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) == -1){
-    cerr << "Unable to initialize SDL. Shutting down." << endl;
-    shutdown();
-  }
-  
-  Uint32 flags;
-  if(screenConfig.opengl){
-    flags = SDL_OPENGL | SDL_RESIZABLE;
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,        8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,      8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,       8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,      8);
- 
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,      16);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE,        32);
- 
-    // These cause error "Couldn't find matching GLX visual" 
-    // when calling SDL_SetVideoMode
-    //SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE,    8);
-    //SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE,    8);
-    //SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,    8);
-    //SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
- 
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  2);
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-  }
-  else{
-    flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ANYFORMAT | SDL_RESIZABLE;
-  }
-
-  mainSurface = SDL_SetVideoMode(screenConfig.width, screenConfig.height, screenConfig.pDepth, flags);
-  //mainSurface = SDL_SetVideoMode(screenConfig.width, screenConfig.height, screenConfig.pDepth, SDL_SWSURFACE);
-  if(mainSurface == NULL){
+  // Create Texture from Surface
+  SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, tempSurface);
+  if( texture == nullptr ){
     ostringstream errorMsg;
-    errorMsg << "Error initializing window: " << SDL_GetError() << endl;
-    logger->log(errorMsg.str(), Logger::CERROR);
-    shutdown();
+    errorMsg << "Unable to load texture from file " << filePath << " - " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
 
-  currentScreenConfig = screenConfig;
+  SDL_FreeSurface(tempSurface);
+  return texture;
+}
 
-  initialized = true;
+void VideoManager::drawTexture(int x, int y, Texture* texture, Rect* srcRect) const{
+  
+  SDL_Rect dstRect;
+  dstRect.x = x;
+  dstRect.y = y;
+
+  int result = SDL_RenderCopy(m_pRenderer, texture, srcRect, &dstRect);
+  if(result != 0){
+    logger->log("Unable to render texture", Logger::CERROR);
+  }
+  
+}
+
+void VideoManager::drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const{
+  SDL_RenderCopy(m_pRenderer, texture, srcRect, dstRect);
 }
 
 void VideoManager::shutdown(){
@@ -149,21 +136,32 @@ void VideoManager::shutdown(){
 }
 
 void VideoManager::drawScreen(){
+  // Clear Screen
+  SDL_RenderClear(m_pRenderer);
+
+  // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);
     int fontSize = 14;
     Surface* fpsSurface = up_fontManager->getTextSurface(ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
+    Texture* fpsTexture = SDL_CreateTextureFromSurface(m_pRenderer, fpsSurface);
+    SDL_FreeSurface(fpsSurface);
     
     int x = 15;
     int y = 15;
-    drawSurface(x, y, fpsSurface);
+    drawTexture(x, y, fpsTexture);
+    this->closeTexture(fpsTexture);
   }
+
+  // draw the screen
   if(currentScreenConfig.opengl){
-    SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(m_pWindow);
   }
   else{
-    SDL_Flip(mainSurface);
+    SDL_RenderPresent(m_pRenderer);
   }
+  
+  // Update fps variables
   Time currentTime;
   double elapsedTime = currentTime.subtractTime(&lastRenderTime);
   lastRenderTime = currentTime;
@@ -171,35 +169,51 @@ void VideoManager::drawScreen(){
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
-  *width = defaultScreen.width;
-  *height = defaultScreen.height;
+  *width = currentScreenConfig.width;
+  *height = currentScreenConfig.height;
 }
 
-//! get the width of given surface
+//! get the width of given texture
 /*!
-  \param surface
+  \param texture
 */
-real VideoManager::getSurfaceWidth(const Surface* surface) const{
-  CAP_THROW_NULL(surface, "surface passed to getSurfaceWidth is null");
-  return surface->w;
+real VideoManager::getTextureWidth(Texture* texture) const{
+  CAP_THROW_NULL(texture, "Texture is null");
+  int w;
+  int result = SDL_QueryTexture(texture, nullptr, nullptr, &w, nullptr);
+  if(result < 0){
+    ostringstream error;
+    error << "Unable to get texture width" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR);
+    throw CapEngineException(error.str());
+  }
+  return w;
 }
 
-//! get the height of given surface
+//! get the height of given texture
 /*!
-  \param surface
+  \param texture
  */
-real VideoManager::getSurfaceHeight(const Surface* surface) const{
-    CAP_THROW_NULL(surface, "surface passed to getSurfaceHeight is null");
-    return surface->h;
+real VideoManager::getTextureHeight(Texture* texture) const{
+    CAP_THROW_NULL(texture, "texture is null");
+    int h;
+    int result = SDL_QueryTexture(texture, nullptr, nullptr, nullptr, &h);
+    if(result < 0){
+      ostringstream error;
+      error << "Unable to get texture height" << endl << SDL_GetError();
+      logger->log(error.str(), Logger::CERROR);
+      throw CapEngineException(error.str());
+    }
+    return h;
 }
 
-//! close a surface openned by the VideoManager
+//! close a texture openned by the VideoManager
 /*!
-  \param surface
-  \li the surface to close
+  \param texture
+  \li the texture to close
  */
-void VideoManager::closeSurface(Surface* surface) const{
-  SDL_FreeSurface(surface);
+void VideoManager::closeTexture(Texture* texture) const{
+  SDL_DestroyTexture(texture);
 }
 
 //! Set the color key for the image
@@ -208,74 +222,27 @@ void VideoManager::closeSurface(Surface* surface) const{
 void VideoManager::setColorKey(Surface* surface) const{
   CAP_THROW_NULL(surface, "Cannot set color key on a null surface");
   
-  if(SDL_SetColorKey(surface, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(surface->format, 0, 0xFF, 0xFF)) == -1){
-    throw new CapEngineException("Error setting the color key of the surface");
+  if(SDL_SetColorKey(surface, SDL_TRUE | SDL_RLEACCEL, SDL_MapRGB(surface->format, 0, 0xFF, 0xFF)) == -1){
+    throw CapEngineException("Error setting the color key of the surface");
   }
 }
 
-Surface* VideoManager::createSurface(int width, int height){
-  // code taken from http://www.libsdl.org/docs/html/sdlcreatergbsurface.html
-  /* Create a 32-bit surface with the bytes of each pixel in R,G,B,A order,
-     as expected by OpenGL for textures */
-  SDL_Surface *surface;
-  Uint32 rmask, gmask, bmask, amask;
-
-  /* SDL interprets each pixel as a 32-bit number, so our masks must depend
-     on the endianness (byte order) of the machine */
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-  rmask = 0xff000000;
-  gmask = 0x00ff0000;
-  bmask = 0x0000ff00;
-  amask = 0x000000ff;
-#else
-  rmask = 0x000000ff;
-  gmask = 0x0000ff00;
-  bmask = 0x00ff0000;
-  amask = 0xff000000;
-#endif
-    
-  surface = SDL_CreateRGBSurface(SDL_HWSURFACE, width, height, 32,
-				 rmask, gmask, bmask, amask);
-  if(surface == NULL) {
-    fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
-    exit(1);
+Texture* VideoManager::createTexture(int width, int height){
+  SDL_Texture* texture = SDL_CreateTexture(m_pRenderer
+					   ,SDL_PIXELFORMAT_ARGB8888
+					   ,SDL_TEXTUREACCESS_STREAMING
+					   , width, height);
+  if (texture == nullptr){
+    ostringstream error;
+    error << "Error creating texture" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR);
+    throw CapEngineException(error.str());
   }
 
-  setColorKey(surface);
-
-  SDL_Surface* optimizedSurface = NULL;
-  optimizedSurface = SDL_DisplayFormat(surface);
-  if(optimizedSurface == 0){
-    cerr << "Unable to get optimized surface" << endl;
-    cerr << "SDL Error: " << SDL_GetError() << endl;
-    return surface;
-  }
-  
-  SDL_FreeSurface(surface);
-  
-  ostringstream logString;
-  logString << "Created new surface with dimensions " << width << "x" << height;
-  logger->log(logString.str(), Logger::CDEBUG);
-  
-  return optimizedSurface;
+  return texture;
 }
-
-void VideoManager::blitSurface(Surface& sourceSurface, int srcX, int srcY, int sourceWidth, int sourceHeight, Surface& destSurface, int x, int y){
-  SDL_Rect srcLocation;
-  srcLocation.x = srcX;
-  srcLocation.y = srcY;
-  srcLocation.w = sourceWidth;
-  srcLocation.h = sourceHeight;
-
-  SDL_Rect dstLocation;
-  dstLocation.x = x;
-  dstLocation.y = y;
-
-  SDL_BlitSurface(&sourceSurface, &srcLocation, &destSurface, &dstLocation);
-}
-
-void VideoManager::setReshapeFunc(void (*func)(int x, int y)){
-  reshapeFunc = func;
+void VideoManager::blitTextures(Texture* sourceTexture, int srcX, int srcY,  int sourceWidth, int sourceHeight, Texture* destTexture, int x, int y){
+  throw CapEngineException("Not implemented");
 }
 
  void VideoManager::callReshapeFunc(int w, int h){

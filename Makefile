@@ -92,7 +92,7 @@ tests:
 	cd test && $(MAKE)
 
 tags:
-	ctags -e -R . && ctags -e -R /usr/include/SDL -a
+	gtags
 
 install:
 	install -m 775 libcapengine.so /usr/lib/
