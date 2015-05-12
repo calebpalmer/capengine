@@ -28,14 +28,14 @@ namespace CapEngine{
     VideoManager* videoManager;
   public:
     std::string configFilepath;
-    std::string surfaceFilepath;
+    std::string textureFilepath;
     unsigned int tileCount;
     unsigned int tileWidth;
     unsigned int tileHeight;
     std::vector<Tile*> tiles;
     
   public:  // public functions
-    Surface* surface;
+    Texture* texture;
 
     ~TileSet();
     TileSet(const std::string& configPath, VideoManager* videoManagerIn = nullptr);

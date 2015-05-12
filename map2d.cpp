@@ -12,8 +12,8 @@ using namespace CapEngine;
 using namespace std;
 
 Map2D::~Map2D(){
-  if(surface != nullptr && videoManager != nullptr){
-    videoManager->closeSurface(surface);
+  if(texture != nullptr && videoManager != nullptr){
+    videoManager->closeTexture(texture);
   }
   vector<TileTup*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
@@ -85,12 +85,12 @@ Map2D::Map2D(const string mapConfigPath,  VideoManager* videoManagerIn) : tileSe
   configStream.close();
 
   if(videoManager != nullptr){
-    // load and draw surface
+    // load and draw texture
     if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
-    surface = videoManager->createSurface(width, height);
-    drawSurface();
+    texture = videoManager->createTexture(width, height);
+    drawTexture();
   }
   ostringstream logString;
   logString << "loaded map from " << mapConfigPath << endl
@@ -129,7 +129,7 @@ void Map2D::readTiles(ifstream& stream){
   }
 }
 
-void Map2D::drawSurface(){
+void Map2D::drawTexture(){
   unsigned int xRes, yRes = 0;
   if(videoManager->initialized == false){
     throw CapEngineException("VideoManager not initialized");
@@ -140,10 +140,10 @@ void Map2D::drawSurface(){
       xRes = 0;
       yRes += (*iter)->tile->height;
     }
-    videoManager->blitSurface(*(tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, *surface, xRes, yRes);
+    videoManager->blitTextures((tileSet->texture), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, texture, xRes, yRes);
     xRes += (*iter)->tile->width;
   }
-  logger.log("Drew consolidate map surface", Logger::CDEBUG);
+  logger.log("Drew consolidate map texture", Logger::CDEBUG);
 }
 
 string Map2D::toString(){

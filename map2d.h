@@ -23,7 +23,7 @@ namespace CapEngine{
     Map2D(const Map2D& map);
     Map2D& operator=(const Map2D& map);
     void readTiles(std::ifstream& stream);
-    void drawSurface();
+    void drawTexture();
     std::unique_ptr<Rectangle> getTileMBR(int index);
 
   public:
@@ -38,7 +38,7 @@ namespace CapEngine{
     };
 
     std::vector<TileTup*> tiles;
-    Surface* surface;
+    Texture* texture;
     unsigned int width;
     unsigned int height;
 

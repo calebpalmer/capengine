@@ -5,7 +5,7 @@ all: libcapengine.so
 include Makefile.defs
 
 #CAPEngine
-libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o xml_parser.o asset_manager.o
+libcapengine.so: Point2d.o Time.o VideoManager.o EventDispatcher.o CapEngine.h vector.o matrix.o collision.o fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o scanconvert.o xml_parser.o asset_manager.o mouse.o
 	$(CPP) $(CFLAGS) -o libcapengine.so Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o \
 	fontmanager.o capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
 	scanconvert.o xml_parser.o asset_manager.o mouse.o \
