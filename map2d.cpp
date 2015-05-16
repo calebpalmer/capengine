@@ -89,7 +89,6 @@ Map2D::Map2D(const string mapConfigPath,  VideoManager* videoManagerIn) : tileSe
     if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
-    texture = videoManager->createTexture(width, height);
     drawTexture();
   }
   ostringstream logString;
@@ -134,15 +133,18 @@ void Map2D::drawTexture(){
   if(videoManager->initialized == false){
     throw CapEngineException("VideoManager not initialized");
   }
+  Surface* surface = videoManager->createSurface(width, height);
+
   vector<TileTup*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
     if(xRes >= width){
       xRes = 0;
       yRes += (*iter)->tile->height;
     }
-    videoManager->blitTextures((tileSet->texture), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, texture, xRes, yRes);
+    videoManager->blitSurface((tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, surface, xRes, yRes);
     xRes += (*iter)->tile->width;
   }
+  texture = videoManager->createTextureFromSurface(surface);
   logger.log("Drew consolidate map texture", Logger::CDEBUG);
 }
 

@@ -75,6 +75,17 @@ void VideoManager::initSystem(Screen_t screenConfig){
   }
 }
 
+Texture* VideoManager::createTextureFromSurface(Surface* surface){
+  // Create Texture from Surface
+  SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, surface);
+  if( texture == nullptr ){
+    ostringstream errorMsg;
+    errorMsg << "Unable to load texture from surface " << " - " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
+  }
+
+  return texture;
+}
 
 Texture* VideoManager::loadImage(string filePath) const{
   // Try to initialise SDL_Image
@@ -241,9 +252,6 @@ Texture* VideoManager::createTexture(int width, int height){
 
   return texture;
 }
-void VideoManager::blitTextures(Texture* sourceTexture, int srcX, int srcY,  int sourceWidth, int sourceHeight, Texture* destTexture, int x, int y){
-  throw CapEngineException("Not implemented");
-}
 
  void VideoManager::callReshapeFunc(int w, int h){
    if(reshapeFunc == nullptr){
@@ -261,3 +269,100 @@ void VideoManager::displayFPS(bool on, const string& ttfFontPath, Uint8 r, Uint8
   this->fpsColourG = g;
   this->fpsColourB = b;
 }
+
+Surface* VideoManager::loadSurface(string filePath) const{
+  int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+  int initted=IMG_Init(flags);
+
+  if( (initted & flags) != flags) {
+    ostringstream error_message;
+    error_message <<"could not init SDL_Image" << endl;
+    error_message<<"Reason: " << IMG_GetError() << endl;
+    throw CapEngineException(error_message.str());
+  }
+
+
+  SDL_Surface* tempSurface = NULL;
+  tempSurface = IMG_Load(filePath.c_str());
+
+  ostringstream logString;
+  logString << "Loaded surface from file "  << filePath;
+  logger->log(logString.str(), Logger::CDEBUG);
+
+  if (tempSurface == NULL){
+    cerr << "Unable to load surface" << endl;
+    cerr << "SDL Error: " << SDL_GetError() << endl;
+    return tempSurface;
+  }
+
+  setColorKey(tempSurface);
+  
+  return tempSurface;
+  
+}
+
+Surface* VideoManager::createSurface(int width, int height){
+  // code taken from http://www.libsdl.org/docs/html/sdlcreatergbsurface.html
+  /* Create a 32-bit surface with the bytes of each pixel in R,G,B,A order,
+     as expected by OpenGL for textures */
+  SDL_Surface *surface;
+  Uint32 rmask, gmask, bmask, amask;
+
+  /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+     on the endianness (byte order) of the machine */
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  rmask = 0xff000000;
+  gmask = 0x00ff0000;
+  bmask = 0x0000ff00;
+  amask = 0x000000ff;
+#else
+  rmask = 0x000000ff;
+  gmask = 0x0000ff00;
+  bmask = 0x00ff0000;
+  amask = 0xff000000;
+#endif
+    
+  surface = SDL_CreateRGBSurface(0, width, height, 32,
+				 rmask, gmask, bmask, amask);
+  if(surface == NULL) {
+    fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
+    exit(1);
+  }
+
+  setColorKey(surface);
+
+  ostringstream logString;
+  logString << "Created new surface with dimensions " << width << "x" << height;
+  logger->log(logString.str(), Logger::CDEBUG);
+  
+  return surface;
+}
+
+void VideoManager::closeSurface(Surface* surface) const{
+  SDL_FreeSurface(surface);
+}
+
+void VideoManager::blitSurface(Surface* sourceSurface, int srcX, int srcY, int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y){
+  SDL_Rect srcLocation;
+  srcLocation.x = srcX;
+  srcLocation.y = srcY;
+  srcLocation.w = sourceWidth;
+  srcLocation.h = sourceHeight;
+
+  SDL_Rect dstLocation;
+  dstLocation.x = x;
+  dstLocation.y = y;
+
+  SDL_BlitSurface(sourceSurface, &srcLocation, destSurface, &dstLocation);
+}
+
+real VideoManager::getSurfaceWidth(const Surface* surface) const{
+  CAP_THROW_NULL(surface, "surface passed to getSurfaceWidth is null");
+  return surface->w;
+}
+
+real VideoManager::getSurfaceHeight(const Surface* surface) const{
+    CAP_THROW_NULL(surface, "surface passed to getSurfaceHeight is null");
+    return surface->h;
+}
+

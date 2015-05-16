@@ -38,17 +38,26 @@ namespace CapEngine {
     VideoManager();    
     VideoManager(Logger* loggerIn);
     void initSystem(Screen_t screenConfig);
+    void shutdown();
+    void drawScreen();
+    void getWindowResolution(int* width, int* height) const;
+    // Surfaces
+    Surface* loadSurface(std::string fileName) const;
+    Surface* createSurface(int width, int height);
+    void closeSurface(Surface* surface) const;
+    void blitSurface(Surface* sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y);
+    real getSurfaceWidth(const Surface* surface) const;
+    real getSurfaceHeight(const Surface* surface) const;
+    // Textures
     Texture* loadImage(std::string fileName) const;
     void closeTexture(Texture* texture) const;
     void drawTexture(int x, int y, Texture* texture, Rect* srcRect=nullptr) const;
     void drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const;
-    void shutdown();
-    void drawScreen();
-    void getWindowResolution(int* width, int* height) const;
     real getTextureWidth(Texture* texture) const;
     real getTextureHeight(Texture* texture) const;
     Texture* createTexture(int width, int height);
-    void blitTextures(Texture* sourceTexture, int srcX, int srcY,  int sourceWidth, int sourceHeight, Texture* destTexture, int x, int y);
+    Texture* createTextureFromSurface(Surface* surface); // TODO
+
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
     void callReshapeFunc(int w, int h);

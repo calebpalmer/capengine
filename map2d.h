@@ -19,7 +19,6 @@ namespace CapEngine{
     Logger logger;
     VideoManager* videoManager;
     
-
     Map2D(const Map2D& map);
     Map2D& operator=(const Map2D& map);
     void readTiles(std::ifstream& stream);
@@ -31,21 +30,20 @@ namespace CapEngine{
       Tile* tile;
       unsigned int index;
     };
-
     struct CollisionTup{
       Tile* tile;
       CollisionType collisionType;
     };
+    Map2D(const std::string mapConfigPath, VideoManager* videoManagerIn = nullptr);
+    ~Map2D();
+    std::string toString();
+    std::vector<CollisionTup> getCollisions(const Rectangle& mbr);
 
     std::vector<TileTup*> tiles;
     Texture* texture;
     unsigned int width;
     unsigned int height;
 
-    Map2D(const std::string mapConfigPath, VideoManager* videoManagerIn = nullptr);
-    ~Map2D();
-    std::string toString();
-    std::vector<CollisionTup> getCollisions(const Rectangle& mbr);
     
   };
 

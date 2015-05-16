@@ -11,8 +11,8 @@ using namespace CapEngine;
 using namespace std;
 
 TileSet::~TileSet(){
-  if(texture != nullptr){
-    videoManager->closeTexture(texture);
+  if(surface != nullptr){
+    videoManager->closeSurface(surface);
   }
   vector<Tile*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
@@ -47,7 +47,7 @@ TileSet::TileSet(const string& configPath, VideoManager* videoManagerIn) {
     string parameter = line.substr(0, position);
     string value = line.substr(position + 1,line.size() - position + 1);
     if(parameter == "tileset_path"){
-      this->textureFilepath = value;
+      this->surfaceFilepath = value;
     }
     else if(parameter == "tile_count"){
       stringstream temp(value);
@@ -80,14 +80,14 @@ TileSet::TileSet(const string& configPath, VideoManager* videoManagerIn) {
     tiles.push_back(&tile);
   }
 
-  //// Load texture
+  //// Load surface
   videoManager = videoManagerIn;
   if(videoManager){
     if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
   
-    texture = videoManager->loadImage(textureFilepath);
+    surface = videoManager->loadSurface(surfaceFilepath);
   }
   validate();
   configIn.close();
@@ -175,8 +175,8 @@ void TileSet::validate(){
   if(tileCount != tiles.size()){
     throw CapEngineException("Tiles read does not equal declared tile count");
   }
-  /*if(texture == nullptr){
-    throw CapEngineException("Texture not loaded");
+  /*if(surface == nullptr){
+    throw CapEngineException("Surface not loaded");
     }*/
 }
 

@@ -27,24 +27,24 @@ namespace CapEngine{
   class TileSet {
     VideoManager* videoManager;
   public:
-    std::string configFilepath;
-    std::string textureFilepath;
-    unsigned int tileCount;
-    unsigned int tileWidth;
-    unsigned int tileHeight;
-    std::vector<Tile*> tiles;
-    
-  public:  // public functions
-    Texture* texture;
-
     ~TileSet();
     TileSet(const std::string& configPath, VideoManager* videoManagerIn = nullptr);
     bool tileExists(unsigned int index);
     Tile& getTile(unsigned int index);
+
+    std::string configFilepath;
+    std::string surfaceFilepath;
+    unsigned int tileCount;
+    unsigned int tileWidth;
+    unsigned int tileHeight;
+    std::vector<Tile*> tiles;
+    Surface* surface;
       
-  private:  // private functions
-      Tile& parseTile(const std::string& line);
-      void validate();
+  private:
+    TileSet(const TileSet&);
+    TileSet& operator=(TileSet);
+    Tile& parseTile(const std::string& line);
+    void validate();
     };
 }
 
