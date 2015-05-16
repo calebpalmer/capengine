@@ -21,6 +21,7 @@ namespace CapEngine {
     int width;
     int height;
     int pDepth;
+    bool fullScreen;
     bool opengl;
   };
 
