@@ -10,20 +10,26 @@ TextButton::TextButton(string text, string font, int fontSize, Vector position)
 {
   // get surface
   FontManager fontManager;
-  m_pTextSurfaceInactive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xFF, 0xFF, 0xFF);
-  m_pTextSurfaceActive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xBA, 0xBA, 0xBA);
+  Surface* textSurfaceInactive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xFF, 0xFF, 0xFF);
+  m_pTextTextureInactive = Locator::videoManager->createTextureFromSurface(textSurfaceInactive);
+  Locator::videoManager->closeSurface(textSurfaceInactive);
+  
+  Surface* textSurfaceActive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xBA, 0xBA, 0xBA);
+  m_pTextTextureActive = Locator::videoManager->createTextureFromSurface(textSurfaceActive);
+  Locator::videoManager->closeSurface(textSurfaceActive);
+  
   // set width and height
 
-  m_width = Locator::videoManager->getSurfaceWidth(m_pTextSurfaceInactive);
-  m_height = Locator::videoManager->getSurfaceHeight(m_pTextSurfaceInactive);
+  m_width = Locator::videoManager->getTextureWidth(m_pTextTextureInactive);
+  m_height = Locator::videoManager->getTextureHeight(m_pTextTextureInactive);
 
   Locator::eventDispatcher->subscribe(this, mouseEvent);
 }
 
 TextButton::~TextButton(){
   // free surfaces
-  Locator::videoManager->closeSurface(m_pTextSurfaceActive);
-  Locator::videoManager->closeSurface(m_pTextSurfaceInactive);
+  Locator::videoManager->closeTexture(m_pTextTextureActive);
+  Locator::videoManager->closeTexture(m_pTextTextureInactive);
   Locator::eventDispatcher->unsubscribe(this);
 }
 
@@ -65,11 +71,11 @@ void TextButton::render() {
   srcRect.h = m_height;
   // if flag is set,
   if(m_selected){
-    Locator::videoManager->drawSurface(m_pTextSurfaceActive, &srcRect, &destRect);
+    Locator::videoManager->drawTexture(m_pTextTextureActive, &srcRect, &destRect);
     }
   // if flag is not set
   else{
-    Locator::videoManager->drawSurface(m_pTextSurfaceInactive, &srcRect, &destRect);
+    Locator::videoManager->drawTexture(m_pTextTextureInactive, &srcRect, &destRect);
   }
 }
 

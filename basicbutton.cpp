@@ -1,6 +1,5 @@
 #include "basicbutton.h"
 #include "locator.h"
-#include "asset_constants.h"
 
 using namespace std;
 using namespace CapEngine;

@@ -39,6 +39,6 @@
 #include "locator.h"
 #include "uiobject.h"
 #include "button.h"
-#include "basicbutton.h"
+#include "textbutton.h"
 
 #endif
