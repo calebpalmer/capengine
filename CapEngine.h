@@ -36,5 +36,6 @@
 #include "scanconvert.h"
 #include "asset_manager.h"
 #include "xml_parser.h"
+#include "locator.h"
 
 #endif
