@@ -6,7 +6,7 @@ include Makefile.defs
 
 OBJECTS=Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o fontmanager.o \
 			capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
-			scanconvert.o xml_parser.o asset_manager.o mouse.o locator.o
+			scanconvert.o xml_parser.o asset_manager.o mouse.o locator.o basicbutton.o
 
 #CAPEngine
 libcapengine.so: $(OBJECTS)

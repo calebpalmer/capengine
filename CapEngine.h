@@ -37,5 +37,8 @@
 #include "asset_manager.h"
 #include "xml_parser.h"
 #include "locator.h"
+#include "uiobject.h"
+#include "button.h"
+#include "basicbutton.h"
 
 #endif
