@@ -40,5 +40,11 @@
 #include "uiobject.h"
 #include "button.h"
 #include "textbutton.h"
+#include "gameobject.h"
+#include "gamestate.h"
+#include "null_custom_component.h"
+#include "null_input_component.h"
+#include "null_graphics_component.h"
+#include "null_physics_component.h"
 
 #endif
