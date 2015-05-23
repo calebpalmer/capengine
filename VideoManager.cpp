@@ -38,7 +38,7 @@ void VideoManager::initSystem(Screen_t screenConfig){
   currentScreenConfig = screenConfig;
   Uint32 flags = 0;
   
-  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO ) == -1){
+  if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
     ostringstream errorMsg;
     errorMsg << "Unable to initialize SDL. Shutting down." << endl;
     logger->log(errorMsg.str(), Logger::CERROR);
