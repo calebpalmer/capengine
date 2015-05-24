@@ -396,3 +396,12 @@ void VideoManager::loadControllerMaps(){
     logger->log(error.str(), Logger::CWARNING);
   }
 }
+
+void VideoManager::loadControllerMapFromFile(std::string path){
+  int result = SDL_GameControllerAddMappingsFromFile(path.c_str());
+  if (result != 0){
+    ostringstream error;
+    error << "Error adding controller mappings from file " << path << ": " << SDL_GetError();
+    logger->log(error.str(), Logger::CWARNING);
+  }
+}

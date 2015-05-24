@@ -60,6 +60,9 @@ namespace CapEngine {
     void callReshapeFunc(int w, int h);
     void displayFPS(bool on, const std::string& ttfFontPath="", Uint8 r = 0, Uint8 g = 0, Uint8 b = 0);
 
+    // input
+    void loadControllerMapFromFile(std::string filePath);
+
     bool initialized;
 
   protected:
