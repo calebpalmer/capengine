@@ -8,6 +8,7 @@ namespace CapEngine{
   bool fileExists(const std::string& filepath);
   void setCurrentDir(const std::string& directory);
   std::string getCurrentDir();
+  std::string getCurrentExecutableDir();
   std::string stripPath(const std::string& path);
 }
 

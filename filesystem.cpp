@@ -51,6 +51,27 @@ string CapEngine::getCurrentDir(){
   return strCurdir;
 }
 
+string CapEngine::getCurrentExecutableDir(){
+  string strCurdir;
+#ifdef UNIX
+  //change dir code here
+  const ssize_t buffsize = 255;
+  char buffer[buffsize];
+  char link[] = "/proc/self/exe";
+  ssize_t charsRead = readlink(link, buffer, buffsize);
+  if(charsRead < buffsize and charsRead > 0){
+    buffer[charsRead] = '\0';
+  }
+  strCurdir = buffer;
+#endif
+  
+#ifdef WIN
+  //change dir code here
+#endif
+  
+  return strCurdir;
+}
+
 string CapEngine::stripPath(const string& path){
   char pathSeparator = '/';
 #ifdef WIN

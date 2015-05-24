@@ -1,5 +1,5 @@
 #ifndef TIMESTEP_H
-#define TIMESTEP
+#define TIMESTEP_H
 
 #include "Time.h"
 #include "captypes.h"

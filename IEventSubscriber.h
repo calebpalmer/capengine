@@ -1,6 +1,8 @@
 #ifndef IEVENTSUBSCRIBER_H
 #define IEVENTSUBSCRIBER_H
 
+#include <SDL2/SDL.h>
+
 #include "Time.h"
 
 //@brief - Interface for subscribing to EventManager
