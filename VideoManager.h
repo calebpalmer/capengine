@@ -31,10 +31,6 @@ namespace CapEngine {
 
 
   class VideoManager {
-    // private for singleton
-    VideoManager(const VideoManager& videoManager);
-    VideoManager& operator=(const VideoManager& videoManager);
-
   public:
     VideoManager();    
     VideoManager(Logger* loggerIn);
@@ -68,8 +64,14 @@ namespace CapEngine {
 
   protected:
     void setColorKey(Surface* surface) const;
+    void loadControllerMaps();
 
   private:
+    // private for singleton
+    VideoManager(const VideoManager& videoManager);
+    VideoManager& operator=(const VideoManager& videoManager);
+
+
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
     Logger* logger;

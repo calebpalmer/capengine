@@ -386,3 +386,13 @@ real VideoManager::getSurfaceHeight(const Surface* surface) const{
     return surface->h;
 }
 
+void VideoManager::loadControllerMaps(){
+  // generated for wii u pro controller using antimicro
+  const char mapping[] = "050000007e0500003003000001000000,Nintendo Wii Remote Pro Controller,platform:Linux,a:b0,b:b0,x:b2,y:b3,back:b8,start:b9,guide:b10,leftshoulder:b4,rightshoulder:b5,leftstick:b11,rightstick:b12,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,dpup:b13,dpleft:b15,dpdown:b14,dpright:b16,";
+  int result = SDL_GameControllerAddMapping(mapping);
+  if (result != 0){
+    ostringstream error;
+    error << "Unable to add controller mapping: " << SDL_GetError();
+    logger->log(error.str(), Logger::CWARNING);
+  }
+}
