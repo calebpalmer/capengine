@@ -36,6 +36,7 @@ namespace CapEngine {
     VideoManager(Logger* loggerIn);
     void initSystem(Screen_t screenConfig);
     void shutdown();
+    void clearScreen();
     void drawScreen();
     void getWindowResolution(int* width, int* height) const;
     // Surfaces

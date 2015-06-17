@@ -11,21 +11,20 @@ namespace CapEngine {
     static bool instantiated;
     std::ostream* outputStream;
 
-    Logger(const Logger& logger);
-    Logger& operator=(const Logger& logger);
     
   public:
     enum LogLevel {
+      CNONE = 0,
       CDEBUG,
       CWARNING,
       CERROR,
-      CNONE,
     };
     
     LogLevel currentLevel;
 
     Logger();
     ~Logger();
+
     void log(const std::string& message, LogLevel level);
     void setOutput(std::ostream& stream);
     
@@ -33,6 +32,8 @@ namespace CapEngine {
     std::string getLevelDescription(LogLevel level);
     
  };
+
+
   
 }
 

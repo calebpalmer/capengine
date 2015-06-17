@@ -1,4 +1,5 @@
 #include "soundplayer.h"
+#include "locator.h"
 #include <iostream>
 #include <sstream>
 #include <assert.h>
@@ -9,7 +10,7 @@ using namespace std;
 
 CapEngine::SoundPlayer* CapEngine::SoundPlayer::instance;
 
-SoundPlayer::SoundPlayer(){
+SoundPlayer::SoundPlayer(): idCounter(0) {
   SDL_AudioSpec targetFormat;
   memset(&targetFormat, 0, sizeof(SDL_AudioSpec));
   memset(&audioFormat, 0, sizeof(SDL_AudioSpec));
@@ -25,10 +26,14 @@ SoundPlayer::SoundPlayer(){
     throw new CapEngineException(errorMsg.str());
   }
 
-  // cout << "audio device format openned" << endl
-  //      << "frequency: " << audioFormat.freq << endl
-  //      << "channels: " << audioFormat.channels << endl
-  //      << "format: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16") << endl;
+  SDL_PauseAudio(UNPAUSE);
+
+  ostringstream logMsg;
+  logMsg << "audio device format opened" << endl
+	 << "frequency: " << audioFormat.freq << endl
+	 << "channels: " << audioFormat.channels << endl
+	 << "format: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
+  Locator::logger->log(logMsg.str(), Logger::CDEBUG);
 
 }
 
@@ -58,22 +63,24 @@ void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len){
   SoundCollection& sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
   if(sounds.size() <= 0)
     return;
-  SoundCollectionIter iter;
+  // SoundCollectionIter iter;
   Uint32 amount, position;
-  for(iter = sounds.begin(); iter != sounds.end(); iter++){
-    if(((*iter)->pcm->currentPosition() + len) > (*iter)->pcm->getLength()){
-      amount = (*iter)->pcm->getLength() - (*iter)->pcm->currentPosition();
+
+  for(auto& i: sounds){
+    if( (i->pcm->currentPosition() + len) > i->pcm->getLength() ){
+      amount = i->pcm->getLength() - i->pcm->currentPosition();
     }
     else{
       amount = len;
     }
 
-    position = (*iter)->pcm->currentPosition();
-    Uint8* bufStart = &((*iter)->pcm->getBuf())[position];
+    position = i->pcm->currentPosition();
+    Uint8* bufStart = &(i->pcm->getBuf())[position];
     SDL_MixAudio(stream, bufStart, amount, SDL_MIX_MAXVOLUME);
     
-    (*iter)->pcm->incrementPosition(amount);
+    i->pcm->incrementPosition(amount);
   }
+  
 }
 
 long SoundPlayer::addSound(PCM* sound, bool repeat){
@@ -107,19 +114,21 @@ void SoundPlayer::setState(int state){
  */
 void SoundPlayer::cleanSounds(){
   SoundCollectionIter iter;
-  iter = sounds.begin();
-  while(iter != sounds.end()){
+   iter = sounds.begin();
+
+   // I don't think this iteration is safe because deletes are occurring.
+   while(iter != sounds.end()){
     if(*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())){
       if(*iter != nullptr && (*iter)->repeat == false){
-	delete ((*iter)->pcm);
-	delete *iter;
-	iter = sounds.erase(iter);
+  	delete ((*iter)->pcm);
+  	delete *iter;
+  	iter = sounds.erase(iter);
       }
       else{
-	// if not null, set position back to beginning
-	if(*iter != nullptr){
-	  (*iter)->pcm->resetPosition();
-	}
+  	// if not null, set position back to beginning
+  	if(*iter != nullptr){
+  	  (*iter)->pcm->resetPosition();
+  	}
       }
     }
     else{

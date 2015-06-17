@@ -19,6 +19,7 @@ class Locator{
   static CapEngine::Mouse* mouse;
   static CapEngine::AssetManager* assetManager;
   static CapEngine::EventDispatcher* eventDispatcher;
+
 };
 
 #endif

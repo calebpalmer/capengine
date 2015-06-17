@@ -51,7 +51,7 @@ string CapEngine::getCurrentDir(){
   return strCurdir;
 }
 
-string CapEngine::getCurrentExecutableDir(){
+string CapEngine::getCurrentExecutablePath(){
   string strCurdir;
 #ifdef UNIX
   //change dir code here

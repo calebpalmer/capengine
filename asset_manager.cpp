@@ -59,7 +59,7 @@ void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeigh
 
 void AssetManager::parseAssetFile(XmlParser& parser){
   // get Images nodes at /assets/images/image
- vector<XmlNode> images = parser.getNodes("/assets/images/image");
+ vector<XmlNode> images = parser.getNodes("/assets/textures/texture");
   auto imageIter = images.begin();
   for( ; imageIter != images.end(); imageIter++){
     string id = parser.getAttribute(*imageIter, "id");
@@ -249,9 +249,15 @@ void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
   
 }
 
-void AssetManager::playSound(int id, bool repeat){
+long AssetManager::playSound(int id, bool repeat){
     // TODO implement repeat functionality
     Sound* sound = getSound(id); 
     unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
-    mSoundPlayer.addSound(upTempPCM.release(), repeat);
+    long soundID = mSoundPlayer.addSound(upTempPCM.release(), repeat);
+    return soundID;
 }
+
+void AssetManager::stopSound(int id){
+  mSoundPlayer.deleteSound(id);
+}
+

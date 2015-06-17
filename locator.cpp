@@ -1,4 +1,7 @@
 #include "locator.h"
+#include "filesystem.h"
+
+using namespace CapEngine;
 
 CapEngine::VideoManager* Locator::videoManager = nullptr;
 CapEngine::Logger* Locator::logger = nullptr;

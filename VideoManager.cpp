@@ -158,7 +158,7 @@ void VideoManager::shutdown(){
   instantiated = false;
 }
 
-void VideoManager::drawScreen(){
+void VideoManager::clearScreen(){
   // Clear Screen
   SDL_RenderClear(m_pRenderer);
 
@@ -169,7 +169,9 @@ void VideoManager::drawScreen(){
   rectangle.w = currentScreenConfig.width;
   rectangle.h = currentScreenConfig.height;
   SDL_RenderFillRect(m_pRenderer, &rectangle);
+}
 
+void VideoManager::drawScreen(){
   // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <iostream>
 #include "soundplayer.h"
+#include "locator.h"
 #include "CapEngineException.h"
 
 using namespace std;
@@ -34,6 +35,9 @@ PCM::PCM(const string filePath) : position(0) {
   convertToDeviceFormat(sndSpec);
 
   sf_close(sndFile);
+  ostringstream msg;
+  msg << "Successfully loaded sound from " << filePath;
+  Locator::logger->log(msg.str(), Logger::CDEBUG);
 }
 
 PCM::~PCM(){

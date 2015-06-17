@@ -38,7 +38,7 @@ namespace CapEngine{
     Image* getImage(int id); 
     int getImageWidth(int id);
     int getImageHeight(int id);
-    void playSound(int id, bool repeat=false);
+    long playSound(int id, bool repeat=false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
     Sound* getSound(int id);
