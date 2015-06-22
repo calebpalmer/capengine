@@ -12,7 +12,7 @@ namespace CapEngine {
    */
   FontManager::FontManager(){
     if (TTF_Init() != 0){
-      throw new CapEngineException("Unable to initialise SDL_ttf");
+      throw CapEngineException("Unable to initialise SDL_ttf");
     }
   }
   
@@ -33,7 +33,7 @@ namespace CapEngine {
     if(fontFace == 0){
       string ttf_error = TTF_GetError();
       TTF_CloseFont(fontFace);
-      throw new CapEngineException("Unable to open font: " + ttf_error);
+      throw CapEngineException("Unable to open font: " + ttf_error);
       return nullptr;
     }
 
@@ -47,7 +47,7 @@ namespace CapEngine {
     if(fontSurface == 0){
       string ttf_error = TTF_GetError();
       TTF_CloseFont(fontFace);
-      throw new CapEngineException("Unable to get text surface: " + ttf_error);
+      throw CapEngineException("Unable to get text surface: " + ttf_error);
     }
 
     TTF_CloseFont(fontFace);

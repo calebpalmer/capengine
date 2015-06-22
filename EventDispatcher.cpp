@@ -27,7 +27,7 @@ EventDispatcher::~EventDispatcher(){
 
 void EventDispatcher::subscribe(IEventSubscriber* subscriber_in, int subscriptionMask){
   if(subscriber_in == NULL){
-    throw new CapEngineException("Error registering event subscriber:  Event subcriber is null");
+    throw CapEngineException("Error registering event subscriber:  Event subcriber is null");
   }
 
   if(subscriptionMask == 0x00){

@@ -22,11 +22,11 @@ PCM::PCM(const string filePath) : position(0) {
     ostringstream msg;
     msg << "Unable to open sound file"
 	<< endl << sf_strerror(sndFile);
-    throw new CapEngineException(msg.str());
+    throw CapEngineException(msg.str());
   }
 
   if((sndInfo.format & SF_FORMAT_PCM_U8) == 0 && (sndInfo.format * SF_FORMAT_PCM_16 == 0)){
-    throw new CapEngineException("Sound file is not U8 or S16 PCM format");
+    throw CapEngineException("Sound file is not U8 or S16 PCM format");
   }
 
   copySndFileToBuffer(sndFile, sndInfo);
@@ -64,7 +64,7 @@ void PCM::copySndFileToBuffer(SNDFILE* sndFile, SF_INFO sndInfo){
   buf.reset((short*)malloc(bufSize));
   size_t items_read = sf_read_short(sndFile, tempBuf.get(), bufSize / sizeof(short));
   if(items_read != bufSize / sizeof(short)){
-    throw new CapEngineException("Error reading items from sound file");
+    throw CapEngineException("Error reading items from sound file");
   }
 
   if((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8){
@@ -115,7 +115,7 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec){
 			      , sndSpec.freq, obtainedSpec.format
 			      , obtainedSpec.channels, obtainedSpec.freq);
   if(ret < 0){
-    throw new CapEngineException("Unable to build audio converter");    
+    throw CapEngineException("Unable to build audio converter");    
   }
 
     cvt.len = this->length;
@@ -125,7 +125,7 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec){
     memcpy(cvt.buf, buf.get(), cvt.len);
 
     if(SDL_ConvertAudio(&cvt) < 0){
-      throw new CapEngineException("Unable to convert to device format");
+      throw CapEngineException("Unable to convert to device format");
     }
 
     buf.reset((short*)cvt.buf);

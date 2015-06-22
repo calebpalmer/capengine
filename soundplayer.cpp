@@ -23,10 +23,8 @@ SoundPlayer::SoundPlayer(): idCounter(0) {
   if ( SDL_OpenAudio(&targetFormat, &this->audioFormat ) < 0 ){
     ostringstream errorMsg;
     errorMsg << "Couldn't open audio: " << SDL_GetError();
-    throw new CapEngineException(errorMsg.str());
+    throw CapEngineException(errorMsg.str());
   }
-
-  SDL_PauseAudio(UNPAUSE);
 
   ostringstream logMsg;
   logMsg << "audio device format opened" << endl

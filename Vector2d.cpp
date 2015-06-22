@@ -148,7 +148,7 @@ real Vector2d::dotProduct(const Vector2d& vec) const{
  */
 Vector2d* Vector2d::crossProduct(const Vector2d& vec) const{
   //makes no sense to calculate crossProduct for 2d vectors
-  throw new CapEngineException("Tried to calculate cross product of 2d vector");
+  throw CapEngineException("Tried to calculate cross product of 2d vector");
 }
 
 /*
@@ -169,7 +169,7 @@ real Vector2d::angle(const Vector2d& vec) const{
 /*!
  */
 Vector2d* Vector2d::surfaceNormal(const Vector2d& vec) const{
-  throw new CapEngineException("Tried to calculate the surface normal of 2d vectors");
+  throw CapEngineException("Tried to calculate the surface normal of 2d vectors");
 }
 
 //! return a PolarVector version of current vector

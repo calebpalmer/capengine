@@ -36,7 +36,7 @@ namespace CapEngine{
     ~SoundPlayer();
     long addSound(PCM* sound, bool repeat=false);
     void cleanSounds();
-    void setState(int state);
+    void setState(int state); // should change this to take an enum
     SoundCollection& getSoundCollection();
     static SoundPlayer& getSoundPlayer();
     uint8_t getSilence() const;
