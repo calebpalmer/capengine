@@ -12,18 +12,11 @@ bool EventDispatcher::instantiated = false;
 EventDispatcher::EventDispatcher(VideoManager* videoManagerIn, int queuedelay) : queueDelayCount(queuedelay) {
   assert(instantiated == false);
   instantiated = true;
-  unique_ptr<vector<subscription> > subscribersPtr(new vector<subscription>());
-  unique_ptr<vector<SDL_Event*> > eventQueuePtr(new vector<SDL_Event*>());
-  subscribers = subscribersPtr.release();
-  eventQueue = eventQueuePtr.release();
   assert(videoManagerIn != nullptr);
   videoManager = videoManagerIn;
 }
 
-EventDispatcher::~EventDispatcher(){
-  delete subscribers;
-  delete eventQueue;
-}
+EventDispatcher::~EventDispatcher(){ }
 
 void EventDispatcher::subscribe(IEventSubscriber* subscriber_in, int subscriptionMask){
   if(subscriber_in == NULL){
@@ -37,17 +30,17 @@ void EventDispatcher::subscribe(IEventSubscriber* subscriber_in, int subscriptio
   subscription newSubscription;
   newSubscription.subscriber = subscriber_in;
   newSubscription.subscriptionType = subscriptionMask;
-  subscribers->push_back(newSubscription);
+  subscribers.push_back(newSubscription);
 }
 
 void EventDispatcher::enqueue(SDL_Event* event){
-  eventQueue->push_back(event);
+  eventQueue.push_back(event);
 }
 
 void EventDispatcher::flushQueue(){
-  vector<subscription>::iterator subscriberIter = subscribers->begin();
-  vector<SDL_Event*>::iterator eventIter = eventQueue->begin();
-  while(eventIter != eventQueue->end()){
+  vector<subscription>::iterator subscriberIter = subscribers.begin();
+  vector<SDL_Event*>::iterator eventIter = eventQueue.begin();
+  while(eventIter != eventQueue.end()){
     SDL_Event* curEvent = *eventIter;
 
     // Call the reshape function if SDL is being used
@@ -56,7 +49,7 @@ void EventDispatcher::flushQueue(){
       int h = ((SDL_WindowEvent*)curEvent)->data2;
       videoManager->callReshapeFunc(w, h); 
     }
-    while(subscriberIter != subscribers->end()){
+    while(subscriberIter != subscribers.end()){
       subscription* curSubscription = &(*subscriberIter);
       // check to see if subscriber subscribes to current event types
       switch(curEvent->type){
@@ -97,12 +90,12 @@ void EventDispatcher::flushQueue(){
     eventIter++;
     delete curEvent;
   }
-  //eventQueue->erase(eventQueue->begin(), eventQueue->end());
-  eventQueue->clear();
+  //eventQueue.erase(eventQueue.begin(), eventQueue.end());
+  eventQueue.clear();
 }
 
 bool EventDispatcher::hasEvents(){
-  if(eventQueue->size() > 0){
+  if(eventQueue.size() > 0){
     return true;
   }
   else{
@@ -124,10 +117,10 @@ SDL_Event* EventDispatcher::copyEvent(SDL_Event* event){
 }
 
 void EventDispatcher::unsubscribe(IEventSubscriber* subscriber_in){
-  auto i = subscribers->begin();
-  while(i != subscribers->end()){
+  auto i = subscribers.begin();
+  while(i != subscribers.end()){
     if(i->subscriber == subscriber_in){
-      i = subscribers->erase(i);
+      i = subscribers.erase(i);
     }
     else{
       i++;

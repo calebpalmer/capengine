@@ -20,15 +20,16 @@
        IEventSubscriber* subscriber;
      } subscription;
 
-     static bool instantiated;
-     std::vector<subscription>* subscribers;
-     std::vector<SDL_Event*>* eventQueue;
-     VideoManager* videoManager;
-     int queueDelayCount;    
-
      EventDispatcher(const EventDispatcher&){}
      EventDispatcher& operator=(const EventDispatcher&){return *this;}
      SDL_Event* copyEvent(SDL_Event* event);
+
+     static bool instantiated;
+     std::vector<subscription> subscribers;
+     std::vector<SDL_Event*> eventQueue;
+     VideoManager* videoManager;
+     int queueDelayCount;    
+
 
    public:
      EventDispatcher(VideoManager* videoManager, int queueDelay = 0);
