@@ -32,11 +32,10 @@ TextButton::~TextButton(){
   Locator::videoManager->closeTexture(m_pTextTextureInactive);
   Locator::eventDispatcher->unsubscribe(this);
 }
-
-void TextButton::receiveEvent(const SDL_Event* event, CapEngine::Time* time){
-  if(event->type == SDL_MOUSEBUTTONDOWN || event->type == SDL_MOUSEBUTTONUP){
+void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
+  if(event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP){
     if(mouseInButton(Vector(Locator::mouse->getx(), Locator::mouse->gety()))){
-      if(event->type == SDL_MOUSEBUTTONDOWN){
+      if(event.type == SDL_MOUSEBUTTONDOWN){
 	m_selected = true;
       }
       else{  // MOUSEBUTTONUP
@@ -50,7 +49,6 @@ void TextButton::receiveEvent(const SDL_Event* event, CapEngine::Time* time){
       m_selected = false;
     }
   }
-  delete event;
 }
 
 

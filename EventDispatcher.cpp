@@ -33,54 +33,54 @@ void EventDispatcher::subscribe(IEventSubscriber* subscriber_in, int subscriptio
   subscribers.push_back(newSubscription);
 }
 
-void EventDispatcher::enqueue(SDL_Event* event){
+void EventDispatcher::enqueue(SDL_Event event){
   eventQueue.push_back(event);
 }
 
 void EventDispatcher::flushQueue(){
   vector<subscription>::iterator subscriberIter = subscribers.begin();
-  vector<SDL_Event*>::iterator eventIter = eventQueue.begin();
+  vector<SDL_Event>::iterator eventIter = eventQueue.begin();
   while(eventIter != eventQueue.end()){
-    SDL_Event* curEvent = *eventIter;
+    SDL_Event curEvent = *eventIter;
 
     // Call the reshape function if SDL is being used
-    if(curEvent->type == SDL_WINDOWEVENT_RESIZED){
-      int w = ((SDL_WindowEvent*)curEvent)->data1;
-      int h = ((SDL_WindowEvent*)curEvent)->data2;
+    if(curEvent.type == SDL_WINDOWEVENT_RESIZED){
+      int w = ((SDL_WindowEvent*)&curEvent)->data1;
+      int h = ((SDL_WindowEvent*)&curEvent)->data2;
       videoManager->callReshapeFunc(w, h); 
     }
     while(subscriberIter != subscribers.end()){
       subscription* curSubscription = &(*subscriberIter);
       // check to see if subscriber subscribes to current event types
-      switch(curEvent->type){
+      switch(curEvent.type){
       case SDL_KEYDOWN:
 	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       case SDL_KEYUP:
 	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       case SDL_MOUSEMOTION:
 	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       case SDL_MOUSEBUTTONDOWN:
 	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       case SDL_MOUSEBUTTONUP:
 	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent(curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       case SDL_QUIT:
 	if(curSubscription->subscriptionType & systemEvent){
-	  (curSubscription->subscriber)->receiveEvent(copyEvent( curEvent), nullptr);
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
       }
@@ -88,7 +88,6 @@ void EventDispatcher::flushQueue(){
     }
     //delete *eventIter;
     eventIter++;
-    delete curEvent;
   }
   //eventQueue.erase(eventQueue.begin(), eventQueue.end());
   eventQueue.clear();
@@ -106,7 +105,7 @@ bool EventDispatcher::hasEvents(){
 void EventDispatcher::getEvents(){
   SDL_Event event;
   while(SDL_PollEvent(&event)){
-    enqueue(copyEvent(&event));
+    enqueue(event);
   }
 }
 

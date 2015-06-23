@@ -30,7 +30,7 @@ namespace CapEngine {
     virtual void setText(const std::string text);
     virtual void setPosition(const CapEngine::Vector position);
     // IEventSubscriber virtual
-    virtual void receiveEvent(const SDL_Event* event, CapEngine::Time* time); 
+    virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time); 
 
   protected:
     std::string m_text;

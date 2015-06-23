@@ -26,7 +26,7 @@
 
      static bool instantiated;
      std::vector<subscription> subscribers;
-     std::vector<SDL_Event*> eventQueue;
+     std::vector<SDL_Event> eventQueue;
      VideoManager* videoManager;
      int queueDelayCount;    
 
@@ -36,7 +36,7 @@
     ~EventDispatcher();
     void subscribe(IEventSubscriber* subscriber_in, int subscriptionMask);
     void unsubscribe(IEventSubscriber* subscriber_in);
-    void enqueue(SDL_Event* event);
+    void enqueue(SDL_Event event);
     void flushQueue();
     bool hasEvents();
     void getEvents();

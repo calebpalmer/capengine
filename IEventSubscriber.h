@@ -10,7 +10,7 @@
 
 class IEventSubscriber {
  public:
-  virtual void receiveEvent(const SDL_Event* event, CapEngine::Time* time) = 0;
+  virtual void receiveEvent(SDL_Event event, CapEngine::Time* time) = 0;
   virtual ~IEventSubscriber(){};
 };
 
