@@ -26,12 +26,12 @@ namespace {
     return pixel;
   }
 
-  void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern=SolidEdge){
+  void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern=EdgePattern::SolidEdge){
     // lock the surface for writing
     // TODO need to clip the coordinates to fit the screen
     bool drawPixel = true;
     int flipWrite = -1;
-    if(pattern == StripedEdge)
+    if(pattern == EdgePattern::StripedEdge)
       {
 	flipWrite = basicStippleLength;
       }
@@ -137,7 +137,6 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
     ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
   }
   else{
-    free(pixel);
     throw CapEngineException("Unsupported pixel format");
   }
     
