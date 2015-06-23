@@ -55,7 +55,7 @@ namespace CapEngine{
     real slope2 = vector2->getYSlope() / vector2->getXSlope();
     real x = ((slope1 * vector1->getX() - slope2 * vector2->getX()) + vector2->getY() - vector1->getY()) / (slope1 - slope2);
     real y = (slope1 * (-1)) * vector1->getX() + vector1->getY();
-    std::auto_ptr<Vector2d> position(new Vector2d(x, y));
+    std::unique_ptr<Vector2d> position(new Vector2d(x, y));
     return position.release();
   }
 

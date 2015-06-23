@@ -12,8 +12,8 @@ bool EventDispatcher::instantiated = false;
 EventDispatcher::EventDispatcher(VideoManager* videoManagerIn, int queuedelay) : queueDelayCount(queuedelay) {
   assert(instantiated == false);
   instantiated = true;
-  auto_ptr<vector<subscription> > subscribersPtr(new vector<subscription>());
-  auto_ptr<vector<SDL_Event*> > eventQueuePtr(new vector<SDL_Event*>());
+  unique_ptr<vector<subscription> > subscribersPtr(new vector<subscription>());
+  unique_ptr<vector<SDL_Event*> > eventQueuePtr(new vector<SDL_Event*>());
   subscribers = subscribersPtr.release();
   eventQueue = eventQueuePtr.release();
   assert(videoManagerIn != nullptr);

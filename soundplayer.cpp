@@ -101,9 +101,13 @@ long SoundPlayer::addSound(PCM* sound, bool repeat){
 /*!
 
  */
-void SoundPlayer::setState(int state){
-  assert(state == PAUSE ||  state == UNPAUSE);
-  SDL_PauseAudio(state);
+void SoundPlayer::setState(SoundState state){
+  if(state == SoundState::PAUSE){
+    SDL_PauseAudio(1);
+  }
+  else if(state == SoundState::PLAY){
+    SDL_PauseAudio(0);
+  }
 }
 
 //! clean up null or empty sounds

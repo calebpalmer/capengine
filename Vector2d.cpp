@@ -126,7 +126,7 @@ real Vector2d::magnitude() const{
  */
 Vector2d* Vector2d::normalize() const{
   real mag = this->magnitude();
-  auto_ptr<Vector2d> normalVec(new Vector2d(x/mag, y/mag));
+  unique_ptr<Vector2d> normalVec(new Vector2d(x/mag, y/mag));
   return normalVec.release();
 }
 

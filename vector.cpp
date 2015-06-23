@@ -176,7 +176,7 @@ real Vector::magnitude() const{
  */
 Vector& Vector::normalize() const{
   real mag = this->magnitude();
-  auto_ptr<Vector> normalVec(new Vector(x/mag, y/mag, z/mag));
+  unique_ptr<Vector> normalVec(new Vector(x/mag, y/mag, z/mag));
   return *(normalVec.release());
 }
 

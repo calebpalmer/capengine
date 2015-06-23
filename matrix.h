@@ -4,7 +4,7 @@
 #define MATRIX_H
 
 #include <vector>
-#include "CapEngine.h"
+#include "vector.h"
 
 typedef std::vector<CapEngine::Vector*> MatrixContainer;
 
