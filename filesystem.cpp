@@ -1,8 +1,10 @@
 #include "filesystem.h"
 
 #include <iostream>
+#include <sstream>
 
 #include "CapEngineException.h"
+#include "locator.h"
 
 #ifdef UNIX  // unix include files
 #include <unistd.h>
@@ -31,6 +33,9 @@ void CapEngine::setCurrentDir(const string& directory){
 #ifdef WIN
 
 #endif //WIN
+    std::stringstream msg;
+    msg << "Current directory set to " << directory;
+    Locator::logger->log(msg.str(), Logger::CDEBUG);
 }
 
 string CapEngine::getCurrentDir(){
