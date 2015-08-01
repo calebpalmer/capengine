@@ -206,6 +206,14 @@ void VideoManager::getWindowResolution(int* width, int* height) const{
   *height = currentScreenConfig.height;
 }
 
+int VideoManager::getWindowWidth() const{
+  return currentScreenConfig.width;
+}
+
+int VideoManager::getWindowHeight() const{
+  return currentScreenConfig.height;
+}
+
 //! get the width of given texture
 /*!
   \param texture

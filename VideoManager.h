@@ -39,6 +39,8 @@ namespace CapEngine {
     void clearScreen();
     void drawScreen();
     void getWindowResolution(int* width, int* height) const;
+    int getWindowWidth() const;
+    int getWindowHeight() const;
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
     Surface* createSurface(int width, int height);
