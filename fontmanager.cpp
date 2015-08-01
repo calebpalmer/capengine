@@ -1,6 +1,8 @@
 #include "fontmanager.h"
 #include "CapEngineException.h"
 
+#include <sstream>
+
 #include <SDL2/SDL_ttf.h>
 
 using namespace std;
@@ -33,7 +35,10 @@ namespace CapEngine {
     if(fontFace == 0){
       string ttf_error = TTF_GetError();
       TTF_CloseFont(fontFace);
-      throw CapEngineException("Unable to open font: " + ttf_error);
+      stringstream errorMsg;
+      errorMsg << "Unable to open font: " << font << endl
+	       << "\tDetails: " << ttf_error;
+      throw CapEngineException(errorMsg.str());
       return nullptr;
     }
 
