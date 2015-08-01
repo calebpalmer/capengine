@@ -29,6 +29,7 @@
 #include "logger.h"
 #include "tileset.h"
 #include "map2d.h"
+#include "platformermap.h"
 #include "filesystem.h"
 #include "timestep.h"
 #include "keyboard.h"
