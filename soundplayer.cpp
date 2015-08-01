@@ -28,9 +28,9 @@ SoundPlayer::SoundPlayer(): idCounter(0) {
 
   ostringstream logMsg;
   logMsg << "audio device format opened" << endl
-	 << "frequency: " << audioFormat.freq << endl
-	 << "channels: " << audioFormat.channels << endl
-	 << "format: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
+	 << "\tfrequency: " << audioFormat.freq << endl
+	 << "\tchannels: " << audioFormat.channels << endl
+	 << "\tformat: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
   Locator::logger->log(logMsg.str(), Logger::CDEBUG);
 
 }
