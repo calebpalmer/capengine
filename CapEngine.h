@@ -49,5 +49,6 @@
 #include "null_physics_component.h"
 #include "runner.h"
 #include "game_management.h"
+#include "colour.h"
 
 #endif

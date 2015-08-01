@@ -7,11 +7,11 @@ include Makefile.defs
 OBJECTS=Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o collision.o fontmanager.o \
 			capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
 			scanconvert.o xml_parser.o asset_manager.o mouse.o locator.o textbutton.o gameobject.o game_management.o \
-			runner.o platformermap.o
+			runner.o platformermap.o colour.o
 
 #CAPEngine
 libcapengine.so: $(OBJECTS)
-	$(CPP) $(CFLAGS) -o libcapengine.so $(OBJECTS) -lSDL -lSDL_image -lSDL_ttf -lsndfile -lSDL_sound -shared -fPIC
+	$(CPP) $(CFLAGS) -o libcapengine.so $(OBJECTS) -lsndfile -shared -fPIC
 
 $(OBJECTS): %.o: %.cpp
 	$(CPP) -c $(CFLAGS) $< -o $@ -fPIC
