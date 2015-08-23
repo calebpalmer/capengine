@@ -1,10 +1,12 @@
 #ifndef TEXTBUTTON_H
 #define TEXTBUTTON_H
 
+#include <string>
+
 #include "button.h"
 #include "IEventSubscriber.h"
+#include "colour.h"
 
-#include <string>
 
 namespace CapEngine {
 
@@ -16,6 +18,7 @@ namespace CapEngine {
 
   public:
     TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position);
+    TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
     ~TextButton();
     void registerCallback(void (*callback)(void*), void* context);
     virtual void update();

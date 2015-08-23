@@ -6,20 +6,24 @@ using namespace std;
 using namespace CapEngine;
 
 TextButton::TextButton(string text, string font, int fontSize, Vector position)
+  : TextButton(text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
+{ }
+
+TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
   : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position)
 {
-  // get surface
+    // get surface
   FontManager fontManager;
-  Surface* textSurfaceInactive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xFF, 0xFF, 0xFF);
+  Surface* textSurfaceInactive = fontManager.getTextSurface(m_font, m_text, m_fontSize, inactiveColour.m_r, inactiveColour.m_g, inactiveColour.m_b);
   m_pTextTextureInactive = Locator::videoManager->createTextureFromSurface(textSurfaceInactive);
   Locator::videoManager->closeSurface(textSurfaceInactive);
   
-  Surface* textSurfaceActive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xBA, 0xBA, 0xBA);
+  //Surface* textSurfaceActive = fontManager.getTextSurface(m_font, m_text, m_fontSize, 0xBA, 0xBA, 0xBA);
+  Surface* textSurfaceActive = fontManager.getTextSurface(m_font, m_text, m_fontSize, activeColour.m_r, activeColour.m_g, activeColour.m_b);
   m_pTextTextureActive = Locator::videoManager->createTextureFromSurface(textSurfaceActive);
   Locator::videoManager->closeSurface(textSurfaceActive);
   
   // set width and height
-
   m_width = Locator::videoManager->getTextureWidth(m_pTextTextureInactive);
   m_height = Locator::videoManager->getTextureHeight(m_pTextTextureInactive);
 
@@ -62,6 +66,8 @@ void TextButton::render() {
   Rect destRect;
   destRect.x = m_position.x;
   destRect.y = m_position.y;
+  destRect.w = m_width;
+  destRect.h = m_height;
   Rect srcRect;
   srcRect.x = 0.0;
   srcRect.y = 0.0;
