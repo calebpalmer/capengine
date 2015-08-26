@@ -10,7 +10,7 @@ TextButton::TextButton(string text, string font, int fontSize, Vector position)
 { }
 
 TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
-  : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position)
+  : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position), m_callback(nullptr)
 {
     // get surface
   FontManager fontManager;
