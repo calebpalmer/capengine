@@ -83,6 +83,12 @@ void EventDispatcher::flushQueue(){
 	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
 	break;
+      case SDL_WINDOWEVENT:
+	  if(curSubscription->subscriptionType & windowEvent){
+	    // TODO when multiple window support is added, a window identifier should be passed along to the receiver
+	    (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	  }
+	break;
       }
       subscriberIter++;
     }
