@@ -41,6 +41,7 @@
 #include "uiobject.h"
 #include "button.h"
 #include "textbutton.h"
+#include "button_group.h"
 #include "gameobject.h"
 #include "gamestate.h"
 #include "null_custom_component.h"

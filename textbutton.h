@@ -21,19 +21,21 @@ namespace CapEngine {
     TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
     ~TextButton();
     void registerCallback(void (*callback)(void*), void* context);
-    virtual void update();
-    virtual void render();
-    virtual void setEnabled(bool enabled = true);
-    virtual bool isEnabled() const;
-    virtual int getWidth() const;
-    virtual int getHeight() const;
-    virtual void setWidth(int width);
-    virtual void setHeight(int height);
-    virtual std::string getText() const;
-    virtual void setText(const std::string text);
-    virtual void setPosition(const CapEngine::Vector position);
+    virtual void update() override;
+    virtual void render() override;
+    virtual void setEnabled(bool enabled = true) override;
+    virtual bool isEnabled() const override;
+    virtual int getWidth() const override;
+    virtual int getHeight() const override;
+    virtual void setWidth(int width) override;
+    virtual void setHeight(int height) override;
+    virtual std::string getText() const override;
+    virtual void setText(const std::string text) override;
+    virtual void setPosition(const CapEngine::Vector position) override;
+    virtual void setSelected(bool selected) override;
+    virtual bool isSelected() const override;
     // IEventSubscriber virtual
-    virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time); 
+    virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time) override; 
 
   protected:
     std::string m_text;

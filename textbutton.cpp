@@ -41,17 +41,17 @@ void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   if(event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP){
     if(mouseInButton(Vector(Locator::mouse->getx(), Locator::mouse->gety()))){
       if(event.type == SDL_MOUSEBUTTONDOWN){
-	m_selected = true;
+	m_activated = true;
       }
       else{  // MOUSEBUTTONUP
 	if(m_callback != nullptr){
 	  m_callback(m_context);
 	}
-	m_selected = false;
+	m_activated = false;
       }
     }
     else{
-      m_selected = false;
+      m_activated = false;
     }
   }
 }
@@ -59,7 +59,7 @@ void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
 
 void TextButton::update() {
   if(!(mouseInButton(Vector(Locator::mouse->getx(), Locator::mouse->gety())))){
-    m_selected = false;
+    m_activated = false;
   }
 }
 
@@ -75,12 +75,18 @@ void TextButton::render() {
   srcRect.w = m_width;
   srcRect.h = m_height;
   // if flag is set,
-  if(m_selected){
+  if(m_activated){
     Locator::videoManager->drawTexture(m_pTextTextureActive, &srcRect, &destRect);
     }
   // if flag is not set
   else{
     Locator::videoManager->drawTexture(m_pTextTextureInactive, &srcRect, &destRect);
+  }
+
+  if(m_selected){
+    // render selected indicator
+    
+
   }
 }
 
@@ -136,5 +142,10 @@ bool TextButton::mouseInButton(Vector position){
     }
 }
 
+void TextButton::setSelected(bool selected){
+  m_selected = true;
+}
 
-
+bool TextButton::isSelected() const{
+  return m_selected;
+}

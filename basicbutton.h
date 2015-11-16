@@ -18,16 +18,17 @@ namespace CapEngine {
   public:
     BasicButton(std::string text, int fontSize, CapEngine::Vector position,  int width, int height);
     ~BasicButton();
-    virtual void update();
-    virtual void render();
-    virtual void setEnabled(bool enabled = true);
-    virtual bool isEnabled() const;
-    virtual int getWidth() const;
-    virtual int getHeight() const;
-    virtual void setWidth(int width);
-    virtual void setHeight(int height);
-    virtual std::string getText() const;
-    virtual void setText(const std::string text);
+
+    virtual void update() override;
+    virtual void render() override;
+    virtual void setEnabled(bool enabled = true) override ;
+    virtual bool isEnabled() const override;
+    virtual int getWidth() const override;
+    virtual int getHeight() const override;
+    virtual void setWidth(int width) override;
+    virtual void setHeight(int height) override;
+    virtual std::string getText() const override;
+    virtual void setText(const std::string text) override;
 
   protected:
     std::string m_text;
