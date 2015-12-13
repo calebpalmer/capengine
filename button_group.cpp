@@ -15,18 +15,16 @@ ButtonGroup::ButtonGroup() : m_activeButtonIndex(0) {
 }
 
 void ButtonGroup::update(){
-  // update members
-  for(auto& i : m_buttons){
-    i->update();
+  for(unsigned int i = 0; i < m_buttons.size(); i++){
+    m_buttons[i]->update();
+    if(i == m_activeButtonIndex){
+      m_buttons[i]->setSelected(true);
+    }
+    else{
+      m_buttons[i]->setSelected(false);      
+    }
   }
 
-  // set active button to selected
-  if(m_activeButtonIndex > -1u){
-#ifdef DEBUG
-    assert(m_activeButtonIndex < m_buttons.size());
-#endif
-    m_buttons[m_activeButtonIndex]->setSelected(true);
-  }
 }
 
 void ButtonGroup::render(){

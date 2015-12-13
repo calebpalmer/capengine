@@ -14,6 +14,7 @@
 #include "Time.h"
 #include "fontmanager.h"
 #include "logger.h"
+#include "colour.h"
 
 namespace CapEngine {
 
@@ -65,6 +66,8 @@ namespace CapEngine {
 
     // input
     void loadControllerMapFromFile(std::string filePath);
+    //Drawing
+    void drawRect(Rect rect, Colour fillColour);
 
     bool initialized;
 

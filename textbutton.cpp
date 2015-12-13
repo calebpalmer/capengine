@@ -6,11 +6,13 @@ using namespace std;
 using namespace CapEngine;
 
 TextButton::TextButton(string text, string font, int fontSize, Vector position)
-  : TextButton(text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
+ : TextButton(text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
 { }
 
-TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
-  : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position), m_callback(nullptr)
+TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, 
+                        CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
+  : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position)
+    , m_callback(nullptr), m_fontColour(inactiveColour)
 {
     // get surface
   FontManager fontManager;
@@ -85,8 +87,12 @@ void TextButton::render() {
 
   if(m_selected){
     // render selected indicator
-    
-
+    Rect rect;
+    rect.h = m_height *.4;
+    rect.w = rect.h;
+    rect.x = m_position.x - (rect.w * 1.5);
+    rect.y = m_position.y + ((m_height - rect.h) / 2);
+    Locator::videoManager->drawRect(rect, m_fontColour);
   }
 }
 
@@ -143,7 +149,7 @@ bool TextButton::mouseInButton(Vector position){
 }
 
 void TextButton::setSelected(bool selected){
-  m_selected = true;
+  m_selected = selected;
 }
 
 bool TextButton::isSelected() const{

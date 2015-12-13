@@ -49,6 +49,7 @@ namespace CapEngine {
     CapEngine::Texture* m_pTextTextureInactive;
     CapEngine::Texture* m_pTextTextureActive;
     CapEngine::Vector m_position;
+    Colour m_fontColour;
     void (*m_callback)(void *);
     void* m_context;
 

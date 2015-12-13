@@ -172,6 +172,8 @@ void VideoManager::clearScreen(){
 }
 
 void VideoManager::drawScreen(){
+  SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
+  
   // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);
@@ -414,4 +416,12 @@ void VideoManager::loadControllerMapFromFile(std::string path){
     error << "Error adding controller mappings from file " << path << ": " << SDL_GetError();
     logger->log(error.str(), Logger::CWARNING);
   }
+}
+
+void VideoManager::drawRect(Rect rect, Colour fillColour){
+    SDL_SetRenderDrawColor(m_pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
+    if(SDL_RenderFillRect(m_pRenderer, &rect) != 0){
+      string errorMessage(SDL_GetError());
+      logger->log(errorMessage, Logger::CWARNING);
+    }
 }
