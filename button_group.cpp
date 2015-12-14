@@ -48,9 +48,12 @@ void ButtonGroup::receiveEvent(const SDL_Event event, CapEngine::Time* time){
       msg << "Button group index changed to " << m_activeButtonIndex;
       Locator::logger->log(msg.str(), Logger::CDEBUG);
     }
-
+    // if enter, activate current button
+    if(keyboardEvent->keysym.sym == SDLK_RETURN){
+      m_buttons[m_activeButtonIndex]->executeCallback();
+    }
   }
-  // if enter, activate current button
+
 }
 
 void ButtonGroup::addButton(std::unique_ptr<Button> pbutton){

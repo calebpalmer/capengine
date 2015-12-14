@@ -47,7 +47,8 @@ void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
       }
       else{  // MOUSEBUTTONUP
 	if(m_callback != nullptr){
-	  m_callback(m_context);
+	  //m_callback(m_context);
+	  this->executeCallback();
 	}
 	m_activated = false;
       }
@@ -154,4 +155,9 @@ void TextButton::setSelected(bool selected){
 
 bool TextButton::isSelected() const{
   return m_selected;
+}
+
+void TextButton::executeCallback()
+{
+  m_callback(m_context);
 }

@@ -20,7 +20,8 @@ namespace CapEngine {
     TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position);
     TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
     ~TextButton();
-    void registerCallback(void (*callback)(void*), void* context);
+    void registerCallback(void (*callback)(void*), void* context) override;
+    void executeCallback();
     virtual void update() override;
     virtual void render() override;
     virtual void setEnabled(bool enabled = true) override;
@@ -35,8 +36,8 @@ namespace CapEngine {
     virtual void setSelected(bool selected) override;
     virtual bool isSelected() const override;
     // IEventSubscriber virtual
-    virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time) override; 
-
+    virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time) override;
+    
   protected:
     std::string m_text;
     std::string m_font;

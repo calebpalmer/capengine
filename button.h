@@ -11,6 +11,8 @@ namespace CapEngine {
     virtual ~Button() {}
     virtual std::string getText() const = 0;
     virtual void setText(const std::string text) = 0;
+    virtual void registerCallback(void (*callback)(void*), void* context) = 0;
+    virtual void executeCallback() = 0;
   };
 
 }
