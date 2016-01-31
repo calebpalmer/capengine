@@ -42,6 +42,7 @@ namespace CapEngine {
     void getWindowResolution(int* width, int* height) const;
     int getWindowWidth() const;
     int getWindowHeight() const;
+    void setBackgroundColour(Colour colour);
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
     Surface* createSurface(int width, int height);
@@ -57,7 +58,7 @@ namespace CapEngine {
     real getTextureWidth(Texture* texture) const;
     real getTextureHeight(Texture* texture) const;
     Texture* createTexture(int width, int height);
-    Texture* createTextureFromSurface(Surface* surface); // TODO
+    Texture* createTextureFromSurface(Surface* surface); 
 
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
@@ -96,6 +97,7 @@ namespace CapEngine {
     Uint8 fpsColourR;
     Uint8 fpsColourG;
     Uint8 fpsColourB;
+    Colour m_backgroundColour;
   };
 
 }

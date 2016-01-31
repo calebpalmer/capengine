@@ -80,7 +80,10 @@ void VideoManager::initSystem(Screen_t screenConfig){
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
 	SDL_RenderSetLogicalSize(m_pRenderer, screenConfig.width, screenConfig.height);
       }
-      SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
+      SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+			     m_backgroundColour.m_g, m_backgroundColour.m_g,
+			     255);
+
     }
   }
 }
@@ -139,6 +142,19 @@ void VideoManager::drawTexture(int x, int y, Texture* texture, Rect* srcRect) co
   SDL_Rect dstRect;
   dstRect.x = x;
   dstRect.y = y;
+  if(srcRect != nullptr){
+    dstRect.w = srcRect->w;
+    dstRect.h = srcRect->h;
+  }
+ else{
+   int result = SDL_QueryTexture(texture, nullptr, nullptr,
+ 				 &(dstRect.w), &(dstRect.h));
+   if(result != 0){
+     ostringstream errorMsg;
+     errorMsg << "Unable to draw texture:  " << SDL_GetError();
+     logger->log(errorMsg.str(), Logger::CERROR);
+   }
+ }
 
   int result = SDL_RenderCopy(m_pRenderer, texture, srcRect, &dstRect);
   if(result != 0){
@@ -159,21 +175,25 @@ void VideoManager::shutdown(){
 }
 
 void VideoManager::clearScreen(){
+
+  SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+			 m_backgroundColour.m_g, m_backgroundColour.m_g,
+			 255);
+
   // Clear Screen
   SDL_RenderClear(m_pRenderer);
 
-  // draw rect to clear everything
-  SDL_Rect rectangle;
-  rectangle.x = 0;
-  rectangle.y = 0;
-  rectangle.w = currentScreenConfig.width;
-  rectangle.h = currentScreenConfig.height;
-  SDL_RenderFillRect(m_pRenderer, &rectangle);
+  // // draw rect to clear everything
+  // SDL_Rect rectangle;
+  // rectangle.x = 0;
+  // rectangle.y = 0;
+  // rectangle.w = currentScreenConfig.width;
+  // rectangle.h = currentScreenConfig.height;
+  // SDL_RenderFillRect(m_pRenderer, &rectangle);
+
 }
 
 void VideoManager::drawScreen(){
-  SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
-  
   // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);
@@ -201,6 +221,9 @@ void VideoManager::drawScreen(){
   double elapsedTime = currentTime.subtractTime(&lastRenderTime);
   lastRenderTime = currentTime;
   fps = 1 / (elapsedTime * 0.001);
+
+  // clear screen
+  this->clearScreen();
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
@@ -361,11 +384,13 @@ Surface* VideoManager::createSurface(int width, int height){
     exit(1);
   }
 
-  setColorKey(surface);
+  //setColorKey(surface);
 
   ostringstream logString;
   logString << "Created new surface with dimensions " << width << "x" << height;
   logger->log(logString.str(), Logger::CDEBUG);
+
+  memset(surface->pixels, 0x00, surface->pitch * surface->h);
   
   return surface;
 }
@@ -424,4 +449,8 @@ void VideoManager::drawRect(Rect rect, Colour fillColour){
       string errorMessage(SDL_GetError());
       logger->log(errorMessage, Logger::CWARNING);
     }
+}
+
+void VideoManager::setBackgroundColour(Colour colour){
+m_backgroundColour = colour;
 }

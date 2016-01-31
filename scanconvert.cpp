@@ -1,8 +1,13 @@
 #include "scanconvert.h"
-#include "CapEngineException.h"
 
-#include <SDL2/SDL.h>
 #include <iostream>
+#include <sstream>
+#include <SDL2/SDL.h>
+#include <cassert>
+
+#include "CapEngineException.h"
+#include "VideoManager.h"
+#include "locator.h"
 
 using namespace CapEngine;
 
@@ -17,13 +22,70 @@ namespace {
     return pixel;
   }
 
-  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b){
+  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255){
     Uint32 pixel;
     pixel = ((r >> format->Rloss) << format->Rshift) +
       ((g >> format->Gloss) << format->Gshift) +
-      ((b >> format->Bloss) << format->Bshift);
+      ((b >> format->Bloss) << format->Bshift) +
+      ((a >> format->Aloss) << format->Ashift);
 
     return pixel;
+  }
+
+  Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255){
+    Uint8 rshift, gshift, bshift, ashift;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rshift = 6;
+    gshift = 4;
+    bshift = 2;
+    ashift = 0;
+#else
+    rshift = 0;
+    gshift = 2;
+    bshift = 4;
+    ashift = 6;
+#endif
+
+    Uint32 pixel;
+    pixel = (r << rshift) + (g << gshift) + (b << bshift) + (a << ashift);
+
+    return pixel;
+  }
+
+  Uint32* createPixelBuffer(unsigned int size){
+    unsigned int bufSize = sizeof(Uint32) * size;
+    Uint32* buffer = (Uint32*)malloc(bufSize);
+    memset(buffer, 0, bufSize);
+
+    return buffer;
+  }
+
+  Surface* createSurfaceFromPixelBuffer(Uint32* pixels, unsigned int width,
+					unsigned int height){
+    const unsigned int pixelSize = 4; // bytes
+    Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+    
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(pixels, width, height,
+						    pixelSize * 8, width * pixelSize, rmask, gmask,
+						    bmask, amask);
+    if(surface == nullptr){
+      std::ostringstream errorStream;
+      errorStream << "CreateRGBSurfaceFrom failed: " << SDL_GetError();
+      throw CapEngineException(errorStream.str());
+    }
+    
+    return surface;
   }
 
   void drawLineBasicIncremental(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern=EdgePattern::SolidEdge){
@@ -72,7 +134,7 @@ namespace {
 	if(drawPixel){
 	  writePixel(surface, x, y);
 	}
-      }
+    }
     }
     
     else{  // increment over x
@@ -113,11 +175,11 @@ void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* sur
 }
 
 void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
-
   // convert to screen coordinates
   int yNew = surface->h - y;
 
-  // calculate offset into pixel buffer
+  // calculate offset into pixel buffer of (x, y)
+  // pitch is the length of a row in pixels
   int offset = (surface->pitch / surface->format->BytesPerPixel) * yNew + x;
 	
   void* pixel;
@@ -127,7 +189,7 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
     ((Uint16*)surface->pixels)[offset] = *(Uint16*)pixel;
   }
   else if(surface->format->BytesPerPixel == 3){
-    pixel = malloc(4);
+    pixel = malloc(3); 
     *(Uint32*)pixel = createUint32Pixel(surface->format, scanR, scanG, scanB);
     ((Uint32*)surface->pixels)[offset] = *(Uint32*)pixel;
   }
@@ -143,5 +205,136 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
   free(pixel);
 }
 
+void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine::Colour colour){
+  // convert to screen coordinates
+  int yNew = (surface->h - 1)- y;
+
+  // calculate offset into pixel buffer of (x, y)
+  // pitch is the length of a row in pixels
+  int offset = (surface->pitch / surface->format->BytesPerPixel)
+    * (yNew * surface->format->BytesPerPixel)
+    + (x * surface->format->BytesPerPixel);
+
+  assert(offset >= 0 && offset <= surface->pitch * surface ->h);
+	
+  void* pixel;
+  if(surface->format->BytesPerPixel == 2){
+    pixel = malloc(2);
+    *(Uint16*)pixel = createUint16Pixel(surface->format, colour.m_r, colour.m_g, colour.m_g);
+    ((Uint16*)surface->pixels)[offset / 2] = *(Uint16*)pixel;
+  }
+  else if(surface->format->BytesPerPixel == 3){
+    pixel = malloc(3); 
+    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b);
+    ((Uint32*)surface->pixels)[offset / 3] = *(Uint32*)pixel;
+  }
+  else if(surface->format->BytesPerPixel == 4){
+    pixel = malloc(4);
+    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b);
+    ((Uint32*)surface->pixels)[offset / 4] = *(Uint32*)pixel;
+  }
+  else{
+    throw CapEngineException("Unsupported pixel format");
+  }
+    
+  free(pixel);
+}
+
+void CapEngine::writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colour, int bufWidth, int bufHeight){
+  // convert to screen coordinates
+  int yNew = (bufHeight - 1)- y;
+  
+  // calculate offset into pixel buffer of (x, y)
+  // bufWidth is the length of a row in pixels
+  int bytesPerPixel = 4;
+  int offset = (bufWidth / bytesPerPixel)
+    * (yNew * bytesPerPixel)
+    + (x * bytesPerPixel);
+
+  assert(offset >= 0 && offset <= bufWidth * bufHeight * 4);
+	
+  void* pixel;
+  pixel = malloc(bytesPerPixel);
+  *(Uint32*)pixel = createUint32Pixel(colour.m_r, colour.m_g, colour.m_b);
+  buffer[offset] = *(Uint32*)pixel;
+
+  free(pixel);
+}
 
 
+Surface* CapEngine::createRectangle(int width, int height, Colour colour){
+  if(Locator::videoManager == nullptr){
+    throw CapEngineException("Locator::videoManager has not been set.");
+  }
+
+  Surface* surface = Locator::videoManager->createSurface(width, height);
+
+  SDL_LockSurface(surface);
+
+  std::cout << "Writing pixels to surface" << std::endl;
+  
+  for(int i = 0; i < width; i++){
+    for(int j = 0; j < height; j++){
+      std::cout << j << "," << i << std::endl;
+      writePixel(surface, j, i, colour);
+    }
+  }
+
+  SDL_UnlockSurface(surface);
+  Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+
+  //validate pixels
+  int buffsize = surface->pitch * surface->h;
+  int pixelSize = surface->pitch / surface->w;
+  for(int i = 0; i < buffsize; i += pixelSize){
+    Uint32 value = ((Uint32*)surface->pixels)[i / pixelSize];
+    int x = (i / pixelSize) % (surface->pitch / pixelSize);
+    int y = (i / pixelSize) / (surface->pitch / pixelSize);
+    std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value
+	      << " r: " << (value & surface->format->Rmask) << ", "
+	      << " g: " << (value & surface->format->Gmask) << ","
+	      << " b: " << (value & surface->format->Bmask) << ","
+	      << " a: " << (value & surface->format->Amask)
+	      << std::endl;
+    
+  }
+
+  Locator::logger->log("Pixels validated", Logger::CDEBUG);
+  
+  return surface;
+}
+
+Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
+  if(Locator::videoManager == nullptr){
+    throw CapEngineException("Locator::videoManager has not been set.");
+  }
+
+  unsigned int pixelSize = 4;  // bytes
+  unsigned int bufSize = width * height * pixelSize;
+  Uint32* pixels = createPixelBuffer(bufSize);
+
+  std::cout << "Writing pixels to surface" << std::endl;
+  
+  for(int i = 0; i < height; i++){
+    for(int j = 0; j < width; j++){
+      std::cout << j << "," << i << std::endl;
+      writePixel(pixels, j, i, colour, width, height);
+    }
+  }
+  Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+
+  //validate pixels
+  for(unsigned int i = 0; i < bufSize; i += pixelSize){
+    Uint32 value = ((Uint32*)pixels)[i];
+    int x = (i / pixelSize) % width;
+    int y = (i / pixelSize) / width;
+    if(value != 0){
+      std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value << std::endl;
+    }
+  }
+
+  Locator::logger->log("Pixels validated", Logger::CDEBUG);
+
+  Surface* surface = createSurfaceFromPixelBuffer(pixels, width, height);
+  return surface;
+}

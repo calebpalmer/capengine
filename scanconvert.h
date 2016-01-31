@@ -2,6 +2,7 @@
 #define SCANCONVERT_H
 
 #include "captypes.h"
+#include "colour.h"
 
 namespace CapEngine {
 
@@ -15,7 +16,12 @@ namespace CapEngine {
   };
 
   void drawLine(int x0, int y0, int x1, int y1, Surface* surface, EdgePattern pattern=EdgePattern::SolidEdge);
+  void drawRectangle(Surface* surface, Rect rectangle);
+  Surface* createRectangle(int width, int height, Colour colour);
+  Surface* createRectangle2(int width, int height, Colour colour);
   void writePixel(CapEngine::Surface* surface, int x, int y);
+  void writePixel(CapEngine::Surface*, int x, int y, CapEngine::Colour colour);
+  void writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colour, int bufWidth, int bufHeight);
 
   static int basicStippleLength = 10;
 
