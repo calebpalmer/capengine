@@ -35,15 +35,15 @@ namespace {
   Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255){
     Uint8 rshift, gshift, bshift, ashift;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    rshift = 6;
-    gshift = 4;
-    bshift = 2;
-    ashift = 0;
+    rshift = 8*3;
+    gshift = 8*2;
+    bshift = 8*1;
+    ashift = 8*0;
 #else
-    rshift = 0;
-    gshift = 2;
-    bshift = 4;
-    ashift = 6;
+    rshift = 8*0;
+    gshift = 8*1;
+    bshift = 8*2;
+    ashift = 8*3;
 #endif
 
     Uint32 pixel;
@@ -247,9 +247,10 @@ void CapEngine::writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colou
   // calculate offset into pixel buffer of (x, y)
   // bufWidth is the length of a row in pixels
   int bytesPerPixel = 4;
-  int offset = (bufWidth / bytesPerPixel)
-    * (yNew * bytesPerPixel)
-    + (x * bytesPerPixel);
+  int offset = (bufWidth)
+    * (yNew)
+    + (x);
+
 
   assert(offset >= 0 && offset <= bufWidth * bufHeight * 4);
 	
@@ -271,35 +272,35 @@ Surface* CapEngine::createRectangle(int width, int height, Colour colour){
 
   SDL_LockSurface(surface);
 
-  std::cout << "Writing pixels to surface" << std::endl;
+  //std::cout << "Writing pixels to surface" << std::endl;
   
   for(int i = 0; i < width; i++){
     for(int j = 0; j < height; j++){
-      std::cout << j << "," << i << std::endl;
+      //std::cout << j << "," << i << std::endl;
       writePixel(surface, j, i, colour);
     }
   }
 
   SDL_UnlockSurface(surface);
-  Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
 
-  //validate pixels
-  int buffsize = surface->pitch * surface->h;
-  int pixelSize = surface->pitch / surface->w;
-  for(int i = 0; i < buffsize; i += pixelSize){
-    Uint32 value = ((Uint32*)surface->pixels)[i / pixelSize];
-    int x = (i / pixelSize) % (surface->pitch / pixelSize);
-    int y = (i / pixelSize) / (surface->pitch / pixelSize);
-    std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value
-	      << " r: " << (value & surface->format->Rmask) << ", "
-	      << " g: " << (value & surface->format->Gmask) << ","
-	      << " b: " << (value & surface->format->Bmask) << ","
-	      << " a: " << (value & surface->format->Amask)
-	      << std::endl;
+  // //validate pixels
+  // int buffsize = surface->pitch * surface->h;
+  // int pixelSize = surface->pitch / surface->w;
+  // for(int i = 0; i < buffsize; i += pixelSize){
+  //   Uint32 value = ((Uint32*)surface->pixels)[i / pixelSize];
+  //   int x = (i / pixelSize) % (surface->pitch / pixelSize);
+  //   int y = (i / pixelSize) / (surface->pitch / pixelSize);
+  //   std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value
+  // 	      << " r: " << (value & surface->format->Rmask) << ", "
+  // 	      << " g: " << (value & surface->format->Gmask) << ","
+  // 	      << " b: " << (value & surface->format->Bmask) << ","
+  // 	      << " a: " << (value & surface->format->Amask)
+  // 	      << std::endl;
     
-  }
+  // }
 
-  Locator::logger->log("Pixels validated", Logger::CDEBUG);
+  //Locator::logger->log("Pixels validated", Logger::CDEBUG);
   
   return surface;
 }
@@ -313,27 +314,44 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
   unsigned int bufSize = width * height * pixelSize;
   Uint32* pixels = createPixelBuffer(bufSize);
 
-  std::cout << "Writing pixels to surface" << std::endl;
+  //std::cout << "Writing pixels to surface" << std::endl;
   
   for(int i = 0; i < height; i++){
     for(int j = 0; j < width; j++){
-      std::cout << j << "," << i << std::endl;
+      //std::cout << j << "," << i << std::endl;
       writePixel(pixels, j, i, colour, width, height);
     }
   }
-  Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
 
   //validate pixels
-  for(unsigned int i = 0; i < bufSize; i += pixelSize){
-    Uint32 value = ((Uint32*)pixels)[i];
-    int x = (i / pixelSize) % width;
-    int y = (i / pixelSize) / width;
-    if(value != 0){
-      std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value << std::endl;
-    }
-  }
+//   for(unsigned int i = 0; i < bufSize; i += pixelSize){
+//     Uint32 value = ((Uint32*)pixels)[i];
+//     int x = (i / pixelSize) % width;
+//     int y = (i / pixelSize) / width;
+//     if(value != 0){
+//       Uint32 rmask, gmask, bmask, amask;      
+// #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+//       rmask = 0xff000000;
+//       gmask = 0x00ff0000;
+//       bmask = 0x0000ff00;
+//       amask = 0x000000ff;
+// #else
+//       rmask = 0x000000ff;
+//       gmask = 0x0000ff00;
+//       bmask = 0x00ff0000;
+//       amask = 0xff000000;
+// #endif
+//       std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<  ") = " << value
+// 		<< " r: " << (value & rmask) << ", "
+// 		<< " g: " << (value & gmask) << ","
+// 		<< " b: " << (value & bmask) << ","
+// 		<< " a: " << (value & amask)
+// 		<< std::endl;
+//     }
+//  }
 
-  Locator::logger->log("Pixels validated", Logger::CDEBUG);
+  //Locator::logger->log("Pixels validated", Logger::CDEBUG);
 
   Surface* surface = createSurfaceFromPixelBuffer(pixels, width, height);
   return surface;

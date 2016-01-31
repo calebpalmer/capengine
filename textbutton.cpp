@@ -1,6 +1,7 @@
 #include "textbutton.h"
 
 #include "locator.h"
+#include "scanconvert.h"
 
 using namespace std;
 using namespace CapEngine;
@@ -12,7 +13,7 @@ TextButton::TextButton(string text, string font, int fontSize, Vector position)
 TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, 
                         CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
   : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position)
-    , m_callback(nullptr), m_fontColour(inactiveColour)
+  , m_callback(nullptr), m_fontColour(inactiveColour), m_pSelectedTexture(nullptr)
 {
     // get surface
   FontManager fontManager;
@@ -36,6 +37,9 @@ TextButton::~TextButton(){
   // free surfaces
   Locator::videoManager->closeTexture(m_pTextTextureActive);
   Locator::videoManager->closeTexture(m_pTextTextureInactive);
+  if(m_pSelectedTexture != nullptr){
+    Locator::videoManager->closeTexture(m_pSelectedTexture);
+  }
   Locator::eventDispatcher->unsubscribe(this);
 }
 
@@ -88,12 +92,22 @@ void TextButton::render() {
 
   if(m_selected){
     // render selected indicator
+    // check to see if texture is loaded already and load it if not
+    if(m_pSelectedTexture == nullptr){
+      // load a square texture of 75% of the hight of button
+      int height = m_height * 0.5;
+      int width = height;
+      Surface* pSurface = CapEngine::createRectangle(width, height, m_fontColour);
+      m_pSelectedTexture = Locator::videoManager->createTextureFromSurface(pSurface, true);
+    }
     Rect rect;
-    rect.h = m_height *.4;
-    rect.w = rect.h;
+    int w, h;
+    Locator::videoManager->getTextureDims(m_pSelectedTexture, &w, &h);
+    rect.w = w;
+    rect.h = h;
     rect.x = m_position.x - (rect.w * 1.5);
     rect.y = m_position.y + ((m_height - rect.h) / 2);
-    Locator::videoManager->drawRect(rect, m_fontColour);
+    Locator::videoManager->drawTexture(m_pSelectedTexture, nullptr, &rect);
   }
 }
 

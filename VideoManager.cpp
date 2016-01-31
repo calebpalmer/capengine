@@ -88,7 +88,7 @@ void VideoManager::initSystem(Screen_t screenConfig){
   }
 }
 
-Texture* VideoManager::createTextureFromSurface(Surface* surface){
+Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){
   // Create Texture from Surface
   SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, surface);
   if( texture == nullptr ){
@@ -97,6 +97,9 @@ Texture* VideoManager::createTextureFromSurface(Surface* surface){
     throw CapEngineException(errorMsg.str());
   }
 
+  if(freeSurface){
+    this->closeSurface(surface);
+  }
   return texture;
 }
 
@@ -271,6 +274,17 @@ real VideoManager::getTextureHeight(Texture* texture) const{
       throw CapEngineException(error.str());
     }
     return h;
+}
+
+void VideoManager::getTextureDims(Texture* texture, int* x, int* y) const{
+    CAP_THROW_NULL(texture, "texture is null");
+    int result = SDL_QueryTexture(texture, nullptr, nullptr, x, y);
+    if(result < 0){
+      ostringstream error;
+      error << "Unable to get texture height" << endl << SDL_GetError();
+      logger->log(error.str(), Logger::CERROR);
+      throw CapEngineException(error.str());
+    }
 }
 
 //! close a texture openned by the VideoManager

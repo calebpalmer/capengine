@@ -57,8 +57,9 @@ namespace CapEngine {
     void drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const;
     real getTextureWidth(Texture* texture) const;
     real getTextureHeight(Texture* texture) const;
+    void getTextureDims(Texture* texture, int* x, int* y) const;
     Texture* createTexture(int width, int height);
-    Texture* createTextureFromSurface(Surface* surface); 
+    Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false); 
 
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));
