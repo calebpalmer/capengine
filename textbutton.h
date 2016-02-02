@@ -35,6 +35,7 @@ namespace CapEngine {
     virtual void setPosition(const CapEngine::Vector position) override;
     virtual void setSelected(bool selected) override;
     virtual bool isSelected() const override;
+    virtual void setIndicator(const std::string imagePath) override;
     // IEventSubscriber virtual
     virtual void receiveEvent(const SDL_Event event, CapEngine::Time* time) override;
     

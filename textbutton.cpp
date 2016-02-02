@@ -3,6 +3,8 @@
 #include "locator.h"
 #include "scanconvert.h"
 
+#include <sstream>
+
 using namespace std;
 using namespace CapEngine;
 
@@ -95,7 +97,7 @@ void TextButton::render() {
     // check to see if texture is loaded already and load it if not
     if(m_pSelectedTexture == nullptr){
       // load a square texture of 75% of the hight of button
-      int height = m_height * 0.5;
+      int height = m_height * 0.75;
       int width = height;
       Surface* pSurface = CapEngine::createRectangle(width, height, m_fontColour);
       m_pSelectedTexture = Locator::videoManager->createTextureFromSurface(pSurface, true);
@@ -103,8 +105,8 @@ void TextButton::render() {
     Rect rect;
     int w, h;
     Locator::videoManager->getTextureDims(m_pSelectedTexture, &w, &h);
-    rect.w = w;
-    rect.h = h;
+    rect.h = m_height * 0.75;
+    rect.w = w * ((double)rect.h / (double)h);
     rect.x = m_position.x - (rect.w * 1.5);
     rect.y = m_position.y + ((m_height - rect.h) / 2);
     Locator::videoManager->drawTexture(m_pSelectedTexture, nullptr, &rect);
@@ -174,4 +176,16 @@ bool TextButton::isSelected() const{
 void TextButton::executeCallback()
 {
   m_callback(m_context);
+}
+
+void TextButton::setIndicator(const string imagePath){
+  try{
+    Texture* tempTexture = Locator::videoManager->loadImage(imagePath);
+    m_pSelectedTexture = tempTexture;
+  }
+  catch(const CapEngineException& e){
+    ostringstream errorStream;
+    errorStream << "Unable to load indicator: " << e.what() << endl << "Using default indicator";
+    Locator::logger->log(errorStream.str(), Logger::CWARNING);
+  }
 }
