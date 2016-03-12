@@ -68,3 +68,16 @@ void CapEngine::startLoop(std::unique_ptr<GameState> pGameState){
 void CapEngine::end(){
   Runner::getInstance().end();
 }
+
+void CapEngine::switchState(std::unique_ptr<GameState> pGameState){
+  Runner::getInstance().switchState(std::move(pGameState));
+}
+
+void CapEngine::popState(){
+  Runner::getInstance().popState();
+}
+
+void CapEngine::pushState(std::unique_ptr<GameState> pGameState){
+  Runner::getInstance().pushState(std::move(pGameState));
+}
+

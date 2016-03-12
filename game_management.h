@@ -14,6 +14,9 @@ namespace CapEngine {
   void loadAssetFile(std::string assetsFile);
   void startLoop(std::unique_ptr<GameState> pGameState);
   void end();
+  void switchState(std::unique_ptr<GameState> pGameState);
+  void popState();
+  void pushState(std::unique_ptr<GameState> pGameState);
 }
 
 #endif
