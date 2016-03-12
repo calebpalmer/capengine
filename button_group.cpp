@@ -14,6 +14,10 @@ ButtonGroup::ButtonGroup() : m_activeButtonIndex(0) {
   Locator::eventDispatcher->subscribe(this, keyboardEvent);
 }
 
+ButtonGroup::~ButtonGroup(){
+  Locator::eventDispatcher->unsubscribe(this);
+}
+
 void ButtonGroup::update(){
   for(unsigned int i = 0; i < m_buttons.size(); i++){
     m_buttons[i]->update();

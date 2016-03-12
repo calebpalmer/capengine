@@ -12,7 +12,7 @@ namespace CapEngine{
   class ButtonGroup : public UIObject, public IEventSubscriber {
   public:
     ButtonGroup();
-    virtual ~ButtonGroup() {}
+    virtual ~ButtonGroup();
 
     // UIObject virtual inherited members
     virtual void update() override;
