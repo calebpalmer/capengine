@@ -7,12 +7,13 @@
 
 //@brief - Interface for subscribing to EventManager
 //@authoer - Caleb Palmer
-
-class IEventSubscriber {
- public:
-  virtual void receiveEvent(SDL_Event event, CapEngine::Time* time) = 0;
-  virtual ~IEventSubscriber(){};
-};
+namespace CapEngine {
+  class IEventSubscriber {
+  public:
+    virtual void receiveEvent(SDL_Event event, CapEngine::Time* time) = 0;
+    virtual ~IEventSubscriber(){};
+  };
+}
 
 //IEventSubscriber::~IEventSubscriber(){};
 
