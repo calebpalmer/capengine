@@ -211,6 +211,8 @@ void AssetManager::draw(int id, Vector position){
   Rect destRect;
   destRect.x = position.x;
   destRect.y = position.y;
+  destRect.w = mVideoManager.getTextureWidth(image->texture);
+  destRect.h = mVideoManager.getTextureHeight(image->texture);
 
   mVideoManager.drawTexture(image->texture, nullptr, &destRect);
 }
