@@ -48,6 +48,7 @@
 #include "null_input_component.h"
 #include "null_graphics_component.h"
 #include "null_physics_component.h"
+#include "null_ai_component.h"
 #include "runner.h"
 #include "game_management.h"
 #include "colour.h"
