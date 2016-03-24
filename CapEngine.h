@@ -52,5 +52,6 @@
 #include "runner.h"
 #include "game_management.h"
 #include "colour.h"
+#include "controller.h"
 
 #endif

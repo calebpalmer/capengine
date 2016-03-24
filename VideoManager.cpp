@@ -86,6 +86,9 @@ void VideoManager::initSystem(Screen_t screenConfig){
 
     }
   }
+
+  // load controller maps
+  //loadControllerMaps();
 }
 
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){

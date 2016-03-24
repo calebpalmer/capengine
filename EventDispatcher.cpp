@@ -89,6 +89,22 @@ void EventDispatcher::flushQueue(){
 	    (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	  }
 	break;
+      case SDL_CONTROLLERAXISMOTION:
+      case SDL_CONTROLLERBUTTONDOWN:
+	if(curSubscription->subscriptionType & controllerEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+
+      case SDL_CONTROLLERBUTTONUP:
+      case SDL_CONTROLLERDEVICEADDED:
+      case SDL_CONTROLLERDEVICEREMOVED:
+      case SDL_CONTROLLERDEVICEREMAPPED:
+	if(curSubscription->subscriptionType & controllerEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+
       }
       subscriberIter++;
     }

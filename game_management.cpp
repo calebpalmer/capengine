@@ -1,10 +1,12 @@
 #include "game_management.h"
-#include "locator.h"
-#include "filesystem.h"
-#include "runner.h"
 
 #include <memory>
 #include <sstream>
+
+#include "locator.h"
+#include "filesystem.h"
+#include "runner.h"
+#include "controller.h"
 
 using namespace CapEngine;
 
@@ -34,6 +36,9 @@ void CapEngine::init(Screen_t screenConfig){
     Locator::eventDispatcher = pEventDispatcher.release();
 
     Locator::assetManager = nullptr;
+
+    // initialize ControllerManager
+    ControllerManager::initialize();
 
     // set current directory to directory of executable
     std::string exePath = getCurrentExecutablePath();

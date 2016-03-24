@@ -12,6 +12,7 @@
    const int keyboardEvent = 0x02;
    const int systemEvent = 0x04;
    const int windowEvent = 0x08;
+   const int controllerEvent = 0x10;
 
    // Class to recieve game events and dispatch them to subscribed parties
    class EventDispatcher{
