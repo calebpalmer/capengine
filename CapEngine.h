@@ -44,6 +44,7 @@
 #include "button_group.h"
 #include "gameobject.h"
 #include "gamestate.h"
+#include "components.h"
 #include "null_custom_component.h"
 #include "null_input_component.h"
 #include "null_graphics_component.h"

@@ -10,6 +10,7 @@ using namespace CapEngine;
 using namespace std;
 
 ObjectID GameObject::nextID = 0;
+int GameObject::nextMessageId = 0;
 
 GameObject::GameObject(bool newID) {
   if(newID){
@@ -166,4 +167,26 @@ void GameObject::setCustomComponent(shared_ptr<CustomComponent> pCustomComponent
 
 void GameObject::setAIComponent(shared_ptr<AIComponent> pAIComponentIn){
   mpAIComponent = pAIComponentIn;
+}
+
+int GameObject::generateMessageId(){
+  return nextMessageId++;
+}
+
+void GameObject::send(int id, string message){
+  if(inputComponent){
+    inputComponent->receive(id, message);
+  }
+  if(physicsComponent){
+    physicsComponent->receive(id, message);
+  }
+  if(graphicsComponent){
+    graphicsComponent->receive(id, message);
+  }
+  if(customComponent){
+    customComponent->receive(id, message);
+  }
+  if(mpAIComponent){
+    mpAIComponent->receive(id, message);
+  }
 }

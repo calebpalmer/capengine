@@ -2,6 +2,7 @@
 #define GAMEOBJECT_H
 
 #include <memory>
+#include <string>
 
 #include "vector.h"
 #include "collision.h"
@@ -47,6 +48,7 @@ namespace CapEngine {
     GameObject& operator=(const GameObject&);
 
     static ObjectID nextID;
+    static int nextMessageId;
     std::shared_ptr<ObjectData> m_pObjectData;
     ObjectState m_objectState;
     ObjectID m_objectID;
@@ -69,6 +71,7 @@ namespace CapEngine {
     ~GameObject();
 
     static ObjectID generateID();
+    static int generateMessageId();
     void render();
     std::unique_ptr<GameObject> update(double ms) const;
     Rectangle boundingPolygon() const;
@@ -82,6 +85,7 @@ namespace CapEngine {
     ObjectID getObjectID() const;
     void setObjectID(ObjectID id);
     ObjectID getParentObjectID() const;
+    void send(int messageId, std::string message);
     void setParentObjectID(ObjectID id);
     void setInputComponent(std::shared_ptr<InputComponent> pInputComponent);
     void setPhysicsComponent(std::shared_ptr<PhysicsComponent> pPhysicsComponent);
