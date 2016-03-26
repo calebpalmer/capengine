@@ -11,7 +11,7 @@ using namespace CapEngine;
 using namespace std;
 
 ButtonGroup::ButtonGroup() : m_activeButtonIndex(0) {
-  Locator::eventDispatcher->subscribe(this, keyboardEvent);
+  Locator::eventDispatcher->subscribe(this, keyboardEvent | controllerEvent);
 }
 
 ButtonGroup::~ButtonGroup(){
@@ -38,6 +38,7 @@ void ButtonGroup::render(){
 }
 
 void ButtonGroup::receiveEvent(const SDL_Event event, CapEngine::Time* time){
+  // keyboard
   if(event.type == SDL_KEYUP){
     const SDL_KeyboardEvent* keyboardEvent = reinterpret_cast<const SDL_KeyboardEvent*>(&event);
     if(keyboardEvent->keysym.sym == SDLK_UP){
@@ -58,6 +59,27 @@ void ButtonGroup::receiveEvent(const SDL_Event event, CapEngine::Time* time){
     }
   }
 
+  // game controller
+  if(m_controllers.size() > 0 && event.type == SDL_CONTROLLERBUTTONUP){
+    const SDL_ControllerButtonEvent* controllerEvent = reinterpret_cast<const SDL_ControllerButtonEvent*>(&event);
+    SDL_GameControllerButton button = (SDL_GameControllerButton)controllerEvent->button;
+    if(button == SDL_CONTROLLER_BUTTON_DPAD_UP){
+      ostringstream msg;
+      m_activeButtonIndex = static_cast<int>(std::abs(static_cast<double>(m_activeButtonIndex - 1))) % m_buttons.size();
+      msg << "Button group index changed to " << m_activeButtonIndex;
+      Locator::logger->log(msg.str(), Logger::CDEBUG);
+    }
+    else if(button == SDL_CONTROLLER_BUTTON_DPAD_DOWN){
+      ostringstream msg;
+      m_activeButtonIndex = (m_activeButtonIndex + 1) % m_buttons.size();
+      msg << "Button group index changed to " << m_activeButtonIndex;
+      Locator::logger->log(msg.str(), Logger::CDEBUG);
+    }
+    else if(button == SDL_CONTROLLER_BUTTON_A){
+      m_buttons[m_activeButtonIndex]->executeCallback();
+    }
+  }
+
 }
 
 void ButtonGroup::addButton(std::unique_ptr<Button> pbutton){
@@ -68,3 +90,19 @@ void ButtonGroup::removeButton(int index){
   
 }
 
+void ButtonGroup::listenController(shared_ptr<Controller> pController){
+  m_controllers.push_back(pController);
+}
+
+void ButtonGroup::forgetController(shared_ptr<Controller> pController){
+  // doesn't handle duplicates
+  auto i = m_controllers.begin();
+  for( ; i != m_controllers.end(); i++){
+    if((*i)->getId() == pController->getId()){
+      break;
+    }
+  }
+  if(i != m_controllers.end()){
+    m_controllers.erase(i);
+  }
+}

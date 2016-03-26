@@ -7,6 +7,7 @@
 #include "uiobject.h"
 #include "button.h"
 #include "IEventSubscriber.h"
+#include "controller.h"
 
 namespace CapEngine{
   class ButtonGroup : public UIObject, public IEventSubscriber {
@@ -33,6 +34,8 @@ namespace CapEngine{
 
     virtual void addButton(std::unique_ptr<Button>);
     virtual void removeButton(int index);
+    virtual void listenController(std::shared_ptr<Controller> pController);
+    virtual void forgetController(std::shared_ptr<Controller> pController);
 
   protected:
     ButtonGroup(const ButtonGroup&);
@@ -40,6 +43,7 @@ namespace CapEngine{
 
     std::vector<std::unique_ptr<Button>> m_buttons;
     unsigned int m_activeButtonIndex;
+    std::vector<std::shared_ptr<Controller> > m_controllers;
   };
 }
 
