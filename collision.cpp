@@ -1,6 +1,9 @@
 #include "collision.h"
 
+#include "scanconvert.h"
+
 using namespace CapEngine;
+using namespace std;
 
 Rectangle::Rectangle(){}
 Rectangle::Rectangle(real xIn,real yIn, real widthIn, real heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
@@ -66,4 +69,165 @@ Relation CapEngine::MBRRelate(int x, int y, const Rectangle& r){
   else{
     return OUTSIDE;
   }
+}
+
+// anonymous functions for bitmap collision detection
+namespace {
+  
+  bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface,
+				Vector& collisionPoint){
+    Uint8 r;
+    Uint8 g;
+    Uint8  b;
+    Uint8  a;
+    // start from halfway down rectangle to find lowest rectangle that
+    // "top" collides
+    int y = rect.y + (rect.height / 2);
+    for( ; y > rect.y; y --){
+      for(int x = rect.x; x < rect.x + rect.width; x++){
+	getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+	if(r == 0x00 && g == 0x00 && b == 0x00){
+	  collisionPoint.setX(x);
+	  collisionPoint.setY(y);
+	  collisionPoint.setZ(0);
+	  return true;
+	}
+      }
+    }
+    return false;
+  }
+
+  bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface,
+				   Vector& collisionPoint){
+    Uint8 r;
+    Uint8 g;
+    Uint8  b;
+    Uint8  a;
+
+    // start from halfway up to find the first part the collides
+    int y = rect.y + (rect.height / 2);
+    for(; y < rect.y + rect.height; y++){
+      for(int x = rect.x; x < rect.x + rect.width; x++){
+	getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+	if(r == 0x00 && g == 0x00 && b == 0x00){
+	  collisionPoint.setX(x);
+	  collisionPoint.setY(y);
+	  collisionPoint.setZ(0);
+	  return true;
+	}
+      }
+    }
+    return false;
+  }
+
+  bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface,
+				  Vector& collisionPoint){
+    Uint8 r;
+    Uint8 g;
+    Uint8  b;
+    Uint8  a;
+
+    int x = rect.x + (rect.width / 2);
+    for(; x < rect.x + rect.width; x++){
+      for(int y = rect.y; y < rect.y + rect.height; y++){
+	getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+	if(r == 0x00 && g == 0x00 && b == 0x00){
+	  collisionPoint.setX(x);
+	  collisionPoint.setY(y);
+	  collisionPoint.setZ(0);
+	  return true;
+	}
+      }
+    }
+    return false;
+  }
+
+  bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface,
+				  Vector& collisionPoint){
+    Uint8 r;
+    Uint8 g;
+    Uint8  b;
+    Uint8  a;
+
+    int x = rect.x + (rect.width / 2);
+    for(; x > rect.x; x--){
+      for(int y = rect.y; y < rect.y + rect.height; y++){
+	getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+	if(r == 0x00 && g == 0x00 && b == 0x00){
+	  collisionPoint.setX(x);
+	  collisionPoint.setY(y);
+	  collisionPoint.setZ(0);
+	  return true;
+	}
+      }
+    }
+    return false;
+  }
+
+}
+
+// assumes 32bpp surface
+CollisionType CapEngine::detectBitmapCollision(const CapEngine::Rectangle &rect, const Surface *bitmapSurface,
+					       Vector& collisionPoint){
+  // check top collision
+  if(detectTopBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    return COLLISION_TOP;
+  }
+  
+  // check bottom collision
+  if(detectBottomBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    return COLLISION_BOTTOM;
+  }
+
+  // check left side collition
+  if(detectLeftBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    return COLLISION_LEFT;
+  }
+
+  // check left side collition
+  if(detectRightBitmapCollision(rect, bitmapSurface, collisionPoint)){
+      return COLLISION_RIGHT;
+  }
+
+  return COLLISION_NONE;
+}
+
+vector<PixelCollision> CapEngine::detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface){
+  vector<PixelCollision> pixelCollisions;
+  Vector collisionPoint;
+
+    // check bottom collision
+  if(detectBottomBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    PixelCollision pixelCollision;
+    pixelCollision.collisionType = COLLISION_BOTTOM;
+    pixelCollision.collisionPoint = collisionPoint;
+    pixelCollisions.push_back(pixelCollision);
+  }
+
+    // check top collision
+  if(detectTopBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    PixelCollision pixelCollision;
+    pixelCollision.collisionType = COLLISION_TOP;
+    pixelCollision.collisionPoint = collisionPoint;
+    pixelCollisions.push_back(pixelCollision);
+  }
+
+  // check left side collition
+  if(detectLeftBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    PixelCollision pixelCollision;
+    pixelCollision.collisionType = COLLISION_LEFT;
+    pixelCollision.collisionPoint = collisionPoint;
+    pixelCollisions.push_back(pixelCollision);
+  }
+
+  // check left side collition
+  if(detectRightBitmapCollision(rect, bitmapSurface, collisionPoint)){
+    PixelCollision pixelCollision;
+    pixelCollision.collisionType = COLLISION_RIGHT;
+    pixelCollision.collisionPoint = collisionPoint;
+    pixelCollisions.push_back(pixelCollision);
+  }
+
+  return pixelCollisions;
+
 }

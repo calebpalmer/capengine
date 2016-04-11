@@ -21,6 +21,13 @@ namespace CapEngine{
     int frameHeight;
   };
 
+  struct SoftwareImage{
+    std::string path;
+    Surface* surface;
+    int frameWidth;
+    int frameHeight;
+  };
+
   struct Sound {
     std::string path;
     PCM* pcm;
@@ -35,7 +42,8 @@ namespace CapEngine{
     void draw(int id, Rectangle dstRect, int row, int frame);
     void draw(int id, Vector position);
     void loadImage(int id, std::string path, int frameWidth=0, int frameHeight=0);
-    Image* getImage(int id); 
+    Image* getImage(int id);
+    SoftwareImage getSoftwareImage(int id);
     int getImageWidth(int id);
     int getImageHeight(int id);
     long playSound(int id, bool repeat=false);

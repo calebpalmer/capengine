@@ -7,7 +7,7 @@ namespace CapEngine {
   class Component{
   public:
     virtual ~Component() {}
-    virtual void receive(int messageId, std::string message) {}
+    virtual void receive(GameObject* object, int messageId, std::string message) {}
   };
   
   class PhysicsComponent : public Component {
@@ -15,7 +15,9 @@ namespace CapEngine {
     virtual ~PhysicsComponent() {}
     virtual void update(GameObject* object, double timestep) = 0;
     virtual Rectangle boundingPolygon(const GameObject* object) const = 0;
-    virtual bool handleCollision(GameObject* object, CollisionType, CollisionClass, GameObject* otherObject) = 0;
+    virtual bool handleCollision(GameObject* object, CollisionType, CollisionClass, GameObject* otherObject,
+				 Vector collisionVector) = 0;
+    virtual bool handlesColliisions() {return false;}
   };
 
   class GraphicsComponent : public Component {

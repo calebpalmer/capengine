@@ -21,6 +21,8 @@ namespace CapEngine {
   Surface* createRectangle2(int width, int height, Colour colour);
   void writePixel(CapEngine::Surface* surface, int x, int y);
   void writePixel(CapEngine::Surface*, int x, int y, CapEngine::Colour colour);
+  Uint32 getPixel(const CapEngine::Surface* surface, int x, int y);
+  void getPixelComponents(const CapEngine::Surface* surface, int x, int y, Uint8* r, Uint8* g, Uint8* b, Uint8* a);
   void writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colour, int bufWidth, int bufHeight);
 
   static int basicStippleLength = 10;

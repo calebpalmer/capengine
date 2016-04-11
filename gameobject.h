@@ -75,7 +75,8 @@ namespace CapEngine {
     void render();
     std::unique_ptr<GameObject> update(double ms) const;
     Rectangle boundingPolygon() const;
-    bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject);
+    bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,
+			 Vector collisionLocation);
     std::unique_ptr<GameObject> clone() const;
     // getters and setters
     std::shared_ptr<ObjectData> getObjectData() const;

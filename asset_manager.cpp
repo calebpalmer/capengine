@@ -136,6 +136,24 @@ Image* AssetManager::getImage(int id){
   return &(iter->second);
 }
 
+SoftwareImage AssetManager::getSoftwareImage(int id){
+  auto iter = mImageMap.find(id);
+  if(iter == mImageMap.end()){
+    ostringstream message;
+    message << "Image with id " << id << " does not exist";
+    throw CapEngineException(message.str());
+  }
+
+  Surface* surface = mVideoManager.loadSurface(iter->second.path);
+  SoftwareImage softwareImage;
+  softwareImage.path = iter->second.path;
+  softwareImage.surface = surface;
+  softwareImage.frameWidth = iter->second.frameWidth;
+  softwareImage.frameHeight = iter->second.frameHeight;
+
+  return softwareImage;
+}
+
 int AssetManager::getImageWidth(int id){
   Image* image = this->getImage(id);
 

@@ -53,8 +53,9 @@ Rectangle GameObject::boundingPolygon() const {
 }
 
 
-bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_, GameObject* otherObject){
-  return physicsComponent->handleCollision(this, type, class_, otherObject);
+bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_, GameObject* otherObject,
+				 Vector collisionLocation){
+  return physicsComponent->handleCollision(this, type, class_, otherObject, collisionLocation);
 }
 
 unique_ptr<GameObject> GameObject::clone() const{
@@ -174,19 +175,23 @@ int GameObject::generateMessageId(){
 }
 
 void GameObject::send(int id, string message){
+  ostringstream messageStr;
+  messageStr << "Object " << this->m_objectID << ":  Message: " << message;
+  Locator::logger->log(messageStr.str(), Logger::CDEBUG);
+    
   if(inputComponent){
-    inputComponent->receive(id, message);
+    inputComponent->receive(this, id, message);
   }
   if(physicsComponent){
-    physicsComponent->receive(id, message);
+    physicsComponent->receive(this, id, message);
   }
   if(graphicsComponent){
-    graphicsComponent->receive(id, message);
+    graphicsComponent->receive(this, id, message);
   }
   if(customComponent){
-    customComponent->receive(id, message);
+    customComponent->receive(this, id, message);
   }
   if(mpAIComponent){
-    mpAIComponent->receive(id, message);
+    mpAIComponent->receive(this, id, message);
   }
 }

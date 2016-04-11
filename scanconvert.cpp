@@ -356,3 +356,41 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
   Surface* surface = createSurfaceFromPixelBuffer(pixels, width, height);
   return surface;
 }
+
+Uint32 CapEngine::getPixel(const CapEngine::Surface* surface, int x, int y){
+  if(surface->format->BytesPerPixel == 4){
+    int offset = (surface->pitch / surface->format->BytesPerPixel) * y + x;
+    Uint32 pixel = ((Uint32*)surface->pixels)[offset];
+    return pixel;
+  }
+  else{
+    throw CapEngineException("Trying to get 32bpp pixel from non 32bpp surface");
+  }
+}
+
+void CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, int y, Uint8* r, Uint8* g, Uint8* b, Uint8* a){
+  Uint32 pixel = getPixel(surface, x, y);
+  Uint32 rmask, gmask, bmask, amask;
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+    *r = (pixel & rmask) >> 6;
+    *g= (pixel & gmask) >> 4;
+    *b= (pixel & bmask) >> 2;
+    *a= (pixel & amask);
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+    *r = (pixel & rmask);
+    *g= (pixel & gmask) >> 2;
+    *b= (pixel & bmask) >> 4;
+    *a= (pixel & amask) >> 6;
+#endif
+    
+
+  
+}
