@@ -21,6 +21,7 @@
 #include "Time.h"
 #include "EventDispatcher.h"
 #include "IEventSubscriber.h"
+#include "physics.h"
 #include "collision.h"
 #include "fontmanager.h"
 #include "numbergenerator.h"
