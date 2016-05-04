@@ -10,6 +10,6 @@ Vector CapEngine::applyDisplacement(Vector velocity, Vector position, double tim
 
 Vector CapEngine::applyAcceleration(Vector acceleration, Vector velocity, double timestep){
   Vector delta = acceleration;
-  delta.scale(timestep);
+  delta.scale(timestep / 1000.0);
   return velocity + delta;
 }

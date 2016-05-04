@@ -62,6 +62,7 @@ namespace CapEngine {
     Vector position;
     Vector orientation;
     Vector velocity;
+    Vector acceleration;
 
 
   public:
@@ -99,6 +100,8 @@ namespace CapEngine {
     void setOrientation(Vector orientation);
     Vector getVelocity() const;
     void setVelocity(Vector velocity);
+    Vector getAcceleration() const;
+    void setAcceleration(Vector velocity);
   };
 }
 

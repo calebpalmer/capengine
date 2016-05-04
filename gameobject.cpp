@@ -64,6 +64,7 @@ unique_ptr<GameObject> GameObject::clone() const{
   newObj->position = position;
   newObj->orientation = orientation;
   newObj->velocity = velocity;
+  newObj->acceleration = acceleration;
   if(inputComponent){
     newObj->inputComponent = inputComponent;
   }
@@ -149,6 +150,15 @@ Vector GameObject::getVelocity() const{
 void GameObject::setVelocity(Vector velocityIn){
   velocity = velocityIn;
 }
+
+Vector GameObject::getAcceleration() const{
+  return acceleration;
+}
+
+void GameObject::setAcceleration(Vector accelerationIn){
+  acceleration = accelerationIn;
+}
+
 
 void GameObject::setInputComponent(shared_ptr<InputComponent> pInputComponent){
   inputComponent = pInputComponent;
