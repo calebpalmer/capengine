@@ -6,6 +6,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -18,24 +19,36 @@
 
 namespace CapEngine {
 
-  struct Screen_t{
+  struct WindowParams{
+    std::string windowName;
     int width;
     int height;
     int pDepth;
     bool fullScreen;
     bool opengl;
+    bool resizable;
+  };
+
+  struct Window {
+    Window(SDL_Window* window,
+	   SDL_Renderer* renderer)
+    : m_window(window),
+      m_renderer(renderer) {}
+   
+    SDL_Window* m_window;
+    SDL_Renderer* m_renderer;
   };
 
   class FontManager;
 
-  const Screen_t defaultScreen = {1280,800,32,false};
+  static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false,false};
 
 
   class VideoManager {
   public:
     VideoManager();    
     VideoManager(Logger* loggerIn);
-    void initSystem(Screen_t screenConfig);
+    void initSystem(WindowParams screenConfig);
     void shutdown();
     void clearScreen();
     void drawScreen();
@@ -82,12 +95,17 @@ namespace CapEngine {
     VideoManager(const VideoManager& videoManager);
     VideoManager& operator=(const VideoManager& videoManager);
 
+    SDL_Window* createWindow(WindowParams windowParams);
+    SDL_Renderer* createRenderer(SDL_Window* window, WindowParams windowParams);
+
 
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
+    std::vector<Window> m_windows;
+    
     Logger* logger;
     static bool instantiated; //singleton
-    Screen_t currentScreenConfig;
+    WindowParams currentScreenConfig;
     void (*reshapeFunc)(int, int); //for opengl resize functions
     CapEngine::Time lastRenderTime;
     float fps;

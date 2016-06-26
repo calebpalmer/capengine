@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <vector>
 
 #include <SDL2/SDL_image.h>
 
@@ -34,9 +35,8 @@ VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
   initialized = false;
 }
 
-void VideoManager::initSystem(Screen_t screenConfig){
-  currentScreenConfig = screenConfig;
-  Uint32 flags = 0;
+void VideoManager::initSystem(WindowParams windowParams){
+  currentScreenConfig = windowParams;
   
   if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
     ostringstream errorMsg;
@@ -45,46 +45,30 @@ void VideoManager::initSystem(Screen_t screenConfig){
     shutdown();
   }
   
-  if(screenConfig.opengl){
+  if(windowParams.opengl){
     throw CapEngineException("OpenGL not implemented");
   }
 
   else{
-    if(screenConfig.fullScreen){
-      flags = flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
-      m_pWindow = SDL_CreateWindow("CapEngine", SDL_WINDOWPOS_UNDEFINED,
-				   SDL_WINDOWPOS_UNDEFINED, 0, 0, flags);
+    m_pWindow = createWindow(windowParams);
     
-    }
-    else{
-      m_pWindow = SDL_CreateWindow("CapEngine", SDL_WINDOWPOS_UNDEFINED,
-				   SDL_WINDOWPOS_UNDEFINED, screenConfig.width, screenConfig.height, flags);
-    }
-
-    if(m_pWindow == nullptr){
+    // Now create the 2d Renderer if OpenGL is not being used
+    m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
+    if(m_pRenderer == nullptr){
       ostringstream errorStream;
-      errorStream << "Error creating window: " << SDL_GetError();
+      errorStream << "Error creating renderer:  " << SDL_GetError();
+
       throw CapEngineException(errorStream.str());
     }
-
-    // Now create the 2d Renderer if OpenGL is not being used
-    if( !screenConfig.opengl ){
-      m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
-      if(m_pRenderer == nullptr){
-	ostringstream errorStream;
-	errorStream << "Error creating renderer:  " << SDL_GetError();
-
-	throw CapEngineException(errorStream.str());
-      }
-      if(screenConfig.fullScreen){
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-	SDL_RenderSetLogicalSize(m_pRenderer, screenConfig.width, screenConfig.height);
-      }
-      SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
-			     m_backgroundColour.m_g, m_backgroundColour.m_g,
-			     255);
-
+    if(windowParams.fullScreen){
+      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+      SDL_RenderSetLogicalSize(m_pRenderer, windowParams.width, windowParams.height);
     }
+    SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+			   m_backgroundColour.m_g, m_backgroundColour.m_g,
+			   255);
+
+    m_windows.push_back(Window(m_pWindow, m_pRenderer));
   }
 
   // load controller maps
@@ -470,4 +454,40 @@ void VideoManager::drawRect(Rect rect, Colour fillColour){
 
 void VideoManager::setBackgroundColour(Colour colour){
 m_backgroundColour = colour;
+}
+
+SDL_Window* VideoManager::createWindow(WindowParams windowParams){
+  Uint32 flags = 0;
+  SDL_Window* pWindow = nullptr;
+  
+  if(windowParams.fullScreen){
+    // full screen
+    flags = flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
+    pWindow = SDL_CreateWindow(windowParams.windowName.c_str(), SDL_WINDOWPOS_UNDEFINED,
+				 SDL_WINDOWPOS_UNDEFINED, 0, 0, flags);
+    
+  }
+  else{
+    // windowed
+    if(windowParams.resizable){
+      flags = flags | SDL_WINDOW_RESIZABLE;
+    }
+    pWindow = SDL_CreateWindow(windowParams.windowName.c_str(), SDL_WINDOWPOS_UNDEFINED,
+				 SDL_WINDOWPOS_UNDEFINED, windowParams.width, windowParams.height, flags);
+  
+  }
+
+  // check for error
+  if(pWindow == nullptr){
+    ostringstream errorStream;
+    errorStream << "Error creating window: " << SDL_GetError();
+    throw CapEngineException(errorStream.str());
+  }
+
+  return  pWindow;
+}
+
+SDL_Renderer* VideoManager::createRenderer(SDL_Window* window, WindowParams windowparams){
+  SDL_Renderer* pRenderer = nullptr;
+  return pRenderer;
 }
