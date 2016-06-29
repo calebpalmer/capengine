@@ -105,7 +105,7 @@ namespace CapEngine {
     
     Logger* logger;
     static bool instantiated; //singleton
-    WindowParams currentScreenConfig;
+    WindowParams currentWindowParams;
     void (*reshapeFunc)(int, int); //for opengl resize functions
     CapEngine::Time lastRenderTime;
     float fps;

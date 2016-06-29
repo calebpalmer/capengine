@@ -36,7 +36,7 @@ VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
 }
 
 void VideoManager::initSystem(WindowParams windowParams){
-  currentScreenConfig = windowParams;
+  currentWindowParams = windowParams;
   
   if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
     ostringstream errorMsg;
@@ -177,8 +177,8 @@ void VideoManager::clearScreen(){
   // SDL_Rect rectangle;
   // rectangle.x = 0;
   // rectangle.y = 0;
-  // rectangle.w = currentScreenConfig.width;
-  // rectangle.h = currentScreenConfig.height;
+  // rectangle.w = currentWindowParams.width;
+  // rectangle.h = currentWindowParams.height;
   // SDL_RenderFillRect(m_pRenderer, &rectangle);
 
 }
@@ -199,7 +199,7 @@ void VideoManager::drawScreen(){
   }
 
   // draw the screen
-  if(currentScreenConfig.opengl){
+  if(currentWindowParams.opengl){
     SDL_GL_SwapWindow(m_pWindow);
   }
   else{
@@ -217,16 +217,16 @@ void VideoManager::drawScreen(){
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
-  *width = currentScreenConfig.width;
-  *height = currentScreenConfig.height;
+  *width = currentWindowParams.width;
+  *height = currentWindowParams.height;
 }
 
 int VideoManager::getWindowWidth() const{
-  return currentScreenConfig.width;
+  return currentWindowParams.width;
 }
 
 int VideoManager::getWindowHeight() const{
-  return currentScreenConfig.height;
+  return currentWindowParams.height;
 }
 
 //! get the width of given texture
@@ -313,7 +313,7 @@ Texture* VideoManager::createTexture(int width, int height){
    if(reshapeFunc == nullptr){
      throw CapEngineException("No reshape function set"); 
    }
-   if(currentScreenConfig.opengl){
+   if(currentWindowParams.opengl){
      reshapeFunc(w, h);
   }
 }
