@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <exception>
 
 #include <SDL2/SDL_image.h>
 
@@ -17,6 +18,7 @@ using namespace std;
 using namespace CapEngine;
 
 bool VideoManager::instantiated = false;
+unsigned int VideoManager::nextWindowID = 1;
 
 VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
 				  , logger(nullptr), m_pWindow(nullptr), m_pRenderer(nullptr)
@@ -53,7 +55,7 @@ void VideoManager::initSystem(WindowParams windowParams){
     m_pWindow = createWindow(windowParams);
     m_pRenderer = createRenderer(m_pWindow, windowParams);
     
-    m_windows.push_back(Window(m_pWindow, m_pRenderer));
+    m_windows[0] = Window(m_pWindow, m_pRenderer);
   }
 
   // load controller maps
@@ -495,4 +497,29 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
 			 255);
 
   return pRenderer;
+}
+
+/**
+   Creates a new window and returns it's id.
+ */
+unsigned int VideoManager::createNewWindow(WindowParams windowParams){
+  SDL_Window* pWindow = createWindow(windowParams);
+  SDL_Renderer* pRenderer = createRenderer(pWindow, windowParams);
+
+  unsigned int id = nextWindowID++;
+  Window window(pWindow, pRenderer);
+  m_windows[id] = window;
+
+  return id;
+}
+
+/**
+   Closes the window (and renderer) identied by the given windowID
+ */
+void VideoManager::closeWindow(unsigned int windowID){
+  auto window = m_windows.find(windowID);
+  if(window != m_windows.end()){
+    SDL_DestroyRenderer(window->second.m_renderer);
+    SDL_DestroyWindow(window->second.m_window);
+  }
 }

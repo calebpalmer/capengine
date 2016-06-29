@@ -30,10 +30,17 @@ namespace CapEngine {
   };
 
   struct Window {
+    Window() {}
+    
     Window(SDL_Window* window,
 	   SDL_Renderer* renderer)
     : m_window(window),
       m_renderer(renderer) {}
+
+    Window(const Window& oldWindow) {
+      m_window = oldWindow.m_window;
+      m_renderer = oldWindow.m_renderer;
+    }
    
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
@@ -48,7 +55,9 @@ namespace CapEngine {
   public:
     VideoManager();    
     VideoManager(Logger* loggerIn);
-    void initSystem(WindowParams screenConfig);
+    void initSystem(WindowParams windowParams);
+    unsigned int createNewWindow(WindowParams windowParams);
+    void closeWindow(unsigned int windowID);
     void shutdown();
     void clearScreen();
     void drawScreen();
@@ -98,10 +107,10 @@ namespace CapEngine {
     SDL_Window* createWindow(WindowParams windowParams);
     SDL_Renderer* createRenderer(SDL_Window* window, WindowParams windowParams);
 
-
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
-    std::vector<Window> m_windows;
+    std::map<int, Window> m_windows;
+    static unsigned int nextWindowID;
     
     Logger* logger;
     static bool instantiated; //singleton
