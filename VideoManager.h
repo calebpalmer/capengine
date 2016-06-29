@@ -56,8 +56,8 @@ namespace CapEngine {
     VideoManager();    
     VideoManager(Logger* loggerIn);
     void initSystem(WindowParams windowParams);
-    unsigned int createNewWindow(WindowParams windowParams);
-    void closeWindow(unsigned int windowID);
+    Uint32 createNewWindow(WindowParams windowParams);
+    void closeWindow(Uint32 windowID);
     void shutdown();
     void clearScreen();
     void drawScreen();
@@ -109,8 +109,7 @@ namespace CapEngine {
 
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
-    std::map<int, Window> m_windows;
-    static unsigned int nextWindowID;
+    std::map<Uint32, Window> m_windows;
     
     Logger* logger;
     static bool instantiated; //singleton
