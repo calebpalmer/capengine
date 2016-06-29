@@ -12,7 +12,7 @@ using namespace CapEngine;
 
 bool CapEngine::initted = false;
 
-void CapEngine::init(Screen_t screenConfig){
+void CapEngine::init(WindowParams screenConfig){
   if(!initted){
     std::unique_ptr<VideoManager> pVideoManager(new VideoManager());
     Locator::videoManager = pVideoManager.release();
