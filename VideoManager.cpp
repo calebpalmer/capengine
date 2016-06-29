@@ -51,23 +51,8 @@ void VideoManager::initSystem(WindowParams windowParams){
 
   else{
     m_pWindow = createWindow(windowParams);
+    m_pRenderer = createRenderer(m_pWindow, windowParams);
     
-    // Now create the 2d Renderer if OpenGL is not being used
-    m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED);
-    if(m_pRenderer == nullptr){
-      ostringstream errorStream;
-      errorStream << "Error creating renderer:  " << SDL_GetError();
-
-      throw CapEngineException(errorStream.str());
-    }
-    if(windowParams.fullScreen){
-      SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-      SDL_RenderSetLogicalSize(m_pRenderer, windowParams.width, windowParams.height);
-    }
-    SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
-			   m_backgroundColour.m_g, m_backgroundColour.m_g,
-			   255);
-
     m_windows.push_back(Window(m_pWindow, m_pRenderer));
   }
 
@@ -487,7 +472,27 @@ SDL_Window* VideoManager::createWindow(WindowParams windowParams){
   return  pWindow;
 }
 
-SDL_Renderer* VideoManager::createRenderer(SDL_Window* window, WindowParams windowparams){
+SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams windowParams){
   SDL_Renderer* pRenderer = nullptr;
+  // Now create the 2d Renderer if OpenGL is not being used
+  pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
+  if(pRenderer == nullptr){
+    ostringstream errorStream;
+    errorStream << "Error creating renderer:  " << SDL_GetError();
+    std::cerr << errorStream.str() << std::endl;
+
+    throw CapEngineException(errorStream.str());
+  }
+
+  // if full, set scaling
+  if(windowParams.fullScreen){
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+    SDL_RenderSetLogicalSize(m_pRenderer, windowParams.width, windowParams.height);
+  }
+
+  SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+			 m_backgroundColour.m_g, m_backgroundColour.m_g,
+			 255);
+
   return pRenderer;
 }

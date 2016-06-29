@@ -9,8 +9,8 @@ namespace CapEngine{
   
   typedef SDL_Surface Surface;
   typedef SDL_Texture Texture;
-  typedef SDL_Window Window;
-  typedef SDL_Renderer Renderer;
+  //  typedef SDL_Window Window;
+  //typedef SDL_Renderer Renderer;
   typedef SDL_Rect Rect;
 
 }
