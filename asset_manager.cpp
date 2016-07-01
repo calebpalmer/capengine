@@ -205,7 +205,7 @@ void AssetManager::loadSound(int id, string path){
 
 }
 
-void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
+void AssetManager::draw(Uint32 windowID, int id, Rectangle _srcRect, Rectangle _destRect){
   Image* image = this->getImage(id);
 
   Rect srcRect;
@@ -220,10 +220,10 @@ void AssetManager::draw(int id, Rectangle _srcRect, Rectangle _destRect){
   destRect.w = _destRect.width;
   destRect.h = _destRect.height;
   
-  mVideoManager.drawTexture(image->texture, &srcRect, &destRect);
+  mVideoManager.drawTexture(windowID, image->texture, &srcRect, &destRect);
 }
 
-void AssetManager::draw(int id, Vector position){
+void AssetManager::draw(Uint32 windowID, int id, Vector position){
   Image* image = this->getImage(id);
 
   Rect destRect;
@@ -232,10 +232,10 @@ void AssetManager::draw(int id, Vector position){
   destRect.w = mVideoManager.getTextureWidth(image->texture);
   destRect.h = mVideoManager.getTextureHeight(image->texture);
 
-  mVideoManager.drawTexture(image->texture, nullptr, &destRect);
+  mVideoManager.drawTexture(windowID, image->texture, nullptr, &destRect);
 }
 
-void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
+void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frame){
   Image* image = this->getImage(id);
   real width, height;
   width = mVideoManager.getTextureWidth(image->texture);
@@ -265,7 +265,7 @@ void AssetManager::draw(int id, Rectangle _destRect, int row, int frame){
   destRect.w = _destRect.width;
   destRect.h = _destRect.height;
 
-  mVideoManager.drawTexture(image->texture, &srcRect, &destRect);
+  mVideoManager.drawTexture(windowID, image->texture, &srcRect, &destRect);
   
 }
 

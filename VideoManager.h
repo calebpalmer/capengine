@@ -55,12 +55,14 @@ namespace CapEngine {
   public:
     VideoManager();    
     VideoManager(Logger* loggerIn);
-    void initSystem(WindowParams windowParams);
+    Uint32 initSystem(WindowParams windowParams);
     Uint32 createNewWindow(WindowParams windowParams);
     void closeWindow(Uint32 windowID);
     void shutdown();
-    void clearScreen();
-    void drawScreen();
+    void clearScreen(Uint32 windowID);
+    void drawScreen(Uint32 windowID);
+    void clearAll();
+    void drawAll();
     void getWindowResolution(int* width, int* height) const;
     int getWindowWidth() const;
     int getWindowHeight() const;
@@ -75,8 +77,8 @@ namespace CapEngine {
     // Textures
     Texture* loadImage(std::string fileName) const;
     void closeTexture(Texture* texture) const;
-    void drawTexture(int x, int y, Texture* texture, Rect* srcRect=nullptr) const;
-    void drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const;
+    void drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect=nullptr);
+    void drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect);
     real getTextureWidth(Texture* texture) const;
     real getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;
@@ -91,7 +93,7 @@ namespace CapEngine {
     // input
     void loadControllerMapFromFile(std::string filePath);
     //Drawing
-    void drawRect(Rect rect, Colour fillColour);
+    void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
 
     bool initialized;
 
@@ -106,6 +108,7 @@ namespace CapEngine {
 
     SDL_Window* createWindow(WindowParams windowParams);
     SDL_Renderer* createRenderer(SDL_Window* window, WindowParams windowParams);
+    Window getWindow(Uint32 windowID);
 
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;

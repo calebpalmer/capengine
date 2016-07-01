@@ -8,14 +8,14 @@
 using namespace std;
 using namespace CapEngine;
 
-TextButton::TextButton(string text, string font, int fontSize, Vector position)
- : TextButton(text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
+TextButton::TextButton(Uint32 windowID, string text, string font, int fontSize, Vector position)
+  : TextButton(windowID, text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
 { }
 
-TextButton::TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, 
+TextButton::TextButton(Uint32 windowID, std::string text, std::string font, int fontSize, CapEngine::Vector position, 
                         CapEngine::Colour inactiveColour, CapEngine::Colour activeColour)
-  : m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false),  m_position(position)
-  , m_callback(nullptr), m_fontColour(inactiveColour), m_pSelectedTexture(nullptr)
+  : m_windowID(windowID), m_text(text), m_font(font), m_fontSize(fontSize), m_selected(false)
+  ,  m_position(position), m_callback(nullptr), m_fontColour(inactiveColour), m_pSelectedTexture(nullptr)
 {
     // get surface
   FontManager fontManager;
@@ -85,11 +85,11 @@ void TextButton::render() {
   srcRect.h = m_height;
   // if flag is set,
   if(m_activated){
-    Locator::videoManager->drawTexture(m_pTextTextureActive, &srcRect, &destRect);
+    Locator::videoManager->drawTexture(m_windowID, m_pTextTextureActive, &srcRect, &destRect);
     }
   // if flag is not set
   else{
-    Locator::videoManager->drawTexture(m_pTextTextureInactive, &srcRect, &destRect);
+    Locator::videoManager->drawTexture(m_windowID, m_pTextTextureInactive, &srcRect, &destRect);
   }
 
   if(m_selected){
@@ -109,7 +109,7 @@ void TextButton::render() {
     rect.w = w * ((double)rect.h / (double)h);
     rect.x = m_position.x - (rect.w * 1.5);
     rect.y = m_position.y + ((m_height - rect.h) / 2);
-    Locator::videoManager->drawTexture(m_pSelectedTexture, nullptr, &rect);
+    Locator::videoManager->drawTexture(m_windowID, m_pSelectedTexture, nullptr, &rect);
   }
 }
 

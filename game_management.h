@@ -9,7 +9,7 @@
 namespace CapEngine {
   extern bool initted;
 
-  void init(WindowParams windowParams);
+  Uint32 init(WindowParams windowParams);
   void destroy();
   void loadAssetFile(std::string assetsFile);
   void startLoop(std::unique_ptr<GameState> pGameState);

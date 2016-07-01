@@ -12,11 +12,12 @@ using namespace CapEngine;
 
 bool CapEngine::initted = false;
 
-void CapEngine::init(WindowParams screenConfig){
+Uint32 CapEngine::init(WindowParams screenConfig){
+  Uint32 windowID = -1;
   if(!initted){
     std::unique_ptr<VideoManager> pVideoManager(new VideoManager());
     Locator::videoManager = pVideoManager.release();
-    Locator::videoManager->initSystem(screenConfig);
+    windowID = Locator::videoManager->initSystem(screenConfig);
 
     std::unique_ptr<Logger> pLogger(new Logger);
     //Locator::logger = pLogger.release();
@@ -45,6 +46,8 @@ void CapEngine::init(WindowParams screenConfig){
     setCurrentDir(stripPath(exePath));
     initted = true;
   }
+
+  return windowID;
 }
 
 void CapEngine::destroy(){

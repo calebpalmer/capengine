@@ -28,6 +28,8 @@ $(EDITOR_OBJECTS): %.o: %.cpp
 .PHONEY: clean tests tags
 
 clean:
+	-rm libcapengine.so
+	-rm editor
 	-rm -f *.o
 	-rm -f *.so
 	-rm test/*.o

@@ -81,9 +81,9 @@ void Runner::update(){
 }
 
 void Runner::render(double frameFactor){
-  Locator::videoManager->clearScreen();
+  Locator::videoManager->clearAll();
   m_gameStates.back()->render();
-  Locator::videoManager->drawScreen();
+  Locator::videoManager->drawAll();
 }
 
 void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){

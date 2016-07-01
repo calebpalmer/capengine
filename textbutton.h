@@ -17,8 +17,8 @@ namespace CapEngine {
     TextButton& operator=(const TextButton&);
 
   public:
-    TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position);
-    TextButton(std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
+    TextButton(Uint32 windowID, std::string text, std::string font, int fontSize, CapEngine::Vector position);
+    TextButton(Uint32 windowID, std::string text, std::string font, int fontSize, CapEngine::Vector position, CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
     ~TextButton();
     void registerCallback(void (*callback)(void*), void* context) override;
     void executeCallback();
@@ -48,6 +48,7 @@ namespace CapEngine {
     bool m_selected;
     bool m_enabled;
     bool m_activated;
+    Uint32 m_windowID;
     CapEngine::Texture* m_pTextTextureInactive;
     CapEngine::Texture* m_pTextTextureActive;
     CapEngine::Texture* m_pSelectedTexture;

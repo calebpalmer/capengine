@@ -38,9 +38,9 @@ namespace CapEngine{
   public:
     AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::string assetFile);
     ~AssetManager();
-    void draw(int id, Rectangle srcRect, Rectangle dstRect);
-    void draw(int id, Rectangle dstRect, int row, int frame);
-    void draw(int id, Vector position);
+    void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect);
+    void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
+    void draw(Uint32 windowID, int id, Vector position);
     void loadImage(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Image* getImage(int id);
     SoftwareImage getSoftwareImage(int id);

@@ -36,7 +36,12 @@ VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
   initialized = false;
 }
 
-void VideoManager::initSystem(WindowParams windowParams){
+/**
+   Unitializes the system.
+   Returns the id of the main window
+ */
+Uint32 VideoManager::initSystem(WindowParams windowParams){
+  Uint32 windowID = -1;
   currentWindowParams = windowParams;
   
   if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
@@ -53,12 +58,15 @@ void VideoManager::initSystem(WindowParams windowParams){
   else{
     m_pWindow = createWindow(windowParams);
     m_pRenderer = createRenderer(m_pWindow, windowParams);
-    
-    m_windows[0] = Window(m_pWindow, m_pRenderer);
+
+    windowID = SDL_GetWindowID(m_pWindow);    
+    m_windows[windowID] = Window(m_pWindow, m_pRenderer);
   }
 
   // load controller maps
   //loadControllerMaps();
+
+  return windowID;
 }
 
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){
@@ -113,7 +121,9 @@ Texture* VideoManager::loadImage(string filePath) const{
   return texture;
 }
 
-void VideoManager::drawTexture(int x, int y, Texture* texture, Rect* srcRect) const{
+void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
   
   SDL_Rect dstRect;
   dstRect.x = x;
@@ -132,32 +142,43 @@ void VideoManager::drawTexture(int x, int y, Texture* texture, Rect* srcRect) co
    }
  }
 
-  int result = SDL_RenderCopy(m_pRenderer, texture, srcRect, &dstRect);
+  int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
   if(result != 0){
     logger->log("Unable to render texture", Logger::CERROR);
   }
   
 }
 
-void VideoManager::drawTexture(Texture* texture, Rect* srcRect, Rect* dstRect) const{
-  SDL_RenderCopy(m_pRenderer, texture, srcRect, dstRect);
+void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect) {
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
+  
+  SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
 }
 
 void VideoManager::shutdown(){
-  SDL_DestroyRenderer(m_pRenderer);
-  SDL_DestroyWindow(m_pWindow);
+  for (auto & i : m_windows){
+    auto pWindow = i.second.m_window;
+    auto pRenderer = i.second.m_renderer;
+
+    SDL_DestroyRenderer(pRenderer);
+    SDL_DestroyWindow(pWindow);
+  }
+  
   SDL_Quit();
   instantiated = false;
 }
 
-void VideoManager::clearScreen(){
+void VideoManager::clearScreen(Uint32 windowID){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
 
-  SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+  SDL_SetRenderDrawColor(pRenderer, m_backgroundColour.m_r,
 			 m_backgroundColour.m_g, m_backgroundColour.m_g,
 			 255);
 
   // Clear Screen
-  SDL_RenderClear(m_pRenderer);
+  SDL_RenderClear(pRenderer);
 
   // // draw rect to clear everything
   // SDL_Rect rectangle;
@@ -165,22 +186,25 @@ void VideoManager::clearScreen(){
   // rectangle.y = 0;
   // rectangle.w = currentWindowParams.width;
   // rectangle.h = currentWindowParams.height;
-  // SDL_RenderFillRect(m_pRenderer, &rectangle);
+  // SDL_RenderFillRect(pRenderer, &rectangle);
 
 }
 
-void VideoManager::drawScreen(){
+void VideoManager::drawScreen(Uint32 windowID){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
+  
   // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);
     int fontSize = 14;
     Surface* fpsSurface = up_fontManager->getTextSurface(ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
-    Texture* fpsTexture = SDL_CreateTextureFromSurface(m_pRenderer, fpsSurface);
+    Texture* fpsTexture = SDL_CreateTextureFromSurface(pRenderer, fpsSurface);
     SDL_FreeSurface(fpsSurface);
     
     int x = 15;
     int y = 15;
-    drawTexture(x, y, fpsTexture);
+    drawTexture(windowID, x, y, fpsTexture);
     this->closeTexture(fpsTexture);
   }
 
@@ -189,7 +213,7 @@ void VideoManager::drawScreen(){
     SDL_GL_SwapWindow(m_pWindow);
   }
   else{
-    SDL_RenderPresent(m_pRenderer);
+    SDL_RenderPresent(pRenderer);
   }
   
   // Update fps variables
@@ -199,7 +223,7 @@ void VideoManager::drawScreen(){
   fps = 1 / (elapsedTime * 0.001);
 
   // clear screen
-  this->clearScreen();
+  this->clearScreen(windowID);
 }
 
 void VideoManager::getWindowResolution(int* width, int* height) const{
@@ -430,12 +454,15 @@ void VideoManager::loadControllerMapFromFile(std::string path){
   }
 }
 
-void VideoManager::drawRect(Rect rect, Colour fillColour){
-    SDL_SetRenderDrawColor(m_pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
-    if(SDL_RenderFillRect(m_pRenderer, &rect) != 0){
-      string errorMessage(SDL_GetError());
-      logger->log(errorMessage, Logger::CWARNING);
-    }
+void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
+
+  SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
+  if(SDL_RenderFillRect(pRenderer, &rect) != 0){
+    string errorMessage(SDL_GetError());
+    logger->log(errorMessage, Logger::CWARNING);
+  }
 }
 
 void VideoManager::setBackgroundColour(Colour colour){
@@ -516,9 +543,49 @@ unsigned int VideoManager::createNewWindow(WindowParams windowParams){
    Closes the window (and renderer) identied by the given windowID
  */
 void VideoManager::closeWindow(Uint32 windowID){
+  try {
   auto window = m_windows.find(windowID);
   if(window != m_windows.end()){
     SDL_DestroyRenderer(window->second.m_renderer);
     SDL_DestroyWindow(window->second.m_window);
   }
+  }
+  catch(...) {
+    
+  }
+}
+
+/**
+   Returns the Window for a given window ID
+ */
+Window VideoManager::getWindow(Uint32 windowID){
+  auto window = m_windows.find(windowID);
+  if(window == m_windows.end()){
+    ostringstream exceptionDetails;
+    exceptionDetails << "Window " << windowID << " not found.  Texture not drawn";
+    throw CapEngineException(exceptionDetails.str());
+  }
+
+  return window->second;
+}
+
+/**
+   Clears all opened windows.
+ */
+void VideoManager::clearAll(){
+  for (auto & i : m_windows){
+    auto id = i.first;
+    clearScreen(id);
+  }
+}
+
+/**
+   Draws all open windows.
+ */
+void VideoManager::drawAll(){
+  for (auto & i : m_windows){
+    auto id = i.first;
+    drawScreen(id);
+  }
+
 }
