@@ -48,7 +48,8 @@ void Runner::end(){
 
 void Runner::loop() {
   int subscriptionMask = mouseEvent | keyboardEvent | systemEvent | windowEvent;
-  Locator::eventDispatcher->subscribe(this, subscriptionMask);
+  //Locator::eventDispatcher->subscribe(this, subscriptionMask);
+  IEventSubscriber::subscribe(Locator::eventDispatcher, subscriptionMask);
   double previous = currentTime();
   double lag = 0.0;
   while(!m_quit){
@@ -94,8 +95,7 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   }
   
   // exit when 'q' is pressed
-  if ((event.type == SDL_KEYUP && ((SDL_KeyboardEvent*)&event)->keysym.sym == SDLK_q)
-      || event.type == SDL_QUIT){
+  if ((event.type == SDL_KEYUP && ((SDL_KeyboardEvent*)&event)->keysym.sym == SDLK_q)) {
     m_quit = true;
     Locator::logger->log("quitting. ", Logger::CDEBUG);
     return;
