@@ -589,3 +589,14 @@ void VideoManager::drawAll(){
   }
 
 }
+
+/**
+   Returns a list of ids of open windows
+ */
+std::vector<Uint32> VideoManager::getWindows() const{
+  std::vector<Uint32> ids;
+  for (auto & i : m_windows){
+    ids.push_back(i.first);
+  }
+  return ids;
+}

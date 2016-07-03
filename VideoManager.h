@@ -58,6 +58,7 @@ namespace CapEngine {
     Uint32 initSystem(WindowParams windowParams);
     Uint32 createNewWindow(WindowParams windowParams);
     void closeWindow(Uint32 windowID);
+    std::vector<Uint32> getWindows() const;
     void shutdown();
     void clearScreen(Uint32 windowID);
     void drawScreen(Uint32 windowID);
