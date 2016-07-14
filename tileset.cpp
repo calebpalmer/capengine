@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "filesystem.h"
+#include "locator.h"
 #include "CapEngineException.h"
 
 using namespace CapEngine;
@@ -20,7 +21,7 @@ TileSet::~TileSet(){
   }
 }
 
-TileSet::TileSet(const string& configPath, VideoManager* videoManagerIn) {
+TileSet::TileSet(const string& configPath) {
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(configPath)){
     throw CapEngineException(configPath + " is not a valid path");
@@ -81,7 +82,7 @@ TileSet::TileSet(const string& configPath, VideoManager* videoManagerIn) {
   }
 
   //// Load surface
-  videoManager = videoManagerIn;
+  videoManager = Locator::videoManager;
   if(videoManager){
     if(videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");

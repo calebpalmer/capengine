@@ -28,7 +28,7 @@ namespace CapEngine{
     VideoManager* videoManager;
   public:
     ~TileSet();
-    TileSet(const std::string& configPath, VideoManager* videoManagerIn = nullptr);
+    TileSet(const std::string& configPath);
     bool tileExists(unsigned int index);
     Tile& getTile(unsigned int index);
 
