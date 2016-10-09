@@ -11,11 +11,12 @@ using namespace CapEngine;
 using namespace std;
 
 ButtonGroup::ButtonGroup() : m_activeButtonIndex(0) {
-  Locator::eventDispatcher->subscribe(this, keyboardEvent | controllerEvent);
+  //Locator::eventDispatcher->subscribe(this, keyboardEvent | controllerEvent);
+  IEventSubscriber::subscribe(Locator::eventDispatcher, keyboardEvent | controllerEvent);
 }
 
 ButtonGroup::~ButtonGroup(){
-  Locator::eventDispatcher->unsubscribe(this);
+  //Locator::eventDispatcher->unsubscribe(this);
 }
 
 void ButtonGroup::update(){
