@@ -32,7 +32,8 @@ TextButton::TextButton(Uint32 windowID, std::string text, std::string font, int 
   m_width = Locator::videoManager->getTextureWidth(m_pTextTextureInactive);
   m_height = Locator::videoManager->getTextureHeight(m_pTextTextureInactive);
 
-  Locator::eventDispatcher->subscribe(this, mouseEvent);
+  //Locator::eventDispatcher->subscribe(this, mouseEvent);
+  IEventSubscriber::subscribe(Locator::eventDispatcher, mouseEvent);
 }
 
 TextButton::~TextButton(){
@@ -42,7 +43,7 @@ TextButton::~TextButton(){
   if(m_pSelectedTexture != nullptr){
     Locator::videoManager->closeTexture(m_pSelectedTexture);
   }
-  Locator::eventDispatcher->unsubscribe(this);
+  //Locator::eventDispatcher->unsubscribe(this);
 }
 
 void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
