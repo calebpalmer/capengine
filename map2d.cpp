@@ -65,7 +65,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
       setCurrentDir(mapPath);
       //      string tilesetPath = stripPath(configPath) + "/" + value;
       this->tileSetPath = value;
-      tileSet.reset(new TileSet(this->tileSetPath, Locator::videoManager));
+      tileSet.reset(new TileSet(this->tileSetPath));
       setCurrentDir(prevPath);
     }
     else if(parameter == "tiles"){

@@ -5,6 +5,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "IEventSubscriber.h"
+
 namespace CapEngine{
 
   class MapPanel : public IEventSubscriber {

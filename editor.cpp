@@ -31,7 +31,7 @@ void Editor::receiveEvent(SDL_Event event, Time* time) {
 }
 
 void Editor::render(){
-  p_mapPanel->render();o
+  m_pMapPanel->render();
 }
 
 void Editor::update(double ms) {}
