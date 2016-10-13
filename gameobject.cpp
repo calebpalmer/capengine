@@ -168,6 +168,13 @@ void GameObject::setPhysicsComponent(shared_ptr<PhysicsComponent> pPhysicsCompon
   physicsComponent = pPhysicsComponent;
 }
 
+/**
+   Accessor method for objects PhysicsComponent
+ */
+std::shared_ptr<PhysicsComponent> GameObject::getPhysicsComponent() const {
+  return physicsComponent;
+}
+
 void GameObject::setGraphicsComponent(shared_ptr<GraphicsComponent> pGraphicsComponent){
   graphicsComponent = pGraphicsComponent;
 }

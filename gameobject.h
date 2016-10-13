@@ -91,6 +91,7 @@ namespace CapEngine {
     void setParentObjectID(ObjectID id);
     void setInputComponent(std::shared_ptr<InputComponent> pInputComponent);
     void setPhysicsComponent(std::shared_ptr<PhysicsComponent> pPhysicsComponent);
+    std::shared_ptr<PhysicsComponent> getPhysicsComponent() const;
     void setGraphicsComponent(std::shared_ptr<GraphicsComponent> pGraphicsComponent);
     void setCustomComponent(std::shared_ptr<CustomComponent> pCustomComponent);
     void setAIComponent(std::shared_ptr<AIComponent> pAIComponent);
