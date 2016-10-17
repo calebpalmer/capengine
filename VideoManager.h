@@ -68,6 +68,8 @@ namespace CapEngine {
     int getWindowWidth() const;
     int getWindowHeight() const;
     void setBackgroundColour(Colour colour);
+    int getFPS() const;
+    
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
     Surface* createSurface(int width, int height);

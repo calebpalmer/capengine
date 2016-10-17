@@ -600,3 +600,10 @@ std::vector<Uint32> VideoManager::getWindows() const{
   }
   return ids;
 }
+
+/**
+   Accessor function for FPS metric
+ */
+int VideoManager::getFPS() const{
+  return fps;
+}
