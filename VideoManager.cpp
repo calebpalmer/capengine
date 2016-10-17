@@ -515,7 +515,12 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
   // if full, set scaling
   if(windowParams.fullScreen){
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-    SDL_RenderSetLogicalSize(m_pRenderer, windowParams.width, windowParams.height);
+    int result = SDL_RenderSetLogicalSize(pRenderer, windowParams.width, windowParams.height);
+    if(result != 0){
+      ostringstream errorMsg;
+      errorMsg << "Unable to set logical render size: " << SDL_GetError();
+      logger->log(errorMsg.str(), Logger::CERROR);
+    }
   }
 
   SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
@@ -606,4 +611,22 @@ std::vector<Uint32> VideoManager::getWindows() const{
  */
 int VideoManager::getFPS() const{
   return fps;
+}
+
+/**
+   Set Window to full screen or windowed
+ */
+void VideoManager::setFullscreen(Uint32 windowID, ScreenMode screenMode){
+  SDL_Window* window = SDL_GetWindowFromID(windowID);
+  if(window == nullptr){
+    ostringstream errorMsg;
+    errorMsg << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
+  }
+  int result = SDL_SetWindowFullscreen(window, screenMode);
+  if(result != 0){
+    ostringstream errorMsg;
+    errorMsg << "Unable to set window fullscreen: " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
+  }
 }

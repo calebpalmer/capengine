@@ -19,6 +19,11 @@
 
 namespace CapEngine {
 
+  enum ScreenMode{
+    ScreenMode_FullScreen,
+    ScreenMode_Windowed
+  };
+
   struct WindowParams{
     std::string windowName;
     int width;
@@ -69,6 +74,7 @@ namespace CapEngine {
     int getWindowHeight() const;
     void setBackgroundColour(Colour colour);
     int getFPS() const;
+    void setFullscreen(Uint32 windowID, ScreenMode screenMode);
     
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
