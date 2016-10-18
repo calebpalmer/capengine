@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cmath>
+#include <sstream>
 #include "vector.h"
 #include "trigonometry.h"
 
@@ -265,4 +266,13 @@ Vector& surfaceNormal(const Vector& vec1, const Vector& vec2){
  */
 PolarVector* Vector::toPolarVector() const{
   return nullptr;
+}
+
+/**
+   return a textual representation of a vector
+ */
+std::string Vector::toString() const{
+  ostringstream desc;
+  desc << "x: " << x << ", y: " << y << ", z: " << z;
+  return desc.str();
 }

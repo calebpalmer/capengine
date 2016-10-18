@@ -50,6 +50,7 @@ namespace CapEngine{
     real magnitude() const;
     Vector& normalize() const;
     PolarVector* toPolarVector() const;
+    std::string toString() const;
     
     real x;
     real y;
