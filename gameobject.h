@@ -60,6 +60,7 @@ namespace CapEngine {
     std::shared_ptr<CustomComponent> customComponent;
     std::shared_ptr<AIComponent> mpAIComponent;
     Vector position;
+    Vector previousPosition;
     Vector orientation;
     Vector velocity;
     Vector acceleration;
@@ -103,6 +104,8 @@ namespace CapEngine {
     void setVelocity(Vector velocity);
     Vector getAcceleration() const;
     void setAcceleration(Vector velocity);
+    Vector getPreviousPosition() const;
+    void setPreviousPosition(Vector position);
   };
 }
 

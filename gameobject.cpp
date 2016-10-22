@@ -212,3 +212,17 @@ void GameObject::send(int id, string message){
     mpAIComponent->receive(this, id, message);
   }
 }
+
+/**
+   Return the previous position of the object
+ */
+Vector GameObject::getPreviousPosition() const{
+  return previousPosition;
+}
+
+/**
+   Set the previous position of the object
+ */
+void GameObject::setPreviousPosition(Vector position){
+  previousPosition = position;
+}
