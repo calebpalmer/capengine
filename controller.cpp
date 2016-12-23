@@ -83,7 +83,6 @@ void ControllerManager::initialize(){
 }
 
 ControllerManager::ControllerManager(){
-  //Locator::eventDispatcher->subscribe(this, controllerEvent);
   IEventSubscriber::subscribe( Locator::eventDispatcher, controllerEvent );
 }
 
