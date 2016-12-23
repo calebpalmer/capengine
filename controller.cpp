@@ -83,7 +83,8 @@ void ControllerManager::initialize(){
 }
 
 ControllerManager::ControllerManager(){
-  Locator::eventDispatcher->subscribe(this, controllerEvent);
+  //Locator::eventDispatcher->subscribe(this, controllerEvent);
+  IEventSubscriber::subscribe( Locator::eventDispatcher, controllerEvent );
 }
 
 void ControllerManager::receiveEvent(SDL_Event event, CapEngine::Time *time){
