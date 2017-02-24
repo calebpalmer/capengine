@@ -13,7 +13,8 @@ using namespace CapEngine;
 bool Controller::s_controllersEnumerated = false;
 vector<shared_ptr<Controller> > Controller::s_controllers;
 
-Controller::Controller(int joystickIndex){
+Controller::Controller(int joystickIndex)
+  : m_joystickIndex(joystickIndex) {
   if(SDL_IsGameController(joystickIndex)){
     m_pController = nullptr;
 
@@ -67,6 +68,10 @@ string Controller::getName() const{
 
 int Controller::getId() const{
   return m_joystickId;
+}
+
+int Controller::getIndex() const {
+  return m_joystickIndex;
 }
 
 SDL_GameController* Controller::getGameController() const{

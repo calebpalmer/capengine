@@ -226,3 +226,7 @@ Vector GameObject::getPreviousPosition() const{
 void GameObject::setPreviousPosition(Vector position){
   previousPosition = position;
 }
+
+std::shared_ptr<InputComponent> GameObject::getInputComponent(){
+  return inputComponent;
+}

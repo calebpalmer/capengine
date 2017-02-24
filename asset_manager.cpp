@@ -233,6 +233,13 @@ void AssetManager::draw(Uint32 windowID, int id, Vector position){
   destRect.h = mVideoManager.getTextureHeight(image->texture);
 
   mVideoManager.drawTexture(windowID, image->texture, nullptr, &destRect);
+  
+}
+
+void AssetManager::draw(Uint32 windowID, int id, Rectangle destRect){
+  Image* image = this->getImage(id);
+  Rect rect = {destRect.x, destRect.y, destRect.width, destRect.height};
+  mVideoManager.drawTexture(windowID, image->texture, nullptr, &rect);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frame){

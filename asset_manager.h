@@ -41,6 +41,7 @@ namespace CapEngine{
     void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect);
     void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
     void draw(Uint32 windowID, int id, Vector position);
+    void draw(Uint32 windowID, int id, Rectangle dstRect);
     void loadImage(int id, std::string path, int frameWidth=0, int frameHeight=0);
     Image* getImage(int id);
     SoftwareImage getSoftwareImage(int id);

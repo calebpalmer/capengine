@@ -55,5 +55,7 @@
 #include "game_management.h"
 #include "colour.h"
 #include "controller.h"
+#include "animation.h"
+#include "flashing_animation.h"
 
 #endif

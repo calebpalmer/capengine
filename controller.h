@@ -16,6 +16,7 @@ namespace CapEngine{
     Controller(int joystickIndex);
     ~Controller();
     int getId() const;
+    int getIndex() const;
     static std::vector<std::shared_ptr<Controller> > getConnectedControllers();
     std::string getName() const;
     SDL_GameController* getGameController() const;
@@ -28,6 +29,7 @@ namespace CapEngine{
     static bool s_controllersEnumerated;
     SDL_GameController* m_pController;
     int m_joystickId;
+    int m_joystickIndex;
 
   };
 
