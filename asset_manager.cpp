@@ -4,12 +4,62 @@
 #include <sstream>
 #include <memory>
 #include <stdexcept>
+#include <cassert>
 
 #include "CapEngineException.h"
 #include "xml_parser.h"
 
 using namespace std;
 using namespace CapEngine;
+
+namespace {
+
+  std::map<string, Frame> parseFrames(XmlParser& parser, XmlNode parentNode){
+    std::map<string, Frame>  frameMap;
+    vector<XmlNode> childNodes = parser.getNodeChildren(parentNode);
+    
+    for(auto && node : childNodes){
+      if(parser.nodeNameCompare(node, "row")){
+	// read the attributes of the frame
+	string frameName = parser.getAttribute(node ,"frameName");
+	string rowNumStr = parser.getAttribute(node, "rowNum");
+	string frameWidthStr = parser.getAttribute(node, "frameWidth");
+	string frameHeightStr = parser.getAttribute(node,"frameHeight");
+	string numFramesStr = parser.getAttribute(node,  "numFrames");
+	string animationTime = parser.getAttribute(node, "animationTime");
+
+	int horizontalPadding = 0;
+	int verticalPadding = 0;
+	try{
+	  horizontalPadding = std::stoi(parser.getAttribute(node, "horizontalPadding"));
+	  verticalPadding = std::stoi(parser.getAttribute(node, "verticalPadding"));
+	}
+	catch(...){
+	  // ignore any errors because these are optional
+	}
+
+	// make sure there is a frameName
+	if(frameName == ""){
+	  throw CapEngineException("Frame name missing while reading Asset file");
+	}
+
+	Frame frame = {frameName, std::stoi(rowNumStr), std::stoi(frameWidthStr), std::stoi(frameHeightStr),
+		       std::stoi(numFramesStr), std::stod(animationTime), horizontalPadding, verticalPadding};
+
+	// does frame under this name aready exist?
+	if(frameMap.find(frameName) != frameMap.end()){
+	  ostringstream msg;
+	  msg << "Frame name \"" << frameName << "\" already exists";
+	  throw CapEngineException(msg.str());
+	}
+	frameMap[frameName] = frame;
+      }
+    }
+
+    return frameMap;
+  }
+  
+} // end anonymous namespace
 
 AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, string assetFile)
   : mVideoManager(videoManager), mSoundPlayer(soundPlayer), mAssetFile(assetFile)
@@ -52,8 +102,6 @@ void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeigh
   Image image;
   image.path = path;
   image.texture = tempTexture;
-  image.frameWidth = frameWidth;
-  image.frameHeight = frameHeight;
   mImageMap[id] = image;
 }
 
@@ -66,33 +114,19 @@ void AssetManager::parseAssetFile(XmlParser& parser){
     string path = parser.getStringValue(*imageIter);
     string frameWidth = parser.getAttribute(*imageIter, "frameWidth");
     string frameHeight = parser.getAttribute(*imageIter, "frameHeight");
+    string hasFrames = parser.getAttribute(*imageIter, "hasFrames");
     
     //convert id to int
     istringstream idStream(id);
     int tId;
     idStream >> tId;
 
-    // stoi introduced in c++11
-    int fWidth, fHeight = 0;
-    try{
-      fWidth = stoi( frameWidth );
-    }
-    catch(const invalid_argument& e){
-      fWidth = 0;
-    }
-
-    try{
-      fHeight = stoi( frameHeight );
-    }
-    catch(const invalid_argument& e){
-      fWidth = 0;
-    }
-
     Image image;
     image.path = path;
     image.texture = nullptr;
-    image.frameWidth = fWidth;
-    image.frameHeight = fHeight;
+    if(hasFrames == "y"){
+      image.frames = parseFrames(parser, *imageIter);
+    }
 
     mImageMap[tId] = image;
   }
@@ -148,8 +182,6 @@ SoftwareImage AssetManager::getSoftwareImage(int id){
   SoftwareImage softwareImage;
   softwareImage.path = iter->second.path;
   softwareImage.surface = surface;
-  softwareImage.frameWidth = iter->second.frameWidth;
-  softwareImage.frameHeight = iter->second.frameHeight;
 
   return softwareImage;
 }
@@ -169,6 +201,43 @@ int AssetManager::getImageHeight(int id){
   height = mVideoManager.getTextureHeight(image->texture);
   return height;
 }
+
+Frame AssetManager::getFrame(int assetID, std::string frameName){
+  Image* pImage = this->getImage(assetID);
+  assert(pImage != nullptr);
+
+  auto frameIter = pImage->frames.find(frameName);
+  if(frameIter == pImage->frames.end()){
+    std::ostringstream msg;
+    msg << "Frame " << frameName << " does not exist";
+    throw CapEngineException(msg.str());
+  }
+
+  return frameIter->second;
+}
+
+Frame AssetManager::getFrame(int assetID, int rowNum){
+  Image* pImage = this->getImage(assetID);
+  assert(pImage != nullptr);
+
+  Frame frame;
+  bool found = false;
+  for(auto && i : pImage->frames){
+    if(i.second.rowNum == rowNum){
+      frame = i.second;
+      found = true;
+    }
+  }
+
+  if(!found){
+    std::ostringstream msg;
+    msg << "Frame " << rowNum << " does not exist";
+    throw CapEngineException(msg.str());
+  }
+
+  return frame;
+}
+
 
 Sound* AssetManager::getSound(int id){
   // throw error if image has not been loaded
@@ -242,29 +311,16 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle destRect){
   mVideoManager.drawTexture(windowID, image->texture, nullptr, &rect);
 }
 
-void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frame){
+void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frameNum){
   Image* image = this->getImage(id);
-  real width, height;
-  width = mVideoManager.getTextureWidth(image->texture);
-  height = mVideoManager.getTextureHeight(image->texture);
-
-  if(image->frameWidth == 0 || image->frameHeight == 0){
-    throw CapEngineException("Image does not contain frames");
-  }
-
-  if(frame * image->frameWidth > width - image->frameWidth){
-    throw CapEngineException("Frame out of bounds of image");
-  }
-
-  if(row * image->frameHeight > height - image->frameHeight){
-    throw CapEngineException("Row out of bounds of image");
-  }
-
+  Frame frame = this->getFrame(id, row);
+  // need to add some checkingto make sure row and frames exists
+  
   Rect srcRect;
-  srcRect.x = frame * image->frameWidth;
-  srcRect.y = row * image->frameHeight;
-  srcRect.w = image->frameWidth;
-  srcRect.h = image->frameHeight;
+  srcRect.x = frameNum * frame.frameWidth;
+  srcRect.y = row * frame.frameHeight;
+  srcRect.w = frame.frameWidth;
+  srcRect.h = frame.frameHeight;
 
   Rect destRect;
   destRect.x = _destRect.x;

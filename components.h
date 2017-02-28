@@ -24,6 +24,7 @@ namespace CapEngine {
   public:
     virtual ~GraphicsComponent() {}
     virtual void render(GameObject* object) = 0;
+    virtual void update(GameObject* pObject, double timestepMS) = 0;
   };
 
   class InputComponent : public Component {

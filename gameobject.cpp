@@ -44,6 +44,9 @@ unique_ptr<GameObject> GameObject::update(double ms) const{
   if(newObj->mpAIComponent){
     newObj->mpAIComponent->update(newObj.get());
   }
+  if(newObj->graphicsComponent){
+    newObj->graphicsComponent->update(newObj.get(), ms);
+  }
 
   return move(newObj);
 }

@@ -14,18 +14,26 @@
 
 namespace CapEngine{
 
+  struct Frame {
+    std::string frameName;
+    int rowNum;
+    int frameWidth;
+    int frameHeight;
+    int numFrames;
+    double animationTime;
+    int horizontalPadding;
+    int verticalPadding;
+  };
+
   struct Image {
     std::string path;
     Texture* texture;
-    int frameWidth;
-    int frameHeight;
+    std::map<std::string, Frame> frames;
   };
 
   struct SoftwareImage{
     std::string path;
     Surface* surface;
-    int frameWidth;
-    int frameHeight;
   };
 
   struct Sound {
@@ -47,6 +55,8 @@ namespace CapEngine{
     SoftwareImage getSoftwareImage(int id);
     int getImageWidth(int id);
     int getImageHeight(int id);
+    Frame getFrame(int assetID, std::string frameName);
+    Frame getFrame(int assetID, int rowNum);
     long playSound(int id, bool repeat=false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
