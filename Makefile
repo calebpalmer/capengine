@@ -40,7 +40,7 @@ tests:
 	cd test && $(MAKE)
 
 tags:
-	gtags
+	#gtags
 
 install:
 	install -m 775 libcapengine.so /usr/lib/
