@@ -19,8 +19,12 @@ namespace CapEngine {
     ~Matrix() = default;
     
     Vector getColumnVector(int index) const;
-    Vector getRowVector(int index) const ;
+    Vector getRowVector(int index) const;
+    Vector& getRowVectorRef(int index);
 
+    void setRowVector(int index, Vector vector);
+
+    static Matrix createZeroMatrix();
     static Matrix createIdentityMatrix();
     static Matrix createTranslationMatrix(real x, real y, real z);
     static Matrix createScaleMatrix(real x, real y, real z);
@@ -30,7 +34,8 @@ namespace CapEngine {
 
 
     // overloaded operators
-    Matrix operator*(const Matrix& left);
+    Matrix operator*(const Matrix& right) const;
+    Vector operator*(const Vector& right) const;
     
     std::unique_ptr<float> getGLMatrix() const;
     const MatrixContainer& getVectors() const;

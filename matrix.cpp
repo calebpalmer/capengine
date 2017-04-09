@@ -46,6 +46,24 @@ std::unique_ptr<float> Matrix::getGLMatrix() const{
 
 }
 
+void Matrix::setRowVector(int index, CapEngine::Vector vector)
+{
+  if(index > 3 || index < 0){
+    throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
+  }
+
+  vectors[index] = vector;
+}
+
+Matrix Matrix::createZeroMatrix()
+{
+  Vector vec1(0.0, 0.0, 0.0, 0.0);
+  Vector vec2(0.0, 0.0, 0.0, 0.0);
+  Vector vec3(0.0, 0.0, 0.0, 0.0);
+  Vector vec4(0.0, 0.0, 0.0, 0.0);
+  Matrix matrix(vec1, vec2, vec3, vec4);
+  return matrix;
+}
 
 Matrix Matrix::createIdentityMatrix(){
   Vector vec1(1.0, 0.0, 0.0, 0.0);
@@ -117,7 +135,7 @@ const MatrixContainer& Matrix::getVectors() const{
   return vectors;
 }
 
-Matrix Matrix::operator*(const Matrix& right){
+Matrix Matrix::operator*(const Matrix& right) const{
   real cell1, cell2, cell3, cell4;
   // column 1
   // multiply the first row by the first column vector (column major matrix)
@@ -184,6 +202,41 @@ Matrix Matrix::operator*(const Matrix& right){
   return newMatrix;
 }
 
+Vector Matrix::operator*(const Vector& in_right) const{
+  
+  Vector right(in_right);
+  
+  Vector xTransform = this->vectors[0];
+  real x =
+    right.getX() * xTransform.getX() +
+    right.getY() * xTransform.getY() +
+    right.getZ() * xTransform.getZ() +
+    right.getD() * xTransform.getD();
+  
+  Vector yTransform = this->vectors[1];
+  real y =
+    right.getX() * yTransform.getX() +
+    right.getY() * yTransform.getY() +
+    right.getZ() * yTransform.getZ() +
+    right.getD() * yTransform.getD();
+    
+  Vector zTransform = this->vectors[2];
+  real z =
+    right.getX() * zTransform.getX() +
+    right.getY() * zTransform.getY() +
+    right.getZ() * zTransform.getZ() +
+    right.getD() * zTransform.getD();
+  
+  Vector dTransform = this->vectors[3];
+  real d =
+    right.getX() * dTransform.getX() +
+    right.getY() * dTransform.getY() +
+    right.getZ() * dTransform.getZ() +
+    right.getD() * dTransform.getD();
+
+  return Vector(x, y, z, d);
+}
+
 Vector Matrix::getColumnVector(int index) const{
   if(index > 3 || index < 0){
     throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
@@ -230,5 +283,13 @@ Vector Matrix::getRowVector(int index) const{
   
   Vector retVector(vectors[index]);
   return retVector;
+}
+
+Vector& Matrix::getRowVectorRef(int index){
+  if(index > 3 || index < 0){
+    throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
+  }
+  
+  return vectors[index];
 }
 
