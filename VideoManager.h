@@ -16,6 +16,8 @@
 #include "fontmanager.h"
 #include "logger.h"
 #include "colour.h"
+#include "matrix.h"
+#include "viewport.h"
 
 namespace CapEngine {
 
@@ -35,7 +37,7 @@ namespace CapEngine {
   };
 
   struct Window {
-    Window() {}
+/*    Window() {}
     
     Window(SDL_Window* window,
 	   SDL_Renderer* renderer)
@@ -46,9 +48,13 @@ namespace CapEngine {
       m_window = oldWindow.m_window;
       m_renderer = oldWindow.m_renderer;
     }
-   
+*/
+    Window();
+    Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
+	   Viewport viewport);
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
+    Viewport m_viewport;
   };
 
   class FontManager;
@@ -75,6 +81,8 @@ namespace CapEngine {
     void setBackgroundColour(Colour colour);
     int getFPS() const;
     void setFullscreen(Uint32 windowID, ScreenMode screenMode);
+    void setViewport(Uint32 windowId, Viewport viewport);
+    Viewport getViewport(Uint32 windowId) const;
     
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
@@ -122,6 +130,8 @@ namespace CapEngine {
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
     std::map<Uint32, Window> m_windows;
+
+    Matrix m_transformationMatrix;
     
     Logger* logger;
     static bool instantiated; //singleton

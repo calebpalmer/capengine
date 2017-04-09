@@ -17,11 +17,19 @@
 using namespace std;
 using namespace CapEngine;
 
+Window::Window() :
+  m_window(nullptr), m_renderer(nullptr) {}
+
+Window::Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
+	       Viewport viewport) :
+  m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport) { }
+
+
 bool VideoManager::instantiated = false;
 
 VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
 				  , logger(nullptr), m_pWindow(nullptr), m_pRenderer(nullptr)
-			     , initialized(false)
+			     , initialized(false), m_transformationMatrix(Matrix::createIdentityMatrix())
 {
   assert(instantiated == false);
   instantiated = true;
@@ -29,7 +37,8 @@ VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
 }
 
 VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager()), showFPS(false)
-					     , m_pWindow(nullptr), m_pRenderer(nullptr), logger(loggerIn), initialized(false)
+					     , m_pWindow(nullptr), m_pRenderer(nullptr), logger(loggerIn), initialized(false),
+					       m_transformationMatrix(Matrix::createIdentityMatrix())
 {
   assert(instantiated == false);
   instantiated = true;
@@ -60,7 +69,12 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
     m_pRenderer = createRenderer(m_pWindow, windowParams);
 
     windowID = SDL_GetWindowID(m_pWindow);    
-    m_windows[windowID] = Window(m_pWindow, m_pRenderer);
+
+    //Create viewpor
+    Viewport viewport = {0, 0, windowParams.width, windowParams.height};
+    Window window = {m_pWindow, m_pRenderer, viewport};
+
+    m_windows[windowID] = window;
   }
 
   // load controller maps
@@ -124,6 +138,8 @@ Texture* VideoManager::loadImage(string filePath) const{
 void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect){
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
+
+  Viewport viewport = getViewport(windowID);
   
   SDL_Rect dstRect;
   dstRect.x = x;
@@ -152,6 +168,8 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, 
 void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect) {
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
+
+  Viewport viewport = getViewport(windowID);
   
   SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
 }
@@ -536,8 +554,9 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
 unsigned int VideoManager::createNewWindow(WindowParams windowParams){
   SDL_Window* pWindow = createWindow(windowParams);
   SDL_Renderer* pRenderer = createRenderer(pWindow, windowParams);
+  Viewport viewport(0.0, 0.0, windowParams.width, windowParams.height);
 
-  Window window(pWindow, pRenderer);
+  Window window ={pWindow, pRenderer, viewport};
   Uint32 id = SDL_GetWindowID(pWindow);
   m_windows[id] = window;
 
@@ -629,4 +648,31 @@ void VideoManager::setFullscreen(Uint32 windowID, ScreenMode screenMode){
     errorMsg << "Unable to set window fullscreen: " << SDL_GetError();
     throw CapEngineException(errorMsg.str());
   }
+}
+
+void VideoManager::setViewport(Uint32 windowId, Viewport viewport){
+  // does window exist
+  auto windowTuple = m_windows.find(windowId);
+  if(windowTuple == m_windows.end()){
+    std::ostringstream errorStream;
+    errorStream << "WindowID " << windowId << " does not exist";
+    throw CapEngineException(errorStream.str());
+  }
+  
+  // update window
+  Window updatedWindow = windowTuple->second;
+  updatedWindow.m_viewport = viewport;
+  m_windows[windowId] = updatedWindow;
+}
+
+Viewport VideoManager::getViewport(Uint32 windowId) const{
+  // does window exist
+  auto windowTuple = m_windows.find(windowId);
+  if(windowTuple == m_windows.end()){
+    std::ostringstream errorStream;
+    errorStream << "WindowID " << windowId << " does not exist";
+    throw CapEngineException(errorStream.str());
+  }
+
+  return windowTuple->second.m_viewport;
 }

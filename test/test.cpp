@@ -5,14 +5,14 @@
 #include "vectortest.h"
 #include "capcommontest.h"
 #include "xml_parser_test.h"
-#include "asset_manager_test.h"
+#include "matrixtest.h"
 
 int main(){
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(VectorTest::suite());
   runner.addTest(CapCommonTest::suite());
   runner.addTest(XmlParserTest::suite());
-  runner.addTest(AssetManagerTest::suite());
+  runner.addTest(MatrixTest::suite());
   
   if (runner.run() ){
     return EXIT_SUCCESS;
