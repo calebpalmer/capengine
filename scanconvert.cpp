@@ -358,13 +358,35 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
 }
 
 Uint32 CapEngine::getPixel(const CapEngine::Surface* surface, int x, int y){
-  if(surface->format->BytesPerPixel == 4){
-    int offset = (surface->pitch / surface->format->BytesPerPixel) * y + x;
-    Uint32 pixel = ((Uint32*)surface->pixels)[offset];
-    return pixel;
-  }
-  else{
-    throw CapEngineException("Trying to get 32bpp pixel from non 32bpp surface");
+
+  // This was taken from http://sdl.beuc.net/sdl.wiki/Pixel_Access
+  int bpp = surface->format->BytesPerPixel;
+  /* Here p is the address to the pixel we want to retrieve */
+  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+  switch(bpp) {
+  case 1:
+    return *p;
+    break;
+
+  case 2:
+    return *(Uint16 *)p;
+    break;
+
+  case 3:
+    if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+      return p[0] << 16 | p[1] << 8 | p[2];
+    else
+      return p[0] | p[1] << 8 | p[2] << 16;
+    break;
+
+  case 4:
+    return *(Uint32 *)p;
+    break;
+
+  default:
+    return 0;       /* shouldn't happen, but avoids warnings */
+
   }
 }
 
