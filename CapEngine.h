@@ -57,5 +57,6 @@
 #include "controller.h"
 #include "animation.h"
 #include "flashing_animation.h"
+#include "viewport.h"
 
 #endif

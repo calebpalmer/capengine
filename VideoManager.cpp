@@ -13,6 +13,7 @@
 
 #include "logger.h"
 #include "EventDispatcher.h"
+#include "collision.h"
 
 using namespace std;
 using namespace CapEngine;
@@ -148,30 +149,54 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, 
     dstRect.w = srcRect->w;
     dstRect.h = srcRect->h;
   }
- else{
-   int result = SDL_QueryTexture(texture, nullptr, nullptr,
- 				 &(dstRect.w), &(dstRect.h));
-   if(result != 0){
-     ostringstream errorMsg;
-     errorMsg << "Unable to draw texture:  " << SDL_GetError();
-     logger->log(errorMsg.str(), Logger::CERROR);
-   }
- }
 
-  int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
-  if(result != 0){
-    logger->log("Unable to render texture", Logger::CERROR);
+  else{
+    int result = SDL_QueryTexture(texture, nullptr, nullptr,
+				  &(dstRect.w), &(dstRect.h));
+    if(result != 0){
+      ostringstream errorMsg;
+      errorMsg << "Unable to draw texture:  " << SDL_GetError();
+      logger->log(errorMsg.str(), Logger::CERROR);
+    }
+  }
+
+  //Transform the dstRect
+  dstRect = viewport.transformRect(dstRect);
+
+  int w, h;
+  getWindowResolution(windowID, &w, &h);
+  Rect windowRect = {0, 0, w, h};
+
+  // only draw things that are in the window
+  if(detectMBRCollision(dstRect, windowRect) != COLLISION_NONE){
+    int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
+    if(result != 0){
+      logger->log("Unable to render texture", Logger::CERROR);
+    }
   }
   
 }
 
 void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect) {
+  assert(texture != nullptr);
+  assert(dstRect != nullptr);
+  
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
 
   Viewport viewport = getViewport(windowID);
-  
-  SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
+
+  //Transform the dstRect
+  Rect newDstRect = viewport.transformRect(*dstRect);
+
+  int w, h;
+  getWindowResolution(windowID, &w, &h);
+  Rect windowRect = {0, 0, w, h};
+
+  // only draw things that are in the window
+  if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
+    SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
+  }
 }
 
 void VideoManager::shutdown(){
@@ -244,17 +269,26 @@ void VideoManager::drawScreen(Uint32 windowID){
   this->clearScreen(windowID);
 }
 
-void VideoManager::getWindowResolution(int* width, int* height) const{
-  *width = currentWindowParams.width;
-  *height = currentWindowParams.height;
+void VideoManager::getWindowResolution(Uint32 windowID, int* width, int* height){
+  const Window window = getWindow(windowID);
+  SDL_GetWindowSize(window.m_window, width, height);
 }
 
-int VideoManager::getWindowWidth() const{
-  return currentWindowParams.width;
+int VideoManager::getWindowWidth(Uint32 windowID){
+  const Window window = getWindow(windowID);
+  int w;
+  int h;
+  SDL_GetWindowSize(window.m_window, &w, &h);
+  return w;
 }
 
-int VideoManager::getWindowHeight() const{
-  return currentWindowParams.height;
+int VideoManager::getWindowHeight(Uint32 windowID){
+  const Window window = getWindow(windowID);
+  int w;
+  int h;
+  SDL_GetWindowSize(window.m_window, &w, &h);
+  return h;
+
 }
 
 //! get the width of given texture
@@ -475,11 +509,22 @@ void VideoManager::loadControllerMapFromFile(std::string path){
 void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
+  Viewport viewport = getViewport(windowID);
+  
+  //Transform the dstRect
+  Rect newDstRect = viewport.transformRect(rect);
 
-  SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
-  if(SDL_RenderFillRect(pRenderer, &rect) != 0){
-    string errorMessage(SDL_GetError());
-    logger->log(errorMessage, Logger::CWARNING);
+  int w, h;
+  getWindowResolution(windowID, &w, &h);
+  Rect windowRect = {0, 0, w, h};
+
+  // only draw things that are in the window
+  if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
+    SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
+    if(SDL_RenderFillRect(pRenderer, &rect) != 0){
+      string errorMessage(SDL_GetError());
+      logger->log(errorMessage, Logger::CWARNING);
+    }
   }
 }
 

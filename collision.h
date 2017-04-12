@@ -17,6 +17,7 @@ namespace CapEngine{
     
     Rectangle();
     Rectangle(real xIn,real yIn, real widthIn, real heightIn);
+    Rectangle(Rect rect);
   };
 
   

@@ -37,21 +37,10 @@ namespace CapEngine {
   };
 
   struct Window {
-/*    Window() {}
-    
-    Window(SDL_Window* window,
-	   SDL_Renderer* renderer)
-    : m_window(window),
-      m_renderer(renderer) {}
-
-    Window(const Window& oldWindow) {
-      m_window = oldWindow.m_window;
-      m_renderer = oldWindow.m_renderer;
-    }
-*/
     Window();
     Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
 	   Viewport viewport);
+
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     Viewport m_viewport;
@@ -75,9 +64,10 @@ namespace CapEngine {
     void drawScreen(Uint32 windowID);
     void clearAll();
     void drawAll();
-    void getWindowResolution(int* width, int* height) const;
-    int getWindowWidth() const;
-    int getWindowHeight() const;
+    void getWindowResolution(Uint32 windowID, int* width, int* height);
+    int getWindowWidth(Uint32 windowID);
+    int getWindowHeight(Uint32 windowID);
+    void setViewport();
     void setBackgroundColour(Colour colour);
     int getFPS() const;
     void setFullscreen(Uint32 windowID, ScreenMode screenMode);

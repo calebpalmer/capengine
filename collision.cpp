@@ -7,6 +7,7 @@ using namespace std;
 
 Rectangle::Rectangle(){}
 Rectangle::Rectangle(real xIn,real yIn, real widthIn, real heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
+Rectangle::Rectangle(Rect rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h) {}
 
 CollisionType CapEngine::detectMBRCollision(const Rectangle& r1, const Rectangle& r2){
   real top1, top2, bottom1, bottom2, right1, right2, left1, left2;
