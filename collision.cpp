@@ -9,6 +9,14 @@ Rectangle::Rectangle(){}
 Rectangle::Rectangle(real xIn,real yIn, real widthIn, real heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
 Rectangle::Rectangle(Rect rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h) {}
 
+Rect Rectangle::toRect() const{
+  Rect rect = {static_cast<int>(std::round(x)),
+	       static_cast<int>(std::round(y)),
+	       static_cast<int>(std::round(width)),
+	       static_cast<int>(std::round(height))};
+  return rect;
+}
+
 CollisionType CapEngine::detectMBRCollision(const Rectangle& r1, const Rectangle& r2){
   real top1, top2, bottom1, bottom2, right1, right2, left1, left2;
   left1 = r1.x;

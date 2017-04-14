@@ -84,8 +84,8 @@ namespace CapEngine {
     // Textures
     Texture* loadImage(std::string fileName) const;
     void closeTexture(Texture* texture) const;
-    void drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect=nullptr);
-    void drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect);
+    void drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect=nullptr, bool applyTransform=true);
+    void drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect, bool applyTransform=true);
     real getTextureWidth(Texture* texture) const;
     real getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;

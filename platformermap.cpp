@@ -10,7 +10,8 @@ using namespace std;
 
 PlatformerMap::PlatformerMap(Uint32 windowID, int mapAssetID, int collisionMapAssetID)
   : m_windowID(windowID), m_mapAssetID(mapAssetID)
-  , m_collisionMapAssetID(collisionMapAssetID), m_collisionMapSurface(nullptr) { }
+  , m_collisionMapAssetID(collisionMapAssetID), m_collisionMapSurface(nullptr),
+    m_width(-1), m_height(-1) {}
 
 PlatformerMap::~PlatformerMap(){
   if(m_collisionMapSurface != nullptr){
@@ -38,4 +39,18 @@ Surface* PlatformerMap::getCollisionMap(){
     m_collisionMapSurface = softwareImage.surface;
   }
   return m_collisionMapSurface;
+}
+
+int PlatformerMap::getWidth(){
+  if(m_width == -1){
+    m_width = Locator::assetManager->getImageWidth(m_mapAssetID);
+  }
+  return m_width;
+}
+
+int PlatformerMap::getHeight(){
+  if(m_height == -1){
+    m_height = Locator::assetManager->getImageHeight(m_mapAssetID);
+  }
+  return m_height;
 }

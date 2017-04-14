@@ -9,11 +9,13 @@ namespace CapEngine{
   {
   public:
     Viewport();
-    Viewport(int x,  int y,
+    Viewport(int x, int y,
 	     int width, int height);
     ~Viewport() = default;
 
     Rect transformRect(Rect in_rect) const;
+    void centerOnObject(Rect objectToCenter,
+			      Rect mapDims);
     void setX(int x);
     int getX() const;
     void setY(int y);

@@ -16,6 +16,8 @@ namespace CapEngine {
     std::vector<Vector> getSpawnPoints() const;
     void addSpawnPoint(Vector spawnPoint);
     Surface* getCollisionMap();
+    int getWidth();
+    int getHeight();
     
   private:
     Uint32 m_windowID;
@@ -23,6 +25,8 @@ namespace CapEngine {
     int m_collisionMapAssetID;
     Surface* m_collisionMapSurface;
     std::vector<Vector> m_spawnPoints;
+    int m_width;
+    int m_height;
   };
 }
 

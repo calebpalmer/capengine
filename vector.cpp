@@ -273,6 +273,6 @@ PolarVector* Vector::toPolarVector() const{
  */
 std::string Vector::toString() const{
   ostringstream desc;
-  desc << "x: " << x << ", y: " << y << ", z: " << z;
+  desc << "  " << x << "  " << y << "  " << z << "  " << d;
   return desc.str();
 }

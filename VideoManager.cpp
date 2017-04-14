@@ -136,7 +136,9 @@ Texture* VideoManager::loadImage(string filePath) const{
   return texture;
 }
 
-void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect){
+void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture,
+			       Rect* srcRect, bool applyTransform)
+{
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
 
@@ -161,7 +163,8 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, 
   }
 
   //Transform the dstRect
-  dstRect = viewport.transformRect(dstRect);
+  if(applyTransform)
+     dstRect = viewport.transformRect(dstRect);
 
   int w, h;
   getWindowResolution(windowID, &w, &h);
@@ -177,7 +180,8 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture, 
   
 }
 
-void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect) {
+void VideoManager::drawTexture(Uint32 windowID, Texture* texture,
+			       Rect* srcRect, Rect* dstRect, bool applyTransform) {
   assert(texture != nullptr);
   assert(dstRect != nullptr);
   
@@ -187,7 +191,9 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect,
   Viewport viewport = getViewport(windowID);
 
   //Transform the dstRect
-  Rect newDstRect = viewport.transformRect(*dstRect);
+  Rect newDstRect = *dstRect;
+  if(applyTransform)
+    newDstRect = viewport.transformRect(*dstRect);
 
   int w, h;
   getWindowResolution(windowID, &w, &h);
@@ -195,7 +201,7 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect,
 
   // only draw things that are in the window
   if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
-    SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
+    SDL_RenderCopy(pRenderer, texture, srcRect, &newDstRect);
   }
 }
 
@@ -247,7 +253,7 @@ void VideoManager::drawScreen(Uint32 windowID){
     
     int x = 15;
     int y = 15;
-    drawTexture(windowID, x, y, fpsTexture);
+    drawTexture(windowID, x, y, fpsTexture, nullptr, false);
     this->closeTexture(fpsTexture);
   }
 
