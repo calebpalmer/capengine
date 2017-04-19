@@ -58,5 +58,6 @@
 #include "animation.h"
 #include "flashing_animation.h"
 #include "viewport.h"
+#include "objectfactory.h"
 
 #endif
