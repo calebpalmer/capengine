@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+#include <memory>
+
 namespace CapEngine {
   class GameObject;
 
@@ -17,7 +19,7 @@ namespace CapEngine {
     virtual Rectangle boundingPolygon(const GameObject* object) const = 0;
     virtual bool handleCollision(GameObject* object, CollisionType, CollisionClass, GameObject* otherObject,
 				 Vector collisionVector) = 0;
-    virtual bool handlesColliisions() {return false;}
+    virtual bool handlesCollisions() {return false;}
   };
 
   class GraphicsComponent : public Component {
@@ -37,14 +39,14 @@ namespace CapEngine {
   public:
     virtual ~CustomComponent() {}
     virtual void update(GameObject* object) = 0;
-    virtual CustomComponent* clone() const = 0;
+    virtual std::unique_ptr<CustomComponent> clone() const = 0;
   };
 
   class AIComponent : public Component {
   public:
     virtual ~AIComponent() {}
     virtual void update(GameObject* object) = 0;
-    virtual AIComponent* clone() const = 0;
+    virtual std::unique_ptr<AIComponent> clone() const = 0;
   };
 
 }

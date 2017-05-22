@@ -51,6 +51,7 @@ namespace CapEngine{
     Vector& normalize() const;
     PolarVector* toPolarVector() const;
     std::string toString() const;
+    friend std::ostream& operator<<(std::ostream& stream, const Vector& vector);
     
     real x;
     real y;

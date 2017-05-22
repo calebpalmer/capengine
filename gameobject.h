@@ -18,6 +18,8 @@ namespace CapEngine {
     GameObject* object2;
     CollisionType type;
     CollisionClass class_;
+
+    friend std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEvent);
   };
 
   class ObjectCreator{

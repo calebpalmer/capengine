@@ -44,7 +44,8 @@ namespace CapEngine{
     COLLISION_UNKNOWN,
     COLLISION_WALL,
     COLLISION_PROJECTILE,
-    COLLISION_ENTITY
+    COLLISION_ENTITY,
+    COLLISION_BITMAP
   };
 
   struct PixelCollision{
@@ -61,5 +62,11 @@ namespace CapEngine{
 				     Vector& collisionPoint);
  std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
 
+ std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
+ std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);
+ std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionClass& collisionClass);
 }
+
+
+
 #endif //COLLISION_H

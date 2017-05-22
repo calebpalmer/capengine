@@ -7,7 +7,9 @@
 #include "vector.h"
 #include "trigonometry.h"
 
-using namespace CapEngine;
+
+namespace CapEngine {
+
 using namespace std;
 
 //default constructor for a Vector.  Sets everything to zeros.
@@ -142,7 +144,7 @@ Vector& Vector::operator=(const Vector& vec){
   \return
   \li the distance of this from vec.
  */
-real CapEngine::distance(const Vector& vec1, const Vector& vec2){
+real distance(const Vector& vec1, const Vector& vec2){
   // sqrt (x*x + y*y
   real xdelta = vec1.getX() - vec2.getX();
   real ydelta = vec1.getY() - vec2.getY();
@@ -191,7 +193,7 @@ if < 0 -> theta between 90 and 180
   \return 
   \li the dot product
  */
-real CapEngine::dotProduct(const Vector& vec1, const Vector& vec2){
+real dotProduct(const Vector& vec1, const Vector& vec2){
     return (vec1.getX() * vec2.getX() + vec1.getY() * vec2.getY() + vec1.getZ() * vec2.getZ());
   }
 
@@ -201,7 +203,7 @@ real CapEngine::dotProduct(const Vector& vec1, const Vector& vec2){
   \return
   \li the cross product of the two vectors
 */
-Vector& CapEngine::crossProduct(const Vector& vec1, const Vector& vec2){
+Vector& crossProduct(const Vector& vec1, const Vector& vec2){
     real newx = vec1.getY()*vec2.getZ() + vec1.getZ()*vec2.getY();
     real newy = vec1.getZ()*vec2.getX() + vec1.getX()*vec2.getZ();
     real newz = vec1.getX()*vec2.getY() + vec1.getY()*vec2.getX();
@@ -216,7 +218,7 @@ Vector& CapEngine::crossProduct(const Vector& vec1, const Vector& vec2){
   \return
   \li the project vector of this onto vec
  */
-Vector& CapEngine::projectedVector(const Vector& vec1, const Vector& vec2){
+Vector& projectedVector(const Vector& vec1, const Vector& vec2){
   real dotProd = CapEngine::dotProduct(vec1, vec2);
   real magVec = vec2.magnitude();
   unique_ptr<Vector> retVal(new Vector(vec2));
@@ -275,4 +277,12 @@ std::string Vector::toString() const{
   ostringstream desc;
   desc << "  " << x << "  " << y << "  " << z << "  " << d;
   return desc.str();
+}
+
+std::ostream& operator<<(std::ostream& stream, const CapEngine::Vector& vector){
+  stream << "Vector(" << vector.x << ", " << vector.y << ", "
+	 << vector.z << ", " << vector.d << ")";
+  return stream;
+}
+
 }
