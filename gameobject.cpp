@@ -65,6 +65,7 @@ namespace CapEngine {
     unique_ptr<GameObject> newObj(new GameObject(false));
 
     newObj->position = position;
+    newObj->previousPosition = previousPosition;
     newObj->orientation = orientation;
     newObj->velocity = velocity;
     newObj->acceleration = acceleration;
@@ -246,4 +247,14 @@ namespace CapEngine {
     stream << repr.str();
     return stream;
   }
+
+  GameObject::ObjectType GameObject::getObjectType() const{
+    return m_objectType;
+  }
+
+  void GameObject::setObjectType(GameObject::ObjectType in_objectType){
+    m_objectType = in_objectType;
+  }
+  
 }
+

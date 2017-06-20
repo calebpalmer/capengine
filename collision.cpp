@@ -269,7 +269,7 @@ namespace CapEngine{
       repr = "COLLISION_RIGHT";
       break;
     case COLLISION_TOP:
-      repr = "COLLISION_BOTTOM";
+      repr = "COLLISION_TOP";
       break;
     case COLLISION_BOTTOM:
       repr = "COLLISION_BOTTOM";
@@ -300,7 +300,7 @@ namespace CapEngine{
       repr = "COLLISION_WALL";
       break;
     case COLLISION_PROJECTILE:
-      repr = "COLLISION_PROJECTRILE";
+      repr = "COLLISION_PROJECTILE";
       break;
     case COLLISION_ENTITY:
       repr = "COLLISION_ENTITY";

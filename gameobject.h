@@ -45,34 +45,17 @@ namespace CapEngine {
       Dead
     };
 
-  private:
-    GameObject(const GameObject&);
-    GameObject& operator=(const GameObject&);
-
-    static ObjectID nextID;
-    static int nextMessageId;
-    std::shared_ptr<ObjectData> m_pObjectData;
-    ObjectState m_objectState;
-    ObjectID m_objectID;
-    ObjectID m_parentObjectID;
-
-    std::shared_ptr<InputComponent> inputComponent;
-    std::shared_ptr<PhysicsComponent> physicsComponent;
-    std::shared_ptr<GraphicsComponent> graphicsComponent;
-    std::shared_ptr<CustomComponent> customComponent;
-    std::shared_ptr<AIComponent> mpAIComponent;
-    Vector position;
-    Vector previousPosition;
-    Vector orientation;
-    Vector velocity;
-    Vector acceleration;
-
-
-  public:
+    enum ObjectType {
+      ObjectType_AI,
+      ObjectType_Player
+    };
 
     //constructors
     GameObject(bool newID = true);
     ~GameObject();
+
+    GameObject(const GameObject&) = delete;
+    GameObject& operator=(const GameObject&) = delete;
 
     static ObjectID generateID();
     static int generateMessageId();
@@ -109,6 +92,28 @@ namespace CapEngine {
     void setAcceleration(Vector velocity);
     Vector getPreviousPosition() const;
     void setPreviousPosition(Vector position);
+    ObjectType getObjectType() const;
+    void setObjectType(ObjectType in_objectType);
+
+   private:
+    static ObjectID nextID;
+    static int nextMessageId;
+    std::shared_ptr<ObjectData> m_pObjectData;
+    ObjectState m_objectState;
+    ObjectID m_objectID;
+    ObjectID m_parentObjectID;
+    ObjectType m_objectType;
+
+    std::shared_ptr<InputComponent> inputComponent;
+    std::shared_ptr<PhysicsComponent> physicsComponent;
+    std::shared_ptr<GraphicsComponent> graphicsComponent;
+    std::shared_ptr<CustomComponent> customComponent;
+    std::shared_ptr<AIComponent> mpAIComponent;
+    Vector position;
+    Vector previousPosition;
+    Vector orientation;
+    Vector velocity;
+    Vector acceleration;
   };
 }
 
