@@ -9,10 +9,14 @@ namespace CapEngine {
 
   class PlatformerMap {
   public:
-    PlatformerMap(Uint32 windowID, int mapAssetID, int collisionMapAssetID);
+    static std::unique_ptr<PlatformerMap> createPlatformerMapFromFile(
+            std::string const& in_arenaConfigPath,
+            int in_arenaId);
+
+    PlatformerMap(int mapAssetID, int collisionMapAssetID);
     ~PlatformerMap();
     void update(double ms);
-    void render();
+    void render(Uint32 in_windowId);
     std::vector<Vector> getSpawnPoints() const;
     void addSpawnPoint(Vector spawnPoint);
     Surface* getCollisionMap();
