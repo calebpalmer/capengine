@@ -76,13 +76,16 @@ namespace CapEngine {
     
     // Surfaces
     Surface* loadSurface(std::string fileName) const;
+    SurfacePtr loadSurfacePtr(std::string const& in_filePath) const;
     Surface* createSurface(int width, int height);
+    SurfacePtr createSurfacePtr(int in_width, int in_height);
     void closeSurface(Surface* surface) const;
     void blitSurface(Surface* sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y);
     real getSurfaceWidth(const Surface* surface) const;
     real getSurfaceHeight(const Surface* surface) const;
     // Textures
     Texture* loadImage(std::string fileName) const;
+    TexturePtr loadImagePtr(std::string const& in_filePath) const;
     void closeTexture(Texture* texture) const;
     void drawTexture(Uint32 windowID, int x, int y, Texture* texture, Rect* srcRect=nullptr, bool applyTransform=true);
     void drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect, bool applyTransform=true);
@@ -90,7 +93,9 @@ namespace CapEngine {
     real getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;
     Texture* createTexture(int width, int height);
+    TexturePtr createTexturePtr(int width, int height);
     Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false); 
+    TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false); 
 
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));

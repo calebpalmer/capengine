@@ -84,6 +84,11 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
   return windowID;
 }
 
+TexturePtr VideoManager::createTextureFromSurfacePtr(Surface* surface, bool freeSurface){
+ Texture *texture = createTextureFromSurface(surface, freeSurface);
+ return std::move(TexturePtr(texture, SDL_DestroyTexture));
+}
+
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){
   // Create Texture from Surface
   SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, surface);
@@ -97,6 +102,11 @@ Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurfa
     this->closeSurface(surface);
   }
   return texture;
+}
+
+TexturePtr VideoManager::loadImagePtr(std::string const& in_filePath) const{
+  Texture* texture = loadImage(in_filePath);
+  return std::move(TexturePtr(texture, SDL_DestroyTexture));
 }
 
 Texture* VideoManager::loadImage(string filePath) const{
@@ -362,6 +372,12 @@ void VideoManager::setColorKey(Surface* surface) const{
   }
 }
 
+TexturePtr VideoManager::createTexturePtr(int width, int height){
+  Texture* texture = createTexture(width, height);
+  return std::move(TexturePtr(texture, SDL_DestroyTexture));
+}
+    
+
 Texture* VideoManager::createTexture(int width, int height){
   SDL_Texture* texture = SDL_CreateTexture(m_pRenderer
 					   ,SDL_PIXELFORMAT_ARGB8888
@@ -394,6 +410,12 @@ void VideoManager::displayFPS(bool on, const string& ttfFontPath, Uint8 r, Uint8
   this->fpsColourB = b;
 }
 
+SurfacePtr VideoManager::loadSurfacePtr(std::string const& in_filePath) const{
+    Surface* surface = loadSurface(in_filePath);
+    SurfacePtr pSurface(surface, SDL_FreeSurface);
+    return std::move(pSurface);
+}
+
 Surface* VideoManager::loadSurface(string filePath) const{
   int flags = IMG_INIT_JPG | IMG_INIT_PNG;
   int initted=IMG_Init(flags);
@@ -423,6 +445,11 @@ Surface* VideoManager::loadSurface(string filePath) const{
   
   return tempSurface;
   
+}
+
+SurfacePtr VideoManager::createSurfacePtr(int in_width, int in_height){
+    Surface* surface = createSurface(in_width, in_height);
+    return std::move(SurfacePtr(surface, SDL_FreeSurface));
 }
 
 Surface* VideoManager::createSurface(int width, int height){

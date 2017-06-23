@@ -1,6 +1,8 @@
 #ifndef CAPTYPES_H
 #define CAPTYPES_H
 
+#include <memory>
+
 #include <SDL2/SDL.h>
 
 namespace CapEngine{
@@ -13,6 +15,8 @@ namespace CapEngine{
   //typedef SDL_Renderer Renderer;
   typedef SDL_Rect Rect;
 
+  typedef std::unique_ptr<Surface, decltype(&SDL_FreeSurface)> SurfacePtr;
+  typedef std::unique_ptr<Texture, decltype(&SDL_DestroyTexture)> TexturePtr;
 }
 
 #endif //CAPTYPES_H
