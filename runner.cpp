@@ -23,7 +23,7 @@ void Runner::popState(){
     auto pPoppedState = std::move(m_gameStates.back());
     m_gameStates.pop_back();
     if(pPoppedState->onDestroy() == false){
-      Locator::logger->log("Failed to destroy popped state", Logger::CWARNING);
+      Locator::logger->log("Failed to destroy popped state", Logger::CWARNING, __FILE__, __LINE__);
     }
   }
 }
@@ -31,7 +31,7 @@ void Runner::popState(){
 void Runner::pushState(std::unique_ptr<GameState> pGameState){
   m_gameStates.push_back(std::move(pGameState));
   if(m_gameStates.back()->onLoad() == false){
-    Locator::logger->log("Failed to init pushed state", Logger::CWARNING);
+    Locator::logger->log("Failed to init pushed state", Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
@@ -97,7 +97,7 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   // exit when 'q' is pressed
   if ((event.type == SDL_KEYUP && ((SDL_KeyboardEvent*)&event)->keysym.sym == SDLK_q)) {
     m_quit = true;
-    Locator::logger->log("quitting. ", Logger::CDEBUG);
+    Locator::logger->log("quitting. ", Logger::CDEBUG, __FILE__, __LINE__);
     return;
   }
   // update the keyboard

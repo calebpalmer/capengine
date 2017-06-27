@@ -95,14 +95,17 @@ namespace CapEngine {
     ObjectType getObjectType() const;
     void setObjectType(ObjectType in_objectType);
 
+    friend std::ostream& operator<<(std::ostream& stream, GameObject const& object);
+
+
    private:
     static ObjectID nextID;
     static int nextMessageId;
     std::shared_ptr<ObjectData> m_pObjectData;
-    ObjectState m_objectState;
-    ObjectID m_objectID;
-    ObjectID m_parentObjectID;
-    ObjectType m_objectType;
+    ObjectState m_objectState = Active;
+    ObjectID m_objectID = -1;
+    ObjectID m_parentObjectID = -1;
+    ObjectType m_objectType = ObjectType_AI;
 
     std::shared_ptr<InputComponent> inputComponent;
     std::shared_ptr<PhysicsComponent> physicsComponent;

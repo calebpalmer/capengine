@@ -187,6 +187,6 @@ void TextButton::setIndicator(const string imagePath){
   catch(const CapEngineException& e){
     ostringstream errorStream;
     errorStream << "Unable to load indicator: " << e.what() << endl << "Using default indicator";
-    Locator::logger->log(errorStream.str(), Logger::CWARNING);
+    Locator::logger->log(errorStream.str(), Logger::CWARNING, __FILE__, __LINE__);
   }
 }

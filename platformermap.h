@@ -24,13 +24,13 @@ namespace CapEngine {
     int getHeight();
     
   private:
-    Uint32 m_windowID;
-    int m_mapAssetID;
-    int m_collisionMapAssetID;
+    int m_mapAssetID = -1;
+    int m_collisionMapAssetID = -1;
     Surface* m_collisionMapSurface;
     std::vector<Vector> m_spawnPoints;
-    int m_width;
-    int m_height;
+    int m_finishLineX = -1;
+    int m_width = -1;
+    int m_height = -1;
   };
 }
 

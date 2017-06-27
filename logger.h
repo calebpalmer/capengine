@@ -25,7 +25,7 @@ namespace CapEngine {
     Logger();
     ~Logger();
 
-    void log(const std::string& message, LogLevel level);
+    void log(const std::string& message, LogLevel level, char const* in_file="", int in_lineno=-1);
     void setOutput(std::ostream& stream);
     
   private:

@@ -57,7 +57,7 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
   if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
     ostringstream errorMsg;
     errorMsg << "Unable to initialize SDL. Shutting down." << endl;
-    logger->log(errorMsg.str(), Logger::CERROR);
+    logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
     shutdown();
   }
   
@@ -130,7 +130,7 @@ Texture* VideoManager::loadImage(string filePath) const{
   }
   ostringstream logString;
   logString << "Loaded surface from file "  << filePath;
-  logger->log(logString.str(), Logger::CDEBUG);
+  logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
   setColorKey(tempSurface);
 
@@ -168,7 +168,7 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture,
     if(result != 0){
       ostringstream errorMsg;
       errorMsg << "Unable to draw texture:  " << SDL_GetError();
-      logger->log(errorMsg.str(), Logger::CERROR);
+      logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
     }
   }
 
@@ -184,7 +184,7 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture,
   if(detectMBRCollision(dstRect, windowRect) != COLLISION_NONE){
     int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
     if(result != 0){
-      logger->log("Unable to render texture", Logger::CERROR);
+      logger->log("Unable to render texture", Logger::CERROR, __FILE__, __LINE__);
     }
   }
   
@@ -318,7 +318,7 @@ real VideoManager::getTextureWidth(Texture* texture) const{
   if(result < 0){
     ostringstream error;
     error << "Unable to get texture width" << endl << SDL_GetError();
-    logger->log(error.str(), Logger::CERROR);
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
     throw CapEngineException(error.str());
   }
   return w;
@@ -335,7 +335,7 @@ real VideoManager::getTextureHeight(Texture* texture) const{
     if(result < 0){
       ostringstream error;
       error << "Unable to get texture height" << endl << SDL_GetError();
-      logger->log(error.str(), Logger::CERROR);
+      logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
       throw CapEngineException(error.str());
     }
     return h;
@@ -347,7 +347,7 @@ void VideoManager::getTextureDims(Texture* texture, int* x, int* y) const{
     if(result < 0){
       ostringstream error;
       error << "Unable to get texture height" << endl << SDL_GetError();
-      logger->log(error.str(), Logger::CERROR);
+      logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
       throw CapEngineException(error.str());
     }
 }
@@ -386,7 +386,7 @@ Texture* VideoManager::createTexture(int width, int height){
   if (texture == nullptr){
     ostringstream error;
     error << "Error creating texture" << endl << SDL_GetError();
-    logger->log(error.str(), Logger::CERROR);
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
     throw CapEngineException(error.str());
   }
 
@@ -433,7 +433,7 @@ Surface* VideoManager::loadSurface(string filePath) const{
 
   ostringstream logString;
   logString << "Loaded surface from file "  << filePath;
-  logger->log(logString.str(), Logger::CDEBUG);
+  logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
   if (tempSurface == NULL){
     cerr << "Unable to load surface" << endl;
@@ -484,7 +484,7 @@ Surface* VideoManager::createSurface(int width, int height){
 
   ostringstream logString;
   logString << "Created new surface with dimensions " << width << "x" << height;
-  logger->log(logString.str(), Logger::CDEBUG);
+  logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
   memset(surface->pixels, 0x00, surface->pitch * surface->h);
   
@@ -526,7 +526,7 @@ void VideoManager::loadControllerMaps(){
   if (result != 0){
     ostringstream error;
     error << "Unable to add controller mapping: " << SDL_GetError();
-    logger->log(error.str(), Logger::CWARNING);
+    logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
@@ -535,7 +535,7 @@ void VideoManager::loadControllerMapFromFile(std::string path){
   if (result != 0){
     ostringstream error;
     error << "Error adding controller mappings from file " << path << ": " << SDL_GetError();
-    logger->log(error.str(), Logger::CWARNING);
+    logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
@@ -556,7 +556,7 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
     SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
     if(SDL_RenderFillRect(pRenderer, &rect) != 0){
       string errorMessage(SDL_GetError());
-      logger->log(errorMessage, Logger::CWARNING);
+      logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
     }
   }
 }
@@ -615,7 +615,7 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
     if(result != 0){
       ostringstream errorMsg;
       errorMsg << "Unable to set logical render size: " << SDL_GetError();
-      logger->log(errorMsg.str(), Logger::CERROR);
+      logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
     }
   }
 

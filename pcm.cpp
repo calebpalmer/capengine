@@ -37,7 +37,7 @@ PCM::PCM(const string filePath) : position(0) {
   sf_close(sndFile);
   ostringstream msg;
   msg << "Successfully loaded sound from " << filePath;
-  Locator::logger->log(msg.str(), Logger::CDEBUG);
+  Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
 }
 
 PCM::~PCM(){

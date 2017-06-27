@@ -18,7 +18,7 @@ BasicButton::BasicButton(string text, int fontSize, Vector position, int width, 
   int fontHeight = pVideoManager->getSurfaceHeight(m_pTextSurface);
 
   if(fontWidth > m_width || fontHeight > m_height){
-    Locator::logger->log("font exceeds button size", Logger::CWARNING);
+    Locator::logger->log("font exceeds button size", Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 

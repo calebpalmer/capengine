@@ -282,7 +282,7 @@ Surface* CapEngine::createRectangle(int width, int height, Colour colour){
   }
 
   SDL_UnlockSurface(surface);
-  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG, __FILE__, __LINE__);
 
   // //validate pixels
   // int buffsize = surface->pitch * surface->h;
@@ -300,7 +300,7 @@ Surface* CapEngine::createRectangle(int width, int height, Colour colour){
     
   // }
 
-  //Locator::logger->log("Pixels validated", Logger::CDEBUG);
+  //Locator::logger->log("Pixels validated", Logger::CDEBUG, __FILE__, __LINE__);
   
   return surface;
 }
@@ -322,7 +322,7 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
       writePixel(pixels, j, i, colour, width, height);
     }
   }
-  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG);
+  //Locator::logger->log("Pixels written to rectangle surface", Logger::CDEBUG, __FILE__, __LINE__);
 
   //validate pixels
 //   for(unsigned int i = 0; i < bufSize; i += pixelSize){
@@ -351,7 +351,7 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
 //     }
 //  }
 
-  //Locator::logger->log("Pixels validated", Logger::CDEBUG);
+  //Locator::logger->log("Pixels validated", Logger::CDEBUG, __FILE__, __LINE__);
 
   Surface* surface = createSurfaceFromPixelBuffer(pixels, width, height);
   return surface;

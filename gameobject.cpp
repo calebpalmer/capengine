@@ -95,7 +95,7 @@ namespace CapEngine {
   ObjectID GameObject::generateID(){
     ostringstream msg;
     msg << "ID " << (nextID) << " generated";
-    Locator::logger->log(msg.str(), Logger::CDEBUG);
+    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
     return nextID++;
   }
 
@@ -197,8 +197,8 @@ namespace CapEngine {
 
   void GameObject::send(int id, string message){
     ostringstream messageStr;
-    messageStr << "Object " << this->m_objectID << ":  Message: " << message;
-    Locator::logger->log(messageStr.str(), Logger::CDEBUG);
+    messageStr << *this << ": Message: " << message;
+    Locator::logger->log(messageStr.str(), Logger::CDEBUG, __FILE__, __LINE__);
     
     if(inputComponent){
       inputComponent->receive(this, id, message);
@@ -243,6 +243,15 @@ namespace CapEngine {
       repr << " and " << collisionEvent.object2->getObjectID();
 
     repr << " class: " << collisionEvent.class_;
+
+    stream << repr.str();
+    return stream;
+  }
+
+
+  std::ostream& operator<<(std::ostream& stream, GameObject const & gameObject){
+    std::ostringstream repr;
+    repr << "GameObject[" << gameObject.m_objectID << "]@" << gameObject.position;
 
     stream << repr.str();
     return stream;

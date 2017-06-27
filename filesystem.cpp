@@ -35,7 +35,7 @@ void CapEngine::setCurrentDir(const string& directory){
 #endif //WIN
     std::stringstream msg;
     msg << "Current directory set to " << directory;
-    Locator::logger->log(msg.str(), Logger::CDEBUG);
+    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
 }
 
 string CapEngine::getCurrentDir(){

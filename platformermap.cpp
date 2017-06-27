@@ -7,14 +7,14 @@
 #include "xml_parser.h"
 
 #include <sstream>
+#include <boost/lexical_cast.hpp>
 
 using namespace CapEngine;
 using namespace std;
 
 PlatformerMap::PlatformerMap(int mapAssetID, int collisionMapAssetID)
   : m_mapAssetID(mapAssetID)
-  , m_collisionMapAssetID(collisionMapAssetID), m_collisionMapSurface(nullptr),
-    m_width(-1), m_height(-1) {}
+  , m_collisionMapAssetID(collisionMapAssetID), m_collisionMapSurface(nullptr) {}
 
 PlatformerMap::~PlatformerMap(){
   if(m_collisionMapSurface != nullptr){
@@ -78,17 +78,31 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
 
   int mapAssetID = -1;
   int collisionMapAssetID = -1;
-  vector<Vector> arenaSpawnPoints;
+  vector<Vector> arenaSpawnPoints = {};
+  int xFinishLocation = -1;
+
   auto children = xmlParser.getNodeChildren(nodes[0]);
   for (auto& i : children){
+
+    // texture
     if(xmlParser.nodeNameCompare(i, "texture")){
       string temp = xmlParser.getStringValue(i);
-      mapAssetID = std::stoi(temp);
+      //mapAssetID = std::stoi(temp);
+      mapAssetID = boost::lexical_cast<int>(temp);
     }
+    // collision texture
     else if(xmlParser.nodeNameCompare(i, "collisions")){
       string temp = xmlParser.getStringValue(i);
-      collisionMapAssetID = std::stoi(temp);
+      //collisionMapAssetID = std::stoi(temp);
+      collisionMapAssetID = boost::lexical_cast<int>(temp);
     }
+    // finish line
+    else if(xmlParser.nodeNameCompare(i, "finish_location")){
+      string temp = xmlParser.getStringValue(i);
+      collisionMapAssetID = std::stoi(temp);
+      xFinishLocation = boost::lexical_cast<int>(temp);
+    }
+    // spawn points
     else if(xmlParser.nodeNameCompare(i, "spawn_points")){
       auto spawnPoints = xmlParser.getNodeChildren(i);
       for(auto& spawnPoint : spawnPoints){
@@ -99,7 +113,7 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
             arenaSpawnPoints.push_back(Vector(x, y));
           }
           catch(exception& e){
-            Locator::logger->log(e.what(), Logger::CWARNING);
+            Locator::logger->log(e.what(), Logger::CWARNING, __FILE__, __LINE__);
           }
         }
       }

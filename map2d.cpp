@@ -42,7 +42,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
     position = line.find("=");
 
     if(position == string::npos || position == 0){
-      Locator::logger->log("Invalid Line", Logger::CWARNING);
+      Locator::logger->log("Invalid Line", Logger::CWARNING, __FILE__, __LINE__);
       break;
     }
 
@@ -73,7 +73,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
     }
     else{
       // log warning
-      Locator::logger->log("Invalid parameter: " + parameter, Logger::CWARNING);
+      Locator::logger->log("Invalid parameter: " + parameter, Logger::CWARNING, __FILE__, __LINE__);
     }
       
   }
@@ -90,7 +90,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
   logString << "loaded map from " << mapConfigPath << endl
 	    << " using tileset " << tileSet->configFilepath << endl
 	    << " with " << tiles.size() << " tiles loaded " << endl;
-  Locator::logger->log(logString.str(), Logger::CDEBUG);
+  Locator::logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 }
 
 void Map2D::readTiles(ifstream& stream){
@@ -140,7 +140,7 @@ void Map2D::drawTexture(){
     xRes += (*iter)->tile->width;
   }
   texture = Locator::videoManager->createTextureFromSurface(surface);
-  Locator::logger->log("Drew consolidate map texture", Logger::CDEBUG);
+  Locator::logger->log("Drew consolidate map texture", Logger::CDEBUG, __FILE__, __LINE__);
 }
 
 string Map2D::toString(){

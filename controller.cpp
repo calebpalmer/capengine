@@ -51,7 +51,7 @@ vector<shared_ptr<Controller> > Controller::getConnectedControllers(){
 	  s_controllers.push_back(pController);
 	}
 	catch(CapEngineException& e){
-	  Locator::logger->log(e.what(), Logger::CWARNING);
+	  Locator::logger->log(e.what(), Logger::CWARNING, __FILE__, __LINE__);
 	}
       }
     }
@@ -100,7 +100,7 @@ void ControllerManager::receiveEvent(SDL_Event event, CapEngine::Time *time){
 
     ostringstream msg;
     msg << "Controller with id " << p_controller->getId() << " was found.";
-    Locator::logger->log(msg.str(), Logger::CDEBUG);
+    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
   }
   
   // remove existing controller

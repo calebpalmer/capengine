@@ -31,7 +31,7 @@ SoundPlayer::SoundPlayer(): idCounter(0) {
 	 << "\tfrequency: " << audioFormat.freq << endl
 	 << "\tchannels: " << audioFormat.channels << endl
 	 << "\tformat: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
-  Locator::logger->log(logMsg.str(), Logger::CDEBUG);
+  Locator::logger->log(logMsg.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
 }
 

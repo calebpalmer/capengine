@@ -37,11 +37,16 @@ string Logger::getLevelDescription(Logger::LogLevel level){
   }
 }
 
-void Logger::log(const string& message, LogLevel level){
+void Logger::log(const string& message, LogLevel level,
+                char const* in_file, int in_lineno){
   if(level >= currentLevel){
     ostringstream errorStream;
     string errorLevelDesc = getLevelDescription(level);
     errorStream << errorLevelDesc << ": " << message;
+    
+    if(std::string(in_file) != "" && in_lineno != -1)
+      errorStream << " (" << in_file << ":" << in_lineno << ")";  
+
     *outputStream << errorStream.str() << endl;
   }
 }
