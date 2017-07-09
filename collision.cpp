@@ -1,6 +1,8 @@
 #include "collision.h"
 
 #include "scanconvert.h"
+#include "locator.h"
+#include "logger.h"
 
 #include <sstream>
 
@@ -18,6 +20,30 @@ namespace CapEngine{
 		 static_cast<int>(std::round(width)),
 		 static_cast<int>(std::round(height))};
     return rect;
+  }
+
+  Rectangle Rectangle::raiseBottom(CapEngine::real in_amount) const{
+    Rectangle newRect = *this;
+    newRect.height = newRect.height - in_amount;
+    return newRect;
+  }
+
+  Rectangle Rectangle::lowerTop(CapEngine::real in_amount) const{
+    Rectangle newRect = *this;
+    newRect.y = newRect.y + in_amount;
+    return newRect;
+  }
+
+  Rectangle Rectangle::narrowLeft(CapEngine::real in_amount) const{
+    Rectangle newRect = *this;
+    newRect.x = newRect.x + in_amount;
+    return newRect;
+  }
+
+  Rectangle Rectangle::narrowRight(CapEngine::real in_amount) const{
+    Rectangle newRect = *this;
+    newRect.width = newRect.width - in_amount;
+    return newRect;
   }
 
   CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2){
@@ -96,15 +122,15 @@ namespace CapEngine{
       // "top" collides
       int y = rect.y + (rect.height / 2);
       for( ; y > rect.y; y --){
-	for(int x = rect.x; x < rect.x + rect.width; x++){
-	  getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
-	  if(r == 0x00 && g == 0x00 && b == 0x00){
-	    collisionPoint.setX(x);
-	    collisionPoint.setY(y);
-	    collisionPoint.setZ(0);
-	    return true;
-	  }
-	}
+        for(int x = rect.x; x < rect.x + rect.width; x++){
+          getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+          if(r == 0x00 && g == 0x00 && b == 0x00){
+            collisionPoint.setX(x);
+            collisionPoint.setY(y);
+            collisionPoint.setZ(0);
+            return true;
+          }
+        }
       }
       return false;
     }
@@ -119,15 +145,15 @@ namespace CapEngine{
       // start from halfway up to find the first part the collides
       int y = rect.y + (rect.height / 2);
       for(; y < rect.y + rect.height; y++){
-	for(int x = rect.x; x < rect.x + rect.width; x++){
-	  getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
-	  if(r == 0x00 && g == 0x00 && b == 0x00){
-	    collisionPoint.setX(x);
-	    collisionPoint.setY(y);
-	    collisionPoint.setZ(0);
-	    return true;
-	  }
-	}
+        for(int x = rect.x; x < rect.x + rect.width; x++){
+          getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+          if(r == 0x00 && g == 0x00 && b == 0x00){
+            collisionPoint.setX(x);
+            collisionPoint.setY(y);
+            collisionPoint.setZ(0);
+            return true;
+          }
+        }
       }
       return false;
     }
@@ -141,15 +167,15 @@ namespace CapEngine{
 
       int x = rect.x + (rect.width / 2);
       for(; x < rect.x + rect.width; x++){
-	for(int y = rect.y; y < rect.y + rect.height; y++){
-	  getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
-	  if(r == 0x00 && g == 0x00 && b == 0x00){
-	    collisionPoint.setX(x);
-	    collisionPoint.setY(y);
-	    collisionPoint.setZ(0);
-	    return true;
-	  }
-	}
+        for(int y = rect.y; y < rect.y + rect.height; y++){
+          getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+          if(r == 0x00 && g == 0x00 && b == 0x00){
+            collisionPoint.setX(x);
+            collisionPoint.setY(y);
+            collisionPoint.setZ(0);
+            return true;
+          }
+        }
       }
       return false;
     }
@@ -163,15 +189,15 @@ namespace CapEngine{
 
       int x = rect.x + (rect.width / 2);
       for(; x > rect.x; x--){
-	for(int y = rect.y; y < rect.y + rect.height; y++){
-	  getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
-	  if(r == 0x00 && g == 0x00 && b == 0x00){
-	    collisionPoint.setX(x);
-	    collisionPoint.setY(y);
-	    collisionPoint.setZ(0);
-	    return true;
-	  }
-	}
+        for(int y = rect.y; y < rect.y + rect.height; y++){
+          getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+          if(r == 0x00 && g == 0x00 && b == 0x00){
+            collisionPoint.setX(x);
+            collisionPoint.setY(y);
+            collisionPoint.setZ(0);
+            return true;
+          }
+        }
       }
       return false;
     }
@@ -181,6 +207,7 @@ namespace CapEngine{
   // assumes 32bpp surface
   CollisionType detectBitmapCollision(const CapEngine::Rectangle &rect, const Surface *bitmapSurface,
 						 Vector& collisionPoint){
+
     // check top collision
     if(detectTopBitmapCollision(rect, bitmapSurface, collisionPoint)){
       return COLLISION_TOP;
@@ -205,6 +232,7 @@ namespace CapEngine{
   }
 
   vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface){
+
     vector<PixelCollision> pixelCollisions;
     Vector collisionPoint;
 
@@ -243,6 +271,53 @@ namespace CapEngine{
     return pixelCollisions;
 
   }
+
+  std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, 
+                                                     const Surface* in_bitmapSurface){
+  std::vector<PixelCollision> pixelCollisions;
+
+    Vector collisionPoint;
+    PixelCollision pixelCollision;
+
+    auto addCollision = [&](CollisionType type){
+      pixelCollision.collisionType = type;
+      pixelCollision.collisionPoint = collisionPoint;
+      pixelCollisions.push_back(pixelCollision);
+    };
+
+    for (auto && i : in_rects){
+      CollisionType collisionType = i.first;
+      Rectangle rect = i.second;
+
+      switch(collisionType){
+        case COLLISION_BOTTOM:
+          if(detectBottomBitmapCollision(rect, in_bitmapSurface, collisionPoint)) 
+            addCollision(collisionType);
+           break;
+         case COLLISION_TOP:
+          if(detectTopBitmapCollision(rect, in_bitmapSurface, collisionPoint)) 
+            addCollision(collisionType);
+          break;
+        case COLLISION_LEFT:
+          if(detectLeftBitmapCollision(rect, in_bitmapSurface, collisionPoint)) 
+            addCollision(collisionType);
+          break;
+        case COLLISION_RIGHT:
+          if(detectRightBitmapCollision(rect, in_bitmapSurface, collisionPoint)) 
+            addCollision(collisionType);
+           break;
+       default:
+          {
+            std::ostringstream msg;
+            msg << "Unsupported Collision Type \"" <<  collisionType << "\"";
+            Locator::logger->log(msg.str(), Logger::CWARNING, __FILE__, __LINE__); 
+          }
+      }
+    }
+
+    return pixelCollisions;
+  }
+
 
   std::ostream& operator<<(std::ostream& stream, const CollisionType& collisionType){
     using namespace CapEngine;

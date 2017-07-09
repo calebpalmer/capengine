@@ -2,6 +2,7 @@
 #define COLLISION_H
 
 #include <vector>
+#include <map>
 
 #include "captypes.h"
 #include "vector.h"
@@ -20,6 +21,11 @@ namespace CapEngine{
     Rectangle(Rect rect);
 
     Rect toRect() const;
+
+    Rectangle raiseBottom(CapEngine::real in_amount) const;
+    Rectangle lowerTop(CapEngine::real in_amount) const;
+    Rectangle narrowRight(CapEngine::real in_amount) const;
+    Rectangle narrowLeft(CapEngine::real in_amount) const;
   };
 
   
@@ -59,8 +65,9 @@ namespace CapEngine{
  Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
  Relation MBRRelate(int x, int y, const Rectangle& r);
  CollisionType detectBitmapCollision(const Rectangle& rect, const Surface* bitmapSurface,
-				     Vector& collisionPoint);
+				     Vector& out_collisionPoint);
  std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
+ std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
 
  std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
  std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);

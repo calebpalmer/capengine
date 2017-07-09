@@ -12,8 +12,8 @@
 using namespace CapEngine;
 using namespace std;
 
-PlatformerMap::PlatformerMap(int mapAssetID, int collisionMapAssetID)
-  : m_mapAssetID(mapAssetID)
+PlatformerMap::PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX)
+  : m_mapAssetID(mapAssetID), m_finishLineX(in_finishLineX)
   , m_collisionMapAssetID(collisionMapAssetID), m_collisionMapSurface(nullptr) {}
 
 PlatformerMap::~PlatformerMap(){
@@ -129,7 +129,7 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
 
 
   //std::unique_ptr<PlatformerMap> platformerMap(new PlatformerMap(mapAssetID, collisionMapAssetID));
-  pPlatformerMap.reset((new PlatformerMap(mapAssetID, collisionMapAssetID)));
+  pPlatformerMap.reset((new PlatformerMap(mapAssetID, collisionMapAssetID, xFinishLocation)));
   for(auto& spawnPoint : arenaSpawnPoints){
     pPlatformerMap->addSpawnPoint(spawnPoint);
   }

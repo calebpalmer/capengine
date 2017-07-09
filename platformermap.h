@@ -13,7 +13,7 @@ namespace CapEngine {
             std::string const& in_arenaConfigPath,
             int in_arenaId);
 
-    PlatformerMap(int mapAssetID, int collisionMapAssetID);
+    PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX);
     ~PlatformerMap();
     void update(double ms);
     void render(Uint32 in_windowId);
