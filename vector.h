@@ -49,6 +49,7 @@ namespace CapEngine{
     void scale(real factor);
     real magnitude() const;
     Vector& normalize() const;
+    real slope() const;
     PolarVector* toPolarVector() const;
     std::string toString() const;
     friend std::ostream& operator<<(std::ostream& stream, const Vector& vector);

@@ -13,7 +13,7 @@ objects = test.o
 test: $(objects) 
 	$(CPP) $(CFLAGS) -o test $(objects) ../libcapengine.so $(LIBS)
 
-test.o: vectortest.h xml_parser_test.h capcommontest.h matrixtest.h
+test.o: vectortest.h xml_parser_test.h capcommontest.h matrixtest.h scanconvert_test.h 
 	$(CPP) $(CFLAGS) -c test.cpp 
 
 all: $(objects)

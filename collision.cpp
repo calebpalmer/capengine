@@ -5,6 +5,8 @@
 #include "logger.h"
 
 #include <sstream>
+#include <algorithm>
+#include <functional>
 
 using namespace std;
 
@@ -318,6 +320,77 @@ namespace CapEngine{
     return pixelCollisions;
   }
 
+  std::vector<PixelCollision> detectBitmapCollisionsWithTangents(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, 
+                                                     const Surface* in_bitmapSurface){
+    std::vector<PixelCollision> pixelCollisions = detectBitmapCollisions(in_rects, in_bitmapSurface);
+
+    auto findPredicate = [](const CollisionType in_collisionType, const PixelCollision& in_pixelCollision){
+      return in_collisionType == in_pixelCollision.collisionType;
+    };
+
+    using namespace std::placeholders;
+    auto topCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_TOP, _1));
+    auto bottomCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_BOTTOM, _1));
+    auto rightCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_RIGHT, _1));        
+    auto leftCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_LEFT, _1));
+
+    std::vector<PixelCollision> pixelCollisionWithTangents;
+    
+    // bottom 
+    if(bottomCollision != pixelCollisions.end() && rightCollision != pixelCollisions.end()){
+      Vector tangent = rightCollision->collisionPoint - bottomCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_BOTTOM, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    if(bottomCollision != pixelCollisions.end() && leftCollision != pixelCollisions.end()){
+      Vector tangent = leftCollision->collisionPoint - bottomCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_BOTTOM, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    // top
+    if(topCollision != pixelCollisions.end() && rightCollision != pixelCollisions.end()){
+      Vector tangent = rightCollision->collisionPoint - topCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_TOP, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    if(topCollision != pixelCollisions.end() && leftCollision != pixelCollisions.end()){
+      Vector tangent = leftCollision->collisionPoint - topCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_TOP, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    // right
+    if(rightCollision != pixelCollisions.end() && topCollision != pixelCollisions.end()){
+      Vector tangent = topCollision->collisionPoint - rightCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_RIGHT, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    if(rightCollision != pixelCollisions.end() && bottomCollision != pixelCollisions.end()){
+      Vector tangent = bottomCollision->collisionPoint - rightCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_RIGHT, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    // left
+    if(leftCollision != pixelCollisions.end() && topCollision != pixelCollisions.end()){
+      Vector tangent = topCollision->collisionPoint - leftCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_LEFT, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+
+    if(leftCollision != pixelCollisions.end() && bottomCollision != pixelCollisions.end()){
+      Vector tangent = bottomCollision->collisionPoint - leftCollision->collisionPoint;
+      PixelCollision collision = { COLLISION_LEFT, tangent, COLLISIONVECTORTYPE_LINE };
+      pixelCollisionWithTangents.push_back(collision);
+    }
+    
+
+    return pixelCollisionWithTangents;
+  }
 
   std::ostream& operator<<(std::ostream& stream, const CollisionType& collisionType){
     using namespace CapEngine;

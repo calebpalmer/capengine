@@ -54,9 +54,15 @@ namespace CapEngine{
     COLLISION_BITMAP
   };
 
+  enum CollisionVectorType {
+    COLLISIONVECTORTYPE_POINT,
+    COLLISIONVECTORTYPE_LINE
+  };
+  
   struct PixelCollision{
     CollisionType collisionType;
     Vector collisionPoint;
+    CollisionVectorType vectorType;
   };
 
 
@@ -68,6 +74,7 @@ namespace CapEngine{
 				     Vector& out_collisionPoint);
  std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
  std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
+ std::vector<PixelCollision> detectBitmapCollisionsWithTangents(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
 
  std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
  std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);

@@ -412,7 +412,68 @@ void CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, int
     *b= (pixel & bmask) >> 4;
     *a= (pixel & amask) >> 6;
 #endif
-    
 
+}
+
+
+Pixel CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, int y){
+  Uint8 r = 0x00;
+  Uint8 g = 0x00;
+  Uint8 b = 0x00;
+  Uint8 a = 0x00;
+  getPixelComponents(surface, x, y, &r, &g, &b, &a);
+
+  return {r, g, b, a};
+}
+
+boost::optional<CapEngine::Vector> CapEngine::getTangent(const CapEngine::Surface* surface, int x, int y, Pixel solidPixel, int numNeighbours, bool above){
+  auto pixelsEqual = [](const Pixel& lhs, const Pixel& rhs) -> bool {
+    return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
+  };
+  
+  // if pixel at x,y is not a solid pixel then return nothing
+  Pixel mainPixel = getPixelComponents(surface, x, y);
+  if(mainPixel.r != solidPixel.r || mainPixel.g != solidPixel.g || mainPixel.b != solidPixel.b){
+    return boost::optional<Vector>();
+  }
+
+  if(above){
+    Pixel pixel = getPixelComponents(surface, x, y--);
+    if(!pixelsEqual(pixel, solidPixel)){
+      return boost::optional<Vector>();
+    }
+
+    std::vector<Vector> points;
+    for(int i = x - numNeighbours; i <= x + numNeighbours; i++){
+      bool pixelFound = false;
+      for(int j = y - numNeighbours; j <= y + numNeighbours; j++){
+	pixel = getPixelComponents(surface, x, y);
+
+	if(pixelsEqual(pixel, solidPixel)){
+	  points.push_back(Vector(i, j));
+	  pixelFound = true;
+	  break;
+	}
+      }
+
+      if(!pixelFound){
+	points.push_back(Vector(i, y + numNeighbours + 1));
+      }
+    }
+
+    // get the average of all the slopes
+    Vector tangentVector;
+    for(unsigned int i = 0; i < points.size(); i++){
+      tangentVector += points[i];
+    }
+
+    return boost::optional<Vector>(tangentVector);
+  }
+
+  // below
+  else{
+    BOOST_THROW_EXCEPTION(CapEngineException("Not implemented"));
+  }
   
 }
+
