@@ -495,6 +495,10 @@ void VideoManager::closeSurface(Surface* surface) const{
   SDL_FreeSurface(surface);
 }
 
+void VideoManager::saveSurface(SDL_Surface* surface,  const std::string& filePath){
+  SDL_SaveBMP(surface, filePath.c_str());
+}
+
 void VideoManager::blitSurface(Surface* sourceSurface, int srcX, int srcY, int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y){
   SDL_Rect srcLocation;
   srcLocation.x = srcX;
@@ -559,6 +563,11 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
       logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
     }
   }
+}
+
+int VideoManager::toScreenCoord(Surface* surface, int y){
+  CAP_THROW_NULL(surface, "surface is null");
+  return surface->h - 1 - y;
 }
 
 void VideoManager::setBackgroundColour(Colour colour){

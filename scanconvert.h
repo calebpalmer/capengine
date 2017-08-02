@@ -9,9 +9,9 @@
 
 namespace CapEngine {
 
-  const Uint8 scanR = 0xff;
-  const Uint8 scanG = 0xff;
-  const Uint8 scanB = 0xff;
+  const Uint8 scanR = 0x00;
+  const Uint8 scanG = 0x00;
+  const Uint8 scanB = 0x00;
 
   enum class EdgePattern {
     SolidEdge,

@@ -134,7 +134,7 @@ namespace {
 	if(drawPixel){
 	  writePixel(surface, x, y);
 	}
-    }
+      }
     }
     
     else{  // increment over x
@@ -359,10 +359,10 @@ Surface* CapEngine::createRectangle2(int width, int height, Colour colour){
 
 Uint32 CapEngine::getPixel(const CapEngine::Surface* surface, int x, int y){
 
-  // This was taken from http://sdl.beuc.net/sdl.wiki/Pixel_Access
+  // This was taken from http://sdl.beuc.net/sdl.wiki/Pixel_Accessblack
   int bpp = surface->format->BytesPerPixel;
   /* Here p is the address to the pixel we want to retrieve */
-  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+  Uint8 *p = (Uint8 *)surface->pixels + (y * surface->pitch) + (x * bpp);
 
   switch(bpp) {
   case 1:
@@ -398,9 +398,9 @@ void CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, int
     gmask = 0x00ff0000;
     bmask = 0x0000ff00;
     amask = 0x000000ff;
-    *r = (pixel & rmask) >> 6;
-    *g= (pixel & gmask) >> 4;
-    *b= (pixel & bmask) >> 2;
+    *r = (pixel & rmask) >> 24;
+    *g= (pixel & gmask) >> 16;
+    *b= (pixel & bmask) >> 8;
     *a= (pixel & amask);
 #else
     rmask = 0x000000ff;
@@ -408,9 +408,9 @@ void CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, int
     bmask = 0x00ff0000;
     amask = 0xff000000;
     *r = (pixel & rmask);
-    *g= (pixel & gmask) >> 2;
-    *b= (pixel & bmask) >> 4;
-    *a= (pixel & amask) >> 6;
+    *g= (pixel & gmask) >> 8;
+    *b= (pixel & bmask) >> 16;
+    *a= (pixel & amask) >> 24;
 #endif
 
 }

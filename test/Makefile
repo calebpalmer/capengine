@@ -8,6 +8,9 @@ runtest: test
 	chmod 755 test
 	./test
 
+build: 	test
+	chmod 755 test
+
 objects = test.o
 
 test: $(objects) 
@@ -21,7 +24,7 @@ all: $(objects)
 #$(objects): %.o: %.cpp
 #	$(CPP) -c $(CFLAGS) $(INCLUDE) $< -o $@
 
-.PHONEY: clean runtest
+.PHONEY: clean build
 
 clean:
 	rm test

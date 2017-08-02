@@ -79,6 +79,7 @@ namespace CapEngine {
     SurfacePtr loadSurfacePtr(std::string const& in_filePath) const;
     Surface* createSurface(int width, int height);
     SurfacePtr createSurfacePtr(int in_width, int in_height);
+    void saveSurface(Surface* surface, const std::string& filePath);
     void closeSurface(Surface* surface) const;
     void blitSurface(Surface* sourceSurface, int srcX, int srcY,  int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y);
     real getSurfaceWidth(const Surface* surface) const;
@@ -106,6 +107,9 @@ namespace CapEngine {
     void loadControllerMapFromFile(std::string filePath);
     //Drawing
     void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
+
+    // utility
+    int toScreenCoord(Surface* surface, int y);
 
     bool initialized;
 
