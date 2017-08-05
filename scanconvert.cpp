@@ -9,6 +9,8 @@
 #include "VideoManager.h"
 #include "locator.h"
 
+#include <boost/numeric/conversion/cast.hpp>
+
 using namespace CapEngine;
 
 namespace {
@@ -22,7 +24,7 @@ namespace {
     return pixel;
   }
 
-  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255){
+  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0){
     Uint32 pixel;
     pixel = ((r >> format->Rloss) << format->Rshift) +
       ((g >> format->Gloss) << format->Gshift) +
@@ -32,7 +34,7 @@ namespace {
     return pixel;
   }
 
-  Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255){
+  Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0){
     Uint8 rshift, gshift, bshift, ashift;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     rshift = 8*3;
@@ -164,6 +166,27 @@ namespace {
     SDL_UnlockSurface(surface);
   }
 
+void fillRectangleBruteForce(Surface* surface, Rect rectangle, Colour colour){
+  CAP_THROW_NULL(surface, "surface is null");
+  CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
+  
+  VideoManager& vMan = *Locator::videoManager;
+  int surfaceWidth = boost::numeric_cast<int>(vMan.getSurfaceWidth(surface));
+  int surfaceHeight = boost::numeric_cast<int>(vMan.getSurfaceHeight(surface));
+
+  SDL_LockSurface(surface);
+  for(int i = rectangle.x; i < rectangle.w; i++){
+    for(int j = rectangle.y; j < rectangle.h; j++){
+      if(i >= 0 && i < surfaceWidth && j >= 0 && j < surfaceHeight){
+	int screenJ = vMan.toScreenCoord(surface, j);
+	writePixel(surface, i, screenJ, colour);
+      }
+    }
+  }
+  SDL_UnlockSurface(surface);
+
+}
+
 }
 
 void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* surface, EdgePattern pattern){
@@ -176,7 +199,7 @@ void CapEngine::drawLine(int x0, int y0, int x1, int y1, CapEngine::Surface* sur
 
 void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
   // convert to screen coordinates
-  int yNew = surface->h - y;
+  int yNew = (surface->h - 1) - y;
 
   // calculate offset into pixel buffer of (x, y)
   // pitch is the length of a row in pixels
@@ -426,21 +449,21 @@ Pixel CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, in
   return {r, g, b, a};
 }
 
-boost::optional<CapEngine::Vector> CapEngine::getTangent(const CapEngine::Surface* surface, int x, int y, Pixel solidPixel, int numNeighbours, bool above){
+boost::optional<real> CapEngine::getSlopeAtPixel(const CapEngine::Surface* surface, int x, int y, Pixel solidPixel, int numNeighbours, bool above){
   auto pixelsEqual = [](const Pixel& lhs, const Pixel& rhs) -> bool {
     return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
   };
   
   // if pixel at x,y is not a solid pixel then return nothing
   Pixel mainPixel = getPixelComponents(surface, x, y);
-  if(mainPixel.r != solidPixel.r || mainPixel.g != solidPixel.g || mainPixel.b != solidPixel.b){
-    return boost::optional<Vector>();
+  if(mainPixel.r != solidPixel.r || mainPixel.g != solidPixel.g || mainPixel.b != solidPixel.b || mainPixel.a != solidPixel.a){
+    return boost::optional<real>();
   }
 
   if(above){
     Pixel pixel = getPixelComponents(surface, x, y--);
     if(!pixelsEqual(pixel, solidPixel)){
-      return boost::optional<Vector>();
+      return boost::optional<real>();
     }
 
     std::vector<Vector> points;
@@ -462,12 +485,19 @@ boost::optional<CapEngine::Vector> CapEngine::getTangent(const CapEngine::Surfac
     }
 
     // get the average of all the slopes
-    Vector tangentVector;
-    for(unsigned int i = 0; i < points.size(); i++){
-      tangentVector += points[i];
+    real sumSlope = 0.0;
+    for(unsigned int i = 0; i < points.size() - 1; i++){
+      CAP_THROW_NULL(Locator::videoManager, "Cannot locate VideoManager");
+
+      int y1 = Locator::videoManager->fromScreenCoord(surface, points[i].y);
+      int y2 = Locator::videoManager->fromScreenCoord(surface, points[i+1].y);
+      int x1 = points[i].x;
+      int x2 = points[i+1].x;
+      
+      sumSlope += (y2 - y1) / (x2 - x1);
     }
 
-    return boost::optional<Vector>(tangentVector);
+    return boost::optional<real>(sumSlope / points.size() - 1);
   }
 
   // below
@@ -477,3 +507,6 @@ boost::optional<CapEngine::Vector> CapEngine::getTangent(const CapEngine::Surfac
   
 }
 
+void CapEngine::fillRectangle(Surface* surface, Rect rectangle, Colour colour){
+  fillRectangleBruteForce(surface, rectangle, colour);
+}

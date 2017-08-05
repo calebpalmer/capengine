@@ -565,7 +565,12 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
   }
 }
 
-int VideoManager::toScreenCoord(Surface* surface, int y){
+int VideoManager::toScreenCoord(const Surface* surface, int y) const{
+  CAP_THROW_NULL(surface, "surface is null");
+  return surface->h - 1 - y;
+}
+
+int VideoManager::fromScreenCoord(const Surface* surface, int y) const{
   CAP_THROW_NULL(surface, "surface is null");
   return surface->h - 1 - y;
 }

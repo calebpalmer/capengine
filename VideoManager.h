@@ -109,7 +109,8 @@ namespace CapEngine {
     void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
 
     // utility
-    int toScreenCoord(Surface* surface, int y);
+    int toScreenCoord(const Surface* surface, int y) const;
+    int fromScreenCoord(const Surface* surface, int y) const;
 
     bool initialized;
 
