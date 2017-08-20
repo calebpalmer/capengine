@@ -453,6 +453,7 @@ Pixel CapEngine::getPixelComponents(const CapEngine::Surface* surface, int x, in
 }
 
 boost::optional<real> CapEngine::getSlopeAtPixel(const CapEngine::Surface* surface, int x, int y, Pixel solidPixel, int numNeighbours, bool above){
+  // This is broken and unfinished.  Don't use.
   auto pixelsEqual = [](const Pixel& lhs, const Pixel& rhs) -> bool {
     return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b;
   };
