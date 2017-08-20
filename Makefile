@@ -8,7 +8,7 @@ OBJECTS=Point2d.o Time.o VideoManager.o EventDispatcher.o vector.o matrix.o coll
 			capcommon.o numbergenerator.o pcm.o soundplayer.o filesystem.o tileset.o map2d.o logger.o timestep.o \
 			scanconvert.o xml_parser.o asset_manager.o mouse.o locator.o textbutton.o gameobject.o game_management.o \
 			runner.o platformermap.o colour.o button_group.o controller.o physics.o IEventSubscriber.o tileset_panel.o \
-			map_panel.o flashing_animation.o viewport.o objectfactory.o
+			map_panel.o flashing_animation.o viewport.o objectfactory.o tools.o
 
 EDITOR_OBJECTS=editor.o
 

@@ -13,7 +13,7 @@ using namespace std;
 namespace CapEngine{
 
   Rectangle::Rectangle(){}
-  Rectangle::Rectangle(real xIn,real yIn, real widthIn, real heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
+  Rectangle::Rectangle(int xIn,int yIn, int widthIn, int heightIn) : x(xIn), y(yIn),width(widthIn), height(heightIn) { }
   Rectangle::Rectangle(Rect rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h) {}
 
   Rect Rectangle::toRect() const{
@@ -24,32 +24,32 @@ namespace CapEngine{
     return rect;
   }
 
-  Rectangle Rectangle::raiseBottom(CapEngine::real in_amount) const{
+  Rectangle Rectangle::raiseBottom(int in_amount) const{
     Rectangle newRect = *this;
     newRect.height = newRect.height - in_amount;
     return newRect;
   }
 
-  Rectangle Rectangle::lowerTop(CapEngine::real in_amount) const{
+  Rectangle Rectangle::lowerTop(int in_amount) const{
     Rectangle newRect = *this;
     newRect.y = newRect.y + in_amount;
     return newRect;
   }
 
-  Rectangle Rectangle::narrowLeft(CapEngine::real in_amount) const{
+  Rectangle Rectangle::narrowLeft(int in_amount) const{
     Rectangle newRect = *this;
     newRect.x = newRect.x + in_amount;
     return newRect;
   }
 
-  Rectangle Rectangle::narrowRight(CapEngine::real in_amount) const{
+  Rectangle Rectangle::narrowRight(int in_amount) const{
     Rectangle newRect = *this;
     newRect.width = newRect.width - in_amount;
     return newRect;
   }
 
   CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2){
-    real top1, top2, bottom1, bottom2, right1, right2, left1, left2;
+    int top1, top2, bottom1, bottom2, right1, right2, left1, left2;
     left1 = r1.x;
     left2 = r2.x;
     top1 = r1.y;
@@ -124,7 +124,7 @@ namespace CapEngine{
       // "top" collides
       int y = rect.y + (rect.height / 2);
       for( ; y > rect.y; y --){
-        for(int x = rect.x; x < rect.x + rect.width; x++){
+        for(int x = rect.x; x < rect.x + rect.width - 1; x++){
           getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
           if(r == 0x00 && g == 0x00 && b == 0x00){
             collisionPoint.setX(x);
@@ -147,7 +147,7 @@ namespace CapEngine{
       // start from halfway up to find the first part the collides
       int y = rect.y + (rect.height / 2);
       for(; y < rect.y + rect.height; y++){
-        for(int x = rect.x; x < rect.x + rect.width; x++){
+        for(int x = rect.x; x < rect.x + rect.width - 1; x++){
           getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
           if(r == 0x00 && g == 0x00 && b == 0x00){
             collisionPoint.setX(x);
@@ -169,7 +169,7 @@ namespace CapEngine{
 
       int x = rect.x + (rect.width / 2);
       for(; x < rect.x + rect.width; x++){
-        for(int y = rect.y; y < rect.y + rect.height; y++){
+        for(int y = rect.y; y < rect.y + rect.height - 1; y++){
           getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
           if(r == 0x00 && g == 0x00 && b == 0x00){
             collisionPoint.setX(x);
@@ -191,7 +191,7 @@ namespace CapEngine{
 
       int x = rect.x + (rect.width / 2);
       for(; x > rect.x; x--){
-        for(int y = rect.y; y < rect.y + rect.height; y++){
+        for(int y = rect.y; y < rect.y + rect.height - 1; y++){
           getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
           if(r == 0x00 && g == 0x00 && b == 0x00){
             collisionPoint.setX(x);
@@ -284,6 +284,7 @@ namespace CapEngine{
     auto addCollision = [&](CollisionType type){
       pixelCollision.collisionType = type;
       pixelCollision.collisionPoint = collisionPoint;
+      pixelCollision.vectorType = COLLISIONVECTORTYPE_POINT;
       pixelCollisions.push_back(pixelCollision);
     };
 

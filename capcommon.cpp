@@ -1,16 +1,21 @@
 #include "capcommon.h"
 
+#include "CapEngineException.h"
+
 #include <SDL2/SDL.h>
 
 #include <sstream>
+#include <boost/exception/all.hpp>
 
 using namespace std;
 
-void CapEngine::sleep(int ms){
+namespace CapEngine{
+
+void sleep(int ms){
   SDL_Delay(ms);
 }
 
-string CapEngine::strip(const string str){
+string strip(const string str){
   // strip newlines off first
   string replaced = replace(str, LINESEP, " ");
   
@@ -29,7 +34,7 @@ string CapEngine::strip(const string str){
   return stripped;
 }
 
-string CapEngine::replace(const string str, const string rep, const string val){
+string replace(const string str, const string rep, const string val){
   int length = str.size();
   int repLength = rep.size();
 
@@ -47,4 +52,15 @@ string CapEngine::replace(const string str, const string rep, const string val){
   }
 
   return replaced.str();
+}
+
+
+void sdlTry(std::function<int()> func){
+  if(func() != 0){
+    std::stringstream msg;
+    msg << "SDL Exception: " << SDL_GetError();
+    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
+  }
+}
+
 }

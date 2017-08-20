@@ -1,13 +1,16 @@
 #include "scanconvert.h"
 
-#include <iostream>
-#include <sstream>
-#include <SDL2/SDL.h>
-#include <cassert>
-
 #include "CapEngineException.h"
 #include "VideoManager.h"
 #include "locator.h"
+#include "capcommon.h"
+
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <SDL2/SDL.h>
+#include <cassert>
+
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -24,7 +27,7 @@ namespace {
     return pixel;
   }
 
-  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0){
+  Uint32 createUint32Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0xFF){
     Uint32 pixel;
     pixel = ((r >> format->Rloss) << format->Rshift) +
       ((g >> format->Gloss) << format->Gshift) +
@@ -34,7 +37,7 @@ namespace {
     return pixel;
   }
 
-  Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0){
+  Uint32 createUint32Pixel(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 0xFF){
     Uint8 rshift, gshift, bshift, ashift;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     rshift = 8*3;
@@ -101,7 +104,7 @@ namespace {
       }
     
     
-    SDL_LockSurface(surface);
+    sdlTry(std::bind(SDL_LockSurface, surface));
 
     float slope = (float)(y1 - y0) / (float)(x1 - x0);
     if(x0 > x1) { //swap positions . We want to always increment in positve x direction
@@ -174,12 +177,12 @@ void fillRectangleBruteForce(Surface* surface, Rect rectangle, Colour colour){
   int surfaceWidth = boost::numeric_cast<int>(vMan.getSurfaceWidth(surface));
   int surfaceHeight = boost::numeric_cast<int>(vMan.getSurfaceHeight(surface));
 
-  SDL_LockSurface(surface);
+  sdlTry(std::bind(SDL_LockSurface, surface));
   for(int i = rectangle.x; i < rectangle.w; i++){
     for(int j = rectangle.y; j < rectangle.h; j++){
       if(i >= 0 && i < surfaceWidth && j >= 0 && j < surfaceHeight){
-	int screenJ = vMan.toScreenCoord(surface, j);
-	writePixel(surface, i, screenJ, colour);
+	//int screenJ = vMan.toScreenCoord(surface, j);
+	writePixel(surface, i, j, colour);
       }
     }
   }
@@ -248,12 +251,12 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine:
   }
   else if(surface->format->BytesPerPixel == 3){
     pixel = malloc(3); 
-    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b);
+    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b, colour.m_a);
     ((Uint32*)surface->pixels)[offset / 3] = *(Uint32*)pixel;
   }
   else if(surface->format->BytesPerPixel == 4){
     pixel = malloc(4);
-    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b);
+    *(Uint32*)pixel = createUint32Pixel(surface->format, colour.m_r, colour.m_g, colour.m_b, colour.m_a);
     ((Uint32*)surface->pixels)[offset / 4] = *(Uint32*)pixel;
   }
   else{
@@ -293,7 +296,7 @@ Surface* CapEngine::createRectangle(int width, int height, Colour colour){
 
   Surface* surface = Locator::videoManager->createSurface(width, height);
 
-  SDL_LockSurface(surface);
+  sdlTry(std::bind(SDL_LockSurface, surface));
 
   //std::cout << "Writing pixels to surface" << std::endl;
   
@@ -461,28 +464,106 @@ boost::optional<real> CapEngine::getSlopeAtPixel(const CapEngine::Surface* surfa
   }
 
   if(above){
-    Pixel pixel = getPixelComponents(surface, x, y--);
-    if(!pixelsEqual(pixel, solidPixel)){
+    Pixel pixel = getPixelComponents(surface, x, y - 1);
+    if(pixelsEqual(pixel, solidPixel)){
       return boost::optional<real>();
     }
 
     std::vector<Vector> points;
-    for(int i = x - numNeighbours; i <= x + numNeighbours; i++){
-      bool pixelFound = false;
-      for(int j = y - numNeighbours; j <= y + numNeighbours; j++){
-	pixel = getPixelComponents(surface, x, y);
 
-	if(pixelsEqual(pixel, solidPixel)){
+    VideoManager *vMan = Locator::videoManager;
+    CAP_THROW_NULL(vMan, "VideoManager cannot be located");
+
+    int surfaceWidth = vMan->getSurfaceWidth(surface);
+    int surfaceHeight = vMan->getSurfaceHeight(surface);
+
+    // starting from the middle to the left
+    for(int i = x - 1; i >= x - numNeighbours; i--){
+      if(i <= 0)
+	break;
+      
+      int j = y;
+      pixel = getPixelComponents(surface, i, y);
+      //   if the pixel is solid, look up for the first non solid pixel until end of surface
+      if( pixelsEqual(pixel, solidPixel)){
+	while( j > 0 && pixelsEqual(getPixelComponents(surface, i, j--), solidPixel )) {}
+	points.push_back(Vector(i, j));
+      }
+      //   if the pixel is not solid, look down each pixel until the first solid pixel is found, unless the pixel to the right is not solid
+      else{
+	while(j < surfaceHeight && !pixelsEqual(getPixelComponents(surface, i, j++), solidPixel) &&
+	      pixelsEqual(getPixelComponents(surface, i + 1, j), solidPixel)) {}
+
+	// pixel was found in current column
+	if(pixelsEqual(getPixelComponents(surface, i, j), solidPixel)){
 	  points.push_back(Vector(i, j));
-	  pixelFound = true;
-	  break;
+	}
+
+	// pixel was not found, use pixel to right if found
+	else if(pixelsEqual(getPixelComponents(surface, i + 1, j), solidPixel)){
+	  points.push_back(Vector(i + 1, j));
+	}
+
+	// pixel was not found to right either, so it must be one above this and to the right
+	else{
+	  if(!pixelsEqual(getPixelComponents(surface, i + i, j - i), solidPixel)){
+	    std::stringstream error;
+	    error << "Expecting solid pixel at (" << (i - 1) << ", " << (j - 1) << ")";
+	    BOOST_THROW_EXCEPTION(CapEngineException(error.str()));
+	  }
+	  points.push_back(Vector(i + 1, j - 1));
 	}
       }
-
-      if(!pixelFound){
-	points.push_back(Vector(i, y + numNeighbours + 1));
-      }
     }
+
+    // do the same from middle to right
+    for(int i = x + 1; i < x + numNeighbours; i ++){
+      if(i >= surfaceWidth - 1)
+	break;
+
+      int j = y;
+      pixel = getPixelComponents(surface, i, y);
+      //   if the pixel is solid, look up for the first non solid pixel until end of surface
+      if( pixelsEqual(pixel, solidPixel)){
+	while( j > 0 && pixelsEqual(getPixelComponents(surface, i, j--), solidPixel )) {}
+	points.push_back(Vector(i, j));
+      }
+
+      //   if the pixel is not solid, look down each pixel until the first solid pixel is found, unless the pixel to the right is not solid
+      else{
+	while(j < surfaceHeight && !pixelsEqual(getPixelComponents(surface, i, j++), solidPixel) &&
+	      pixelsEqual(getPixelComponents(surface, i - 1, j), solidPixel)) {}
+
+	// pixel was found in current column
+	if(pixelsEqual(getPixelComponents(surface, i, j), solidPixel)){
+	  points.push_back(Vector(i, j));
+	}
+
+	// pixel was not found, use pixel to right if found
+	else if(pixelsEqual(getPixelComponents(surface, i - 1, j), solidPixel)){
+	  points.push_back(Vector(i - 1, j));
+	}
+
+	// pixel was not found to right either, so it must be one above this and to the right
+	else{
+	  if (!pixelsEqual(getPixelComponents(surface, i - i, j - i), solidPixel)){
+	    std::stringstream error;
+	    error << "Expecting solid pixel at (" << (i - 1) << ", " << (j - 1) << ")";
+	    BOOST_THROW_EXCEPTION(CapEngineException(error.str()));
+	  }
+	  points.push_back(Vector(i - 1, j - 1));
+	}
+
+      }
+      
+    }
+
+    // order the pixels by x and make sure only one point exists per x
+    std::sort(points.begin(), points.end(),
+	      [](const Vector& lhs, const Vector& rhs) { return lhs.x <= rhs.x; });
+    std::unique(points.begin(), points.end(),
+	      [](const Vector& lhs, const Vector& rhs) { return lhs.x == rhs.x; });		
+
 
     // get the average of all the slopes
     real sumSlope = 0.0;

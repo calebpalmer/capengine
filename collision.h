@@ -11,21 +11,21 @@ namespace CapEngine{
 
   class Rectangle {
   public:
-    CapEngine::real x;
-    CapEngine::real y;
-    CapEngine::real width;
-    CapEngine::real height;
+    int x;
+    int y;
+    int width;
+    int height;
     
     Rectangle();
-    Rectangle(real xIn,real yIn, real widthIn, real heightIn);
+    Rectangle(int xIn,int yIn, int widthIn, int heightIn);
     Rectangle(Rect rect);
 
     Rect toRect() const;
 
-    Rectangle raiseBottom(CapEngine::real in_amount) const;
-    Rectangle lowerTop(CapEngine::real in_amount) const;
-    Rectangle narrowRight(CapEngine::real in_amount) const;
-    Rectangle narrowLeft(CapEngine::real in_amount) const;
+    Rectangle raiseBottom(int in_amount) const;
+    Rectangle lowerTop(int in_amount) const;
+    Rectangle narrowRight(int in_amount) const;
+    Rectangle narrowLeft(int in_amount) const;
   };
 
   

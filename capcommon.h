@@ -2,6 +2,7 @@
 #define CAPCOMMON_H
 
 #include <string>
+#include <functional>
 
 namespace CapEngine {
 #ifdef WIN
@@ -18,7 +19,8 @@ namespace CapEngine {
   
   void sleep(int ms);
   std::string strip(const std::string str);
-  std::string replace(const std::string str, const std::string rep, const std::string val); 
+  std::string replace(const std::string str, const std::string rep, const std::string val);
+  void sdlTry(std::function<int()> func);
 }
 
 #endif

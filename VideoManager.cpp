@@ -14,6 +14,7 @@
 #include "logger.h"
 #include "EventDispatcher.h"
 #include "collision.h"
+#include "CapEngineException.h"
 
 using namespace std;
 using namespace CapEngine;
@@ -496,7 +497,11 @@ void VideoManager::closeSurface(Surface* surface) const{
 }
 
 void VideoManager::saveSurface(SDL_Surface* surface,  const std::string& filePath){
-  SDL_SaveBMP(surface, filePath.c_str());
+  if(SDL_SaveBMP(surface, filePath.c_str()) != 0){
+    std::stringstream msg;
+    msg << SDL_GetError();
+    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
+  }
 }
 
 void VideoManager::blitSurface(Surface* sourceSurface, int srcX, int srcY, int sourceWidth, int sourceHeight, Surface* destSurface, int x, int y){
