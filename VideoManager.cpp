@@ -77,6 +77,7 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
     Window window = {m_pWindow, m_pRenderer, viewport};
 
     m_windows[windowID] = window;
+    m_windowNamesToIds[mainWindowName] = windowID;
   }
 
   // load controller maps
@@ -656,6 +657,7 @@ unsigned int VideoManager::createNewWindow(WindowParams windowParams){
   Window window ={pWindow, pRenderer, viewport};
   Uint32 id = SDL_GetWindowID(pWindow);
   m_windows[id] = window;
+  m_windowNamesToIds[windowParams.name] = id;
 
   return id;
 }
@@ -685,6 +687,17 @@ Window VideoManager::getWindow(Uint32 windowID){
     ostringstream exceptionDetails;
     exceptionDetails << "Window " << windowID << " not found.  Texture not drawn";
     throw CapEngineException(exceptionDetails.str());
+  }
+
+  return window->second;
+}
+
+Uint32 VideoManager::getWindowId(const std::string& windowName) const{
+  auto window =  m_windowNamesToIds.find(windowName);
+  if(window == m_windowNamesToIds.end()){
+    std::ostringstream msg;
+    msg << "Window \"" << windowName << "\" does not exist";
+    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
   }
 
   return window->second;

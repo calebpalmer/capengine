@@ -60,4 +60,11 @@ namespace CapEngine {
 
 
   }
+
+Surface* FontManager::getTextSurface(const std::string& font, const std::string& text, int fontSize
+				     , Colour colour) const
+{
+  return getTextSurface(font, text, fontSize, colour.m_r, colour.m_g, colour.m_b);
+}
+
 }

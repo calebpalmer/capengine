@@ -34,6 +34,7 @@ namespace CapEngine {
     bool fullScreen;
     bool opengl;
     bool resizable;
+    std::string name;
   };
 
   struct Window {
@@ -48,7 +49,7 @@ namespace CapEngine {
 
   class FontManager;
 
-  static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false,false};
+  static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false, false, "main"};
 
 
   class VideoManager {
@@ -64,6 +65,7 @@ namespace CapEngine {
     void drawScreen(Uint32 windowID);
     void clearAll();
     void drawAll();
+    Uint32 getWindowId(const std::string& windowName) const;
     void getWindowResolution(Uint32 windowID, int* width, int* height);
     int getWindowWidth(Uint32 windowID);
     int getWindowHeight(Uint32 windowID);
@@ -112,7 +114,8 @@ namespace CapEngine {
     int toScreenCoord(const Surface* surface, int y) const;
     int fromScreenCoord(const Surface* surface, int y) const;
 
-    bool initialized;
+    bool initialized = false;
+    const std::string mainWindowName = "main";
 
   protected:
     void setColorKey(Surface* surface) const;
@@ -130,6 +133,7 @@ namespace CapEngine {
     SDL_Window* m_pWindow;
     SDL_Renderer* m_pRenderer;
     std::map<Uint32, Window> m_windows;
+    std::map<std::string, Uint32> m_windowNamesToIds;
 
     Matrix m_transformationMatrix;
     
