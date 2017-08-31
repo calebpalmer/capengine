@@ -116,12 +116,7 @@ void EventDispatcher::flushQueue(){
 }
 
 bool EventDispatcher::hasEvents(){
-  if(eventQueue.size() > 0){
-    return true;
-  }
-  else{
-    return false;
-  }
+  return eventQueue.size() > 0;
 }
 
 void EventDispatcher::getEvents(){

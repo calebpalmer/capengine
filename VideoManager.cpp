@@ -685,7 +685,7 @@ Window VideoManager::getWindow(Uint32 windowID){
   auto window = m_windows.find(windowID);
   if(window == m_windows.end()){
     ostringstream exceptionDetails;
-    exceptionDetails << "Window " << windowID << " not found.  Texture not drawn";
+    exceptionDetails << "Window " << windowID << " not found.";
     throw CapEngineException(exceptionDetails.str());
   }
 
