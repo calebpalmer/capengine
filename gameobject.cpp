@@ -251,7 +251,7 @@ namespace CapEngine {
 
   std::ostream& operator<<(std::ostream& stream, GameObject const & gameObject){
     std::ostringstream repr;
-    repr << "GameObject[" << gameObject.m_objectID << "]@" << gameObject.position;
+    repr << "GameObject[" << gameObject.m_objectID << "]@" << gameObject.boundingPolygon();;
 
     stream << repr.str();
     return stream;

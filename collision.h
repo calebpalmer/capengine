@@ -76,6 +76,7 @@ namespace CapEngine{
  std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
  std::vector<PixelCollision> detectBitmapCollisionsWithTangents(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
 
+ std::ostream& operator<<(std::ostream& stream, const CapEngine::Rectangle& rectangle); 
  std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
  std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);
  std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionClass& collisionClass);

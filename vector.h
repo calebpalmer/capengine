@@ -49,6 +49,7 @@ namespace CapEngine{
     void scale(real factor);
     real magnitude() const;
     Vector& normalize() const;
+    Vector absolute() const;
     real slope() const;
     PolarVector* toPolarVector() const;
     std::string toString() const;

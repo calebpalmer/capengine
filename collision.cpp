@@ -462,4 +462,14 @@ namespace CapEngine{
     stream << repr; 
     return stream;
   }
+
+  std::ostream& operator<<(std::ostream& stream, const Rectangle& rectangle){
+    using namespace CapEngine;
+
+    stream << "Rectangle (" << rectangle.x << ", " << rectangle.y << "@ " <<
+      rectangle.width << " x " << rectangle.height << ")";
+
+    return stream;
+  }
+
 }
