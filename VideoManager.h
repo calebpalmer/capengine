@@ -145,7 +145,7 @@ namespace CapEngine {
     float fps;
     std::unique_ptr<CapEngine::FontManager> up_fontManager;
 
-    bool showFPS;
+    bool showFPS = false;
     std::string ttfFontPath;
     Uint8 fpsColourR;
     Uint8 fpsColourG;

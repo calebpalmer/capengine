@@ -60,5 +60,6 @@
 #include "viewport.h"
 #include "objectfactory.h"
 #include "tools.h"
+#include "animator.h"
 
 #endif

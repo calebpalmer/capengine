@@ -12,6 +12,7 @@ namespace CapEngine{
   class MapPanel : public IEventSubscriber {
   public:
     MapPanel(Uint32 windowID, int x, int y, int width, int height, std::string mapPath);
+    ~MapPanel() = default;
     void resize(int x, int y, int w, int h);
     void render();
 

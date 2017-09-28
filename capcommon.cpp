@@ -20,15 +20,18 @@ string strip(const string str){
   string replaced = replace(str, LINESEP, " ");
   
   // strip off any other leading or trailing spaces
-  unsigned int start = replaced.find_first_not_of(" ");
-  unsigned int end = replaced.find_last_not_of(" ");
+  std::size_t start = replaced.find_first_not_of(" ");
+  std::size_t end = replaced.find_last_not_of(" ");
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
   if(start == string::npos){
     start = 0;
   }
   if(end == string::npos){
     end = replaced.size() - 1;
   }
+#pragma GCC diagnostic pop
 
   string stripped = replaced.substr(start, end - start + 1);
   return stripped;

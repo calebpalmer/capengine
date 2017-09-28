@@ -18,6 +18,8 @@ using namespace CapEngine;
 
 namespace {
 
+const int basicStippleLength = 10;
+
   Uint16 createUint16Pixel(SDL_PixelFormat* format, Uint8 r, Uint8 g, Uint8 b){
     Uint16 pixel;
     pixel = ((r >> format->Rloss) << format->Rshift) +

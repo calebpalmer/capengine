@@ -29,7 +29,7 @@ Window::Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
 
 bool VideoManager::instantiated = false;
 
-VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
+VideoManager::VideoManager() : up_fontManager(new FontManager())
 				  , logger(nullptr), m_pWindow(nullptr), m_pRenderer(nullptr)
 			     , initialized(false), m_transformationMatrix(Matrix::createIdentityMatrix())
 {
@@ -38,7 +38,7 @@ VideoManager::VideoManager() : up_fontManager(new FontManager()), showFPS(false)
   logger = new Logger();
 }
 
-VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager()), showFPS(false)
+VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
 					     , m_pWindow(nullptr), m_pRenderer(nullptr), logger(loggerIn), initialized(false),
 					       m_transformationMatrix(Matrix::createIdentityMatrix())
 {

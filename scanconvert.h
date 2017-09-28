@@ -37,9 +37,5 @@ namespace CapEngine {
   void getPixelComponents(const CapEngine::Surface* surface, int x, int y, Uint8* r, Uint8* g, Uint8* b, Uint8* a);
   Pixel getPixelComponents(const CapEngine::Surface* surface, int x, int y);
   boost::optional<real> getSlopeAtPixel(const CapEngine::Surface* surface, int x, int y, Pixel solidPixel, int numNeighbours, bool above=true);
-  
-
-  static int basicStippleLength = 10;
-
 }
 #endif // SCANCONVERT_H

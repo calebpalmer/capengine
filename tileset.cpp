@@ -96,7 +96,7 @@ TileSet::TileSet(const string& configPath) {
 
 Tile& TileSet::parseTile(const string& line){
   int x, y, width, height;
-  unsigned int position, oldPosition;
+  std::size_t position, oldPosition;
   
   // parse x
   position = line.find(",");

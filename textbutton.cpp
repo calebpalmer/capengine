@@ -66,7 +66,6 @@ void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   }
 }
 
-
 void TextButton::update() {
   if(!(mouseInButton(Vector(Locator::mouse->getx(), Locator::mouse->gety())))){
     m_activated = false;
