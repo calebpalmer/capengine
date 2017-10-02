@@ -24,7 +24,7 @@ TileSet::~TileSet(){
 TileSet::TileSet(const string& configPath) {
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(configPath)){
-    throw CapEngineException(configPath + " is not a valid path");
+    BOOST_THROW_EXCEPTION(CapEngineException(configPath + " is not a valid path"));
   }
   this->configFilepath = configPath;
 
@@ -42,7 +42,7 @@ TileSet::TileSet(const string& configPath) {
     if(position == string::npos){
       stringstream errorMessage;
       errorMessage << "Unable to parse config file " << configPath << " at line " << linenum;
-      throw CapEngineException(errorMessage.str());
+      BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
     }
 
     string parameter = line.substr(0, position);
@@ -68,7 +68,7 @@ TileSet::TileSet(const string& configPath) {
     else{
       stringstream errorMessage;
       errorMessage << "Unknown parameter " << parameter;
-      throw CapEngineException(errorMessage.str());
+      BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
     }
   }
   // parse tiles
@@ -85,7 +85,7 @@ TileSet::TileSet(const string& configPath) {
   videoManager = Locator::videoManager;
   if(videoManager){
     if(videoManager->initialized == false){
-      throw CapEngineException("VideoManager not initialized");
+      BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
     }
   
     surface = videoManager->loadSurface(surfaceFilepath);
@@ -104,7 +104,7 @@ Tile& TileSet::parseTile(const string& line){
   if(position == string::npos){
     stringstream errorMessage;
     errorMessage << "Unable to parse tile in config file " << configFilepath;
-    throw CapEngineException(errorMessage.str());
+    BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   
   string temp = line.substr(0, position);
@@ -117,7 +117,7 @@ Tile& TileSet::parseTile(const string& line){
  if(position == string::npos){
     stringstream errorMessage;
     errorMessage << "Unable to parse tile in config file " << configFilepath;
-    throw CapEngineException(errorMessage.str());
+    BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
   tempStream.str(temp);
@@ -130,7 +130,7 @@ Tile& TileSet::parseTile(const string& line){
  if(position == string::npos){
     stringstream errorMessage;
     errorMessage << "Unable to parse tile in config file " << configFilepath;
-    throw CapEngineException(errorMessage.str());
+    BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
   tempStream.str(temp);
@@ -143,7 +143,7 @@ Tile& TileSet::parseTile(const string& line){
  if(position == string::npos){
     stringstream errorMessage;
     errorMessage << "Unable to parse tile in config file " << configFilepath;
-    throw CapEngineException(errorMessage.str());
+    BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
   tempStream.str(temp);
@@ -156,7 +156,7 @@ Tile& TileSet::parseTile(const string& line){
  if(position == string::npos){
     stringstream errorMessage;
     errorMessage << "Unable to parse tile in config file " << configFilepath;
-    throw CapEngineException(errorMessage.str());
+    BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
   tempStream.str(temp);
@@ -174,7 +174,7 @@ Tile& TileSet::parseTile(const string& line){
 
 void TileSet::validate(){
   if(tileCount != tiles.size()){
-    throw CapEngineException("Tiles read does not equal declared tile count");
+    BOOST_THROW_EXCEPTION(CapEngineException("Tiles read does not equal declared tile count"));
   }
   /*if(surface == nullptr){
     throw CapEngineException("Surface not loaded");

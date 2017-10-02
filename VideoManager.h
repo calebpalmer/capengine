@@ -51,7 +51,9 @@ namespace CapEngine {
 
   static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false, false, "main"};
 
-
+  // free functions
+  TexturePtr textureToTexturePtr(Texture* texture);
+      
   class VideoManager {
   public:
     VideoManager();    
@@ -97,8 +99,9 @@ namespace CapEngine {
     void getTextureDims(Texture* texture, int* x, int* y) const;
     Texture* createTexture(int width, int height);
     TexturePtr createTexturePtr(int width, int height);
-    Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false); 
-    TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false); 
+    Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false);
+    Texture* createTextureFromSurface(Uint32 windowID, Surface* surface, bool freeSurface = false);     
+    TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false);
 
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));

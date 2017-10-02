@@ -9,6 +9,7 @@ namespace CapEngine{
     virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) {}
     virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) {}
     virtual void handleKeyboardEvent(SDL_KeyboardEvent event) {}
+    virtual void handleWindowEvent(SDL_WindowEvent event) {}
   };
 }
 

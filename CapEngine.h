@@ -61,5 +61,6 @@
 #include "objectfactory.h"
 #include "tools.h"
 #include "animator.h"
+#include "widget.h"
 
 #endif

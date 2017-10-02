@@ -22,10 +22,10 @@ include_directories(${SDL2_INCLUDE_DIR}
 if (MSVC)
   add_compile_options(/W4)
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused)
+  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused)
 endif()
 
-add_definitions(-DUNIX)
+add_definitions(-DUNIX -DDEBUG)
 
 add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp 
 	    capcommon.cpp numbergenerator.cpp pcm.cpp soundplayer.cpp filesystem.cpp tileset.cpp map2d.cpp logger.cpp timestep.cpp 
@@ -33,7 +33,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp)
 
-add_executable(editor editor_main.cpp tileset_panel.cpp map_panel.cpp)
+add_executable(editor editor.cpp tileset_panel.cpp map_panel.cpp)
 
 target_link_libraries(capengine ${SDL2_LIBRARY} 
                       ${SDL2_IMAGE_LIBRARIES}

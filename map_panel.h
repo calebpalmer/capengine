@@ -1,31 +1,37 @@
 #ifndef MAP_PANEL_H
 #define MAP_PANEL_H
 
-#include <string>
+#include "IEventSubscriber.h"
+#include "vector.h"
+#include "map2d.h"
+#include "widget.h"
 
+#include <string>
+#include <vector>
 #include <SDL2/SDL.h>
 
-#include "IEventSubscriber.h"
 
 namespace CapEngine{
 
-  class MapPanel : public IEventSubscriber {
+  class MapPanel : public Widget {
   public:
-    MapPanel(Uint32 windowID, int x, int y, int width, int height, std::string mapPath);
+    MapPanel(Uint32 windowID, bool ownsWindow, int x, int y, int width, int height, std::shared_ptr<Map2D> pMap);
     ~MapPanel() = default;
     void resize(int x, int y, int w, int h);
     void render();
 
-    virtual void receiveEvent(SDL_Event event, CapEngine::Time* time) override;
+    void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 
   private:
-    Uint32 m_windowID;
-    std::string m_mapPath;
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
-
+    Uint32 m_windowID = -1;
+    std::shared_ptr<Map2D> m_pMap;
+    bool m_ownsWindow = false;
+    int m_x= 0;
+    int m_y = 0;
+    int m_width = 0;
+    int m_height = 0;
+    CapEngine::Vector m_translationMatrix = {0.0, 0.0, 0.0};
+    std::pair<int, int> m_hoveredTile = {-1, -1};
   };
 }
 

@@ -9,17 +9,19 @@ namespace CapEngine{
   class TilesetPanel{
   public:
 
-    TilesetPanel(Uint32 windowID, int x, int y, int w, int h, std::string tilesetFile);
+    TilesetPanel(Uint32 windowID, bool ownsWindow,
+		 int x, int y, int w, int h, std::string tilesetFile);
     void resize(int x, int y, int w, int h);
     void render();
 
   private:
-    Uint32 m_windowID;
+    Uint32 m_windowID = -1;
     std::string m_tilesetPath;
-    int m_x;
-    int m_y;
-    int m_w;
-    int m_h;
+    bool m_ownsWindow = true;
+    int m_x = 0;
+    int m_y = 0;
+    int m_w = 0;
+    int m_h = 0;
   };
 }
 

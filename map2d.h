@@ -1,13 +1,13 @@
 #ifndef MAP2D_H
 #define MAP2D_H
 
-#include <memory>
-#include <fstream>
-
 #include "tileset.h"
 #include "captypes.h"
 #include "collision.h"
 #include "VideoManager.h"
+
+#include <memory>
+#include <fstream>
 
 namespace CapEngine{
   
@@ -20,7 +20,7 @@ namespace CapEngine{
     Map2D(const Map2D& map);
     Map2D& operator=(const Map2D& map);
     void readTiles(std::ifstream& stream);
-    void drawTexture();
+    void drawSurface();
     std::unique_ptr<Rectangle> getTileMBR(int index);
 
   public:
@@ -34,15 +34,21 @@ namespace CapEngine{
     };
     Map2D(const std::string mapConfigPath);
     ~Map2D();
+
     std::string toString();
     std::vector<CollisionTup> getCollisions(const Rectangle& mbr);
+    Surface* getSurface();
+    int getWidth() const;
+    int getHeight() const;
+    int getTileSize() const;
+
+    void setWidth(int width);
+    void setHeight(int height);
 
     std::vector<TileTup*> tiles;
-    Texture* texture;
+    Surface* surface;
     unsigned int width;
     unsigned int height;
-
-    
   };
 
 }

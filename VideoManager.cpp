@@ -17,7 +17,8 @@
 #include "CapEngineException.h"
 
 using namespace std;
-using namespace CapEngine;
+
+namespace CapEngine{
 
 Window::Window() :
   m_window(nullptr), m_renderer(nullptr) {}
@@ -83,6 +84,7 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
   // load controller maps
   //loadControllerMaps();
 
+  initialized = true;
   return windowID;
 }
 
@@ -92,8 +94,16 @@ TexturePtr VideoManager::createTextureFromSurfacePtr(Surface* surface, bool free
 }
 
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){
+  auto windowId = getWindowId(mainWindowName);
+  return createTextureFromSurface(windowId, surface, freeSurface);
+}
+
+Texture* VideoManager::createTextureFromSurface(Uint32 windowId, Surface* surface, bool freeSurface){
   // Create Texture from Surface
-  SDL_Texture* texture = SDL_CreateTextureFromSurface(m_pRenderer, surface);
+  auto window = getWindow(windowId);
+  auto pRenderer = window.m_renderer;
+  
+  SDL_Texture* texture = SDL_CreateTextureFromSurface(pRenderer, surface);
   if( texture == nullptr ){
     ostringstream errorMsg;
     errorMsg << "Unable to load texture from surface " << " - " << SDL_GetError();
@@ -195,7 +205,6 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture* texture,
 void VideoManager::drawTexture(Uint32 windowID, Texture* texture,
 			       Rect* srcRect, Rect* dstRect, bool applyTransform) {
   assert(texture != nullptr);
-  assert(dstRect != nullptr);
   
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
@@ -203,17 +212,21 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture,
   Viewport viewport = getViewport(windowID);
 
   //Transform the dstRect
-  Rect newDstRect = *dstRect;
-  if(applyTransform)
-    newDstRect = viewport.transformRect(*dstRect);
+  if(dstRect){
+    Rect newDstRect = *dstRect;
+    if(applyTransform)
+      newDstRect = viewport.transformRect(*dstRect);
+    *dstRect = newDstRect;
+  }
+  
 
   int w, h;
   getWindowResolution(windowID, &w, &h);
   Rect windowRect = {0, 0, w, h};
 
   // only draw things that are in the window
-  if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
-    SDL_RenderCopy(pRenderer, texture, srcRect, &newDstRect);
+  if(!dstRect || detectMBRCollision(*dstRect, windowRect) != COLLISION_NONE){
+    SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
   }
 }
 
@@ -378,7 +391,6 @@ TexturePtr VideoManager::createTexturePtr(int width, int height){
   Texture* texture = createTexture(width, height);
   return std::move(TexturePtr(texture, SDL_DestroyTexture));
 }
-    
 
 Texture* VideoManager::createTexture(int width, int height){
   SDL_Texture* texture = SDL_CreateTexture(m_pRenderer
@@ -628,6 +640,8 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
     throw CapEngineException(errorStream.str());
   }
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+  
   // if full, set scaling
   if(windowParams.fullScreen){
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
@@ -785,4 +799,10 @@ Viewport VideoManager::getViewport(Uint32 windowId) const{
   }
 
   return windowTuple->second.m_viewport;
+}
+
+TexturePtr textureToTexturePtr(Texture* texture){
+  return std::move(TexturePtr(texture, SDL_DestroyTexture));
+}
+
 }

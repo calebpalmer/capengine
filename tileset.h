@@ -14,6 +14,7 @@ namespace CapEngine{
     TILE_SOLID
   };
 
+  // TODO:  This class needs to be refactored to hide it's data members
   class Tile {
   public:
     int xpos;

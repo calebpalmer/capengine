@@ -9,8 +9,11 @@
 #include "logger.h"
 #include "locator.h"
 
-using namespace CapEngine;
+#include <boost/filesystem.hpp>
+
 using namespace std;
+
+namespace CapEngine{
 
 Map2D::~Map2D(){
   vector<TileTup*>::iterator iter;
@@ -84,7 +87,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
     if(Locator::videoManager->initialized == false){
       throw CapEngineException("VideoManager not initialized");
     }
-    drawTexture();
+    drawSurface();
   }
   ostringstream logString;
   logString << "loaded map from " << mapConfigPath << endl
@@ -123,12 +126,12 @@ void Map2D::readTiles(ifstream& stream){
   }
 }
 
-void Map2D::drawTexture(){
+void Map2D::drawSurface(){
   unsigned int xRes, yRes = 0;
   if(Locator::videoManager->initialized == false){
     throw CapEngineException("VideoManager not initialized");
   }
-  Surface* surface = Locator::videoManager->createSurface(width, height);
+  surface = Locator::videoManager->createSurface(width, height);
 
   vector<TileTup*>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
@@ -139,7 +142,21 @@ void Map2D::drawTexture(){
     Locator::videoManager->blitSurface((tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, surface, xRes, yRes);
     xRes += (*iter)->tile->width;
   }
-  texture = Locator::videoManager->createTextureFromSurface(surface);
+
+#ifdef DEBUG
+  boost::filesystem::path path(this->configPath);
+  boost::filesystem::path dir = path.parent_path();
+  std::ostringstream filename;
+  filename << path.stem() << ".bmp";
+  boost::filesystem::path filePath = dir /= boost::filesystem::path(filename.str());
+    
+  Locator::videoManager->saveSurface(surface, filePath.string());
+  std::ostringstream msg;
+  msg << "Saved map surface as " << filePath;
+  Locator::logger->log(msg.str(), Logger::CDEBUG);
+#endif
+
+  
   Locator::logger->log("Drew consolidate map texture", Logger::CDEBUG, __FILE__, __LINE__);
 }
 
@@ -188,3 +205,32 @@ vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
   
   return collisions;
 }
+
+Surface* Map2D::getSurface(){
+  return surface;
+}
+
+int Map2D::getWidth() const{
+  return width;
+}
+
+int Map2D::getHeight() const{
+  return height;
+}
+
+void Map2D::setWidth(int newWidth){
+  width = newWidth;
+}
+
+void Map2D::setHeight(int newHeight){
+  height = newHeight;
+}
+
+int Map2D::getTileSize() const{
+  CAP_THROW_ASSERT(tileSet.get() == nullptr, "TileSet is null");
+  // TODO assuming tilesize is square.  Fix TileSet to be only square tiles.
+  return tileSet->tileWidth;;
+}
+
+
+} // namespace CapEngine
