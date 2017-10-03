@@ -15,18 +15,12 @@ using namespace std;
 
 namespace CapEngine{
 
-Map2D::~Map2D(){
-  vector<TileTup*>::iterator iter;
-  for(iter = tiles.begin(); iter != tiles.end(); iter++){
-    delete *iter;
-  }
-}
+Map2D::~Map2D(){ }
 
 Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
-  
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(mapConfigPath)){
-    throw CapEngineException(mapConfigPath + " is not a valid path");
+    BOOST_THROW_EXCEPTION(CapEngineException(mapConfigPath + " is not a valid path"));
   }
   this->configPath = mapConfigPath;
   
@@ -39,6 +33,7 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
   while(configStream.good()){
     getline(configStream, line);
     if(line == ""){
+      //TODO I think this should be continue
       break;
     }
     string::size_type position;
@@ -102,6 +97,7 @@ void Map2D::readTiles(ifstream& stream){
     getline(stream, line);
     
     if(line == ""){
+      // TODO I think this should be continue
       return;
     }
 
@@ -113,12 +109,13 @@ void Map2D::readTiles(ifstream& stream){
       unsigned int tileIndex;
       valueStream >> tileIndex;
       if(!tileSet->tileExists(tileIndex)){
-			  throw CapEngineException("Unable to load map.  Tile does not exist: " + tileIndex);
+	BOOST_THROW_EXCEPTION(CapEngineException("Unable to load map.  Tile does not exist: " + tileIndex));
       }
-      unique_ptr<TileTup> sp_tileTup(new TileTup);
-      sp_tileTup->tile = &(tileSet->getTile(tileIndex));
-      sp_tileTup->index = tileIndex;
-      tiles.push_back(sp_tileTup.release());
+
+      TileTup tileTup;
+      tileTup.tile = tileSet->getTile(tileIndex);
+      tileTup.index = tileIndex;
+      tiles.push_back(tileTup);
 
       oldPosition = position + 1;
       position = line.find(',', oldPosition);
@@ -129,18 +126,18 @@ void Map2D::readTiles(ifstream& stream){
 void Map2D::drawSurface(){
   unsigned int xRes, yRes = 0;
   if(Locator::videoManager->initialized == false){
-    throw CapEngineException("VideoManager not initialized");
+    BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
   }
   surface = Locator::videoManager->createSurface(width, height);
 
-  vector<TileTup*>::iterator iter;
+  vector<TileTup>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
     if(xRes >= width){
       xRes = 0;
-      yRes += (*iter)->tile->height;
+      yRes += iter->tile.height;
     }
-    Locator::videoManager->blitSurface((tileSet->surface), (*iter)->tile->xpos, (*iter)->tile->ypos, (*iter)->tile->width, (*iter)->tile->height, surface, xRes, yRes);
-    xRes += (*iter)->tile->width;
+    Locator::videoManager->blitSurface((tileSet->surface), iter->tile.xpos, iter->tile.ypos, iter->tile.width, iter->tile.height, surface, xRes, yRes);
+    xRes += iter->tile.width;
   }
 
 #ifdef DEBUG
@@ -168,14 +165,14 @@ string Map2D::toString(){
 	 << "tileset=" << tileSetPath << endl  // TODO Fix this, wrong path
 	 << "tiles=" << endl;
   
-  vector<TileTup*>::iterator iter;
+  vector<TileTup>::iterator iter;
   for(iter = tiles.begin(); iter != tiles.end(); iter++){
     if(xRes >= width){
       xRes = 0;
       output << endl;
     }
-    output << ((*iter)->index) << ',';
-    xRes += (*iter)->tile->width;  
+    output << iter->index << ',';
+    xRes += iter->tile.width;  
   }
 	return output.str();
 }
@@ -198,7 +195,7 @@ vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
     if(collisionType != COLLISION_NONE){
       CollisionTup collision;
       collision.collisionType = collisionType;
-      collision.tile = tiles[i]->tile;
+      collision.tile = tiles[i].tile;
       collisions.push_back(collision);
     }
   }

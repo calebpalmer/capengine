@@ -14,10 +14,7 @@ using namespace std;
 TileSet::~TileSet(){
   if(surface != nullptr){
     videoManager->closeSurface(surface);
-  }
-  vector<Tile*>::iterator iter;
-  for(iter = tiles.begin(); iter != tiles.end(); iter++){
-    delete *iter;
+    surface = nullptr;
   }
 }
 
@@ -77,8 +74,8 @@ TileSet::TileSet(const string& configPath) {
     if(line == ""){
       break;
     }
-    Tile& tile = parseTile(line);
-    tiles.push_back(&tile);
+    Tile tile = parseTile(line);
+    tiles.push_back(tile);
   }
 
   //// Load surface
@@ -94,7 +91,7 @@ TileSet::TileSet(const string& configPath) {
   configIn.close();
 }
 
-Tile& TileSet::parseTile(const string& line){
+Tile TileSet::parseTile(const string& line){
   int x, y, width, height;
   std::size_t position, oldPosition;
   
@@ -163,13 +160,13 @@ Tile& TileSet::parseTile(const string& line){
   tempStream.clear();
   tempStream >> type;
 
-  unique_ptr<Tile> tile(new Tile);
-  tile->xpos = x;
-  tile->ypos = y;
-  tile->width = width;
-  tile->height = height;
-  tile->type = static_cast<TileType>(type);
-  return *(tile.release());
+  Tile tile;
+  tile.xpos = x;
+  tile.ypos = y;
+  tile.width = width;
+  tile.height = height;
+  tile.type = static_cast<TileType>(type);
+  return tile;
 }
 
 void TileSet::validate(){
@@ -190,11 +187,11 @@ bool TileSet::tileExists(unsigned int index){
   }
 }
 
-Tile& TileSet::getTile(unsigned int index){
+Tile TileSet::getTile(unsigned int index){
   if(index >= tiles.size()){
     throw CapEngineException("Tile does not exist at index " + index);
   }
   else{
-    return *(tiles[index]);
+    return tiles[index];
   }
 }

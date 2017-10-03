@@ -25,11 +25,11 @@ namespace CapEngine{
 
   public:
     struct TileTup{
-      Tile* tile;
+      Tile tile;
       unsigned int index;
     };
     struct CollisionTup{
-      Tile* tile;
+      Tile tile;
       CollisionType collisionType;
     };
     Map2D(const std::string mapConfigPath);
@@ -45,7 +45,7 @@ namespace CapEngine{
     void setWidth(int width);
     void setHeight(int height);
 
-    std::vector<TileTup*> tiles;
+    std::vector<TileTup> tiles;
     Surface* surface;
     unsigned int width;
     unsigned int height;
