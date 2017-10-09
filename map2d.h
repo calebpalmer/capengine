@@ -13,27 +13,31 @@ namespace CapEngine{
   
   class Map2D{
 
-    std::string configPath;
-    std::string tileSetPath;
-    std::unique_ptr<TileSet> tileSet;
-    
-    Map2D(const Map2D& map);
-    Map2D& operator=(const Map2D& map);
-    void readTiles(std::ifstream& stream);
-    void drawSurface();
-    std::unique_ptr<Rectangle> getTileMBR(int index);
-
   public:
+
+    enum TileLookupStatus{
+      TileLookupStatus_Found,
+      TileLookupStatus_NotFound,
+      TileLookupStatus_NoTile
+    };
+      
     struct TileTup{
       Tile tile;
-      unsigned int index;
+      int index;
+      TileLookupStatus tileLookupStatus;
     };
+    
     struct CollisionTup{
       Tile tile;
       CollisionType collisionType;
     };
+
     Map2D(const std::string mapConfigPath);
     ~Map2D();
+
+    // deleted
+    Map2D(const Map2D& map) = delete;
+    Map2D& operator=(const Map2D& map) = delete;
 
     std::string toString();
     std::vector<CollisionTup> getCollisions(const Rectangle& mbr);
@@ -45,7 +49,15 @@ namespace CapEngine{
     void setWidth(int width);
     void setHeight(int height);
 
-    std::vector<TileTup> tiles;
+  private:
+    void readTiles(std::ifstream& stream);
+    void drawSurface();
+    std::unique_ptr<Rectangle> getTileMBR(int index);
+
+    std::string configPath;
+    std::string tileSetPath;
+    std::unique_ptr<TileSet> tileSet;
+    std::vector<std::vector<TileTup>> tiles;
     Surface* surface;
     unsigned int width;
     unsigned int height;

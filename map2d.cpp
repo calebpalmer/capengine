@@ -10,12 +10,17 @@
 #include "locator.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
 namespace CapEngine{
 
-Map2D::~Map2D(){ }
+Map2D::~Map2D(){
+  CAP_THROW_ASSERT(Locator::videoManager != nullptr, "Video Manager is null");
+  Locator::videoManager->closeSurface(surface);
+}
 
 Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
   // test that configPath exists and throw exception if it doesn't
@@ -92,7 +97,13 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
 }
 
 void Map2D::readTiles(ifstream& stream){
+  int row = 0;
+  int numRowsInMap = this->height / this->tileSet->getTileSize();
+  tiles.reserve(numRowsInMap);
+  
   while(stream.good()){
+
+    std::vector<TileTup> rowOfTiles;
     string line;
     getline(stream, line);
     
@@ -101,25 +112,69 @@ void Map2D::readTiles(ifstream& stream){
       return;
     }
 
+    int numTilesInRow = this->width / this->tileSet->getTileSize();
+    tiles[row].reserve(numTilesInRow);
+    int column = 0;
+
     string::size_type position;
     string::size_type oldPosition = 0;
     position = line.find(',');
+    
     while(position != string::npos){
-      istringstream valueStream(line.substr(oldPosition, position - oldPosition));
-      unsigned int tileIndex;
-      valueStream >> tileIndex;
-      if(!tileSet->tileExists(tileIndex)){
-	BOOST_THROW_EXCEPTION(CapEngineException("Unable to load map.  Tile does not exist: " + tileIndex));
+
+      std::string value = line.substr(oldPosition, position - oldPosition);
+      boost::trim_right(value);
+
+      try{
+	int tileIndex = boost::lexical_cast<int>(value);
+
+	if(!tileSet->tileExists(tileIndex)){
+	  Locator::logger->log("Unable to load map.  Tile does not exist: " + tileIndex, Logger::CWARNING);
+
+	  TileTup tileTup;
+	  memset(&tileTup, 0, sizeof(tileTup));
+	  tileTup.index = -1;
+	  tileTup.tileLookupStatus = TileLookupStatus_NotFound;
+	  rowOfTiles.push_back(tileTup);
+	  continue;
+	}
+
+	TileTup tileTup;
+	tileTup.tile = tileSet->getTile(tileIndex);
+	tileTup.index = tileIndex;
+	tileTup.tileLookupStatus = TileLookupStatus_Found;
+	rowOfTiles.push_back(tileTup);
+
       }
 
-      TileTup tileTup;
-      tileTup.tile = tileSet->getTile(tileIndex);
-      tileTup.index = tileIndex;
-      tiles.push_back(tileTup);
+      catch(boost::bad_lexical_cast& e){
+	TileTup tileTup;
+	memset(&tileTup, 0, sizeof(tileTup));
+	tileTup.index = -1;
+	tileTup.tileLookupStatus = TileLookupStatus_NoTile;
+	
+	if(value != ""){
+	  Locator::logger->log("Unknowne tile" + value, Logger::CWARNING);
+	  tileTup.tileLookupStatus = TileLookupStatus_NotFound;
+	}
+
+	rowOfTiles.push_back(tileTup);
+      }
 
       oldPosition = position + 1;
       position = line.find(',', oldPosition);
+      column++;
     }
+
+    // fill in unspecified tiles
+    for(int i = rowOfTiles.size(); i < numTilesInRow; i++){
+      TileTup tileTup;
+      memset(&tileTup, 0, sizeof(TileTup));
+      tileTup.tileLookupStatus = TileLookupStatus_NoTile;
+    }
+    
+    tiles.push_back(rowOfTiles);
+    row++;
   }
 }
 
@@ -130,15 +185,28 @@ void Map2D::drawSurface(){
   }
   surface = Locator::videoManager->createSurface(width, height);
 
-  vector<TileTup>::iterator iter;
-  for(iter = tiles.begin(); iter != tiles.end(); iter++){
-    if(xRes >= width){
-      xRes = 0;
-      yRes += iter->tile.height;
+  int rowNum = 0;
+  for(auto && row : tiles){
+
+    int columnNum = 0;
+    for(auto && column : row){
+      int destX = columnNum * tileSet->getTileSize();
+      int destY = rowNum * tileSet->getTileSize();;
+      Locator::videoManager->blitSurface((tileSet->surface), column.tile.xpos, column.tile.ypos, column.tile.width, column.tile.height, surface, destX, destY);
+      columnNum++;
     }
-    Locator::videoManager->blitSurface((tileSet->surface), iter->tile.xpos, iter->tile.ypos, iter->tile.width, iter->tile.height, surface, xRes, yRes);
-    xRes += iter->tile.width;
+    rowNum++;
   }
+
+  // vector<TileTup>::iterator iter;
+  // for(iter = tiles.begin(); iter != tiles.end(); iter++){
+  //   if(xRes >= width){
+  //     xRes = 0;
+  //     yRes += iter->tile.height;
+  //   }
+  //   Locator::videoManager->blitSurface((tileSet->surface), iter->tile.xpos, iter->tile.ypos, iter->tile.width, iter->tile.height, surface, xRes, yRes);
+  //   xRes += iter->tile.width;
+  // }
 
 #ifdef DEBUG
   boost::filesystem::path path(this->configPath);
@@ -154,27 +222,29 @@ void Map2D::drawSurface(){
 #endif
 
   
-  Locator::logger->log("Drew consolidate map texture", Logger::CDEBUG, __FILE__, __LINE__);
+  Locator::logger->log("Drew consolidated map texture", Logger::CDEBUG, __FILE__, __LINE__);
 }
 
-string Map2D::toString(){
-	unsigned int xRes = 0;
-	ostringstream output;
+string Map2D::toString()
+{
+  unsigned int xRes = 0;
+  ostringstream output;
   output << "width=" << width << endl
 	 << "height="<< height << endl
 	 << "tileset=" << tileSetPath << endl  // TODO Fix this, wrong path
 	 << "tiles=" << endl;
-  
-  vector<TileTup>::iterator iter;
-  for(iter = tiles.begin(); iter != tiles.end(); iter++){
-    if(xRes >= width){
-      xRes = 0;
-      output << endl;
-    }
-    output << iter->index << ',';
-    xRes += iter->tile.width;  
-  }
-	return output.str();
+
+  // TODO reimplement this
+  // vector<TileTup>::iterator iter;
+  // for(iter = tiles.begin(); iter != tiles.end(); iter++){
+  //   if(xRes >= width){
+  //     xRes = 0;
+  //     output << endl;
+  //   }
+  //   output << iter->index << ',';
+  //   xRes += iter->tile.width;  
+  // }
+  return output.str();
 }
 
 unique_ptr<Rectangle>  Map2D::getTileMBR(int index){
@@ -188,17 +258,18 @@ unique_ptr<Rectangle>  Map2D::getTileMBR(int index){
 vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
   // do brute force search for collisions of all map MBRs
   vector<CollisionTup> collisions;
-  
-  for(size_t i = 0; i < tiles.size();  i++){
-    unique_ptr<Rectangle> tileMBR = getTileMBR(i);
-    CollisionType collisionType = detectMBRCollision(mbr, *tileMBR);
-    if(collisionType != COLLISION_NONE){
-      CollisionTup collision;
-      collision.collisionType = collisionType;
-      collision.tile = tiles[i].tile;
-      collisions.push_back(collision);
-    }
-  }
+
+  // TODO reimplement this
+  // for(size_t i = 0; i < tiles.size();  i++){
+  //   unique_ptr<Rectangle> tileMBR = getTileMBR(i);
+  //   CollisionType collisionType = detectMBRCollision(mbr, *tileMBR);
+  //   if(collisionType != COLLISION_NONE){
+  //     CollisionTup collision;
+  //     collision.collisionType = collisionType;
+  //     collision.tile = tiles[i].tile;
+  //     collisions.push_back(collision);
+  //   }
+  // }
   
   return collisions;
 }

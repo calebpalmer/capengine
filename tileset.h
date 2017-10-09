@@ -32,6 +32,7 @@ namespace CapEngine{
 
     bool tileExists(unsigned int index);
     Tile getTile(unsigned int index);
+    unsigned int getTileSize() const;
 
     std::string configFilepath;
     std::string surfaceFilepath;

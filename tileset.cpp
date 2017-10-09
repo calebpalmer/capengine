@@ -195,3 +195,7 @@ Tile TileSet::getTile(unsigned int index){
     return tiles[index];
   }
 }
+
+unsigned int TileSet::getTileSize() const{
+  return tileWidth;
+}
