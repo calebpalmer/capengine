@@ -100,15 +100,15 @@ void Map2D::readTiles(ifstream& stream){
   int row = 0;
   int numRowsInMap = this->height / this->tileSet->getTileSize();
   
-  while(stream.good()){
+  while(stream.good() && row < numRowsInMap){
 
     std::vector<TileTup> rowOfTiles;
     string line;
     getline(stream, line);
     
     if(line == ""){
-      // TODO I think this should be continue
-      return;
+      row++;
+      continue;
     }
 
     int numTilesInRow = this->width / this->tileSet->getTileSize();
@@ -118,7 +118,7 @@ void Map2D::readTiles(ifstream& stream){
     string::size_type oldPosition = 0;
     position = line.find(',');
     
-    while(position != string::npos){
+    while(position != string::npos && column < numTilesInRow){
 
       std::string value = line.substr(oldPosition, position - oldPosition);
       boost::trim_right(value);
@@ -293,7 +293,7 @@ void Map2D::setHeight(int newHeight){
 }
 
 int Map2D::getTileSize() const{
-  CAP_THROW_ASSERT(tileSet.get() == nullptr, "TileSet is null");
+  CAP_THROW_ASSERT(tileSet.get() != nullptr, "TileSet is null");
   // TODO assuming tilesize is square.  Fix TileSet to be only square tiles.
   return tileSet->tileWidth;;
 }

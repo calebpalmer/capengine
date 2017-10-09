@@ -561,7 +561,7 @@ void VideoManager::loadControllerMapFromFile(std::string path){
   }
 }
 
-void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
+void VideoManager::drawFillRect(Uint32 windowID, Rect rect, Colour fillColour){
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
   Viewport viewport = getViewport(windowID);
@@ -582,6 +582,29 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
     }
   }
 }
+
+void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
+  Viewport viewport = getViewport(windowID);
+  
+  //Transform the dstRect
+  Rect newDstRect = viewport.transformRect(rect);
+
+  int w, h;
+  getWindowResolution(windowID, &w, &h);
+  Rect windowRect = {0, 0, w, h};
+
+  // only draw things that are in the window
+  if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
+    SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
+    if(SDL_RenderDrawRect(pRenderer, &rect) != 0){
+      string errorMessage(SDL_GetError());
+      logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
+    }
+  }
+}
+
 
 int VideoManager::toScreenCoord(const Surface* surface, int y) const{
   CAP_THROW_NULL(surface, "surface is null");

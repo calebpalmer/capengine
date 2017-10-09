@@ -6,9 +6,15 @@
 #include "colour.h"
 #include "editorconstants.h"
 #include "captypes.h"
+#include "colour.h"
 
 #include <sstream>
+#include <iostream>
 #include <cassert>
+
+namespace {
+const CapEngine::Colour outlineColour = {91, 110, 225, 255};
+}
 
 namespace CapEngine {
 
@@ -40,7 +46,7 @@ void MapPanel::render()
   // fill background colous
   videoManager->clearScreen(m_windowID);
   Rect fillRect = { 0, 0, m_width, m_height };
-  videoManager->drawRect(m_windowID, fillRect, kBackgroundColour);
+  videoManager->drawFillRect(m_windowID, fillRect, kBackgroundColour);
   
   Surface* surface  = m_pMap->getSurface();
   if(surface != nullptr){
@@ -65,14 +71,14 @@ void MapPanel::render()
       // panel is wide screen
       if(panelAspectRatio >= 1){
 	dstRect.h = m_height;
-	float scaleFactor = static_cast<float>(m_height) / static_cast<float>(mapHeight);
-	dstRect.w = static_cast<float>(mapWidth) * scaleFactor;
+	m_scaleFactor = static_cast<float>(m_height) / static_cast<float>(mapHeight);
+	dstRect.w = static_cast<float>(mapWidth) * m_scaleFactor;
       }
       // panel is portrait
       else{
 	dstRect.w = m_width;
-	float scaleFactor = m_width / mapWidth;
-	dstRect.h = mapHeight * scaleFactor;
+	m_scaleFactor = m_width / mapWidth;
+	dstRect.h = mapHeight * m_scaleFactor;
       }
       
       //dstRect.h = m_height;
@@ -93,7 +99,7 @@ void MapPanel::render()
     }
 
     Locator::videoManager->drawTexture(m_windowID, texture.get(), &srcRect, &dstRect, false);
- 
+    this->drawTileOutline();
   }
 
   else{
@@ -106,15 +112,14 @@ void MapPanel::render()
 
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
   if(event.windowID == m_windowID){
-
     if(m_ownsWindow){
       if(event.x < m_pMap->getWidth() && event.y < m_pMap->getHeight()){
 	// we're hovering over a tile
-	int tileSize = m_pMap->getTileSize();
-	int xTile = event.x / tileSize;
-	int yTile = event.y / tileSize;
+	
+	int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * m_scaleFactor;	
+	int xTile = event.x / scaledTileSize;
+	int yTile = event.y / scaledTileSize;
 	m_hoveredTile = { xTile, yTile };
-
       }
       else{
 	// we're not hovering over a tile
@@ -124,6 +129,19 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
     else{
       BOOST_THROW_EXCEPTION(CapEngineException("MapPanel does not yet support sharing windows"));
     }
+  }
+}
+
+void MapPanel::drawTileOutline(){
+  if(m_hoveredTile.first != -1 && m_hoveredTile.second != -1){
+    CAP_THROW_ASSERT(Locator::videoManager != nullptr,
+		     "VideoManager is null");
+
+    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * m_scaleFactor;
+    Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
+    dstRect.x = m_hoveredTile.first * scaledTileSize;
+    dstRect.y = m_hoveredTile.second * scaledTileSize;
+    Locator::videoManager->drawRect(m_windowID, dstRect, outlineColour);
   }
 }
   

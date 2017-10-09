@@ -23,6 +23,8 @@ namespace CapEngine{
     void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 
   private:
+    void drawTileOutline();
+    
     Uint32 m_windowID = -1;
     std::shared_ptr<Map2D> m_pMap;
     bool m_ownsWindow = false;
@@ -30,6 +32,7 @@ namespace CapEngine{
     int m_y = 0;
     int m_width = 0;
     int m_height = 0;
+    double m_scaleFactor = 1;
     CapEngine::Vector m_translationMatrix = {0.0, 0.0, 0.0};
     std::pair<int, int> m_hoveredTile = {-1, -1};
   };

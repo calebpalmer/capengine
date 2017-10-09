@@ -111,7 +111,8 @@ namespace CapEngine {
     // input
     void loadControllerMapFromFile(std::string filePath);
     //Drawing
-    void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
+    void drawFillRect(Uint32 windowID, Rect rect, Colour fillColour);
+    void drawRect(Uint32 windowID, Rect rect, Colour fillColour);    
 
     // utility
     int toScreenCoord(const Surface* surface, int y) const;

@@ -110,7 +110,7 @@ void Editor::render(){
   videoManager->clearScreen(windowId);
   Rect rect = {0, 0, videoManager->getWindowWidth(windowId),
 	       videoManager->getWindowHeight(windowId) };
-  videoManager->drawRect(windowId, rect, kBackgroundColour);
+  videoManager->drawFillRect(windowId, rect, kBackgroundColour);
   
   
   if(m_pMapPanel)
@@ -156,8 +156,8 @@ bool Editor::onLoad() {
   this->connectAllSignals(*m_pMapPanel);
 
   // subscribe to events
-  int subscriptionMask = mouseEvent &
-    keyboardEvent & systemEvent & windowEvent;
+  int subscriptionMask = mouseEvent |
+    keyboardEvent | systemEvent | windowEvent;
   IEventSubscriber::subscribe(Locator::eventDispatcher, subscriptionMask);
   
   return true;
