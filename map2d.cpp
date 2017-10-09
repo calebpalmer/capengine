@@ -99,7 +99,6 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
 void Map2D::readTiles(ifstream& stream){
   int row = 0;
   int numRowsInMap = this->height / this->tileSet->getTileSize();
-  tiles.reserve(numRowsInMap);
   
   while(stream.good()){
 
@@ -113,7 +112,6 @@ void Map2D::readTiles(ifstream& stream){
     }
 
     int numTilesInRow = this->width / this->tileSet->getTileSize();
-    tiles[row].reserve(numTilesInRow);
     int column = 0;
 
     string::size_type position;
