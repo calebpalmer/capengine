@@ -21,9 +21,13 @@ namespace CapEngine{
     void render();
 
     void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+    void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
 
   private:
-    void drawTileOutline();
+    void drawHoveredTileOutline();
+    void drawSelectedTileOutlines();
+    void drawMouseDrag();
+    std::pair<int, int> getHoveredTile(int x, int y) const;
     
     Uint32 m_windowID = -1;
     std::shared_ptr<Map2D> m_pMap;
@@ -35,6 +39,8 @@ namespace CapEngine{
     double m_scaleFactor = 1;
     CapEngine::Vector m_translationMatrix = {0.0, 0.0, 0.0};
     std::pair<int, int> m_hoveredTile = {-1, -1};
+    std::vector<std::pair<int, int>> m_selectedTiles;
+    std::pair<int, int> m_dragStart = {-1, -1};
   };
 }
 
