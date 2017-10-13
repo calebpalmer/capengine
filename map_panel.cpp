@@ -25,6 +25,29 @@ MapPanel::MapPanel(Uint32 windowID, bool ownsWindow, int x, int y, int width, in
   , m_pMap(pMap), m_ownsWindow(true)
 {
   CAP_THROW_ASSERT(m_pMap.get() != nullptr, "Passed Map2D is null");
+
+  // set initial scale size
+  int mapWidth = m_pMap->getWidth();
+  int mapHeight = m_pMap->getHeight();
+  
+  float mapAspectRatio = static_cast<float>(mapWidth) / static_cast<float>(mapHeight);
+  float panelAspectRatio = static_cast<float>(m_width) / static_cast<float>(m_height);
+
+  // TODO this all needs to be revisted so that all cases are handled
+  // eg:  if panel is bigger than map, we stretch the map and maintain aspect ratio
+  float scaleFactor;
+  if(mapAspectRatio >= 1  && mapWidth < m_width){
+    // panel is wide screen
+    if(panelAspectRatio >= 1){
+      scaleFactor = static_cast<float>(m_height) / static_cast<float>(mapHeight);
+    }
+    // panel is portrait
+    else{
+      scaleFactor = static_cast<float>(m_width) / static_cast<float>(mapWidth);
+     }
+  }
+
+  m_scaleMatrix = m_scaleMatrix * Matrix::createScaleMatrix(scaleFactor, scaleFactor, scaleFactor);
 }
 
 
@@ -58,47 +81,15 @@ void MapPanel::render()
     int mapHeight = m_pMap->getHeight();
     Rect srcRect = {0, 0, 0, 0};
     Rect dstRect = {0, 0, 0, 0};
+
+    srcRect.w = mapWidth;
+    srcRect.h = mapHeight;
     
-
-    float mapAspectRatio = static_cast<float>(mapWidth) / static_cast<float>(mapHeight);
-    float panelAspectRatio = static_cast<float>(m_width) / static_cast<float>(m_height);
-
-    // TODO this all needs to be revisted so that all cases are handled
-    // eg:  if panel is bigger than map, we stretch the map and maintain aspect ratio
-    if(mapAspectRatio >= 1  && mapWidth < m_width){
-      // stretch width
-      srcRect.w = mapWidth;
-      srcRect.h = mapHeight;
-
-      // panel is wide screen
-      if(panelAspectRatio >= 1){
-	dstRect.h = m_height;
-	m_scaleFactor = static_cast<float>(m_height) / static_cast<float>(mapHeight);
-	dstRect.w = static_cast<float>(mapWidth) * m_scaleFactor;
-      }
-      // panel is portrait
-      else{
-	dstRect.w = m_width;
-	m_scaleFactor = m_width / mapWidth;
-	dstRect.h = mapHeight * m_scaleFactor;
-      }
-      
-      //dstRect.h = m_height;
-    }
-    
-    else if(mapAspectRatio < 1 && mapHeight < m_height){
-      srcRect.h = mapHeight;
-      srcRect.w = mapWidth;
-
-      dstRect.h = m_height;
-      //dstRect.w = m_width;
-      dstRect.w = m_height * mapWidth / mapHeight;
-    }
-
-    // panel smaller than map.
-    else{
-      assert(false);
-    }
+    Vector dstVector(mapWidth, mapHeight);
+    // scale it with scaleMatrix
+    dstVector = m_scaleMatrix * dstVector;
+    dstRect.w = dstVector.getX();
+    dstRect.h = dstVector.getY();    
 
     Locator::videoManager->drawTexture(m_windowID, texture.get(), &srcRect, &dstRect, false);
     this->drawSelectedTileOutlines();
@@ -192,7 +183,8 @@ void MapPanel::drawHoveredTileOutline(){
     CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		     "VideoManager is null");
 
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * m_scaleFactor;
+    real scaleFactor = m_scaleMatrix.getRowVector(0).getX();    
+    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
     Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
     dstRect.x = m_hoveredTile.first * scaledTileSize;
     dstRect.y = m_hoveredTile.second * scaledTileSize;
@@ -204,8 +196,9 @@ void MapPanel::drawSelectedTileOutlines(){
   for(auto && tileIndex : m_selectedTiles){
     CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		     "VideoManager is null");
-    
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * m_scaleFactor;
+
+    real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
+    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
     Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
     dstRect.x = tileIndex.first * scaledTileSize;
     dstRect.y = tileIndex.second * scaledTileSize;
@@ -230,8 +223,9 @@ void MapPanel::drawMouseDrag(){
 }
 
 std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
-  if(x < m_pMap->getWidth() * m_scaleFactor && y < m_pMap->getHeight() * m_scaleFactor){  
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * m_scaleFactor;	
+  real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
+  if(x < m_pMap->getWidth() * scaleFactor && y < m_pMap->getHeight() * scaleFactor){  
+    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
     int xTile = x / scaledTileSize;
     int yTile = y / scaledTileSize;
     return {xTile, yTile};

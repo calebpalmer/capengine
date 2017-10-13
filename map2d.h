@@ -48,6 +48,8 @@ namespace CapEngine{
 
     void setWidth(int width);
     void setHeight(int height);
+    void deleteTile(int x, int y);
+    
 
   private:
     void readTiles(std::ifstream& stream);

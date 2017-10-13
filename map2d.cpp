@@ -11,6 +11,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -296,6 +297,22 @@ int Map2D::getTileSize() const{
   CAP_THROW_ASSERT(tileSet.get() != nullptr, "TileSet is null");
   // TODO assuming tilesize is square.  Fix TileSet to be only square tiles.
   return tileSet->tileWidth;;
+}
+
+void Map2D::deleteTile(int x, int y){
+  int tileSize = tileSet->getTileSize();
+  if(x > boost::numeric_cast<int>(width) / tileSize
+     || y > boost::numeric_cast<int>(height) / tileSize
+     || x < 0 || y < 0)
+  {
+    BOOST_THROW_EXCEPTION(CapEngineException("Invalid Tile Index"));
+  }
+
+  TileTup tiletup;
+  memset(&tiletup, 0, sizeof(TileTup));
+  tiletup.tileLookupStatus = TileLookupStatus_NoTile;
+
+  tiles[x][y] = tiletup;
 }
 
 

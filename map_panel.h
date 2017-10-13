@@ -5,6 +5,7 @@
 #include "vector.h"
 #include "map2d.h"
 #include "widget.h"
+#include "matrix.h"
 
 #include <string>
 #include <vector>
@@ -37,7 +38,9 @@ namespace CapEngine{
     int m_width = 0;
     int m_height = 0;
     double m_scaleFactor = 1;
-    CapEngine::Vector m_translationMatrix = {0.0, 0.0, 0.0};
+    CapEngine::Matrix m_transformationMatrix = Matrix::createIdentityMatrix();
+    CapEngine::Matrix m_scaleMatrix = Matrix::createIdentityMatrix();
+    
     std::pair<int, int> m_hoveredTile = {-1, -1};
     std::vector<std::pair<int, int>> m_selectedTiles;
     std::pair<int, int> m_dragStart = {-1, -1};
