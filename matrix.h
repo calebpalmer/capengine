@@ -35,7 +35,10 @@ namespace CapEngine {
 
     // overloaded operators
     Matrix operator*(const Matrix& right) const;
+    Matrix operator+(const Matrix& right) const;
+    Matrix operator-(const Matrix& right) const;    
     Vector operator*(const Vector& right) const;
+    friend std::ostream& operator<<(std::ostream& stream, const Matrix& matix);
     
     std::unique_ptr<float> getGLMatrix() const;
     const MatrixContainer& getVectors() const;

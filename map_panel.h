@@ -23,7 +23,8 @@ namespace CapEngine{
 
     void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
     void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
-
+    void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+    
   private:
     void drawHoveredTileOutline();
     void drawSelectedTileOutlines();
@@ -38,7 +39,7 @@ namespace CapEngine{
     int m_width = 0;
     int m_height = 0;
     double m_scaleFactor = 1;
-    CapEngine::Matrix m_transformationMatrix = Matrix::createIdentityMatrix();
+    CapEngine::Matrix m_translationMatrix = Matrix::createIdentityMatrix();
     CapEngine::Matrix m_scaleMatrix = Matrix::createIdentityMatrix();
     
     std::pair<int, int> m_hoveredTile = {-1, -1};

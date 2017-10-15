@@ -1,3 +1,4 @@
+
 #include "map_panel.h"
 
 #include "locator.h"
@@ -16,6 +17,13 @@ namespace {
 const CapEngine::Colour outlineColour = {91, 110, 225, 255};
 const CapEngine::Colour selectedColour = {138, 111, 48, 255};
 const CapEngine::Colour mouseDragColour = {100, 100, 100, 255};
+
+const float kScaleIncrement = 0.1;
+const float kTranslationIncrement = 4.0;
+
+void scaleMatrix(CapEngine::Matrix& matrix, float scaleIncrement){
+  matrix = matrix + CapEngine::Matrix::createScaleMatrix(scaleIncrement, scaleIncrement, scaleIncrement);
+}
 }
 
 namespace CapEngine {
@@ -84,12 +92,19 @@ void MapPanel::render()
 
     srcRect.w = mapWidth;
     srcRect.h = mapHeight;
-    
-    Vector dstVector(mapWidth, mapHeight);
-    // scale it with scaleMatrix
-    dstVector = m_scaleMatrix * dstVector;
-    dstRect.w = dstVector.getX();
-    dstRect.h = dstVector.getY();    
+
+    Vector dstVectorOrigin(0.0,  0.0, 0.0, 1.0);
+    dstVectorOrigin = m_translationMatrix * dstVectorOrigin;
+
+    Vector dstVectorDims(mapWidth, mapHeight, 0.0, 1.0);
+    dstVectorDims = m_scaleMatrix * dstVectorDims;
+
+    dstRect.x = dstVectorOrigin.getX();
+    dstRect.y = dstVectorOrigin.getY();
+    dstRect.w = dstVectorDims.getX();
+    dstRect.h = dstVectorDims.getY();
+
+    //std::cout << dstRect.x << ", " << dstRect.y << ", " << dstRect.w << ", " << dstRect.h << std::endl;
 
     Locator::videoManager->drawTexture(m_windowID, texture.get(), &srcRect, &dstRect, false);
     this->drawSelectedTileOutlines();
@@ -171,11 +186,66 @@ void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 
     else{
       // Mouse button down
-      m_dragStart = {event.x, event.y};
+      real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
+      int mapWidth = m_pMap->getWidth();
+      int mapHeight = m_pMap->getHeight();
+      
+      Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
+      Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
+      if(event.x >= mapOrigin.getX() && event.x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
+	 event.y >= mapOrigin.getY() && event.y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor))
+      {  
+
+	m_dragStart = {event.x, event.y};
+      }
     }
     
   }
   
+}
+
+void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
+  if(event.windowID != m_windowID)
+    return;
+
+  if(event.type == SDL_KEYDOWN){
+    switch(event.keysym.sym){
+    case SDLK_EQUALS:
+      {
+	const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+	CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
+
+	
+	if(keyboardState[SDL_SCANCODE_LSHIFT] == 1
+	   || keyboardState[SDL_SCANCODE_RSHIFT] == 1)
+	  scaleMatrix(m_scaleMatrix, kScaleIncrement);
+      }
+      break;
+    case SDLK_MINUS:
+      scaleMatrix(m_scaleMatrix, (-1) * kScaleIncrement);
+      break;
+
+    case SDLK_RIGHT:
+      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix((-1.0) * kTranslationIncrement, 0.0, 0.0);
+      m_translationMatrix.getRowVectorRef(3).setD(1.0);
+      break;
+    case SDLK_LEFT:
+      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(kTranslationIncrement, 0.0, 0.0);
+      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+      break;
+    case SDLK_UP:
+      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(0.0, kTranslationIncrement, 0.0);
+      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+      break;
+    case SDLK_DOWN:
+      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(0.0, (-1.0) * kTranslationIncrement, 0.0);
+      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+      break;
+    default:
+      break;
+    }
+
+  }
 }
 
 void MapPanel::drawHoveredTileOutline(){
@@ -224,7 +294,14 @@ void MapPanel::drawMouseDrag(){
 
 std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
   real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-  if(x < m_pMap->getWidth() * scaleFactor && y < m_pMap->getHeight() * scaleFactor){  
+  int mapWidth = m_pMap->getWidth();
+  int mapHeight = m_pMap->getHeight();
+
+  Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
+  Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
+  
+  if(x >= mapOrigin.getX() && x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
+     y >= mapOrigin.getY() && y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor)){  
     int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
     int xTile = x / scaledTileSize;
     int yTile = y / scaledTileSize;

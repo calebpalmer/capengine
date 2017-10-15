@@ -110,7 +110,7 @@ void Vector::setD(real dIn) {
   \return Vector
 */
 Vector Vector::operator+(const Vector& vec2) const{
-  return Vector(x + vec2.getX(), y + vec2.getY(), z + vec2.getZ());
+  return Vector(x + vec2.getX(), y + vec2.getY(), z + vec2.getZ(), d + vec2.getD());
 }
 
 Vector& Vector::operator+=(const Vector& vec){
