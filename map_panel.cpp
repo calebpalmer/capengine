@@ -135,74 +135,110 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
   CAP_THROW_ASSERT(m_ownsWindow, "MapPanel does not yet support sharing windows");
   if(event.windowID == m_windowID){
-    if(event.type == SDL_MOUSEBUTTONUP){
-      // Mouse button Up
-      if((m_dragStart.first == -1 || m_dragStart.second == -1)
-	 || (m_dragStart.first == event.x && m_dragStart.second == event.y)){
-	// we're not dragging
-	std::pair<int, int> selectedTile = getHoveredTile(event.x, event.y);
-	const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
-	CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
-      
-	bool addKeyPressed = keyboardState[SDL_SCANCODE_LCTRL] == 1
-	  || keyboardState[SDL_SCANCODE_RCTRL] == 1;
-
-	// remove it if it's already selected
-	auto searchedTile = std::find(m_selectedTiles.begin(), m_selectedTiles.end(), selectedTile);
-	if(searchedTile != m_selectedTiles.end())
-	  m_selectedTiles.erase(searchedTile);
-	// insert it otherwise
-	else{
-	  if(!addKeyPressed)
-	    m_selectedTiles.clear();
-	  m_selectedTiles.push_back(selectedTile);
-	}
-
-	m_dragStart = {-1, -1};
-      }
-      else{
-	// we're dragging
-	m_selectedTiles.clear();
-	auto index1 = getHoveredTile(m_dragStart.first, m_dragStart.second);
-	auto index2 = getHoveredTile(event.x, event.y);
-	m_dragStart = {-1, -1};
-	
-	auto && leftIndex = index1.first < index2.first ? index1 : index2;
-	auto && rightIndex = index1.first > index2.first ? index1 : index2;
-
-	for(int i = leftIndex.first; i <= rightIndex.first; i++){
-	  int j = leftIndex.second;
-	  if(j <= rightIndex.second){
-	    for(; j <= rightIndex.second; j++)
-	      m_selectedTiles.push_back(std::make_pair(i, j));
-	  }
-	  else{
-	    for(; j >= rightIndex.second; j--)
-	      m_selectedTiles.push_back(std::make_pair(i, j));
-	  }
-	}
-      }
+    if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_LEFT){
+      handleLeftMouseButtonUp(event);
     }
 
-    else{
-      // Mouse button down
-      real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-      int mapWidth = m_pMap->getWidth();
-      int mapHeight = m_pMap->getHeight();
-      
-      Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
-      Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
-      if(event.x >= mapOrigin.getX() && event.x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
-	 event.y >= mapOrigin.getY() && event.y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor))
-      {  
+    else if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_MIDDLE){
+      handleMiddleMouseButtonUp(event);
+    }
 
-	m_dragStart = {event.x, event.y};
-      }
+    else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_LEFT){
+      handleLeftMouseButtonDown(event);
+    }
+
+    else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_MIDDLE){
+      handleMiddleMouseButtonUp(event);
     }
     
   }
   
 }
+
+void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
+
+  // Mouse button Up
+  if((m_dragState == DRAGSTATE_NONE) ||
+     (m_dragStart.first == event.x && m_dragStart.second == event.y)){
+    // we're not dragging
+    std::pair<int, int> selectedTile = getHoveredTile(event.x, event.y);
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+    CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
+      
+    bool addKeyPressed = keyboardState[SDL_SCANCODE_LCTRL] == 1
+      || keyboardState[SDL_SCANCODE_RCTRL] == 1;
+
+    // remove it if it's already selected
+    auto searchedTile = std::find(m_selectedTiles.begin(), m_selectedTiles.end(), selectedTile);
+    if(searchedTile != m_selectedTiles.end())
+      m_selectedTiles.erase(searchedTile);
+    // insert it otherwise
+    else{
+      if(!addKeyPressed)
+	m_selectedTiles.clear();
+      m_selectedTiles.push_back(selectedTile);
+	  
+    }
+    
+
+    m_dragStart = {-1, -1};
+  }
+
+  else{
+    // we're dragging
+    m_selectedTiles.clear();
+    auto index1 = getHoveredTile(m_dragStart.first, m_dragStart.second);
+    auto index2 = getHoveredTile(event.x, event.y);
+    m_dragStart = {-1, -1};
+	
+    auto && leftIndex = index1.first < index2.first ? index1 : index2;
+    auto && rightIndex = index1.first > index2.first ? index1 : index2;
+
+    for(int i = leftIndex.first; i <= rightIndex.first; i++){
+      int j = leftIndex.second;
+      if(j <= rightIndex.second){
+	for(; j <= rightIndex.second; j++)
+	  m_selectedTiles.push_back(std::make_pair(i, j));
+      }
+      else{
+	for(; j >= rightIndex.second; j--)
+	  m_selectedTiles.push_back(std::make_pair(i, j));
+      }
+    }
+  }
+}
+
+void MapPanel::handleLeftMouseButtonDown(SDL_MouseButtonEvent event){
+  if(isInMap(event.x, event.y)){
+    if(m_dragState == DRAGSTATE_NONE){
+      m_dragState = DRAGSTATE_SELECT;
+      m_dragStart = {event.x, event.y};
+    }
+
+  }
+}
+
+void MapPanel::handleMiddleMouseButtonUp(SDL_MouseButtonEvent event){
+  if(m_dragState == DRAGSTATE_PAN){
+    Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
+      Vector(m_dragStart.first, m_dragStart.second, 0.0, 1.0);
+
+    m_translationMatrix = m_translationMatrix +
+      Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
+
+    m_dragState = DRAGSTATE_NONE;
+  }
+}
+
+void MapPanel::handleMiddleMouseButtonDown(SDL_MouseButtonEvent event){
+  if(isInMap(event.x, event.y)){
+    if(event.button == SDL_BUTTON_MIDDLE && m_dragState == DRAGSTATE_NONE){
+      m_dragState = DRAGSTATE_PAN;
+      m_dragStart = {event.x, event.y};	  
+    }
+  }
+}
+
 
 void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
   if(event.windowID != m_windowID)
@@ -212,8 +248,8 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
     switch(event.keysym.sym){
     case SDLK_EQUALS:
       {
-	const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
-	CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+    CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
 
 	
 	if(keyboardState[SDL_SCANCODE_LSHIFT] == 1
@@ -248,16 +284,28 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
   }
 }
 
+void MapPanel::handleMouseWheelEvent(SDL_MouseWheelEvent event){
+  if(event.windowID != m_windowID)
+    return;
+
+  scaleMatrix(m_scaleMatrix, event.y * kScaleIncrement);
+  
+}
+
 void MapPanel::drawHoveredTileOutline(){
   if(m_hoveredTile.first != -1 && m_hoveredTile.second != -1){
     CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		     "VideoManager is null");
 
+
+    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);    
     real scaleFactor = m_scaleMatrix.getRowVector(0).getX();    
     int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
+
     Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
-    dstRect.x = m_hoveredTile.first * scaledTileSize;
-    dstRect.y = m_hoveredTile.second * scaledTileSize;
+    dstRect.x = static_cast<int>(mapOrigin.getX()) + (m_hoveredTile.first * scaledTileSize);
+    dstRect.y = static_cast<int>(mapOrigin.getY()) + (m_hoveredTile.second * scaledTileSize);
+
     Locator::videoManager->drawRect(m_windowID, dstRect, outlineColour);
   }
 }
@@ -267,11 +315,14 @@ void MapPanel::drawSelectedTileOutlines(){
     CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		     "VideoManager is null");
 
+    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);        
     real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
     int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
+    
     Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
-    dstRect.x = tileIndex.first * scaledTileSize;
-    dstRect.y = tileIndex.second * scaledTileSize;
+    dstRect.x = static_cast<int>(mapOrigin.getX()) + (tileIndex.first * scaledTileSize);
+    dstRect.y = static_cast<int>(mapOrigin.getY()) + (tileIndex.second * scaledTileSize);
+
     Locator::videoManager->drawRect(m_windowID, dstRect, selectedColour);
   }
 }
@@ -294,23 +345,34 @@ void MapPanel::drawMouseDrag(){
 
 std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
   real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-  int mapWidth = m_pMap->getWidth();
-  int mapHeight = m_pMap->getHeight();
-
-  Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
-  Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
   
-  if(x >= mapOrigin.getX() && x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
-     y >= mapOrigin.getY() && y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor)){  
+  if(isInMap(x, y))
+  {
     int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
-    int xTile = x / scaledTileSize;
-    int yTile = y / scaledTileSize;
+    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
+
+    int xTile = (x - mapOrigin.getX()) / scaledTileSize;
+    int yTile = (y - mapOrigin.getY()) / scaledTileSize;
     return {xTile, yTile};
   }
   else{
     return {-1, -1};
   }
   
+}
+
+bool MapPanel::isInMap(int x, int y) const{
+  real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
+  int mapWidth = m_pMap->getWidth();
+  int mapHeight = m_pMap->getHeight();
+      
+  Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
+  Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
+
+  // is this click in our map?
+  return (x >= mapOrigin.getX() && x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
+	  y >= mapOrigin.getY() && y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor));
+   
 }
   
 }

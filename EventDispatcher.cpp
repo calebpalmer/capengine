@@ -1,6 +1,7 @@
 #include "EventDispatcher.h"
 #include "CapEngineException.h"
 #include "VideoManager.h"
+
 #include <memory>
 #include <cassert>
 
@@ -74,6 +75,11 @@ void EventDispatcher::flushQueue(){
 	}
 	break;
       case SDL_MOUSEBUTTONUP:
+	if(curSubscription->subscriptionType & mouseEvent){
+	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
+	}
+	break;
+      case SDL_MOUSEWHEEL:
 	if(curSubscription->subscriptionType & mouseEvent){
 	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
 	}
