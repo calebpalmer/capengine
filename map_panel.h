@@ -34,6 +34,8 @@ namespace CapEngine{
   private:
     void drawHoveredTileOutline();
     void drawSelectedTileOutlines();
+		void drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
+													CapEngine::Colour colour);
     void drawMouseDrag();
     std::pair<int, int> getHoveredTile(int x, int y) const;
 
@@ -43,23 +45,39 @@ namespace CapEngine{
     void handleMiddleMouseButtonDown(SDL_MouseButtonEvent event);
 
     bool isInMap(int x, int y) const;
-    
+
+
+		//<! The window id to displauy on
     Uint32 m_windowID = -1;
+		//<! the map that is being edited
     std::shared_ptr<Map2D> m_pMap;
+		//<! flag indicating if this panel owns the whole window.
     bool m_ownsWindow = false;
+		//<! TODO
     int m_x= 0;
+		//<! TODO
     int m_y = 0;
+		//<! TODO
     int m_width = 0;
+		//<! TODO
     int m_height = 0;
 
+		//<! Matrix used for the maps location in the window
     CapEngine::Matrix m_translationMatrix = Matrix::createIdentityMatrix();
+		//<! Matrix usedd for the maps current scaling amount
     CapEngine::Matrix m_scaleMatrix = Matrix::createIdentityMatrix();
-    
+
+		//<! The tile the cursor is hovering over
     std::pair<int, int> m_hoveredTile = {-1, -1};
+		//<! The currently selected tiles
     std::vector<std::pair<int, int>> m_selectedTiles;
 
+		//<! The current state of dragging
     DragState m_dragState = DRAGSTATE_NONE;
+		//<! the cursor location where dragging started
     std::pair<int, int> m_dragStart = {-1, -1};
+		//<! The location of the cursor after the last motion event
+		std::pair<int, int> m_lastMotionLocation = {0.0, 0.0};
   };
 }
 

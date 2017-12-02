@@ -5,12 +5,63 @@
 #include "vector.h"
 #include "VideoManager.h"
 #include "xml_parser.h"
+#include "mapobjectdescriptor.h"
 
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
-using namespace CapEngine;
 using namespace std;
+
+namespace
+{
+
+//! parses spawnable objects
+/**
+* \param parser the xml parser to use to parse.
+* \param xmlNode The node to parse objects from.  should have a list of <object> children.
+* \return vector of CapEngine::MaoObjectDescriptors that were parsed.
+*/
+std::vector<CapEngine::MapObjectDescriptor> parseSpawnableObjects(CapEngine::XmlParser& parser,
+																																	CapEngine::XmlNode& xmlNode)
+{
+	std::vector<CapEngine::MapObjectDescriptor> mapObjectDescriptors;
+	
+	std::vector<CapEngine::XmlNode> children = parser.getNodeChildren(xmlNode);
+	for (auto && child : children)
+	{
+		if(parser.nodeNameCompare(child, "object"))
+		{
+			try
+			{
+				std::string objectClass = parser.getAttribute(child, "class");
+				std::string objectType = parser.getAttribute(child, "type");
+				int x =
+					boost::lexical_cast<int>(parser.getAttribute(child, "x"));
+				int y =
+					boost::lexical_cast<int>(parser.getAttribute(child, "y"));
+
+				CapEngine::MapObjectDescriptor mapObjectDescriptor(objectClass, objectType,
+																													 CapEngine::Vector(x, y, 0, 1.0));
+				mapObjectDescriptors.push_back(mapObjectDescriptor);
+			}
+			catch(const boost::bad_lexical_cast &e)
+			{
+				CAP_THROW_ASSERT(CapEngine::Locator::logger != nullptr, "Logger is null");
+
+				std::stringstream msg;
+				msg << "Error parsing spawnable object" << std::endl << e.what();
+				CapEngine::Locator::logger->log(msg.str(), CapEngine::Logger::CWARNING);
+			}
+		}
+	}
+
+	return mapObjectDescriptors;
+}
+
+} // anonymous namespace
+
+namespace CapEngine
+{
 
 PlatformerMap::PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX)
   : m_mapAssetID(mapAssetID), m_finishLineX(in_finishLineX)
@@ -58,6 +109,15 @@ int PlatformerMap::getHeight(){
   return m_height;
 }
 
+//! get MapObjectDescriptors
+/**
+* \return A collection of Objects that the map spawns
+*/
+const std::vector<MapObjectDescriptor>& PlatformerMap::getObjectDescriptors()
+{
+	return m_objectDescriptors;
+}
+
 std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
             std::string const& in_arenaConfigPath,
             int in_arenaId)
@@ -80,9 +140,10 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
   int collisionMapAssetID = -1;
   vector<Vector> arenaSpawnPoints = {};
   int xFinishLocation = -1;
+	std::vector<MapObjectDescriptor> objectDescriptors;
 
   auto children = xmlParser.getNodeChildren(nodes[0]);
-  for (auto& i : children){
+  for (auto && i : children){
 
     // texture
     if(xmlParser.nodeNameCompare(i, "texture")){
@@ -118,6 +179,11 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
         }
       }
     }
+		// spawnable objects
+		else if(xmlParser.nodeNameCompare(i, "objects"))
+		{
+			objectDescriptors = parseSpawnableObjects(xmlParser, i);
+		}
   }
 
   if(mapAssetID == -1 || collisionMapAssetID == -1){
@@ -130,6 +196,7 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
 
   //std::unique_ptr<PlatformerMap> platformerMap(new PlatformerMap(mapAssetID, collisionMapAssetID));
   pPlatformerMap.reset((new PlatformerMap(mapAssetID, collisionMapAssetID, xFinishLocation)));
+	pPlatformerMap->m_objectDescriptors = objectDescriptors;
   for(auto& spawnPoint : arenaSpawnPoints){
     pPlatformerMap->addSpawnPoint(spawnPoint);
   }
@@ -137,4 +204,4 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
   return std::move(pPlatformerMap);
 }
 
-
+} // namespace CapEngine

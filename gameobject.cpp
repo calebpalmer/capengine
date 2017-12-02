@@ -196,9 +196,9 @@ namespace CapEngine {
   }
 
   void GameObject::send(int id, string message){
-    ostringstream messageStr;
-    messageStr << *this << ": Message: " << message;
-    Locator::logger->log(messageStr.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    // ostringstream messageStr;
+    // messageStr << *this << ": Message: " << message;
+    // Locator::logger->log(messageStr.str(), Logger::CDEBUG, __FILE__, __LINE__);
     
     if(inputComponent){
       inputComponent->receive(this, id, message);

@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 namespace {
 const CapEngine::Colour outlineColour = {91, 110, 225, 255};
@@ -122,14 +123,27 @@ void MapPanel::render()
 
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
   if(event.windowID == m_windowID){
-    if(m_ownsWindow){
-      m_hoveredTile = getHoveredTile(event.x, event.y);
-    }
+    if(m_ownsWindow && m_dragState == DRAGSTATE_PAN){
+			Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
+				Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
 
-    else{
-      BOOST_THROW_EXCEPTION(CapEngineException("MapPanel does not yet support sharing windows"));
-    }
-  }
+			m_translationMatrix = m_translationMatrix +
+				Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
+
+		}
+
+		else if(m_dragState == DRAGSTATE_NONE){
+			// set the hovered tile
+			m_hoveredTile = getHoveredTile(event.x, event.y);
+		}
+		
+	}
+	else{
+		BOOST_THROW_EXCEPTION(CapEngineException("MapPanel does not yet support sharing windows"));
+	}
+
+	m_lastMotionLocation = {event.x, event.y};
+	
 }
 
 void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
@@ -148,7 +162,7 @@ void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
     }
 
     else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_MIDDLE){
-      handleMiddleMouseButtonUp(event);
+      handleMiddleMouseButtonDown(event);
     }
     
   }
@@ -175,17 +189,17 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
     // insert it otherwise
     else{
       if(!addKeyPressed)
-	m_selectedTiles.clear();
+				m_selectedTiles.clear();
       m_selectedTiles.push_back(selectedTile);
 	  
     }
     
-
     m_dragStart = {-1, -1};
   }
 
   else{
     // we're dragging
+		m_dragState = DRAGSTATE_NONE;
     m_selectedTiles.clear();
     auto index1 = getHoveredTile(m_dragStart.first, m_dragStart.second);
     auto index2 = getHoveredTile(event.x, event.y);
@@ -197,12 +211,12 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
     for(int i = leftIndex.first; i <= rightIndex.first; i++){
       int j = leftIndex.second;
       if(j <= rightIndex.second){
-	for(; j <= rightIndex.second; j++)
-	  m_selectedTiles.push_back(std::make_pair(i, j));
+				for(; j <= rightIndex.second; j++)
+					m_selectedTiles.push_back(std::make_pair(i, j));
       }
       else{
-	for(; j >= rightIndex.second; j--)
-	  m_selectedTiles.push_back(std::make_pair(i, j));
+				for(; j >= rightIndex.second; j--)
+					m_selectedTiles.push_back(std::make_pair(i, j));
       }
     }
   }
@@ -220,12 +234,6 @@ void MapPanel::handleLeftMouseButtonDown(SDL_MouseButtonEvent event){
 
 void MapPanel::handleMiddleMouseButtonUp(SDL_MouseButtonEvent event){
   if(m_dragState == DRAGSTATE_PAN){
-    Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
-      Vector(m_dragStart.first, m_dragStart.second, 0.0, 1.0);
-
-    m_translationMatrix = m_translationMatrix +
-      Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
-
     m_dragState = DRAGSTATE_NONE;
   }
 }
@@ -234,7 +242,8 @@ void MapPanel::handleMiddleMouseButtonDown(SDL_MouseButtonEvent event){
   if(isInMap(event.x, event.y)){
     if(event.button == SDL_BUTTON_MIDDLE && m_dragState == DRAGSTATE_NONE){
       m_dragState = DRAGSTATE_PAN;
-      m_dragStart = {event.x, event.y};	  
+      m_dragStart = {event.x, event.y};
+			m_lastMotionLocation = {event.x, event.y};
     }
   }
 }
@@ -292,46 +301,50 @@ void MapPanel::handleMouseWheelEvent(SDL_MouseWheelEvent event){
   
 }
 
-void MapPanel::drawHoveredTileOutline(){
-  if(m_hoveredTile.first != -1 && m_hoveredTile.second != -1){
+//! Draws outlines around given tiles in the give colour
+/**
+* \param tiles The tiles to draw outlines around
+* \param colour The colour to draw the outline with
+*/
+void MapPanel::drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
+																CapEngine::Colour colour){
+
     CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		     "VideoManager is null");
 
-
+  for(auto && tile : tiles){
+		
     Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);    
     real scaleFactor = m_scaleMatrix.getRowVector(0).getX();    
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
+    double scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
 
-    Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
-    dstRect.x = static_cast<int>(mapOrigin.getX()) + (m_hoveredTile.first * scaledTileSize);
-    dstRect.y = static_cast<int>(mapOrigin.getY()) + (m_hoveredTile.second * scaledTileSize);
+    Rect dstRect = {0, 0,
+										static_cast<int>(round(scaledTileSize)),
+										static_cast<int>(round(scaledTileSize))};
+    dstRect.x = round(mapOrigin.getX() + (static_cast<double>(tile.first) * scaledTileSize));
+    dstRect.y = round(mapOrigin.getY() + (static_cast<double>(tile.second) * scaledTileSize));
 
-    Locator::videoManager->drawRect(m_windowID, dstRect, outlineColour);
-  }
+    Locator::videoManager->drawRect(m_windowID, dstRect, colour);
+	}
+}
+
+void MapPanel::drawHoveredTileOutline(){
+  if(m_hoveredTile.first != -1 && m_hoveredTile.second != -1){
+		std::vector<std::pair<int,int>> tiles(1);
+		tiles[0] = m_hoveredTile;
+		drawTileOutlines(tiles, outlineColour);
+	}
 }
 
 void MapPanel::drawSelectedTileOutlines(){
-  for(auto && tileIndex : m_selectedTiles){
-    CAP_THROW_ASSERT(Locator::videoManager != nullptr,
-		     "VideoManager is null");
-
-    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);        
-    real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
-    
-    Rect dstRect = {0, 0, scaledTileSize, scaledTileSize};
-    dstRect.x = static_cast<int>(mapOrigin.getX()) + (tileIndex.first * scaledTileSize);
-    dstRect.y = static_cast<int>(mapOrigin.getY()) + (tileIndex.second * scaledTileSize);
-
-    Locator::videoManager->drawRect(m_windowID, dstRect, selectedColour);
-  }
+	drawTileOutlines(m_selectedTiles, selectedColour);
 }
 
 void MapPanel::drawMouseDrag(){
   CAP_THROW_ASSERT(Locator::videoManager != nullptr,
 		   "VideoManager is null");
   
-  if(m_dragStart.first != -1 && m_dragStart.second != -1){
+  if(m_dragState == DRAGSTATE_SELECT && m_dragStart.first != -1 && m_dragStart.second != -1){
     int x = -1;
     int y = -1;
     SDL_GetMouseState(&x, &y);
