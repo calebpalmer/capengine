@@ -5,6 +5,9 @@
 #include <ostream>
 #include <iostream>
 
+#define CAP_LOG(logger, msg, level)	\
+	logger->log(msg, level, __FILE__, __LINE__)
+
 namespace CapEngine {
   
   class Logger {

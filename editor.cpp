@@ -139,7 +139,7 @@ bool Editor::onLoad() {
     32, // bpp,
     false, // fullscreen,
     false, // opengl
-    false, // resizable
+    true, // resizable
     "MapPanel"
   };
 

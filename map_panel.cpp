@@ -146,6 +146,20 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	
 }
 
+//! @copydoc Widget::handleWindowEvent()
+/**
+*/
+void MapPanel::handleWindowEvent(SDL_WindowEvent event){
+	if(event.windowID == m_windowID){
+		if(event.event == SDL_WINDOWEVENT_RESIZED ||
+			 event.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+
+			m_width = event.data1;
+			m_height = event.data2;
+		}
+	}
+}
+
 void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
   CAP_THROW_ASSERT(m_ownsWindow, "MapPanel does not yet support sharing windows");
   if(event.windowID == m_windowID){

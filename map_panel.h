@@ -30,6 +30,7 @@ namespace CapEngine{
     void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
     void handleKeyboardEvent(SDL_KeyboardEvent event) override;
     void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+		void handleWindowEvent(SDL_WindowEvent event);
     
   private:
     void drawHoveredTileOutline();
@@ -47,36 +48,46 @@ namespace CapEngine{
     bool isInMap(int x, int y) const;
 
 
-		//<! The window id to displauy on
+		//! The window id to displauy on
     Uint32 m_windowID = -1;
-		//<! the map that is being edited
+		//! the map that is being edited
     std::shared_ptr<Map2D> m_pMap;
-		//<! flag indicating if this panel owns the whole window.
+		//! flag indicating if this panel owns the whole window.
     bool m_ownsWindow = false;
-		//<! TODO
+		
+		//! The panel starting x position
+		int m_panelX = 0;
+		//! The panel starting y position
+		int m_panelY = 0;
+		//! The panel width
+		int m_panelWidth = 0;
+		//! the panel height
+		int m_panelHeight = 0;
+		
+		//! The x position of the map within the panel
     int m_x= 0;
-		//<! TODO
+		//! The y position of the map within the panel
     int m_y = 0;
-		//<! TODO
+		//! The width of the map
     int m_width = 0;
-		//<! TODO
+		//! The height of the map
     int m_height = 0;
 
-		//<! Matrix used for the maps location in the window
+		//! Matrix used for the maps location in the window
     CapEngine::Matrix m_translationMatrix = Matrix::createIdentityMatrix();
-		//<! Matrix usedd for the maps current scaling amount
+		//! Matrix usedd for the maps current scaling amount
     CapEngine::Matrix m_scaleMatrix = Matrix::createIdentityMatrix();
 
-		//<! The tile the cursor is hovering over
+		//! The tile the cursor is hovering over
     std::pair<int, int> m_hoveredTile = {-1, -1};
-		//<! The currently selected tiles
+		//! The currently selected tiles
     std::vector<std::pair<int, int>> m_selectedTiles;
 
-		//<! The current state of dragging
+		//! The current state of dragging
     DragState m_dragState = DRAGSTATE_NONE;
-		//<! the cursor location where dragging started
+		//! the cursor location where dragging started
     std::pair<int, int> m_dragStart = {-1, -1};
-		//<! The location of the cursor after the last motion event
+		//! The location of the cursor after the last motion event
 		std::pair<int, int> m_lastMotionLocation = {0.0, 0.0};
   };
 }
