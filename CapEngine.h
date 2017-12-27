@@ -63,5 +63,6 @@
 #include "tools.h"
 #include "animator.h"
 #include "widget.h"
+#include "eventsubscriber.h"
 
 #endif

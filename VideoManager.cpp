@@ -52,7 +52,7 @@ VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
    Unitializes the system.
    Returns the id of the main window
  */
-Uint32 VideoManager::initSystem(WindowParams windowParams){
+Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow){
   Uint32 windowID = -1;
   currentWindowParams = windowParams;
   
@@ -62,24 +62,26 @@ Uint32 VideoManager::initSystem(WindowParams windowParams){
     logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
     shutdown();
   }
-  
-  if(windowParams.opengl){
-    throw CapEngineException("OpenGL not implemented");
-  }
 
-  else{
-    m_pWindow = createWindow(windowParams);
-    m_pRenderer = createRenderer(m_pWindow, windowParams);
+	if(!noWindow){
+		if(windowParams.opengl){
+			throw CapEngineException("OpenGL not implemented");
+		}
 
-    windowID = SDL_GetWindowID(m_pWindow);    
+		else{
+			m_pWindow = createWindow(windowParams);
+			m_pRenderer = createRenderer(m_pWindow, windowParams);
 
-    //Create viewpor
-    Viewport viewport = {0, 0, windowParams.width, windowParams.height};
-    Window window = {m_pWindow, m_pRenderer, viewport};
+			windowID = SDL_GetWindowID(m_pWindow);    
 
-    m_windows[windowID] = window;
-    m_windowNamesToIds[mainWindowName] = windowID;
-  }
+			//Create viewpor
+			Viewport viewport = {0, 0, windowParams.width, windowParams.height};
+			Window window = {m_pWindow, m_pRenderer, viewport};
+
+			m_windows[windowID] = window;
+			m_windowNamesToIds[mainWindowName] = windowID;
+		}
+	}
 
   // load controller maps
   //loadControllerMaps();
@@ -320,6 +322,28 @@ int VideoManager::getWindowHeight(Uint32 windowID){
   SDL_GetWindowSize(window.m_window, &w, &h);
   return h;
 
+}
+
+//! Sets the position of a window
+/**
+* \param windowId The window id of the window
+* \param x The x position of the upper left of the window
+* \param y The y position of the upper left of the window
+*/
+void VideoManager::setWindowPosition(Uint32 windowId, int x, int y){
+	Window window = getWindow(windowId);
+	SDL_SetWindowPosition(window.m_window, x, y);
+}
+
+//! Sets the size of a window
+/**
+* \param windowId The window id of the window
+* \param width The width of the window
+* \param height The height of the window
+*/
+void VideoManager::setWindowSize(Uint32 windowId, int width, int height){
+	Window window = getWindow(windowId);
+	SDL_SetWindowSize(window.m_window, width, height);
 }
 
 //! get the width of given texture

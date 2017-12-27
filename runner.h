@@ -11,6 +11,10 @@
 
 namespace CapEngine{
 
+	namespace UI {
+		class Widget;
+	}
+	
   class Runner : public IEventSubscriber {
   public:
     static Runner& getInstance();
@@ -31,6 +35,7 @@ namespace CapEngine{
 
     static Runner* s_pRunner;
     std::vector< std::unique_ptr<GameState> > m_gameStates;
+		std::vector<std::shared_ptr<UI::Widget>> m_widgets;
     bool m_quit;
     bool m_showFPS;
     TimeStep m_timeStep;

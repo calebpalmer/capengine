@@ -1,23 +1,24 @@
 #include "game_management.h"
 
-#include <memory>
-#include <sstream>
-
 #include "locator.h"
 #include "filesystem.h"
 #include "runner.h"
 #include "controller.h"
+#include "windowwidget.h"
 
-using namespace CapEngine;
+#include <memory>
+#include <sstream>
 
-bool CapEngine::initted = false;
+namespace CapEngine {
 
-Uint32 CapEngine::init(WindowParams screenConfig){
+bool initted = false;
+
+Uint32 init(WindowParams screenConfig, bool noWindow){
   Uint32 windowID = -1;
   if(!initted){
     std::unique_ptr<VideoManager> pVideoManager(new VideoManager());
     Locator::videoManager = pVideoManager.release();
-    windowID = Locator::videoManager->initSystem(screenConfig);
+    windowID = Locator::videoManager->initSystem(screenConfig, noWindow);
 
     std::unique_ptr<Logger> pLogger(new Logger);
     //Locator::logger = pLogger.release();
@@ -36,6 +37,9 @@ Uint32 CapEngine::init(WindowParams screenConfig){
     std::unique_ptr<EventDispatcher> pEventDispatcher(new EventDispatcher(Locator::videoManager));
     Locator::eventDispatcher = pEventDispatcher.release();
 
+		std::unique_ptr<EventSubscriber> pEventSubscriber(new EventSubscriber(*(Locator::eventDispatcher)));
+		Locator::eventSubscriber = pEventSubscriber.release();
+
     Locator::assetManager = nullptr;
 
     // initialize ControllerManager
@@ -50,7 +54,7 @@ Uint32 CapEngine::init(WindowParams screenConfig){
   return windowID;
 }
 
-void CapEngine::destroy(){
+void destroy(){
   if(initted){
     delete Locator::mouse;
     delete Locator::keyboard;
@@ -63,29 +67,52 @@ void CapEngine::destroy(){
   }
 }
 
-void CapEngine::loadAssetFile(std::string assetsFile){
+void loadAssetFile(std::string assetsFile){
   std::unique_ptr<AssetManager> pAssetManager(new AssetManager(*(Locator::videoManager), *(Locator::soundPlayer), assetsFile));
   Locator::assetManager = pAssetManager.release();
 }
 
-void CapEngine::startLoop(std::unique_ptr<GameState> pGameState){
+void startLoop(std::unique_ptr<GameState> pGameState){
   Runner::getInstance().pushState(std::move(pGameState));
   Runner::getInstance().loop();
 }
 
-void CapEngine::end(){
+void end(){
   Runner::getInstance().end();
 }
 
-void CapEngine::switchState(std::unique_ptr<GameState> pGameState){
+void switchState(std::unique_ptr<GameState> pGameState){
   Runner::getInstance().switchState(std::move(pGameState));
 }
 
-void CapEngine::popState(){
+void popState(){
   Runner::getInstance().popState();
 }
 
-void CapEngine::pushState(std::unique_ptr<GameState> pGameState){
+void pushState(std::unique_ptr<GameState> pGameState){
   Runner::getInstance().pushState(std::move(pGameState));
 }
 
+//! creates a Window Widget
+/**
+
+The WindowWidget gets inserted into the game loop and automatically
+gets update() and render() called on it. 
+
+* \param name - The name of the window
+* \param width - The width of the window
+* \param height - The height of the window
+* \param resizable - Flag indicating if the window is resizable
+* \return The WindowWidget
+*/
+std::shared_ptr<UI::WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable){
+	std::shared_ptr<UI::WindowWidget> pWindowWidget =
+		std::make_shared<UI::WindowWidget>(name , width, height, resizable);
+
+	CAP_THROW_ASSERT(Locator::eventSubscriber != nullptr, "Locator::eventSubscriber is null");
+	Locator::eventSubscriber->registerWidget(*(pWindowWidget.get()));
+
+	return pWindowWidget;
+}
+
+}

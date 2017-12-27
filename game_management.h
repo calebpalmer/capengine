@@ -3,13 +3,14 @@
 
 #include "VideoManager.h"
 #include "gamestate.h"
+#include "windowwidget.h"
 
 #include <memory>
 
 namespace CapEngine {
   extern bool initted;
 
-  Uint32 init(WindowParams windowParams);
+  Uint32 init(WindowParams windowParams, bool noWindow=false);
   void destroy();
   void loadAssetFile(std::string assetsFile);
   void startLoop(std::unique_ptr<GameState> pGameState);
@@ -17,6 +18,7 @@ namespace CapEngine {
   void switchState(std::unique_ptr<GameState> pGameState);
   void popState();
   void pushState(std::unique_ptr<GameState> pGameState);
+	std::shared_ptr<UI::WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
 }
 
 #endif

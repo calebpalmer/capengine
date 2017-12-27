@@ -8,6 +8,7 @@
 #include "mouse.h"
 #include "asset_manager.h"
 #include "EventDispatcher.h"
+#include "eventsubscriber.h"
 
 namespace CapEngine{
 
@@ -21,7 +22,7 @@ namespace CapEngine{
     static CapEngine::Mouse* mouse;
     static CapEngine::AssetManager* assetManager;
     static CapEngine::EventDispatcher* eventDispatcher;
-
+		static CapEngine::EventSubscriber* eventSubscriber;
   };
 
 }

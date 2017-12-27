@@ -329,11 +329,10 @@ namespace CapEngine{
       return in_collisionType == in_pixelCollision.collisionType;
     };
 
-    using namespace std::placeholders;
-    auto topCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_TOP, _1));
-    auto bottomCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_BOTTOM, _1));
-    auto rightCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_RIGHT, _1));        
-    auto leftCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_LEFT, _1));
+    auto topCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_TOP, std::placeholders::_1));
+    auto bottomCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_BOTTOM, std::placeholders::_1));
+    auto rightCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_RIGHT, std::placeholders::_1));        
+    auto leftCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(), std::bind(findPredicate, COLLISION_LEFT, std::placeholders::_1));
 
     std::vector<PixelCollision> pixelCollisionWithTangents;
     

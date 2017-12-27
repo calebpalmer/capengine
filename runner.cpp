@@ -2,6 +2,7 @@
 #include "locator.h"
 #include "filesystem.h"
 #include "game_management.h"
+#include "widget.h"
 
 #include <sstream>
 
@@ -79,12 +80,23 @@ void Runner::exit(){
 
 void Runner::update(){
   (m_gameStates.back())->update(m_msPerUpdate);
+
+	// update any Widgets (usually WindowWidgets) if there are any
+	for(auto && pWidget : m_widgets){
+		pWidget->update(m_msPerUpdate);
+	}
 }
 
 void Runner::render(double frameFactor){
   Locator::videoManager->clearAll();
   m_gameStates.back()->render();
   Locator::videoManager->drawAll();
+
+	// render any Widgets (usually WindowWidgets) if there are any
+	for(auto && pWidget : m_widgets){
+		// this should be a WindowWidget so the x, y will be ignored.
+		pWidget->render();
+	}
 }
 
 void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){

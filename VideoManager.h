@@ -58,19 +58,24 @@ namespace CapEngine {
   public:
     VideoManager();    
     VideoManager(Logger* loggerIn);
-    Uint32 initSystem(WindowParams windowParams);
-    Uint32 createNewWindow(WindowParams windowParams);
-    void closeWindow(Uint32 windowID);
+    Uint32 initSystem(WindowParams windowParams, bool noWindow = false);
     std::vector<Uint32> getWindows() const;
     void shutdown();
     void clearScreen(Uint32 windowID);
     void drawScreen(Uint32 windowID);
     void clearAll();
     void drawAll();
-    Uint32 getWindowId(const std::string& windowName) const;
+
+		// Windows
+    Uint32 createNewWindow(WindowParams windowParams);
+    void closeWindow(Uint32 windowID);
+		Uint32 getWindowId(const std::string& windowName) const;
     void getWindowResolution(Uint32 windowID, int* width, int* height);
     int getWindowWidth(Uint32 windowID);
     int getWindowHeight(Uint32 windowID);
+		void setWindowPosition(Uint32 windowId, int x, int y);
+		void setWindowSize(Uint32 windowId, int width, int height);
+		
     void setViewport();
     void setBackgroundColour(Colour colour);
     int getFPS() const;
