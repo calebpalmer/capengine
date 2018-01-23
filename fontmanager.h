@@ -10,7 +10,9 @@
 
 namespace CapEngine {
 
-  class FontManager{
+	// TODO: this doesn't need to be a class
+	//! Class for creating text surfaces
+	class FontManager{
   public:
     FontManager();
     ~FontManager();

@@ -31,7 +31,7 @@ void Runner::popState(){
 
 void Runner::pushState(std::unique_ptr<GameState> pGameState){
   m_gameStates.push_back(std::move(pGameState));
-  if(m_gameStates.back()->onLoad() == false){
+ if(m_gameStates.back()->onLoad() == false){
     Locator::logger->log("Failed to init pushed state", Logger::CWARNING, __FILE__, __LINE__);
   }
 }
@@ -91,12 +91,6 @@ void Runner::render(double frameFactor){
   Locator::videoManager->clearAll();
   m_gameStates.back()->render();
   Locator::videoManager->drawAll();
-
-	// render any Widgets (usually WindowWidgets) if there are any
-	for(auto && pWidget : m_widgets){
-		// this should be a WindowWidget so the x, y will be ignored.
-		pWidget->render();
-	}
 }
 
 void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){

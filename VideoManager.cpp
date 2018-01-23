@@ -24,8 +24,9 @@ Window::Window() :
   m_window(nullptr), m_renderer(nullptr) {}
 
 Window::Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
-	       Viewport viewport) :
-  m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport) { }
+							 Viewport viewport, WindowParams windowParams) :
+  m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport),
+	m_windowParams(windowParams) { }
 
 
 bool VideoManager::instantiated = false;
@@ -76,7 +77,7 @@ Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow){
 
 			//Create viewpor
 			Viewport viewport = {0, 0, windowParams.width, windowParams.height};
-			Window window = {m_pWindow, m_pRenderer, viewport};
+			Window window = {m_pWindow, m_pRenderer, viewport, windowParams};
 
 			m_windows[windowID] = window;
 			m_windowNamesToIds[mainWindowName] = windowID;
@@ -251,19 +252,10 @@ void VideoManager::clearScreen(Uint32 windowID){
 
   SDL_SetRenderDrawColor(pRenderer, m_backgroundColour.m_r,
 			 m_backgroundColour.m_g, m_backgroundColour.m_g,
-			 255);
+			 m_backgroundColour.m_b);
 
   // Clear Screen
   SDL_RenderClear(pRenderer);
-
-  // // draw rect to clear everything
-  // SDL_Rect rectangle;
-  // rectangle.x = 0;
-  // rectangle.y = 0;
-  // rectangle.w = currentWindowParams.width;
-  // rectangle.h = currentWindowParams.height;
-  // SDL_RenderFillRect(pRenderer, &rectangle);
-
 }
 
 void VideoManager::drawScreen(Uint32 windowID){
@@ -285,7 +277,7 @@ void VideoManager::drawScreen(Uint32 windowID){
   }
 
   // draw the screen
-  if(currentWindowParams.opengl){
+  if(window.m_windowParams.opengl){
     SDL_GL_SwapWindow(m_pWindow);
   }
   else{
@@ -299,7 +291,7 @@ void VideoManager::drawScreen(Uint32 windowID){
   fps = 1 / (elapsedTime * 0.001);
 
   // clear screen
-  this->clearScreen(windowID);
+  //this->clearScreen(windowID);
 }
 
 void VideoManager::getWindowResolution(Uint32 windowID, int* width, int* height){
@@ -641,7 +633,7 @@ int VideoManager::fromScreenCoord(const Surface* surface, int y) const{
 }
 
 void VideoManager::setBackgroundColour(Colour colour){
-m_backgroundColour = colour;
+	m_backgroundColour = colour;
 }
 
 SDL_Window* VideoManager::createWindow(WindowParams windowParams){
@@ -715,7 +707,7 @@ unsigned int VideoManager::createNewWindow(WindowParams windowParams){
   SDL_Renderer* pRenderer = createRenderer(pWindow, windowParams);
   Viewport viewport(0.0, 0.0, windowParams.width, windowParams.height);
 
-  Window window ={pWindow, pRenderer, viewport};
+  Window window = { pWindow, pRenderer, viewport, windowParams };
   Uint32 id = SDL_GetWindowID(pWindow);
   m_windows[id] = window;
   m_windowNamesToIds[windowParams.name] = id;
@@ -762,6 +754,22 @@ Uint32 VideoManager::getWindowId(const std::string& windowName) const{
   }
 
   return window->second;
+}
+
+
+//! Check if window ID is valid
+/** 
+* \param windowId - The windowId to check
+* \return true if it is valid, false otherwise
+*/
+bool VideoManager::isValidWindowId(Uint32 windowId) const{
+	try{
+		const_cast<VideoManager*>(this)->getWindow(windowId);
+		return true;
+	}
+	catch(...){
+		return false;
+	}
 }
 
 /**

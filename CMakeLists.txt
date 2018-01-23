@@ -17,12 +17,12 @@ include_directories(${SDL2_INCLUDE_DIR}
                     ${LIBXML2_INCLUDE_DIR}
                     )
 
-#link_directories()
+#linhhk_directories()
 
 if (MSVC)
   add_compile_options(/W4)
 else()
-  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused)
+  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused -std=c++14)
 endif()
 
 add_definitions(-DUNIX -DDEBUG)
@@ -32,7 +32,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    scanconvert.cpp xml_parser.cpp asset_manager.cpp mouse.cpp locator.cpp textbutton.cpp gameobject.cpp game_management.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp mapobjectdescriptor.cpp eventsubscriber.cpp
-	    windowwidget.cpp absolutelayout.cpp)
+	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp)
 
 	  #add_executable(editor editor.cpp tileset_panel.cpp map_panel.cpp)
 

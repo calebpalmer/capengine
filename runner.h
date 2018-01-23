@@ -24,7 +24,7 @@ namespace CapEngine{
     void receiveEvent(const SDL_Event event, CapEngine::Time* time) override;  // IEventSubscriber
     void loop();
     void end();
-    
+
   protected:
     Runner();
     Runner(const Runner&);

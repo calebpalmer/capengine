@@ -18,6 +18,9 @@ namespace CapEngine{
   typedef std::unique_ptr<Surface, decltype(&SDL_FreeSurface)> SurfacePtr;
   typedef std::unique_ptr<Texture, decltype(&SDL_DestroyTexture)> TexturePtr;
 
+	SurfacePtr getNullSurfacePtr();
+	TexturePtr getNullTexturePtr();
+
 }
 
 #endif //CAPTYPES_H

@@ -40,11 +40,12 @@ namespace CapEngine {
   struct Window {
     Window();
     Window(SDL_Window* pWindow, SDL_Renderer* pRenderer,
-	   Viewport viewport);
+					 Viewport viewport, WindowParams windowParams);
 
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     Viewport m_viewport;
+		WindowParams m_windowParams;
   };
 
   class FontManager;
@@ -70,6 +71,7 @@ namespace CapEngine {
     Uint32 createNewWindow(WindowParams windowParams);
     void closeWindow(Uint32 windowID);
 		Uint32 getWindowId(const std::string& windowName) const;
+		bool isValidWindowId(Uint32 windowId) const;
     void getWindowResolution(Uint32 windowID, int* width, int* height);
     int getWindowWidth(Uint32 windowID);
     int getWindowHeight(Uint32 windowID);
@@ -126,6 +128,8 @@ namespace CapEngine {
     bool initialized = false;
     const std::string mainWindowName = "main";
 
+		static const int kInvalidWindowId = 0; //<! The of an invalid window
+
   protected:
     void setColorKey(Surface* surface) const;
     void loadControllerMaps();
@@ -159,7 +163,7 @@ namespace CapEngine {
     Uint8 fpsColourR;
     Uint8 fpsColourG;
     Uint8 fpsColourB;
-    Colour m_backgroundColour;
+    Colour m_backgroundColour = {0, 0, 0, 255};
   };
 
 }

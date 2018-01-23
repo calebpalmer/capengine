@@ -16,6 +16,8 @@ namespace CapEngine{
 
 }
 
+#define CAP_THROW(e) BOOST_THROW_EXCEPTION(e);
+
 #define CAP_THROW_NULL(expr, msg) if((expr) == nullptr)		\
     BOOST_THROW_EXCEPTION(CapEngine::CapEngineException(msg));
 
