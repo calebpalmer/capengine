@@ -92,9 +92,15 @@ Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow){
 }
 
 TexturePtr VideoManager::createTextureFromSurfacePtr(Surface* surface, bool freeSurface){
- Texture *texture = createTextureFromSurface(surface, freeSurface);
+  auto windowId = getWindowId(mainWindowName); 
+	return createTextureFromSurfacePtr(windowId, surface, freeSurface);
+}
+
+TexturePtr VideoManager::createTextureFromSurfacePtr(Uint32 windowId, Surface* surface, bool freeSurface){
+	Texture *texture = createTextureFromSurface(windowId, surface, freeSurface);
  return std::move(TexturePtr(texture, SDL_DestroyTexture));
 }
+
 
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface){
   auto windowId = getWindowId(mainWindowName);

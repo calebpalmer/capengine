@@ -21,7 +21,7 @@ Label::Label(Widget* pParent, const std::string &text, const std::string &font)
 			m_fontManager.getTextSurface(m_font, m_text, fontSize);
 		
 		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
-		m_texture = Locator::videoManager->createTextureFromSurfacePtr(surface, true);
+		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surface, true);
 }
 
 //! @copydoc Widget::setPosition()
@@ -48,9 +48,13 @@ void Label::render() {
 	int textureWidth = 0;
 	int textureHeight = 0;
 	Locator::videoManager->getTextureDims(m_texture.get(), &textureWidth, &textureHeight);
+
+	double ratio = static_cast<double>(textureHeight) / static_cast<double>(textureWidth);
+	int drawWidth = m_width;
+	int drawHeight = static_cast<double>(m_width) * ratio;
 	
 	SDL_Rect srcRect = { 0, 0, m_width, m_height };
-	SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
+	SDL_Rect dstRect = { m_x, m_y, drawWidth, drawHeight };
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
 }
 
