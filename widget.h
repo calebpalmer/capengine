@@ -19,7 +19,9 @@ namespace CapEngine { namespace UI{
 			virtual void setSize(int width, int height) = 0;
 			virtual void render() = 0;
 			virtual void update(double ms) {};
-		
+			virtual void setParent(Widget *pParent) { m_pParent = pParent; }
+			virtual void setWindowId(Uint32 windowId) { m_windowId = windowId; }
+
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) {}
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) {}
 			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) {}

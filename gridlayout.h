@@ -3,9 +3,10 @@
 
 #include "widget.h"
 
-namespace CapEngine{ namespace UI{
+namespace CapEngine { namespace UI{
 
 		class GridLayout : public Widget {
+
 			
 		};
 		

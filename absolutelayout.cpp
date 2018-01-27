@@ -5,11 +5,18 @@
 namespace CapEngine { namespace UI {
 
 //! Constructor
-/**
-* \param pWindow - The owning Window
+AbsoluteLayout::AbsoluteLayout() {}
+
+
+//! Creates an AbsoluteLaout
+/** 
+ \param pParent The parent widget
+ \return The created AbsoluteLayout object
 */
-AbsoluteLayout::AbsoluteLayout(Widget *pParent) :
-	Widget(pParent) {}
+std::shared_ptr<AbsoluteLayout> AbsoluteLayout::create(){
+	std::shared_ptr<AbsoluteLayout> pLayout(new AbsoluteLayout());
+	return pLayout;
+}
 
 //! Add a widget to the layout
 /**
@@ -26,6 +33,9 @@ void AbsoluteLayout::addWidget(std::shared_ptr<Widget> pWidget, int x, int y, in
 	WidgetLocation widgetLocation = {pWidget, x, y, width, height};
 	m_widgets.push_back(widgetLocation);
 
+	pWidget->setParent(this);
+	pWidget->setWindowId(this->m_windowId);
+
 	pWidget->setPosition(m_x + x, m_y + y);
 
 	// make sure location doesn't extend past bounds of layout
@@ -34,7 +44,7 @@ void AbsoluteLayout::addWidget(std::shared_ptr<Widget> pWidget, int x, int y, in
 
 	int newHeight = widgetLocation.y + widgetLocation.height <= m_y + m_height ?
 		height : m_height - y;
-		
+
 	pWidget->setSize(newWidth, newHeight);
 }
 

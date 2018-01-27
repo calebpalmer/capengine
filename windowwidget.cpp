@@ -15,6 +15,24 @@ namespace CapEngine { namespace UI {
 WindowWidget::WindowWidget(const std::string &name, int width, int height, bool resizable)
 	: m_windowName(name), m_width(width), m_height(height), m_resizable(resizable) { }
 
+
+//! Creates a WindowWidget
+/** 
+ \param name The name of the Window.
+ \param width The width of the Window.
+ \param height The height of the Window.
+ \param resizable Flag indicating if the window is resizable.
+ \return The WindowWidget
+*/
+std::shared_ptr<WindowWidget> WindowWidget::create(const std::string &name,
+																									 int width,
+																									 int height,
+																									 bool resizable)
+{
+	std::shared_ptr<WindowWidget> pWindowWidget(new WindowWidget(name, width,height, resizable));
+	return pWindowWidget;
+}
+
 //! Show the window
 void WindowWidget::show(){
 
@@ -64,7 +82,11 @@ WindowWidget::~WindowWidget(){
 * \param pLaout The Layout widget
 */
 void WindowWidget::setLayout(std::shared_ptr<Widget> pLayout){
+	CAP_THROW_NULL(pLayout, "Layout is null");
+	
 	m_pLayout = pLayout;
+	m_pLayout->setParent(this);
+	m_pLayout->setWindowId(m_windowId);
 	m_pLayout->setPosition(0, 0);
 	m_pLayout->setSize(m_width, m_height);
 }
@@ -107,27 +129,32 @@ void WindowWidget::render(){
 
 //! @copydoc Widget::handleMouseMotionEvent()
 void WindowWidget::handleMouseMotionEvent(SDL_MouseMotionEvent event) {
-	m_pLayout->handleMouseMotionEvent(event);
+	if(event.windowID == m_windowId)
+		m_pLayout->handleMouseMotionEvent(event);
 }
 
 //! @copydoc Widget::handleMouseButtonEvent()
 void WindowWidget::handleMouseButtonEvent(SDL_MouseButtonEvent event) {
-	m_pLayout->handleMouseButtonEvent(event);
+	if(event.windowID == m_windowId)	
+		m_pLayout->handleMouseButtonEvent(event);
 }
 
 //! @copydoc Widget::handleMouseWheelEvent()
 void WindowWidget::handleMouseWheelEvent(SDL_MouseWheelEvent event) {
-	m_pLayout->handleMouseWheelEvent(event);
+	if(event.windowID == m_windowId)	
+		m_pLayout->handleMouseWheelEvent(event);
 }
 
 //! @copydoc Widget::handleKeyboardEvent()
 void WindowWidget::handleKeyboardEvent(SDL_KeyboardEvent event) {
-	m_pLayout->handleKeyboardEvent(event);
+	if(event.windowID == m_windowId)
+		m_pLayout->handleKeyboardEvent(event);
 }  
 
 //! @copydoc Widget::handleWindowEvent()
 void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
-	m_pLayout->handleWindowEvent(event);
+	if(event.windowID == m_windowId)	
+		m_pLayout->handleWindowEvent(event);
 }
 
 //! Register handlers with event signals

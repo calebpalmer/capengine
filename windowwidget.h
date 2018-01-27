@@ -18,7 +18,10 @@ namespace CapEngine {
 		class WindowWidget : public Widget {
 
 		public:
-			WindowWidget(const std::string &name, int width, int height, bool resizable=true);
+			static std::shared_ptr<WindowWidget> create(const std::string &name,
+																									int width, int height,
+																									bool resizable=true);
+			
 			~WindowWidget();
 
 			// widget overrides
@@ -38,6 +41,8 @@ namespace CapEngine {
 			void setLayout(std::shared_ptr<Widget> pLayout);
 
 		private:
+			WindowWidget(const std::string &name, int width, int height, bool resizable=true);
+			
 			std::string m_windowName; //<! The name of the window
 			int m_x = 0; //<! The x position of the window
 			int m_y = 0; //<! The y position of the window

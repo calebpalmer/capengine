@@ -13,15 +13,19 @@ namespace CapEngine { namespace UI {
  * \param text - The text to display
  * \param font - The ttf font to render in (full path to TTF file)
  */
-Label::Label(Widget* pParent, const std::string &text, const std::string &font)
-	: Widget(pParent), m_text(text), m_font(font), m_texture(getNullTexturePtr()) {
+Label::Label(const std::string &text, const std::string &font)
+	: m_text(text), m_font(font), m_texture(getNullTexturePtr()) { }
 
-		int fontSize = 20;
-		SDL_Surface *surface =
-			m_fontManager.getTextSurface(m_font, m_text, fontSize);
-		
-		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
-		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surface, true);
+
+//! creates a label
+/** 
+ \param text - The text of the label
+ \param font - The path to the ttf font file
+ \return - The label
+*/
+std::shared_ptr<Label> Label::create(const std::string &text, const std::string &font){
+	std::shared_ptr<Label> pLabel(new Label(text, font));
+	return pLabel;
 }
 
 //! @copydoc Widget::setPosition()
@@ -42,8 +46,20 @@ void Label::setSize(int width, int height){
 //! @copydoc Widget::render()
 void Label::render() {
 	CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
-	CAP_THROW_ASSERT(m_texture != nullptr, "Label texture is null");
 	CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
+
+	if(!m_texture){
+		int fontSize = 20;
+
+		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
+		CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
+
+		SDL_Surface *surface =
+			m_fontManager.getTextSurface(m_font, m_text, fontSize);
+		
+		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surface, true);
+		CAP_THROW_ASSERT(m_texture != nullptr, "Unable to create texture");
+	}
 
 	int textureWidth = 0;
 	int textureHeight = 0;

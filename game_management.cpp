@@ -107,7 +107,7 @@ gets update() and render() called on it.
 */
 std::shared_ptr<UI::WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable){
 	std::shared_ptr<UI::WindowWidget> pWindowWidget =
-		std::make_shared<UI::WindowWidget>(name , width, height, resizable);
+		UI::WindowWidget::create(name , width, height, resizable);
 	
 	CAP_THROW_ASSERT(Locator::eventSubscriber != nullptr, "Locator::eventSubscriber is null");
 	pWindowWidget->registerSignals(*Locator::eventSubscriber);

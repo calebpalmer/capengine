@@ -13,7 +13,7 @@ namespace CapEngine { namespace UI {
 	//! Class with absolute control of contained widget locations
 	class AbsoluteLayout : public Widget {
 	public:
-		AbsoluteLayout(Widget* pParent);
+		static std::shared_ptr<AbsoluteLayout> create();
 
 		// Widget overrides
 		void render() override;
@@ -39,6 +39,9 @@ namespace CapEngine { namespace UI {
 			int width; //<! The width of the widget
 			int height; //<! The height of the widget
 		};
+
+	private:
+		AbsoluteLayout();
 
 		//! The widgets in this layout
 		std::vector<WidgetLocation> m_widgets;

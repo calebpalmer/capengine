@@ -23,10 +23,10 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	auto pWindow = widgetState.createWindow(name,  width, height);
 	pWindow->show();
 
-	auto pAbsLayout = std::make_shared<UI::AbsoluteLayout>(pWindow.get());
+	auto pAbsLayout = UI::AbsoluteLayout::create();
 	pWindow->setLayout(pAbsLayout);
 
-	auto pLabel = std::make_shared<UI::Label>(pAbsLayout.get(), "test", "res/fonts/tahoma.ttf");
+	auto pLabel = UI::Label::create("test", "res/fonts/tahoma.ttf");
 	pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
 	
 	return true;
