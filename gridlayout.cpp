@@ -45,6 +45,18 @@ void GridLayout::setSize(int width, int height){
 	updateChildren();
 }
 
+void GridLayout::setWindowId(Uint32 windowId){
+	m_windowId = windowId;
+
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->setWindowId(windowId);
+			}
+		}
+	}
+}
+
 //! @copydoc Widget::render()
 void GridLayout::render(){
 	for (auto && row : m_widgetGrid){

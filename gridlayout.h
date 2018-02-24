@@ -24,6 +24,8 @@ namespace CapEngine { namespace UI {
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 			virtual void handleWindowEvent(SDL_WindowEvent event) override;
 
+			virtual void setWindowId(Uint32 windowId) override;
+
 			void addWidget(std::shared_ptr<Widget>, int row, int column, bool replaceExisting=false);
 			int getNumRows() const;
 			int getNumColumns() const;
