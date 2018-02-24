@@ -7,13 +7,15 @@
 #include "widgetstate.h"
 #include "absolutelayout.h"
 #include "gridlayout.h"
+#include "horizontallayout.h"
 #include "label.h"
-
 
 #include <memory>
 #include <iostream>
 
 namespace {
+
+const std::string kFontPath = "res/fonts/tahoma.ttf";
 
 using namespace CapEngine;
 
@@ -28,9 +30,17 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
 	pWindow->setLayout(pGridLayout);
 
-	auto pLabel = UI::Label::create("test", "res/fonts/tahoma.ttf");
+	auto pLabel = UI::Label::create("test", kFontPath);
 	//pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
-	pGridLayout->addWidget(pLabel, 0, 0);
+	pGridLayout->addWidget(pLabel, 1, 0);
+
+	std::shared_ptr<UI::HorizontalLayout> pHorizontalLayout = UI::HorizontalLayout::create();
+	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Left", kFontPath);
+	std::shared_ptr<UI::Label> pLabelRight = UI::Label::create("Right", kFontPath);
+	pHorizontalLayout->addWidget(pLabelLeft);
+	pHorizontalLayout->addWidget(pLabelRight);
+
+	pGridLayout->addWidget(pHorizontalLayout, 0, 1);
 	
 	return true;
 }

@@ -172,14 +172,13 @@ void WindowWidget::handleKeyboardEvent(SDL_KeyboardEvent event) {
 void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
 	if(event.windowID == m_windowId){
 
-		// window was resized
-		if(event.event == SDL_WINDOWEVENT_RESIZED || event.event == SDL_WINDOWEVENT_SIZE_CHANGED){
-			this->updateSize(event.data1, event.data2);
-		}
-		
-		m_pLayout->handleWindowEvent(event);
-	}
+		CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
+			
+		int width = Locator::videoManager->getWindowWidth(m_windowId);
+		int height = Locator::videoManager->getWindowHeight(m_windowId);
 
+		this->updateSize(width, height);
+	}
 }
 
 //! Register handlers with event signals
