@@ -7,7 +7,7 @@
 #include "widgetstate.h"
 #include "absolutelayout.h"
 #include "gridlayout.h"
-#include "horizontallayout.h"
+#include "linearlayout.h"
 #include "label.h"
 
 #include <memory>
@@ -34,13 +34,14 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	//pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
 	pGridLayout->addWidget(pLabel, 1, 0);
 
-	std::shared_ptr<UI::HorizontalLayout> pHorizontalLayout = UI::HorizontalLayout::create();
+	std::shared_ptr<UI::LinearLayout> pLinearLayout =
+		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Vertical);
 	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Left", kFontPath);
 	std::shared_ptr<UI::Label> pLabelRight = UI::Label::create("Right", kFontPath);
-	pHorizontalLayout->addWidget(pLabelLeft);
-	pHorizontalLayout->addWidget(pLabelRight);
+	pLinearLayout->addWidget(pLabelLeft);
+	pLinearLayout->addWidget(pLabelRight);
 
-	pGridLayout->addWidget(pHorizontalLayout, 0, 1);
+	pGridLayout->addWidget(pLinearLayout, 0, 1);
 	
 	return true;
 }

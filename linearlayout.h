@@ -1,5 +1,5 @@
-#ifndef CAPENGINE_HORIZONTALLAYOUT_H
-#define CAPENGINE_HORIZONTALLAYOUT_H
+#ifndef CAPENGINE_LINEARLAYOUT_H
+#define CAPENGINE_LINEARLAYOUT_H
 
 #include "widget.h"
 
@@ -7,12 +7,19 @@
 
 namespace CapEngine { namespace UI {
 
-		//! Layout the shows widgets horizontally at even widths
-		class HorizontalLayout : public Widget {
+		//! Layout the shows widgets linearly at even widths
+		class LinearLayout : public Widget {
 		public:
-			static std::shared_ptr<HorizontalLayout> create();
+			//! The orientation of the layout
+			enum class Orientation {
+				Horizontal,
+				Vertical
+			};
 			
-			virtual ~HorizontalLayout() = default;
+		public:
+			static std::shared_ptr<LinearLayout> create(Orientation orientation=Orientation::Horizontal);
+			
+			virtual ~LinearLayout() = default;
 
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
@@ -29,18 +36,19 @@ namespace CapEngine { namespace UI {
 			void addWidget(std::shared_ptr<Widget> pWidget);
 
 		private:
-			HorizontalLayout() = default;
+			LinearLayout(Orientation orientation);
 
 			void updateChildren();
 
+			//! The orientation of the layout
+			Orientation m_orientation = Orientation::Horizontal;
 			//! holds the widgets in this layout
 			std::vector<std::shared_ptr<Widget>> m_widgets;
 			//! position and size
 			SDL_Rect m_rect;
 			//! flag indicating children need size and position updates
 			bool m_updateChildren = false;
-
 		};
 }}
 
-#endif // CAPENGINE_HORIZONTALLAYOUT_H
+#endif // CAPENGINE_LINEARLAYOUT_H

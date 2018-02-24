@@ -1,17 +1,25 @@
-#include "horizontallayout.h"
+#include "linearlayout.h"
 
 namespace CapEngine { namespace UI {
 
-//! Creates a HorizontalLayout
+//! Constructo
 /** 
- \return the HorizontalLayout
+ \param orientation - The orientation of the layout
 */
-std::shared_ptr<HorizontalLayout> HorizontalLayout::create(){
-	return std::shared_ptr<HorizontalLayout>(new HorizontalLayout);
+LinearLayout::LinearLayout(Orientation orientation){
+	m_orientation = orientation;
+}
+
+//! Creates a LinearLayout
+/** 
+ \return the LinearLayout
+*/
+std::shared_ptr<LinearLayout> LinearLayout::create(Orientation orientation){
+	return std::shared_ptr<LinearLayout>(new LinearLayout(orientation));
 }
 
 //! \copydoc Widget::setPosition
-void HorizontalLayout::setPosition(int x, int y){
+void LinearLayout::setPosition(int x, int y){
 	m_rect.x = x;
 	m_rect.y = y;
 
@@ -19,7 +27,7 @@ void HorizontalLayout::setPosition(int x, int y){
 }
 
 //! \copydoc Widget::setSize
-void HorizontalLayout::setSize(int width, int height){
+void LinearLayout::setSize(int width, int height){
 	m_rect.w = width;
 	m_rect.h = height;
 
@@ -27,18 +35,18 @@ void HorizontalLayout::setSize(int width, int height){
 }
 
 //! \copydoc Widget::render
-void HorizontalLayout::render(){
+void LinearLayout::render(){
 	if(m_updateChildren)
 		this->updateChildren();
 	
 	for(auto && pWidget : m_widgets){
 		CAP_THROW_NULL(pWidget, "Widget is null");
-		pWidget->render();
+		pWidget->render(); 
 	}
 }
 
 //! \copydoc Widget::update
-void HorizontalLayout::update(double ms){
+void LinearLayout::update(double ms){
 	for(auto && pWidget : m_widgets){
 		CAP_THROW_NULL(pWidget, "Widget is null");
 			pWidget->update(ms);
@@ -46,7 +54,7 @@ void HorizontalLayout::update(double ms){
 }
 
 //! \copydoc Widget::setWindowId
-void HorizontalLayout::setWindowId(Uint32 windowId){
+void LinearLayout::setWindowId(Uint32 windowId){
 	m_windowId = windowId;
 
 	for(auto && pWidget : m_widgets){
@@ -59,7 +67,7 @@ void HorizontalLayout::setWindowId(Uint32 windowId){
 /** 
  \param pWidget - The widget to add.
 */
-void HorizontalLayout::addWidget(std::shared_ptr<Widget> pWidget){
+void LinearLayout::addWidget(std::shared_ptr<Widget> pWidget){
 	CAP_THROW_NULL(pWidget, "The widget is null");
 	m_widgets.push_back(pWidget);
 
@@ -71,49 +79,58 @@ void HorizontalLayout::addWidget(std::shared_ptr<Widget> pWidget){
 
 
 //! update size and position of children
-void HorizontalLayout::updateChildren(){
-	int widgetWidth = m_rect.w / m_widgets.size();
-	int widgetHeight = m_rect.h;
+void LinearLayout::updateChildren(){
+	int widgetWidth = m_orientation == Orientation::Horizontal
+		? m_rect.w / m_widgets.size()
+		: m_rect.w;
+	
+	int widgetHeight = m_orientation == Orientation::Vertical
+		? m_rect.h / m_widgets.size()
+		: m_rect.h;
 
 	for(size_t i = 0; i < m_widgets.size(); i++){
 		CAP_THROW_NULL(m_widgets[i], "Widget is null");
 		m_widgets[i]->setSize(widgetWidth, widgetHeight);
-		m_widgets[i]->setPosition(m_rect.x + i * widgetWidth, m_rect.y);
+
+		if(m_orientation == Orientation::Horizontal)
+			m_widgets[i]->setPosition(m_rect.x + i * widgetWidth, m_rect.y);
+		else
+			m_widgets[i]->setPosition(m_rect.x, m_rect.y + i * widgetHeight);
 	}
 
 	m_updateChildren = false;
 }
 
 //! \copydoc Widget::handleMouseMotionEvent
-void HorizontalLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event){
+void LinearLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	for(auto && pWidget : m_widgets){
 		pWidget->handleMouseMotionEvent(event);
 	}
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
-void HorizontalLayout::handleMouseButtonEvent(SDL_MouseButtonEvent event){
+void LinearLayout::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 	for(auto && pWidget : m_widgets){
 		pWidget->handleMouseButtonEvent(event);
 	}
 }
 
 //! \copydoc Widget::handleMouseWheelEvent
-void HorizontalLayout::handleMouseWheelEvent(SDL_MouseWheelEvent event){
+void LinearLayout::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 	for(auto && pWidget : m_widgets){
 		pWidget->handleMouseWheelEvent(event);
 	}
 }
 
 //! \copydoc Widget::handleKeyboardEvent
-void HorizontalLayout::handleKeyboardEvent(SDL_KeyboardEvent event){
+void LinearLayout::handleKeyboardEvent(SDL_KeyboardEvent event){
 	for(auto && pWidget : m_widgets){
 		pWidget->handleKeyboardEvent(event);
 	}
 }
 
 //! \copydoc Widget::handleWindowEvent
-void HorizontalLayout::handleWindowEvent(SDL_WindowEvent event){
+void LinearLayout::handleWindowEvent(SDL_WindowEvent event){
 	for(auto && pWidget : m_widgets){
 		pWidget->handleWindowEvent(event);
 	}
