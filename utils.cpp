@@ -13,8 +13,13 @@ SDL_Rect expandRectToFit(const SDL_Rect &srcRect, const SDL_Rect &containingRect
 
 	SDL_Rect newRect = {containingRect.x, containingRect.y, 0, 0};
 	
-	float containingAspectRatio = containingRect.w / containingRect.h;
-	float srcAspectRatio = srcRect.w / srcRect.h;
+	float containingAspectRatio = containingRect.h != 0 
+ 		? containingRect.w / containingRect.h
+		: 1.0;
+		
+	float srcAspectRatio = srcRect.h != 0
+		? srcRect.w / srcRect.h
+		: 1.0;
 
 	// if they're both wide, stretch to fit width
 	if(containingAspectRatio >= 1.0 && srcAspectRatio >= 1.0){
