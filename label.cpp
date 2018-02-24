@@ -3,6 +3,7 @@
 #include "VideoManager.h"
 #include "locator.h"
 #include "CapEngineException.h"
+#include "utils.h"
 
 namespace CapEngine { namespace UI {
 
@@ -65,12 +66,15 @@ void Label::render() {
 	int textureHeight = 0;
 	Locator::videoManager->getTextureDims(m_texture.get(), &textureWidth, &textureHeight);
 
-	double ratio = static_cast<double>(textureHeight) / static_cast<double>(textureWidth);
-	int drawWidth = m_width;
-	int drawHeight = static_cast<double>(m_width) * ratio;
-	
-	SDL_Rect srcRect = { 0, 0, m_width, m_height };
-	SDL_Rect dstRect = { m_x, m_y, drawWidth, drawHeight };
+	// double ratio = static_cast<double>(textureHeight) / static_cast<double>(textureWidth);
+	// int drawWidth = m_width;
+	// int drawHeight = static_cast<double>(m_width) * ratio;
+
+	// SDL_Rect srcRect = { 0, 0, m_width, m_height };
+	// SDL_Rect dstRect = { m_x, m_y, drawWidth, drawHeight };
+	SDL_Rect srcRect = {0, 0, textureWidth, textureHeight};
+	//	SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
+	SDL_Rect dstRect = expandRectToFit(srcRect, {m_x, m_y, m_width, m_height});
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
 }
 

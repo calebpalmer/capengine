@@ -6,6 +6,7 @@
 #include "windowwidget.h"
 #include "widgetstate.h"
 #include "absolutelayout.h"
+#include "gridlayout.h"
 #include "label.h"
 
 
@@ -23,11 +24,13 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	auto pWindow = widgetState.createWindow(name,  width, height);
 	pWindow->show();
 
-	auto pAbsLayout = UI::AbsoluteLayout::create();
-	pWindow->setLayout(pAbsLayout);
+	//auto pAbsLayout = UI::AbsoluteLayout::create();
+	std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
+	pWindow->setLayout(pGridLayout);
 
 	auto pLabel = UI::Label::create("test", "res/fonts/tahoma.ttf");
-	pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
+	//pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
+	pGridLayout->addWidget(pLabel, 0, 0);
 	
 	return true;
 }
