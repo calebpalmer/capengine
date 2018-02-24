@@ -72,7 +72,60 @@ int GridLayout::getNumColumns() const {
 	return m_numColumns;
 }
 
+//! \copydoc Widget::handleMouseMotionEvent
+void GridLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleMouseMotionEvent(event);
+			}
+		}
+	}
+}
 
+//! \copydoc Widget::handleMouseButtonEvent
+void GridLayout::handleMouseButtonEvent(SDL_MouseButtonEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleMouseButtonEvent(event);
+			}
+		}
+	}
+}
+
+//! \copydoc Widget::handleMouseWheelEvent
+void GridLayout::handleMouseWheelEvent(SDL_MouseWheelEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleMouseWheelEvent(event);
+			}
+		}
+	}
+}
+
+//! \copydoc Widget::handleKeyboardEvent
+void GridLayout::handleKeyboardEvent(SDL_KeyboardEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleKeyboardEvent(event);
+			}
+		}
+	}
+}
+
+//! \copydoc Widget::handleWindowEvent
+void GridLayout::handleWindowEvent(SDL_WindowEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleWindowEvent(event);
+			}
+		}
+	}
+}
 
 //! Return the wiget in the given grid location
 /** 

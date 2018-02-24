@@ -5,6 +5,7 @@
 #include "captypes.h"
 
 #include <memory>
+#include <functional>
 
 namespace CapEngine { namespace UI {
 
@@ -13,15 +14,15 @@ namespace CapEngine { namespace UI {
 		public:
 			static std::shared_ptr<GridLayout> create(int numRows, int numCols);
 			
-			virtual void setPosition(int x, int y) ;
-			virtual void setSize(int width, int height);
-			virtual void render();
+			virtual void setPosition(int x, int y) override;
+			virtual void setSize(int width, int height) override;
+			virtual void render() override;
 
-			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) {}
-			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) {}
-			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) {}
-			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) {}
-			virtual void handleWindowEvent(SDL_WindowEvent event) {}
+			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+			virtual void handleWindowEvent(SDL_WindowEvent event) override;
 
 			void addWidget(std::shared_ptr<Widget>, int row, int column, bool replaceExisting=false);
 			int getNumRows() const;
@@ -44,7 +45,6 @@ namespace CapEngine { namespace UI {
 			Rect m_position = { 0, 0, 0, 0 };
 			
 		};
-		
 }}
 
 #endif // GRIDLAYOYT_H

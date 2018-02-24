@@ -106,15 +106,32 @@ void WindowWidget::setPosition(int x, int y){
 
 //! @copydoc Widget::setSize()
 void WindowWidget::setSize(int width, int height){
-	m_width  = 0;
-	m_height = 0;
+	m_width  = width;
+	m_height = height;
 
 	// if the  window has already been created, resize it
 	if(m_windowId != VideoManager::kInvalidWindowId){
 		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
 		Locator::videoManager->setWindowSize(m_windowId, m_x, m_y);
 	}
-	
+}
+
+
+
+//! Updates the size of a window.)
+/** 
+
+This doesn't actually resize the window like setSize().
+
+ \param width - The width of the Window.
+ \param - The height of fthe Window
+*/
+void WindowWidget::updateSize(int width, int height){
+	m_width  = width;
+	m_height = height;
+
+	if(m_pLayout)
+		m_pLayout->setSize(width, height);
 }
 
 //! @copydoc Widget::render()
@@ -153,8 +170,16 @@ void WindowWidget::handleKeyboardEvent(SDL_KeyboardEvent event) {
 
 //! @copydoc Widget::handleWindowEvent()
 void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
-	if(event.windowID == m_windowId)	
+	if(event.windowID == m_windowId){
+
+		// window was resized
+		if(event.event == SDL_WINDOWEVENT_RESIZED || event.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+			this->updateSize(event.data1, event.data2);
+		}
+		
 		m_pLayout->handleWindowEvent(event);
+	}
+
 }
 
 //! Register handlers with event signals

@@ -42,6 +42,8 @@ namespace CapEngine {
 
 		private:
 			WindowWidget(const std::string &name, int width, int height, bool resizable=true);
+
+			void updateSize(int width, int height);
 			
 			std::string m_windowName; //<! The name of the window
 			int m_x = 0; //<! The x position of the window
