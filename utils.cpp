@@ -14,47 +14,24 @@ SDL_Rect expandRectToFit(const SDL_Rect &srcRect, const SDL_Rect &containingRect
 	SDL_Rect newRect = {containingRect.x, containingRect.y, 0, 0};
 	
 	float containingAspectRatio = containingRect.h != 0 
- 		? containingRect.w / containingRect.h
+ 		? static_cast<double>(containingRect.w) / static_cast<double>(containingRect.h)
 		: 1.0;
 		
 	float srcAspectRatio = srcRect.h != 0
-		? srcRect.w / srcRect.h
+		? static_cast<double>(srcRect.w) / static_cast<double>(srcRect.h)
 		: 1.0;
 
-	// if they're both wide, stretch to fit width
-	if(containingAspectRatio >= 1.0 && srcAspectRatio >= 1.0){
+	if(srcAspectRatio > containingAspectRatio){
 		newRect.w = containingRect.w;
-		newRect.h = srcRect.h *
+		newRect.h = static_cast<double>(srcRect.h) *
 			(static_cast<double>(newRect.w) / static_cast<double>(srcRect.w));
 
 		// center it vertically
 		newRect.y = containingRect.y + ((containingRect.h - newRect.h) / 2);
 	}
-
-	// if they're both narrows, streth to fit height
-	else if(containingAspectRatio < 1.0 && srcAspectRatio < 1.0){
+	else{
 		newRect.h = containingRect.h;
-		newRect.w = srcRect.w *
-			(static_cast<double>(newRect.h) / static_cast<double>(srcRect.h));
-
-		// center horizontally
-		newRect.x = containingRect.x + ((containingRect.w - newRect.w) / 2);
-	}
-
-	// if src is wide and dst is narrow, stretch to fit width
-	else if(srcAspectRatio >= 1.0 && containingAspectRatio < 1.0){
-		newRect.w = containingRect.w;
-		newRect.h = srcRect.h *
-			(static_cast<double>(newRect.w) / static_cast<double>(srcRect.w));
-
-		// center it vertically
-		newRect.y = containingRect.y + ((containingRect.h - newRect.h) / 2);
-	}
-
-	// if src is narrow and dst is wide, strech to fit height
-	else if(srcAspectRatio < 1.0 && containingAspectRatio >= 1.0){
-		newRect.h = containingRect.h;
-		newRect.w = srcRect.w *
+		newRect.w = static_cast<double>(srcRect.w) *
 			(static_cast<double>(newRect.h) / static_cast<double>(srcRect.h));
 
 		// center horizontally

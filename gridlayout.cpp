@@ -45,6 +45,7 @@ void GridLayout::setSize(int width, int height){
 	updateChildren();
 }
 
+//! \copydoc Widget::setWindowId
 void GridLayout::setWindowId(Uint32 windowId){
 	m_windowId = windowId;
 
