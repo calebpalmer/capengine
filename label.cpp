@@ -50,7 +50,7 @@ void Label::render() {
 	CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
 
 	if(!m_texture){
-		int fontSize = 20;
+		const int fontSize = 128;
 
 		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
 		CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
@@ -71,7 +71,5 @@ void Label::render() {
 	SDL_Rect dstRect = expandRectToFit(srcRect, {m_x, m_y, m_width, m_height});
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
 }
-
-
 
 }} // namespace CapEngine::UI
