@@ -15,8 +15,6 @@
 
 namespace {
 
-const std::string kFontPath = "res/fonts/tahoma.ttf";
-
 using namespace CapEngine;
 
 bool onLoad(CapEngine::UI::WidgetState &widgetState){
@@ -30,14 +28,14 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
 	pWindow->setLayout(pGridLayout);
 
-	auto pLabel = UI::Label::create("test", kFontPath);
+	auto pLabel = UI::Label::create("test");
 	//pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
 	pGridLayout->addWidget(pLabel, 1, 0);
 
 	std::shared_ptr<UI::LinearLayout> pLinearLayout =
 		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Vertical);
-	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Left", kFontPath);
-	std::shared_ptr<UI::Label> pLabelRight = UI::Label::create("Right", kFontPath);
+	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Left");
+	std::shared_ptr<UI::Label> pLabelRight = UI::Label::create("Right");
 	pLinearLayout->addWidget(pLabelLeft);
 	pLinearLayout->addWidget(pLabelRight);
 

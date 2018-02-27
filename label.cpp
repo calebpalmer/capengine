@@ -4,18 +4,31 @@
 #include "locator.h"
 #include "CapEngineException.h"
 #include "utils.h"
+#include "uiconfigmanager.h"
 
 namespace CapEngine { namespace UI {
 
 
 //! Constructor
 /**
- * \param pParent - The parent widget
- * \param text - The text to display
- * \param font - The ttf font to render in (full path to TTF file)
+ \param pParent - The parent widget
+ \param text - The text to display
+ \param font
+   \li The ttf font to render in (full path to TTF file)
+	 \li If empty, the default will be retrieved.
  */
 Label::Label(const std::string &text, const std::string &font)
-	: m_text(text), m_font(font), m_texture(getNullTexturePtr()) { }
+	: m_text(text), m_font(font), m_texture(getNullTexturePtr())
+{
+	if(m_font.empty()){
+		boost::optional<std::string> maybeFont = UIConfigManager::getInstance().getSetting(kDefaultFontSettingsPath);
+		if(!maybeFont){
+			CAP_THROW(CapEngineException("Default font setting not found"));
+		}
+
+		m_font = *maybeFont;
+	}
+}
 
 
 //! creates a label
