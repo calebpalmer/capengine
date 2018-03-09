@@ -27,6 +27,7 @@ namespace CapEngine { namespace UI {
 			int m_height = 0; //<! The height of the label
 			std::string m_text = ""; //<! The text to display
 			std::string m_font = ""; //<! the font of the label
+			int m_fontSize;//<! The size of the font
 
 			TexturePtr m_texture; //<! The surface
 			FontManager m_fontManager;  //<! fontmanager for getting text surfaces

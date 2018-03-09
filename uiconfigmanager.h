@@ -1,21 +1,33 @@
 #ifndef CAPENGINE_UICONFIGMANAGER_H
 #define CAPENGINE_UUICONFIGMANAGER_H
 
+#include "colour.h"
+
 #include <boost/optional.hpp>
+#include <jsoncons/json.hpp>
 
 namespace CapEngine { namespace UI {
 
-		const std::string kDefaultFontSettingsPath = "/font/path";
+		// settings paths
+		const std::string kDefaultFontSettingsPath = "$.font.path";
+		const std::string kDefaultFontSizeSettingsPath = "$.font.size";
+
+		// defaults
+		const int kDefaultFontSize = 13;
 
 		class UIConfigManager {
 		public:
 			static UIConfigManager& getInstance();
 
-			boost::optional<std::string> getSetting(const std::string &settingPath);
+			boost::optional<jsoncons::json> getSetting(const std::string &settingPath);
 
 		private:
 			UIConfigManager();
+
+			jsoncons::json m_settings;
 		};
+
+		boost::optional<Colour> getColour(const jsoncons::json &object);		
 
 	}}
 

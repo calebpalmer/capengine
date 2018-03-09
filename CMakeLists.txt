@@ -15,6 +15,7 @@ include_directories(${SDL2_INCLUDE_DIR}
                     ${SDL2_TTF_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${LIBXML2_INCLUDE_DIR}
+		    "./thirdparty/jsoncons/include"
                     )
 
 #linhhk_directories()
@@ -33,7 +34,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp mapobjectdescriptor.cpp eventsubscriber.cpp
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
-	    uiconfigmanager.cpp)
+	    uiconfigmanager.cpp uibutton.cpp)
 
 	  #add_executable(editor editor.cpp tileset_panel.cpp map_panel.cpp)
 

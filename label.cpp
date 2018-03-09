@@ -21,13 +21,21 @@ Label::Label(const std::string &text, const std::string &font)
 	: m_text(text), m_font(font), m_texture(getNullTexturePtr())
 {
 	if(m_font.empty()){
-		boost::optional<std::string> maybeFont = UIConfigManager::getInstance().getSetting(kDefaultFontSettingsPath);
+		boost::optional<jsoncons::json> maybeFont = UIConfigManager::getInstance().getSetting(kDefaultFontSettingsPath);
 		if(!maybeFont){
 			CAP_THROW(CapEngineException("Default font setting not found"));
 		}
 
-		m_font = *maybeFont;
+		m_font = (*maybeFont)[0].as<std::string>();;
 	}
+
+	boost::optional<jsoncons::json> maybeFontSize =
+		UIConfigManager::getInstance().getSetting(kDefaultFontSizeSettingsPath);
+
+	if(maybeFontSize)
+		m_fontSize = (*maybeFontSize)[0].as<int>();
+	else
+		m_fontSize = kDefaultFontSize;
 }
 
 
@@ -54,7 +62,6 @@ void Label::setSize(int width, int height){
 		m_width = width;
 		m_height = height;
 	}
-
 }
 
 //! @copydoc Widget::render()
@@ -63,13 +70,11 @@ void Label::render() {
 	CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
 
 	if(!m_texture){
-		const int fontSize = 128;
-
 		CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
 		CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "Invalid window id");
 
 		SDL_Surface *surface =
-			m_fontManager.getTextSurface(m_font, m_text, fontSize);
+			m_fontManager.getTextSurface(m_font, m_text, m_fontSize);
 		
 		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surface, true);
 		CAP_THROW_ASSERT(m_texture != nullptr, "Unable to create texture");
@@ -80,8 +85,12 @@ void Label::render() {
 	Locator::videoManager->getTextureDims(m_texture.get(), &textureWidth, &textureHeight);
 
 	SDL_Rect srcRect = {0, 0, textureWidth, textureHeight};
-	//	SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
-	SDL_Rect dstRect = expandRectToFit(srcRect, {m_x, m_y, m_width, m_height});
+	SDL_Rect dstRect = {
+		textureWidth < m_width ? m_x + ((m_width - textureWidth) / 2) : m_x, // x
+		textureHeight < m_height ? m_y + ((m_height - textureHeight) / 2) : m_y, //y
+		textureWidth < m_width ? textureWidth : m_width, // width
+		textureHeight < m_height ? textureHeight : m_height // height
+	};
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
 }
 

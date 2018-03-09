@@ -9,6 +9,7 @@
 #include "gridlayout.h"
 #include "linearlayout.h"
 #include "label.h"
+#include "uibutton.h"
 
 #include <memory>
 #include <iostream>
@@ -29,15 +30,14 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	pWindow->setLayout(pGridLayout);
 
 	auto pLabel = UI::Label::create("test");
-	//pAbsLayout->addWidget(pLabel, 10, 10, 200, 100);
 	pGridLayout->addWidget(pLabel, 1, 0);
 
 	std::shared_ptr<UI::LinearLayout> pLinearLayout =
-		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Vertical);
-	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Left");
-	std::shared_ptr<UI::Label> pLabelRight = UI::Label::create("Right");
+		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Horizontal);
+	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
+	std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
 	pLinearLayout->addWidget(pLabelLeft);
-	pLinearLayout->addWidget(pLabelRight);
+	pLinearLayout->addWidget(pButton);
 
 	pGridLayout->addWidget(pLinearLayout, 0, 1);
 	
