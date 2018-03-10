@@ -91,6 +91,36 @@ void Label::render() {
 		textureWidth < m_width ? textureWidth : m_width, // width
 		textureHeight < m_height ? textureHeight : m_height // height
 	};
+
+	// left alignment
+	if(m_horizontalAlignment == HorizontalAlignment::Right &&
+		 textureWidth < m_width)
+	{
+		dstRect.x = m_x + m_width - textureWidth;
+	}
+
+	// right alignment
+	if(m_horizontalAlignment == HorizontalAlignment::Left &&
+		 textureWidth < m_width)
+	{
+		dstRect.x = m_x;
+	}
+
+	// top alignment
+	if(m_verticalAlignment == VerticalAlignment::Top &&
+		 textureHeight < m_height)
+	{
+		dstRect.y = m_y;
+	}
+
+	// bottom alignment
+	if(m_verticalAlignment == VerticalAlignment::Bottom &&
+		 textureHeight < m_height)
+	{
+		dstRect.y = m_y + m_height - textureHeight;
+	}
+	
+	
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
 }
 

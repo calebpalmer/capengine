@@ -10,6 +10,7 @@
 #include "linearlayout.h"
 #include "label.h"
 #include "uibutton.h"
+#include "orientable.h"
 
 #include <memory>
 #include <iostream>
@@ -34,7 +35,10 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 
 	std::shared_ptr<UI::LinearLayout> pLinearLayout =
 		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Horizontal);
+
 	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
+	pLabelLeft->setHorizontalAlignment(UI::Orientable::HorizontalAlignment::Right);
+
 	std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
 	pLinearLayout->addWidget(pLabelLeft);
 	pLinearLayout->addWidget(pButton);

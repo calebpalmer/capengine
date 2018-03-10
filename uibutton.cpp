@@ -177,8 +177,6 @@ void Button::readUIConfig(){
 	m_uiConfig.pressedBackgroundColour = maybePressedBackgroundColour ? *maybePressedBackgroundColour : kDefaultPressedBackgroundColour;
 }
 
-
-
 //! Gets the Rectangle where the button is rendered.
 /** 
  \return The Rectangle.
