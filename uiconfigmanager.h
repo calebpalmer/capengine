@@ -27,7 +27,10 @@ namespace CapEngine { namespace UI {
 			jsoncons::json m_settings;
 		};
 
-		boost::optional<Colour> getColour(const jsoncons::json &object);		
+		boost::optional<Colour> getColour(const jsoncons::json &object);
+		jsoncons::json getProperty(jsoncons::json object,
+															 const std::string &propertyName,
+															 jsoncons::json defaultValue=jsoncons::json::object());
 
 	}}
 

@@ -88,4 +88,20 @@ boost::optional<Colour> getColour(const jsoncons::json &object){
 	return colour;
 }
 
+
+
+//! Gets a property from a json or return a default value if it doesn't exist.
+/** 
+ \param object - The object to get the property from.
+ \param propertyName - The name of the property to get.
+ \param defaultValue - The default value to returu if the property isn't found
+ \return - The property.
+*/
+jsoncons::json getProperty(jsoncons::json object, const std::string &propertyName, jsoncons::json defaultValue){
+	if(!object.has_key(propertyName))
+		return defaultValue;
+	else
+		return object[propertyName];
+}
+
 }}

@@ -41,11 +41,11 @@ namespace CapEngine{ namespace UI {
 				Colour neutralFontColour;
 				Colour neutralBackgroundColour;
 
-				Colour hoveredFontColour;
-				Colour hoveredBackgroundColour;
+				Colour hoverFontColour;
+				Colour hoverBackgroundColour;
 
 				Colour pressedFontColour;
-				Colour presseddBackgroundColour;
+				Colour pressedBackgroundColour;
 			};
 			
 		private:

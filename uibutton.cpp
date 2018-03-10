@@ -13,8 +13,12 @@ namespace {
 
 const int kMaxHeight = 48;
 
+const Colour kDefaultNeutralFontColour = {0, 0, 0, 255};
+const Colour kDefaultNeutralBackgroundColour = {43, 140, 229, 255};
 const Colour kDefaultHoverFontColour = {0, 0, 0, 255};
-const Colour kDefaultHoverColour = { 43,  140, 229, 255};
+const Colour kDefaultHoverBackgroundColour = { 43,  140, 229, 255};
+const Colour kDefaultPressedFontColour = {0, 0, 0, 255};
+const Colour kDefaultPressedBackgroundColour = { 43,  57, 229, 255};
 
 }
 
@@ -106,19 +110,6 @@ void Button::setText(const std::string & text){
 void Button::updateChildren(){
 	SDL_Rect containingRect = this->getRenderRect();
 	
-	// fit to a box that is a percentage of the height
-// 	const double vscale = 0.2;
-// 	SDL_Rect dstRect = {
-// 		containingRect.x,
-// 		static_cast<int>(containingRect.y + (static_cast<double>(containingRect.h) * vscale / 2.0)),
-// 		containingRect.w,
-// 		static_cast<int>(static_cast<double>(containingRect.h) * 0.2)
-// 	};
-
-// 	assert(m_pLabel);
-// 	m_pLabel->setPosition(dstRect.x, dstRect.y);
-// 	m_pLabel->setSize(dstRect.w, dstRect.h);
-
 	assert(m_pLabel);
  	m_pLabel->setPosition(containingRect.x, containingRect.y);
  	m_pLabel->setSize(containingRect.w, containingRect.h);	
@@ -148,29 +139,42 @@ void Button::readUIConfig(){
 	if(!settings.has_key("neutral"))
 		 CAP_THROW(CapEngineException("Button settings missing \"neutral\" property."));
 
-	jsoncons::json neutralSettings = settings["neutral"];
 
-	auto getColourSetting = [](const jsoncons::json colourParent) -> Colour {
+	auto getColourSetting = [](const jsoncons::json colourParent) -> boost::optional<Colour> {
 		if(!colourParent.has_key("colour"))
-			return {0, 0, 0, 255};
+			return boost::none;
 		else{
 			boost::optional<Colour> maybeColour = getColour(colourParent["colour"]);
 			if(maybeColour)
 				return *maybeColour;
 			else
-				return {0, 0, 0, 255};
+				return boost::none;
 		}
 	};
 
 	// neutral settings
-	m_uiConfig.neutralFontColour = getColourSetting(neutralSettings["font"]);
-	m_uiConfig.neutralBackgroundColour = getColourSetting(neutralSettings["fill"]);
+	jsoncons::json neutralSettings = settings["neutral"];
+	boost::optional<Colour> maybeNeutralFontColour = getColourSetting(getProperty(neutralSettings, "font"));
+	m_uiConfig.neutralFontColour = maybeNeutralFontColour ? *maybeNeutralFontColour : kDefaultNeutralFontColour;
 
-	// // hover settings
-	// if(settings.has_key){
-		
-	// }
-	
+	boost::optional<Colour> maybeNeutralBackgroundColour = getColourSetting(getProperty(neutralSettings,"fill"));
+	m_uiConfig.neutralBackgroundColour = maybeNeutralBackgroundColour ? *maybeNeutralBackgroundColour : kDefaultNeutralBackgroundColour;
+
+	// hover settings
+ 	jsoncons::json hoverSettings = getProperty(settings, "hover");
+	boost::optional<Colour> maybeHoverFontColour = getColourSetting(getProperty(hoverSettings, "font"));
+	m_uiConfig.hoverFontColour = maybeHoverFontColour ? *maybeHoverFontColour : kDefaultHoverFontColour;
+
+	boost::optional<Colour> maybeHoverBackgroundColour = getColourSetting(getProperty(hoverSettings, "fill"));
+	m_uiConfig.hoverBackgroundColour = maybeHoverBackgroundColour ? *maybeHoverBackgroundColour : kDefaultHoverBackgroundColour;
+
+	// pressed settings
+ 	jsoncons::json pressedSettings = getProperty(settings, "pressed");
+	boost::optional<Colour> maybePressedFontColour = getColourSetting(getProperty(pressedSettings, "font"));
+	m_uiConfig.pressedFontColour = maybePressedFontColour ? *maybePressedFontColour : kDefaultPressedFontColour;
+
+	boost::optional<Colour> maybePressedBackgroundColour = getColourSetting(getProperty(pressedSettings, "fill"));
+	m_uiConfig.pressedBackgroundColour = maybePressedBackgroundColour ? *maybePressedBackgroundColour : kDefaultPressedBackgroundColour;
 }
 
 
