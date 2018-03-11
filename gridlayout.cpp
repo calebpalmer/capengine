@@ -58,6 +58,16 @@ void GridLayout::setWindowId(Uint32 windowId){
 	}
 }
 
+//! \copydoc GridLayout::update
+void GridLayout::update(double ms){
+	for (auto && row : m_widgetGrid){
+		for (auto && col : row){
+			if(col != nullptr)
+				col->update(ms);
+		}
+	}
+}
+
 //! @copydoc Widget::render()
 void GridLayout::render(){
 	for (auto && row : m_widgetGrid){

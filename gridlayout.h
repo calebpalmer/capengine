@@ -17,6 +17,7 @@ namespace CapEngine { namespace UI {
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
+			virtual void update(double ms);
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;

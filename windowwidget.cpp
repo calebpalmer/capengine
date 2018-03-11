@@ -116,8 +116,6 @@ void WindowWidget::setSize(int width, int height){
 	}
 }
 
-
-
 //! Updates the size of a window.)
 /** 
 
@@ -132,6 +130,12 @@ void WindowWidget::updateSize(int width, int height){
 
 	if(m_pLayout)
 		m_pLayout->setSize(width, height);
+}
+
+//! \copydoc WindowWidget::update
+void WindowWidget::update(double ms){
+	if(m_pLayout)
+		m_pLayout->update(ms);
 }
 
 //! @copydoc Widget::render()

@@ -120,8 +120,25 @@ void Label::render() {
 		dstRect.y = m_y + m_height - textureHeight;
 	}
 	
-	
 	Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect, &dstRect);
+}
+
+//! Gets the labels text
+/** 
+ \return - The text.
+*/
+std::string Label::getText() const{
+	return m_text;
+}
+
+
+//! Sets the text of the label.
+/** 
+ \param text - The text to set.
+*/
+void Label::setText(const std::string &text){
+	m_text = text;
+	m_texture.release();
 }
 
 }} // namespace CapEngine::UI

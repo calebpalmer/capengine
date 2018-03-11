@@ -9,6 +9,7 @@
 
 namespace CapEngine{
 
+	//! class to  represent a 2D rectangle
   class Rectangle {
   public:
     int x;
@@ -18,7 +19,7 @@ namespace CapEngine{
     
     Rectangle();
     Rectangle(int xIn,int yIn, int widthIn, int heightIn);
-    Rectangle(Rect rect);
+    Rectangle(const Rect &rect);
 
     Rect toRect() const;
 
@@ -27,6 +28,12 @@ namespace CapEngine{
     Rectangle narrowRight(int in_amount) const;
     Rectangle narrowLeft(int in_amount) const;
   };
+
+	//! structure to represent a 2D point.
+	struct Point {
+		int x;
+		int y;
+	};
 
   
   enum CollisionType {
@@ -65,21 +72,21 @@ namespace CapEngine{
     CollisionVectorType vectorType;
   };
 
+	bool pointInRect(const Point &point, const Rectangle& rect);
+	CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
+	CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
+	Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
+	Relation MBRRelate(int x, int y, const Rectangle& r);
+	CollisionType detectBitmapCollision(const Rectangle& rect, const Surface* bitmapSurface,
+																			Vector& out_collisionPoint);
+	std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
+	std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
+	std::vector<PixelCollision> detectBitmapCollisionsWithTangents(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
 
- CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
- CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
- Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
- Relation MBRRelate(int x, int y, const Rectangle& r);
- CollisionType detectBitmapCollision(const Rectangle& rect, const Surface* bitmapSurface,
-				     Vector& out_collisionPoint);
- std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
- std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
- std::vector<PixelCollision> detectBitmapCollisionsWithTangents(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
-
- std::ostream& operator<<(std::ostream& stream, const CapEngine::Rectangle& rectangle); 
- std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
- std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);
- std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionClass& collisionClass);
+	std::ostream& operator<<(std::ostream& stream, const CapEngine::Rectangle& rectangle); 
+	std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
+	std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);
+	std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionClass& collisionClass);
 }
 
 

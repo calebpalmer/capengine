@@ -14,10 +14,16 @@
 
 #include <memory>
 #include <iostream>
+#include <functional>
 
 namespace {
 
 using namespace CapEngine;
+
+void onButtonClicked(std::shared_ptr<UI::Label> pLabel){
+	assert(pLabel);
+	pLabel->setText("changed by button click");
+}
 
 bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	std::string name = "Widget Test";
@@ -40,6 +46,8 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	pLabelLeft->setHorizontalAlignment(UI::Orientable::HorizontalAlignment::Right);
 
 	std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
+	static boost::signals2::scoped_connection connection = pButton->addOnButtonClickedHandler(std::bind(onButtonClicked, pLabelLeft));
+		
 	pLinearLayout->addWidget(pLabelLeft);
 	pLinearLayout->addWidget(pButton);
 

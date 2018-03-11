@@ -4,6 +4,7 @@
 #include "locator.h"
 #include "uiconfigmanager.h"
 #include "utils.h"
+#include "collision.h"
 
 #include <jsoncons_ext/jsonpath/json_query.hpp>
 
@@ -77,6 +78,12 @@ void Button::render(){
 	if(m_state == State::Neutral){
 		Locator::videoManager->drawFillRect(m_windowId, dstRect, m_uiConfig.neutralBackgroundColour);
 	}
+	else if(m_state == State::Hovered){
+		Locator::videoManager->drawFillRect(m_windowId, dstRect, m_uiConfig.hoverBackgroundColour);
+	}
+	else if(m_state == State::Pressed){
+		Locator::videoManager->drawFillRect(m_windowId, dstRect, m_uiConfig.pressedBackgroundColour);
+	}
 	
 	// draw the label
 	assert(m_pLabel != nullptr);
@@ -86,6 +93,13 @@ void Button::render(){
 	m_pLabel->render();
 }
 
+//! \copydoc Widget::update
+void Button::update(double ms){
+	if(m_doClickCallbacks){
+		m_onButtonClicked();
+		m_doClickCallbacks = false;
+	}
+}
 
 //! Get the text of the button.
 /** 
@@ -187,6 +201,54 @@ SDL_Rect Button::getRenderRect() const {
 		dstRect.h = kMaxHeight;
 
 	return expandRectToFit(dstRect, m_rect);
+}
+
+//! \copydoc Widdget::handleMouseMotionEvent
+void Button::handleMouseMotionEvent(SDL_MouseMotionEvent event) {
+	SDL_Rect rect = this->getRenderRect();
+	// hovered
+	if(pointInRect(Point({event.x, event.y}), Rectangle(rect)) &&
+		 m_state != State::Pressed)
+	{
+		m_state = State::Hovered;
+	}
+	// neutral (not hovered)
+	else if(m_state != State::Pressed)
+		m_state = State::Neutral;
+}
+
+//! \copydoc Widget::handleMouseButtonEvent
+void Button::handleMouseButtonEvent(SDL_MouseButtonEvent event) {
+	SDL_Rect rect = this->getRenderRect();
+
+	// button event inside of button
+	if(pointInRect(Point({event.x, event.y}), Rectangle(rect)))
+	{
+		// pressed
+		if(event.type == SDL_MOUSEBUTTONDOWN && m_state != State::Pressed)
+			m_state = State::Pressed;
+
+		else if(event.type == SDL_MOUSEBUTTONUP && m_state == State::Pressed){
+			m_doClickCallbacks = true;
+			m_state = State::Hovered;
+		}
+			
+	}
+
+	// if its not in the button, then we set the state back and do not call callback
+	else{
+		m_state = State::Neutral;
+	}
+}
+
+
+//! Registers a button click handler.
+/** 
+ \param f - The function to register.
+ \return - The scoped connection object.
+*/
+boost::signals2::scoped_connection Button::addOnButtonClickedHandler(std::function<void()> f){
+	return m_onButtonClicked.connect(f);
 }
 
 }}

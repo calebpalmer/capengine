@@ -20,6 +20,9 @@ namespace CapEngine { namespace UI {
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
 
+			std::string getText() const;
+			void setText(const std::string &text);
+
 		private:
 			Label(const std::string &text, const std::string &font="");
 			

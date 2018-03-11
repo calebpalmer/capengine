@@ -15,7 +15,7 @@ namespace CapEngine{ namespace UI {
 			enum class State {
 				Neutral,
 				Hovered,
-				ressed
+				Pressed
 			};
 
 		public:
@@ -24,10 +24,11 @@ namespace CapEngine{ namespace UI {
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
+			virtual void update(double ms) override;
 			virtual void setWindowId(Uint32 windowId) override;
 
-			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override {};
-			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override {};
+			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
 
 			boost::signals2::scoped_connection addOnButtonClickedHandler(std::function<void()> f);
 			boost::signals2::scoped_connection addOnButtonHoverHandler(std::function<void()> f);
@@ -67,6 +68,8 @@ namespace CapEngine{ namespace UI {
 			bool m_updateLabel = true;
 			//! The label displaying the text
 			std::shared_ptr<Widget> m_pLabel;
+			//! flag indicating if button callbacks need to be calledd.
+			bool m_doClickCallbacks = false;
 			//! signal for button click callbacks
 			boost::signals2::signal<void()> m_onButtonClicked;
 			//! signal for button hover callbacks

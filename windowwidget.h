@@ -28,6 +28,7 @@ namespace CapEngine {
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
+			virtual void update(double ms) override;
 
 			void registerSignals(EventSubscriber &eventSubscriber);
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
