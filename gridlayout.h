@@ -6,18 +6,20 @@
 
 #include <memory>
 #include <functional>
+#include <boost/optional.hpp>
 
 namespace CapEngine { namespace UI {
 
 		// Layout of widgets in a Grid
 		class GridLayout : public Widget {
+
 		public:
 			static std::shared_ptr<GridLayout> create(int numRows, int numCols);
 			
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
-			virtual void update(double ms);
+			virtual void update(double ms) override;
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
