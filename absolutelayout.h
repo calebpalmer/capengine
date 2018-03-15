@@ -2,6 +2,7 @@
 #define ABSOLUTELAYOUT_H
 
 #include "widget.h"
+#include "uicommon.h"
 
 #include <memory>
 #include <vector>
@@ -16,19 +17,20 @@ namespace CapEngine { namespace UI {
 		static std::shared_ptr<AbsoluteLayout> create();
 
 		// Widget overrides
-		void render() override;
-		void setPosition(int x, int y) override;
-		void setSize(int x, int y) override;
-    void handleMouseMotionEvent(SDL_MouseMotionEvent event);
-    void handleMouseButtonEvent(SDL_MouseButtonEvent event);
-    void handleMouseWheelEvent(SDL_MouseWheelEvent event);
-    void handleKeyboardEvent(SDL_KeyboardEvent event);
-    void handleWindowEvent(SDL_WindowEvent event);
+		virtual void render() override;
+		virtual void setPosition(int x, int y) override;
+		virtual void setSize(int x, int y) override;
+		virtual void setWindowId(Uint32 windowId) override;
 		
-
-		void addWidget(std::shared_ptr<Widget>, int x, int y, int width, int height);
+    virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+    virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+    virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+    virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+    virtual void handleWindowEvent(SDL_WindowEvent event) override;
+		
+		void addWidget(std::shared_ptr<Widget>, int x, int y, int width, int height,
+									 Unit widthUnit = Unit::Pixels, Unit heightUnit = Unit::Pixels) ;
 		void removeWidget(std::shared_ptr<Widget>);
-		
 
 	private:
 		//! struct holding widget location info
@@ -38,11 +40,16 @@ namespace CapEngine { namespace UI {
 			int y; //<! y location of widget within layout
 			int width; //<! The width of the widget
 			int height; //<! The height of the widget
+			Unit widthUnit; //<! The unit of the width
+			Unit heightUnit; //<! The unit of the height
 		};
 
 	private:
 		AbsoluteLayout();
 
+		void updateWidgetPositions();
+
+		bool m_updateWidgets = false;
 		//! The widgets in this layout
 		std::vector<WidgetLocation> m_widgets;
 		int m_x; //<! The x location within the window

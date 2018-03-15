@@ -55,7 +55,7 @@ void LinearLayout::update(double ms){
 
 //! \copydoc Widget::setWindowId
 void LinearLayout::setWindowId(Uint32 windowId){
-	m_windowId = windowId;
+	Widget::setWindowId(windowId);
 
 	for(auto && pWidget : m_widgets){
 		CAP_THROW_NULL(pWidget, "Widget is null");

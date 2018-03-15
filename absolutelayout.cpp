@@ -1,4 +1,5 @@
 #include "absolutelayout.h"
+#include "utils.h"
 
 #include "CapEngineException.h"
 
@@ -26,27 +27,28 @@ std::shared_ptr<AbsoluteLayout> AbsoluteLayout::create(){
 * \param width - the width of the widget
 * \param height - the height of the widget
 */
-void AbsoluteLayout::addWidget(std::shared_ptr<Widget> pWidget, int x, int y, int width, int height){
+void AbsoluteLayout::addWidget(std::shared_ptr<Widget> pWidget, int x, int y, int width, int height, Unit widthUnit, Unit heightUnit){
 	CAP_THROW_ASSERT(pWidget != nullptr, "Can't add null widget");
 	CAP_THROW_ASSERT(x >= 0 && y >= 0, "Invalid X and Y");
 
-	WidgetLocation widgetLocation = {pWidget, x, y, width, height};
+	WidgetLocation widgetLocation = {pWidget, x, y, width, height, widthUnit, heightUnit};
 	m_widgets.push_back(widgetLocation);
 
 	pWidget->setParent(this);
 	pWidget->setWindowId(this->m_windowId);
 
-	pWidget->setPosition(m_x + x, m_y + y);
+// 	pWidget->setPosition(m_x + x, m_y + y);
 
-	// make sure location doesn't extend past bounds of layout
-	int newWidth = widgetLocation.x + widgetLocation.width <= m_x + m_width ?
-		width : m_width - x;
+// 	// make sure location doesn't extend past bounds of layout
+// 	int newWidth = widgetLocation.x + widgetLocation.width <= m_x + m_width ?
+// 		width : m_width - x;
 
-	int newHeight = widgetLocation.y + widgetLocation.height <= m_y + m_height ?
-		height : m_height - y;
+// 	int newHeight = widgetLocation.y + widgetLocation.height <= m_y + m_height ?
+// 		height : m_height - y;
 
-	pWidget->setSize(newWidth, newHeight);
-}
+// 	pWidget->setSize(newWidth, newHeight);
+	m_updateWidgets = true;
+ }
 
 //! Removes a widget from the layout
 /**
@@ -62,6 +64,9 @@ void AbsoluteLayout::removeWidget(std::shared_ptr<Widget> pWidget){
 
 //! @copydoc Widget::render()
 void AbsoluteLayout::render(){
+	if(m_updateWidgets)
+		updateWidgetPositions();
+	
 	for(auto && widget : m_widgets){
 		widget.pWidget->render();
 	}
@@ -71,12 +76,14 @@ void AbsoluteLayout::render(){
 void AbsoluteLayout::setPosition(int x, int y){
 	m_x = x;
 	m_y = y;
+	m_updateWidgets = true;
 }
 
 //! @copydoc Widget::setSize()
 void AbsoluteLayout::setSize(int width, int height){
 	m_width = width;
 	m_height = height;
+	m_updateWidgets = true;
 }
 
 //! @copydoc Widget::handleMouseMotionEvent()
@@ -114,5 +121,41 @@ void AbsoluteLayout::handleWindowEvent(SDL_WindowEvent event) {
 	}
 }
 
+//! \copydoc Widget::setWindowId
+void AbsoluteLayout::setWindowId(Uint32 windowId){
+	Widget::setWindowId(windowId);
+
+	for(auto && widgetLocation : m_widgets){
+		assert(widgetLocation.pWidget);
+		widgetLocation.pWidget->setWindowId(windowId);
+	}
+}
+
+
+//! update widget positions
+void AbsoluteLayout::updateWidgetPositions(){
+
+	for(auto && widgetLocation : m_widgets){
+		auto pWidget = widgetLocation.pWidget;
+		assert(pWidget);
+
+		SDL_Rect srcRect = { widgetLocation.x, widgetLocation.y, widgetLocation.width, widgetLocation.height };
+
+		if(widgetLocation.widthUnit == Unit::Percentage)
+			srcRect.w = m_x + m_width - srcRect.x;
+
+		if(widgetLocation.heightUnit == Unit::Percentage)
+			srcRect.h = m_y + m_height - srcRect.y;
+		
+		SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
+
+		SDL_Rect clippedRect = clipRect(srcRect, dstRect);
+
+		pWidget->setPosition(clippedRect.x, clippedRect.y);		
+		pWidget->setSize(clippedRect.w, clippedRect.h);
+	}
+
+	m_updateWidgets = false;
+}
 
 }} // namespace CapEngine::UI

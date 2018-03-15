@@ -6,6 +6,7 @@
 namespace CapEngine {
 
 	SDL_Rect expandRectToFit(const SDL_Rect &srcRect, const SDL_Rect &containingRect);
+	SDL_Rect clipRect(const SDL_Rect &srcRect, const SDL_Rect &dstRect);
 
 }
 
