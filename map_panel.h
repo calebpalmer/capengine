@@ -11,7 +11,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 
-namespace CapEngine{
+namespace CapEngine { namespace UI {
 
   enum DragState {
     DRAGSTATE_NONE,
@@ -19,20 +19,25 @@ namespace CapEngine{
     DRAGSTATE_PAN,
   };
 
-  class MapPanel : public Widget {
+  class MapPanel : public UI::Widget {
   public:
-    MapPanel(Uint32 windowID, bool ownsWindow, int x, int y, int width, int height, std::shared_ptr<Map2D> pMap);
+		static std::shared_ptr<MapPanel> create(std::shared_ptr<Map2D> pMap);
     ~MapPanel() = default;
-    void resize(int x, int y, int w, int h);
-    void render();
 
-    void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
-    void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
-    void handleKeyboardEvent(SDL_KeyboardEvent event) override;
-    void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
-		void handleWindowEvent(SDL_WindowEvent event);
+		virtual void setPosition(int x, int y) override;
+		virtual void setSize(int width, int height) override;
+		virtual void render() override;
+		virtual void update(double ms) override;
+
+    virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+    virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+    virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+    virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
     
   private:
+    MapPanel(std::shared_ptr<Map2D> pMap);
+
+		void doLocationInit();
     void drawHoveredTileOutline();
     void drawSelectedTileOutlines();
 		void drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
@@ -47,14 +52,11 @@ namespace CapEngine{
 
     bool isInMap(int x, int y) const;
 
-
-		//! The window id to displauy on
-    Uint32 m_windowID = -1;
 		//! the map that is being edited
     std::shared_ptr<Map2D> m_pMap;
-		//! flag indicating if this panel owns the whole window.
-    bool m_ownsWindow = false;
-		
+		//! flag indicated first location init
+		bool m_locationInitialized = false;
+
 		//! The panel starting x position
 		int m_panelX = 0;
 		//! The panel starting y position
@@ -90,6 +92,7 @@ namespace CapEngine{
 		//! The location of the cursor after the last motion event
 		std::pair<int, int> m_lastMotionLocation = {0.0, 0.0};
   };
-}
+	
+}}
 
 #endif // MAP_PANEL_H

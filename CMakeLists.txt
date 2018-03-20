@@ -36,7 +36,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
 	    uiconfigmanager.cpp uibutton.cpp orientable.cpp)
 
-	  #add_executable(editor editor.cpp tileset_panel.cpp map_panel.cpp)
+add_executable(editor editor.cpp map_panel.cpp)
 
 add_executable(widgettest widget_test.cpp)
 
@@ -48,14 +48,14 @@ target_link_libraries(capengine ${SDL2_LIBRARY}
 		      libsndfile.so
                       )
 
-# target_link_libraries(editor capengine
-# 		      ${SDL2_LIBRARY} 
-#                       ${SDL2_IMAGE_LIBRARIES}
-#                       ${SDL2_TTF_LIBRARIES}
-#                       ${Boost_LIBRARIES}
-#                       ${LIBXML2_LIBRARIES}
-# 		      libsndfile.so
-#                       )
+target_link_libraries(editor capengine
+		      ${SDL2_LIBRARY} 
+                      ${SDL2_IMAGE_LIBRARIES}
+                      ${SDL2_TTF_LIBRARIES}
+                      ${Boost_LIBRARIES}
+                      ${LIBXML2_LIBRARIES}
+		      libsndfile.so
+                      )
 
 target_link_libraries(widgettest capengine
 		      ${SDL2_LIBRARY} 

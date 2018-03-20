@@ -8,6 +8,9 @@
 #define CAP_LOG(logger, msg, level)	\
 	logger->log(msg, level, __FILE__, __LINE__)
 
+#define CAP_LOG_SDL_ERROR(logger, level) \
+	logger->logSDLError(level, __FILE__, __LINE__);
+
 namespace CapEngine {
   
   class Logger {
@@ -28,7 +31,8 @@ namespace CapEngine {
     Logger();
     ~Logger();
 
-    void log(const std::string& message, LogLevel level, char const* in_file="", int in_lineno=-1);
+    void log(const std::string& message, LogLevel level = CWARNING, char const* file="", int lineno=-1);
+		void logSDLError(LogLevel level, char const* file="", int lineno=-1);
     void setOutput(std::ostream& stream);
     
   private:

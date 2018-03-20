@@ -109,7 +109,8 @@ namespace CapEngine {
     Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false);
     Texture* createTextureFromSurface(Uint32 windowID, Surface* surface, bool freeSurface = false);     
     TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false);
-    TexturePtr createTextureFromSurfacePtr(Uint32 windowId, Surface* surface, bool freeSurface = false);		
+    TexturePtr createTextureFromSurfacePtr(Uint32 windowId, Surface* surface, bool freeSurface = false);
+		void setClipRect(Uint32 windowId, SDL_Rect const *clipRect);
 
     //opengl support
     void setReshapeFunc(void (*func)(int x, int y));

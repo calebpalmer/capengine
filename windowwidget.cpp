@@ -140,7 +140,6 @@ void WindowWidget::update(double ms){
 
 //! @copydoc Widget::render()
 void WindowWidget::render(){
-	// clear the screen
 	CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
 	CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "WindowId is invalid");
 	

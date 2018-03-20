@@ -1,9 +1,9 @@
 #include "logger.h"
+#include "CapEngineException.h"
 
 #include <memory>
 #include <sstream>
-
-#include "CapEngineException.h"
+#include <SDL2/SDL.h>
 
 using namespace CapEngine;
 using namespace std;
@@ -49,6 +49,21 @@ void Logger::log(const string& message, LogLevel level,
 
     *outputStream << errorStream.str() << endl;
   }
+}
+
+
+//! log an SDL error code.
+/** 
+ \param level - The level to log it under.
+ \param file - The file where the error occured.
+ \param luneno - The lineno where it occured.
+ \return 
+*/
+void Logger::logSDLError(LogLevel level, char const* file, int lineno){
+	const char* error = SDL_GetError();
+	std::ostringstream msg;
+	msg << "SDL Error ocurred: " << error;
+	this->log(msg.str(), level, file, lineno);
 }
 
 void Logger::setOutput(ostream& stream){

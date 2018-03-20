@@ -239,6 +239,24 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture,
   }
 }
 
+
+
+//! Sets the clip rect for a window
+/** 
+  \param windowID - The window to set the clip rect on.
+	\param - The retanble to use for clipping.  Unsets clip rect if nullptr;
+*/
+void VideoManager::setClipRect(Uint32 windowId, SDL_Rect const *clipRect){
+	Window window = this->getWindow(windowId);
+	assert(window.m_renderer != nullptr);
+	
+	int rcode = SDL_RenderSetClipRect(window.m_renderer, clipRect);
+	if(rcode != 0){
+		assert(logger != nullptr);
+		CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
+	}
+}
+
 void VideoManager::shutdown(){
   for (auto & i : m_windows){
     auto pWindow = i.second.m_window;

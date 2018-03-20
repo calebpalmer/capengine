@@ -1,4 +1,3 @@
-
 #include "map_panel.h"
 
 #include "locator.h"
@@ -8,13 +7,18 @@
 #include "editorconstants.h"
 #include "captypes.h"
 #include "colour.h"
+#include "utils.h"
 
 #include <sstream>
 #include <iostream>
 #include <cassert>
 #include <cmath>
 
+
+namespace CapEngine { namespace UI {
+
 namespace {
+
 const CapEngine::Colour outlineColour = {91, 110, 225, 255};
 const CapEngine::Colour selectedColour = {138, 111, 48, 255};
 const CapEngine::Colour mouseDragColour = {100, 100, 100, 255};
@@ -25,76 +29,92 @@ const float kTranslationIncrement = 4.0;
 void scaleMatrix(CapEngine::Matrix& matrix, float scaleIncrement){
   matrix = matrix + CapEngine::Matrix::createScaleMatrix(scaleIncrement, scaleIncrement, scaleIncrement);
 }
+
 }
 
-namespace CapEngine {
 
-MapPanel::MapPanel(Uint32 windowID, bool ownsWindow, int x, int y, int width, int height, std::shared_ptr<Map2D> pMap)
-  : m_windowID(windowID), m_x(x), m_y(y), m_width(width), m_height(height)
-  , m_pMap(pMap), m_ownsWindow(true)
+//! Constructor
+/** 
+ \param pMap - The map to show on the panel.
+*/
+MapPanel::MapPanel(std::shared_ptr<Map2D> pMap)
+  : m_pMap(pMap)
 {
   CAP_THROW_ASSERT(m_pMap.get() != nullptr, "Passed Map2D is null");
+}
 
+
+
+//! creates a MapPanel
+/** 
+ \param pMap - The map the panel holds.
+ \return - The mapPanel
+*/
+std::shared_ptr<MapPanel> MapPanel::create(std::shared_ptr<Map2D> pMap){
+	return std::shared_ptr<MapPanel>(new MapPanel(pMap));
+}
+
+//! Called when performing initial location initialization
+void MapPanel::doLocationInit(){
   // set initial scale size
-  int mapWidth = m_pMap->getWidth();
-  int mapHeight = m_pMap->getHeight();
+	assert(m_pMap != nullptr);
+	
+	int mapWidth = m_pMap->getWidth();
+	int mapHeight = m_pMap->getHeight();
   
-  float mapAspectRatio = static_cast<float>(mapWidth) / static_cast<float>(mapHeight);
-  float panelAspectRatio = static_cast<float>(m_width) / static_cast<float>(m_height);
+	float mapAspectRatio = static_cast<float>(mapWidth) / static_cast<float>(mapHeight);
+	float panelAspectRatio = static_cast<float>(m_width) / static_cast<float>(m_height);
 
-  // TODO this all needs to be revisted so that all cases are handled
-  // eg:  if panel is bigger than map, we stretch the map and maintain aspect ratio
-  float scaleFactor;
-  if(mapAspectRatio >= 1  && mapWidth < m_width){
-    // panel is wide screen
-    if(panelAspectRatio >= 1){
-      scaleFactor = static_cast<float>(m_height) / static_cast<float>(mapHeight);
-    }
-    // panel is portrait
-    else{
-      scaleFactor = static_cast<float>(m_width) / static_cast<float>(mapWidth);
-     }
-  }
+	float scaleFactor;
 
-  m_scaleMatrix = m_scaleMatrix * Matrix::createScaleMatrix(scaleFactor, scaleFactor, scaleFactor);
+	SDL_Rect srcRect = { m_x, m_y, mapWidth, mapHeight };
+	SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
+	SDL_Rect scaledRect = expandRectToFit(srcRect, dstRect);
+
+	scaleFactor = static_cast<float>(scaledRect.w) / static_cast<float>(mapWidth);
+
+	m_scaleMatrix = m_scaleMatrix * Matrix::createScaleMatrix(scaleFactor, scaleFactor, scaleFactor);
+
+	m_locationInitialized = true;
 }
 
-
-/**
- resizes the panel 
- */
-void MapPanel::resize(int x, int y, int w, int h){
-  m_x = x;
-  m_y = y;
-  m_width = w;
-  m_height = h;
+//! \copydoc Widget::setPosition
+void MapPanel::setPosition(int x, int y){
+	m_x = x;
+	m_y = y;
 }
 
-/**
- * Render the map panel
- */
+//! \copydoc Widget::setSize
+void MapPanel::setSize(int width, int height){
+	m_width = width;
+	m_height = height;
+}
+
+//! \copydoc Widget::update
+void MapPanel::update(double /* ms */){
+	if(!m_locationInitialized)
+		doLocationInit();
+}
+
+//! \copydoc Widget::render
 void MapPanel::render()
 {
-  auto&& videoManager = Locator::videoManager;
-  
-  // fill background colous
-  videoManager->clearScreen(m_windowID);
-  Rect fillRect = { 0, 0, m_width, m_height };
-  videoManager->drawFillRect(m_windowID, fillRect, kBackgroundColour);
+  VideoManager *videoManager = Locator::videoManager;
+	assert(videoManager != nullptr);
   
   Surface* surface  = m_pMap->getSurface();
   if(surface != nullptr){
-    TexturePtr texture = textureToTexturePtr(videoManager->createTextureFromSurface(m_windowID, surface, false));
+    TexturePtr texture = textureToTexturePtr(videoManager->createTextureFromSurface(m_windowId, surface, false));
   
     int mapWidth = m_pMap->getWidth();
     int mapHeight = m_pMap->getHeight();
     Rect srcRect = {0, 0, 0, 0};
-    Rect dstRect = {0, 0, 0, 0};
+    Rect dstRect = {m_x, m_y, 0, 0};
 
     srcRect.w = mapWidth;
     srcRect.h = mapHeight;
 
-    Vector dstVectorOrigin(0.0,  0.0, 0.0, 1.0);
+    Vector dstVectorOrigin(static_cast<double>(m_x), static_cast<double>(m_y), 0.0, 1.0);
     dstVectorOrigin = m_translationMatrix * dstVectorOrigin;
 
     Vector dstVectorDims(mapWidth, mapHeight, 0.0, 1.0);
@@ -105,12 +125,16 @@ void MapPanel::render()
     dstRect.w = dstVectorDims.getX();
     dstRect.h = dstVectorDims.getY();
 
-    //std::cout << dstRect.x << ", " << dstRect.y << ", " << dstRect.w << ", " << dstRect.h << std::endl;
-
-    Locator::videoManager->drawTexture(m_windowID, texture.get(), &srcRect, &dstRect, false);
+		// clip to current rect
+		SDL_Rect clipRect({m_x, m_y, m_width, m_height});
+		videoManager->setClipRect(m_windowId, &clipRect);
+		
+    Locator::videoManager->drawTexture(m_windowId, texture.get(), &srcRect, &dstRect, false);
     this->drawSelectedTileOutlines();
     this->drawHoveredTileOutline();
     this->drawMouseDrag();
+
+		videoManager->setClipRect(m_windowId, nullptr);
   }
 
   else{
@@ -121,66 +145,44 @@ void MapPanel::render()
 
 }
 
+//! \copydoc Widget::handleMouseMotionevent
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
-  if(event.windowID == m_windowID){
-    if(m_ownsWindow && m_dragState == DRAGSTATE_PAN){
-			Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
-				Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
+	if(m_dragState == DRAGSTATE_PAN){
+		Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
+			Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
 
-			m_translationMatrix = m_translationMatrix +
-				Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
+		m_translationMatrix = m_translationMatrix +
+			Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
 
-		}
-
-		else if(m_dragState == DRAGSTATE_NONE){
-			// set the hovered tile
-			m_hoveredTile = getHoveredTile(event.x, event.y);
-		}
-		
 	}
-	else{
-		BOOST_THROW_EXCEPTION(CapEngineException("MapPanel does not yet support sharing windows"));
+
+	else if(m_dragState == DRAGSTATE_NONE){
+		// set the hovered tile
+		m_hoveredTile = getHoveredTile(event.x, event.y);
 	}
 
 	m_lastMotionLocation = {event.x, event.y};
-	
 }
 
-//! @copydoc Widget::handleWindowEvent()
-/**
-*/
-void MapPanel::handleWindowEvent(SDL_WindowEvent event){
-	if(event.windowID == m_windowID){
-		if(event.event == SDL_WINDOWEVENT_RESIZED ||
-			 event.event == SDL_WINDOWEVENT_SIZE_CHANGED){
-
-			m_width = event.data1;
-			m_height = event.data2;
-		}
-	}
-}
-
+//! \copydoc Widget::handleMouseButtonEvent
 void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
-  CAP_THROW_ASSERT(m_ownsWindow, "MapPanel does not yet support sharing windows");
-  if(event.windowID == m_windowID){
-    if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_LEFT){
-      handleLeftMouseButtonUp(event);
-    }
 
-    else if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_MIDDLE){
-      handleMiddleMouseButtonUp(event);
-    }
+	if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_LEFT){
+		handleLeftMouseButtonUp(event);
+	}
 
-    else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_LEFT){
-      handleLeftMouseButtonDown(event);
-    }
+	else if(event.type == SDL_MOUSEBUTTONUP && event.button == SDL_BUTTON_MIDDLE){
+		handleMiddleMouseButtonUp(event);
+	}
 
-    else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_MIDDLE){
-      handleMiddleMouseButtonDown(event);
-    }
-    
-  }
-  
+	else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_LEFT){
+		handleLeftMouseButtonDown(event);
+	}
+
+	else if(event.type == SDL_MOUSEBUTTONDOWN && event.button == SDL_BUTTON_MIDDLE){
+		handleMiddleMouseButtonDown(event);
+	}
+	
 }
 
 void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
@@ -264,8 +266,6 @@ void MapPanel::handleMiddleMouseButtonDown(SDL_MouseButtonEvent event){
 
 
 void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
-  if(event.windowID != m_windowID)
-    return;
 
   if(event.type == SDL_KEYDOWN){
     switch(event.keysym.sym){
@@ -274,7 +274,6 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
     const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
     CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
 
-	
 	if(keyboardState[SDL_SCANCODE_LSHIFT] == 1
 	   || keyboardState[SDL_SCANCODE_RSHIFT] == 1)
 	  scaleMatrix(m_scaleMatrix, kScaleIncrement);
@@ -308,11 +307,7 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
 }
 
 void MapPanel::handleMouseWheelEvent(SDL_MouseWheelEvent event){
-  if(event.windowID != m_windowID)
-    return;
-
   scaleMatrix(m_scaleMatrix, event.y * kScaleIncrement);
-  
 }
 
 //! Draws outlines around given tiles in the give colour
@@ -323,8 +318,8 @@ void MapPanel::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 void MapPanel::drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
 																CapEngine::Colour colour){
 
-    CAP_THROW_ASSERT(Locator::videoManager != nullptr,
-		     "VideoManager is null");
+	CAP_THROW_ASSERT(Locator::videoManager != nullptr,
+									 "VideoManager is null");
 
   for(auto && tile : tiles){
 		
@@ -338,7 +333,7 @@ void MapPanel::drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
     dstRect.x = round(mapOrigin.getX() + (static_cast<double>(tile.first) * scaledTileSize));
     dstRect.y = round(mapOrigin.getY() + (static_cast<double>(tile.second) * scaledTileSize));
 
-    Locator::videoManager->drawRect(m_windowID, dstRect, colour);
+    Locator::videoManager->drawRect(m_windowId, dstRect, colour);
 	}
 }
 
@@ -366,7 +361,7 @@ void MapPanel::drawMouseDrag(){
 		 x - m_dragStart.first,
 		 y - m_dragStart.second};
 
-    Locator::videoManager->drawRect(m_windowID, rect, mouseDragColour);
+    Locator::videoManager->drawRect(m_windowId, rect, mouseDragColour);
     }
 }
 
@@ -402,5 +397,5 @@ bool MapPanel::isInMap(int x, int y) const{
    
 }
   
-}
+}}
 
