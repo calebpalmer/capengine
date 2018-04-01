@@ -21,7 +21,8 @@ int calculateNumColumns(int srcWidth, int dstWidth, int padding){
 	int numColumnsWithBuffer = numColumns;
 
 	while(numColumnsWithBuffer > 0){
-		if(dstWidth / (srcWidth + ((numColumnsWithBuffer + 2) * padding )) == numColumnsWithBuffer){
+		//if(dstWidth / (srcWidth + ((numColumnsWithBuffer + 2) * padding )) == numColumnsWithBuffer){
+		if((srcWidth + ((numColumnsWithBuffer + 2) * padding )) <= dstWidth){
 			return numColumnsWithBuffer;
 		}
 
