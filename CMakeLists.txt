@@ -36,7 +36,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
 	    uiconfigmanager.cpp uibutton.cpp orientable.cpp)
 
-add_executable(editor editor.cpp map_panel.cpp)
+add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
 
 add_executable(widgettest widget_test.cpp)
 

@@ -50,7 +50,8 @@ namespace CapEngine{
     void setHeight(int height);
     void deleteTile(int x, int y);
     
-
+		std::shared_ptr<TileSet> getTileSet();
+		
   private:
     void readTiles(std::ifstream& stream);
     void drawSurface();
@@ -58,7 +59,7 @@ namespace CapEngine{
 
     std::string configPath;
     std::string tileSetPath;
-    std::unique_ptr<TileSet> tileSet;
+    std::shared_ptr<TileSet> tileSet;
     std::vector<std::vector<TileTup>> tiles;
     Surface* surface;
     unsigned int width;

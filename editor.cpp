@@ -50,6 +50,8 @@ Editor::Editor(EditorArgs args)
   : m_tilesetPath(args.m_tileset), m_mapPath(args.m_map)
 {
 	m_pMap.reset(new Map2D(m_mapPath));
+	//m_pTileset.reset(new TileSet(m_tilesetPath));
+	m_pTileset = m_pMap->getTileSet();
 }
 
 //! called by WidgetState when starting up.
@@ -58,12 +60,14 @@ Editor::Editor(EditorArgs args)
 */
 bool Editor::onLoad(CapEngine::UI::WidgetState &widgetState){
 
-	std::shared_ptr<UI::WindowWidget> pWindow = widgetState.createWindow("Editor", 640, 480);
+	std::shared_ptr<UI::WindowWidget> pWindow = widgetState.createWindow("Editor", 1280, 800);
 	pWindow->show();
 
 	std::shared_ptr<UI::LinearLayout> pLinearLayout = UI::LinearLayout::create(UI::LinearLayout::Orientation::Vertical);
-	std::shared_ptr<UI::MapPanel> pMapPanel = UI::MapPanel::create(this->m_pMap);
-	pLinearLayout->addWidget(pMapPanel);
+	m_pTileSetPanel = UI::TileSetPanel::create(this->m_pTileset);
+	m_pMapPanel = UI::MapPanel::create(this->m_pMap);
+	//pLinearLayout->addWidget(m_pTileSetPanel);
+	pLinearLayout->addWidget(m_pMapPanel);
 	
 	pWindow->setLayout(pLinearLayout);
 	

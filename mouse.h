@@ -16,7 +16,7 @@ namespace CapEngine {
     void setButtonState(unsigned int buttonIndex, bool state);
   private:
     std::vector<bool> m_buttonStates;
-    CapEngine::Vector m_position;
+    Vector m_position;
   };
 }
 #endif // MOUSE_H

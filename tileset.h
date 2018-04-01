@@ -8,6 +8,8 @@
 #include "captypes.h"
 #include "VideoManager.h"
 
+#include <memory>
+
 namespace CapEngine{
 
   enum TileType{
@@ -24,23 +26,22 @@ namespace CapEngine{
   };
 
 
-  // TODO:  This class needs to be refactored to hide it's data members
+	//! A class the represents a TileSet.
   class TileSet {
   public:
-    ~TileSet();
     TileSet(const std::string& configPath);
 
     bool tileExists(unsigned int index);
     Tile getTile(unsigned int index);
     unsigned int getTileSize() const;
+		unsigned int getNumTiles() const;
 
-    std::string configFilepath;
-    std::string surfaceFilepath;
-    unsigned int tileCount;
-    unsigned int tileWidth;
-    unsigned int tileHeight;
-    std::vector<Tile> tiles;
-    Surface* surface;
+		std::shared_ptr<SDL_Surface> getSurface();
+		std::string getConfigFilePath() const;
+		std::string getSurfaceFilePath() const;
+		const std::vector<Tile>& getTiles() const;
+		unsigned int getTileWidth() const;
+		unsigned int getTileHeight() const;
       
   private:
     TileSet(const TileSet&);
@@ -48,8 +49,21 @@ namespace CapEngine{
     Tile parseTile(const std::string& line);
     void validate();
 
-    VideoManager* videoManager;
-	
+		//! The surface with the tiles
+		std::shared_ptr<SDL_Surface> m_pSurface;
+		//! The path to the configuration file
+    std::string m_configFilePath;
+		//! The path to the image with the tiles
+    std::string m_surfaceFilePath;
+		//! The tiles
+    std::vector<Tile> m_tiles;
+		//! The number off tiles
+    unsigned int m_tileCount;
+		//! The width of the tiles
+    unsigned int m_tileWidth;
+		//! The height of the tiles
+    unsigned int m_tileHeight;
+		
     };
 }
 

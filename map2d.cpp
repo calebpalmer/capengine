@@ -92,8 +92,8 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
   }
   ostringstream logString;
   logString << "loaded map from " << mapConfigPath << endl
-	    << " using tileset " << tileSet->configFilepath << endl
-	    << " with " << tiles.size() << " tiles loaded " << endl;
+						<< " using tileset " << tileSet->getConfigFilePath() << endl
+						<< " with " << tiles.size() << " tiles loaded " << endl;
   Locator::logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 }
 
@@ -178,12 +178,14 @@ void Map2D::readTiles(ifstream& stream){
 }
 
 void Map2D::drawSurface(){
-  unsigned int xRes, yRes = 0;
   if(Locator::videoManager->initialized == false){
     BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
   }
   surface = Locator::videoManager->createSurface(width, height);
 
+	std::shared_ptr<SDL_Surface> pTileSurface = tileSet->getSurface();
+	assert(pTileSurface != nullptr);
+	
   int rowNum = 0;
   for(auto && row : tiles){
 
@@ -191,7 +193,7 @@ void Map2D::drawSurface(){
     for(auto && column : row){
       int destX = columnNum * tileSet->getTileSize();
       int destY = rowNum * tileSet->getTileSize();;
-      Locator::videoManager->blitSurface((tileSet->surface), column.tile.xpos, column.tile.ypos, column.tile.width, column.tile.height, surface, destX, destY);
+      Locator::videoManager->blitSurface(pTileSurface.get(), column.tile.xpos, column.tile.ypos, column.tile.width, column.tile.height, surface, destX, destY);
       columnNum++;
     }
     rowNum++;
@@ -247,11 +249,15 @@ string Map2D::toString()
 }
 
 unique_ptr<Rectangle>  Map2D::getTileMBR(int index){
-  int tilesWide = width / tileSet->tileWidth;
-  int xpos = tileSet->tileWidth * (index % tilesWide);
-  int ypos = tileSet->tileHeight * (index / tilesWide);
+	assert(tileSet != nullptr);
+	auto tileWidth = tileSet->getTileWidth();
+	auto tileHeight = tileSet->getTileHeight();
+	
+  int tilesWide = width / tileWidth;
+  int xpos = tileWidth * (index % tilesWide);
+  int ypos = tileHeight * (index / tilesWide);
   
-  return unique_ptr<Rectangle>(new Rectangle(xpos, ypos, tileSet->tileWidth, tileSet->tileHeight));
+  return unique_ptr<Rectangle>(new Rectangle(xpos, ypos, tileWidth, tileHeight));
 }
 
 vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
@@ -296,7 +302,7 @@ void Map2D::setHeight(int newHeight){
 int Map2D::getTileSize() const{
   CAP_THROW_ASSERT(tileSet.get() != nullptr, "TileSet is null");
   // TODO assuming tilesize is square.  Fix TileSet to be only square tiles.
-  return tileSet->tileWidth;;
+  return tileSet->getTileWidth();
 }
 
 void Map2D::deleteTile(int x, int y){
@@ -313,6 +319,16 @@ void Map2D::deleteTile(int x, int y){
   tiletup.tileLookupStatus = TileLookupStatus_NoTile;
 
   tiles[x][y] = tiletup;
+}
+
+
+
+//! Gets the TileSet used by this Map.
+/** 
+ \return The TileSet.
+*/
+std::shared_ptr<TileSet> Map2D::getTileSet(){
+	return tileSet;
 }
 
 

@@ -1,29 +1,23 @@
 #include "tileset.h"
 
-#include <fstream>
-#include <sstream>
-#include <memory>
-
 #include "filesystem.h"
 #include "locator.h"
 #include "CapEngineException.h"
 
+#include <fstream>
+#include <sstream>
+#include <memory>
+#include <boost/filesystem.hpp>
+
 using namespace CapEngine;
 using namespace std;
-
-TileSet::~TileSet(){
-  if(surface != nullptr){
-    videoManager->closeSurface(surface);
-    surface = nullptr;
-  }
-}
 
 TileSet::TileSet(const string& configPath) {
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(configPath)){
     BOOST_THROW_EXCEPTION(CapEngineException(configPath + " is not a valid path"));
   }
-  this->configFilepath = configPath;
+  this->m_configFilePath = configPath;
 
   // read configFile loading
   ifstream configIn(configPath);
@@ -44,20 +38,33 @@ TileSet::TileSet(const string& configPath) {
 
     string parameter = line.substr(0, position);
     string value = line.substr(position + 1,line.size() - position + 1);
+
     if(parameter == "tileset_path"){
-      this->surfaceFilepath = value;
+      this->m_surfaceFilePath = value;
+
+			// if it's relative, make it relative to the config file
+			boost::filesystem::path surfacePath(m_surfaceFilePath);
+
+			if(surfacePath.is_relative()){
+				boost::filesystem::path configFilePath(m_configFilePath);
+				surfacePath = configFilePath.parent_path() / surfacePath;
+				this->m_surfaceFilePath = surfacePath.string();
+				
+				if(!boost::filesystem::exists(surfacePath))
+					CAP_THROW(CapEngineException("Surface path not found: " + surfacePath.string()));
+			}
     }
     else if(parameter == "tile_count"){
       stringstream temp(value);
-      temp >> this->tileCount;
+      temp >> this->m_tileCount;
     }
     else if(parameter == "tile_height"){
       stringstream temp(value);
-      temp >> this->tileHeight;
+      temp >> this->m_tileHeight;
     }
     else if(parameter == "tile_width"){
       stringstream temp(value);
-      temp >> this->tileWidth;
+      temp >> this->m_tileWidth;
     }
     else if(parameter == "tiles"){
       break;
@@ -75,18 +82,14 @@ TileSet::TileSet(const string& configPath) {
       break;
     }
     Tile tile = parseTile(line);
-    tiles.push_back(tile);
+    m_tiles.push_back(tile);
   }
 
   //// Load surface
-  videoManager = Locator::videoManager;
-  if(videoManager){
-    if(videoManager->initialized == false){
-      BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
-    }
-  
-    surface = videoManager->loadSurface(surfaceFilepath);
-  }
+	assert(Locator::videoManager != nullptr);
+	m_pSurface = std::shared_ptr<SDL_Surface>(Locator::videoManager->loadSurface(m_surfaceFilePath), SDL_FreeSurface);
+	assert(m_pSurface != nullptr);
+
   validate();
   configIn.close();
 }
@@ -100,7 +103,7 @@ Tile TileSet::parseTile(const string& line){
 
   if(position == string::npos){
     stringstream errorMessage;
-    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    errorMessage << "Unable to parse tile in config file " << m_configFilePath;
     BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   
@@ -113,7 +116,7 @@ Tile TileSet::parseTile(const string& line){
   position = line.find(",", oldPosition);
  if(position == string::npos){
     stringstream errorMessage;
-    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    errorMessage << "Unable to parse tile in config file " << m_configFilePath;
     BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
@@ -126,7 +129,7 @@ Tile TileSet::parseTile(const string& line){
   position = line.find(",", oldPosition);
  if(position == string::npos){
     stringstream errorMessage;
-    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    errorMessage << "Unable to parse tile in config file " << m_configFilePath;
     BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
@@ -139,7 +142,7 @@ Tile TileSet::parseTile(const string& line){
   position = line.find(",", oldPosition);
  if(position == string::npos){
     stringstream errorMessage;
-    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    errorMessage << "Unable to parse tile in config file " << m_configFilePath;
     BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
@@ -152,7 +155,7 @@ Tile TileSet::parseTile(const string& line){
   position = line.find(",", oldPosition);
  if(position == string::npos){
     stringstream errorMessage;
-    errorMessage << "Unable to parse tile in config file " << configFilepath;
+    errorMessage << "Unable to parse tile in config file " << m_configFilePath;
     BOOST_THROW_EXCEPTION(CapEngineException(errorMessage.str()));
   }
   temp = line.substr(oldPosition, position);
@@ -170,16 +173,16 @@ Tile TileSet::parseTile(const string& line){
 }
 
 void TileSet::validate(){
-  if(tileCount != tiles.size()){
+  if(m_tileCount != m_tiles.size()){
     BOOST_THROW_EXCEPTION(CapEngineException("Tiles read does not equal declared tile count"));
   }
-  /*if(surface == nullptr){
+  /*if(m_pSurface == nullptr){
     throw CapEngineException("Surface not loaded");
     }*/
 }
 
 bool TileSet::tileExists(unsigned int index){
-  if(index >= tiles.size()){
+  if(index >= m_tiles.size()){
     return false;
   }
   else{
@@ -188,14 +191,77 @@ bool TileSet::tileExists(unsigned int index){
 }
 
 Tile TileSet::getTile(unsigned int index){
-  if(index >= tiles.size()){
-    throw CapEngineException("Tile does not exist at index " + index);
+  if(index >= m_tiles.size()){
+    throw CapEngineException("Tile does not exist at index " + std::to_string(index));
   }
   else{
-    return tiles[index];
+    return m_tiles[index];
   }
 }
 
 unsigned int TileSet::getTileSize() const{
-  return tileWidth;
+  return m_tileWidth;
 }
+
+
+//! Gets the number of tiles in the tileset
+/** 
+ \return The number of tiles in the tileset
+*/
+unsigned int TileSet::getNumTiles() const{
+	return m_tiles.size();
+}
+
+
+//! Get the surface with all the Tiles
+/** 
+ \return The surface
+*/
+std::shared_ptr<SDL_Surface> TileSet::getSurface(){
+	return m_pSurface;
+}
+
+
+//! Gets the path to the config file for this tileset.
+/** 
+ \return The path to the config file.
+*/
+std::string TileSet::getConfigFilePath() const{
+	return m_configFilePath;
+}
+
+
+//! Gets the path to the image file with the tiles.
+/** 
+ \return The path to the image file.
+*/
+std::string TileSet::getSurfaceFilePath() const{
+	return m_surfaceFilePath;
+}
+
+
+//! Gets the tiles.
+/** 
+ \return The tiles.
+*/
+const std::vector<Tile>& TileSet::getTiles() const{
+	return m_tiles;
+}
+
+
+//! Gets the width of tiles in this set.
+/** 
+ \return The width of tiles;
+*/
+unsigned int TileSet::getTileWidth() const{
+	return m_tileWidth;
+}
+
+//! Gets the height of tiles in this set.
+/** 
+ \return The height of tiles;
+*/
+unsigned int TileSet::getTileHeight() const{
+	return m_tileHeight;
+}
+

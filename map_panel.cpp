@@ -8,6 +8,7 @@
 #include "captypes.h"
 #include "colour.h"
 #include "utils.h"
+#include "scopeguard.h"
 
 #include <sstream>
 #include <iostream>
@@ -61,19 +62,25 @@ void MapPanel::doLocationInit(){
 	
 	int mapWidth = m_pMap->getWidth();
 	int mapHeight = m_pMap->getHeight();
-  
-	float mapAspectRatio = static_cast<float>(mapWidth) / static_cast<float>(mapHeight);
-	float panelAspectRatio = static_cast<float>(m_width) / static_cast<float>(m_height);
 
 	float scaleFactor;
 
+	int buffer = 10;
+	
 	SDL_Rect srcRect = { m_x, m_y, mapWidth, mapHeight };
-	SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
+	SDL_Rect dstRect = { m_x + buffer, m_y + buffer, m_width - buffer, m_height - buffer};
 	SDL_Rect scaledRect = expandRectToFit(srcRect, dstRect);
 
+	// set scaling
 	scaleFactor = static_cast<float>(scaledRect.w) / static_cast<float>(mapWidth);
 
 	m_scaleMatrix = m_scaleMatrix * Matrix::createScaleMatrix(scaleFactor, scaleFactor, scaleFactor);
+
+	// set translation (CapEngine::expandToFit() centers it)
+	m_translationMatrix = m_translationMatrix *
+		Matrix::createTranslationMatrix(scaledRect.x - dstRect.x + buffer,
+																		scaledRect.y - dstRect.y + buffer,
+																		0.0);
 
 	m_locationInitialized = true;
 }
@@ -127,14 +134,13 @@ void MapPanel::render()
 
 		// clip to current rect
 		SDL_Rect clipRect({m_x, m_y, m_width, m_height});
+		ScopeGuard guard([&]() { videoManager->setClipRect(m_windowId, nullptr); });
 		videoManager->setClipRect(m_windowId, &clipRect);
 		
     Locator::videoManager->drawTexture(m_windowId, texture.get(), &srcRect, &dstRect, false);
     this->drawSelectedTileOutlines();
     this->drawHoveredTileOutline();
     this->drawMouseDrag();
-
-		videoManager->setClipRect(m_windowId, nullptr);
   }
 
   else{
