@@ -25,7 +25,7 @@ int calculateNumColumns(int srcWidth, int dstWidth, int padding){
 			return numColumnsWithBuffer;
 		}
 
-		numColumns--;
+		numColumnsWithBuffer--;
 	}
 
 	return numColumnsWithBuffer;
@@ -42,12 +42,6 @@ TileSetPanel::TileSetPanel(std::shared_ptr<TileSet> pTileSet)
 	: m_pTileSet(pTileSet), m_pTileSetTexture(getNullTexturePtr())
 {
 	assert(m_pTileSet != nullptr);
-	assert(Locator::videoManager != nullptr);
-
-	std::shared_ptr<SDL_Surface> pTilesetSurface = m_pTileSet->getSurface();
-	assert(pTilesetSurface != nullptr);
-
-	m_pTileSetTexture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, pTilesetSurface.get());
 }
 
 
@@ -78,6 +72,14 @@ void TileSetPanel::setSize(int width, int height){
 //! \copydoc Widget::render
 void TileSetPanel::render(){
  	assert(Locator::videoManager != nullptr);
+
+	if(m_pTileSetTexture == nullptr){
+		std::shared_ptr<SDL_Surface> pTilesetSurface = m_pTileSet->getSurface();
+		assert(pTilesetSurface != nullptr);
+
+		m_pTileSetTexture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, pTilesetSurface.get());
+	}
+	
 	Locator::videoManager->setClipRect(m_windowId, &m_rect);
 	ScopeGuard guard(std::bind(&VideoManager::setClipRect, Locator::videoManager, m_windowId, nullptr));
 	
@@ -85,6 +87,9 @@ void TileSetPanel::render(){
  	assert(m_pTileSet != nullptr);
 	int tileSize = m_pTileSet->getTileSize();
  	int numColumns = calculateNumColumns(tileSize, m_rect.w, padding);
+
+	if(numColumns == 0)
+		return;
 
  	for(size_t i = 0; i < m_pTileSet->getNumTiles(); i++){
  		int row = i / numColumns;

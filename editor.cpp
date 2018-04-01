@@ -33,24 +33,22 @@ EditorArgs EditorArgs::parseArgs(int argc, char* argv[]){
   std::string tilesetPath = "";
   std::string mapPath = "";
 
-  const int numPosArgs = 2;
+  const int numPosArgs = 1;
   if(argc < numPosArgs + 1){
     std::ostringstream errorMsg;
     errorMsg << "Usage: " << argv[0] << "[tilesetpath] [mappath]" ;
     throw CapEngineException(errorMsg.str());
   }
 
-  tilesetPath = argv[1];
-  mapPath = argv[2];
+  mapPath = argv[1];
 
-  return EditorArgs(tilesetPath, mapPath);
+  return EditorArgs(mapPath);
 }
 
 Editor::Editor(EditorArgs args)
-  : m_tilesetPath(args.m_tileset), m_mapPath(args.m_map)
+  : m_mapPath(args.m_map)
 {
 	m_pMap.reset(new Map2D(m_mapPath));
-	//m_pTileset.reset(new TileSet(m_tilesetPath));
 	m_pTileset = m_pMap->getTileSet();
 }
 
@@ -63,13 +61,13 @@ bool Editor::onLoad(CapEngine::UI::WidgetState &widgetState){
 	std::shared_ptr<UI::WindowWidget> pWindow = widgetState.createWindow("Editor", 1280, 800);
 	pWindow->show();
 
-	std::shared_ptr<UI::LinearLayout> pLinearLayout = UI::LinearLayout::create(UI::LinearLayout::Orientation::Vertical);
+	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2);
+	pWindow->setLayout(pLayout);
+	
 	m_pTileSetPanel = UI::TileSetPanel::create(this->m_pTileset);
 	m_pMapPanel = UI::MapPanel::create(this->m_pMap);
-	//pLinearLayout->addWidget(m_pTileSetPanel);
-	pLinearLayout->addWidget(m_pMapPanel);
-	
-	pWindow->setLayout(pLinearLayout);
+	pLayout->addWidget(m_pTileSetPanel, 0, 0);
+	pLayout->addWidget(m_pMapPanel, 0, 1);
 	
 	return true;
 }

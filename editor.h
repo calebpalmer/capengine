@@ -17,12 +17,11 @@ namespace CapEngine {
 
   class EditorArgs{
   public:
-  EditorArgs(std::string tilesetPath, std::string mapPath) :
-    m_tileset(tilesetPath), m_map(mapPath) {}
+  EditorArgs(std::string mapPath) :
+    m_map(mapPath) {}
 
     static EditorArgs parseArgs(int argc, char* argv[]);
 
-    std::string m_tileset;
     std::string m_map;
     Uint32 m_windowId = -1;
   };
@@ -33,7 +32,6 @@ namespace CapEngine {
 		bool onLoad(CapEngine::UI::WidgetState &widgetState);
 		bool onDestroy(CapEngine::UI::WidgetState &widgetState);
   private:
-    std::string m_tilesetPath;
     std::string m_mapPath;
     std::shared_ptr<TileSet> m_pTileset;
     std::shared_ptr<Map2D> m_pMap;

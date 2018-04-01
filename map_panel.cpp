@@ -78,8 +78,8 @@ void MapPanel::doLocationInit(){
 
 	// set translation (CapEngine::expandToFit() centers it)
 	m_translationMatrix = m_translationMatrix *
-		Matrix::createTranslationMatrix(scaledRect.x - dstRect.x + buffer,
-																		scaledRect.y - dstRect.y + buffer,
+		Matrix::createTranslationMatrix(static_cast<double>(scaledRect.x) - static_cast<double>(dstRect.x) + static_cast<double>(buffer),
+																		static_cast<double>(scaledRect.y) - static_cast<double>(dstRect.y) + static_cast<double>(buffer),
 																		0.0);
 
 	m_locationInitialized = true;
@@ -99,8 +99,6 @@ void MapPanel::setSize(int width, int height){
 
 //! \copydoc Widget::update
 void MapPanel::update(double /* ms */){
-	if(!m_locationInitialized)
-		doLocationInit();
 }
 
 //! \copydoc Widget::render
@@ -108,7 +106,10 @@ void MapPanel::render()
 {
   VideoManager *videoManager = Locator::videoManager;
 	assert(videoManager != nullptr);
-  
+
+	if(!m_locationInitialized)
+		doLocationInit();
+
   Surface* surface  = m_pMap->getSurface();
   if(surface != nullptr){
     TexturePtr texture = textureToTexturePtr(videoManager->createTextureFromSurface(m_windowId, surface, false));
@@ -157,8 +158,8 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 		Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
 			Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
 
-		m_translationMatrix = m_translationMatrix +
-			Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
+		// m_translationMatrix = m_translationMatrix +
+		// 	Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
 
 	}
 
@@ -290,19 +291,19 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
       break;
 
     case SDLK_RIGHT:
-      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix((-1.0) * kTranslationIncrement, 0.0, 0.0);
+      m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix((-1.0) * kTranslationIncrement, 0.0, 0.0);
       m_translationMatrix.getRowVectorRef(3).setD(1.0);
       break;
     case SDLK_LEFT:
-      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(kTranslationIncrement, 0.0, 0.0);
+      m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(kTranslationIncrement, 0.0, 0.0);
       m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     case SDLK_UP:
-      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(0.0, kTranslationIncrement, 0.0);
+      m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(0.0, kTranslationIncrement, 0.0);
       m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     case SDLK_DOWN:
-      m_translationMatrix = m_translationMatrix + Matrix::createTranslationMatrix(0.0, (-1.0) * kTranslationIncrement, 0.0);
+      m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(0.0, (-1.0) * kTranslationIncrement, 0.0);
       m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     default:

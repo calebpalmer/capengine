@@ -76,9 +76,9 @@ Matrix Matrix::createIdentityMatrix(){
 }
 
 Matrix Matrix::createTranslationMatrix(real x, real y, real z){
-  Vector vec1(0.0, 0.0, 0.0, x);
-  Vector vec2(0.0, 0.0, 0.0, y);
-  Vector vec3(0.0, 0.0, 0.0, z);
+  Vector vec1(1.0, 0.0, 0.0, x);
+  Vector vec2(0.0, 1.0, 0.0, y);
+  Vector vec3(0.0, 0.0, 1.0, z);
   Vector vec4(0.0, 0.0, 0.0, 1.0);
   Matrix matrix(vec1, vec2, vec3, vec4);
   return matrix;
