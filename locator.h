@@ -10,11 +10,18 @@
 #include "EventDispatcher.h"
 #include "eventsubscriber.h"
 
+#include <boost/any.hpp>
+
 namespace CapEngine{
 
   class Locator{
 
   public:
+
+		static bool insert(const std::string &id, boost::any item);
+		static void insertOrReplace(const std::string &id, boost::any item);		
+		static boost::any locate(const std::string &id);
+		
     static CapEngine::VideoManager* videoManager;
     static CapEngine::Logger* logger;
     static CapEngine::SoundPlayer* soundPlayer;
