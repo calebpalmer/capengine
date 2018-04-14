@@ -32,6 +32,7 @@ namespace CapEngine {
     ~Logger();
 
     void log(const std::string& message, LogLevel level = CWARNING, char const* file="", int lineno=-1);
+		void log(const std::exception &e, LogLevel level = CWARNING, char const* file="", int lineno=-1);
 		void logSDLError(LogLevel level, char const* file="", int lineno=-1);
     void setOutput(std::ostream& stream);
     

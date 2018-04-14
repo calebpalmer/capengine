@@ -52,6 +52,23 @@ void Logger::log(const string& message, LogLevel level,
 }
 
 
+
+//! Logsan exception
+/** 
+ \param e - The exception to log.
+ \param level - The log level
+ \param file - The file this is logged from
+ \param lineno - The line number where this is logged from.
+ \return 
+*/
+void Logger::log(const std::exception &e, LogLevel level, char const* file, int lineno){
+	std::stringstream msg;
+	msg << boost::diagnostic_information(e);
+
+	this->log(msg.str(), level, file, lineno);
+}
+
+
 //! log an SDL error code.
 /** 
  \param level - The level to log it under.

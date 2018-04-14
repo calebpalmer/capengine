@@ -4,8 +4,10 @@
 #include "gamestate.h"
 
 #include "windowwidget.h"
+#include "control.h"
 
 #include <functional>
+#include <boost/signals2/signal.hpp>
 
 namespace CapEngine { namespace UI {
 
@@ -21,10 +23,41 @@ class WidgetState : public GameState {
 
 	std::shared_ptr<WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
 
+	boost::signals2::scoped_connection connectPostRenderSignal(std::function<void(WidgetState&)> slot);
+
+	virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event);
+	virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event);
+	virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event);
+	virtual void handleKeyboardEvent(SDL_KeyboardEvent event);
+	virtual void handleWindowEvent(SDL_WindowEvent event);
+
+ public:
+	static constexpr char const* kControlStackId = "WindowWidgetControlStack";
+
 private:
+	//! The list of windows
 	std::vector<std::shared_ptr<UI::WindowWidget>> m_pWindows;
+	//! callback function that is called when widget state is loaded
 	std::function<bool(WidgetState& widgetState)> m_onLoadFunctor;
+	//! callback function that is called when widget state is destroyed
 	std::function<bool(WidgetState& widgetState)> m_onDestroyFunctor;
+	//! ui controls managed by this state
+	std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>> m_pUiControls;
+	//! signal that is called after state is rendered
+	boost::signals2::signal<void(WidgetState&)> m_postRenderSignal;
+
+	//signal connections
+	//! connection for keyboard events
+	boost::signals2::scoped_connection m_keyboardEventConnection;
+	//! connection for mouse button events
+	boost::signals2::scoped_connection m_mouseButtonEventConnection;
+	//! connection for mouse motion events
+	boost::signals2::scoped_connection m_mouseMotionEventConnection;
+	//! connection for mouse wheel events
+	boost::signals2::scoped_connection m_mouseWheelEventConnection;
+	//! connection for window events
+	boost::signals2::scoped_connection m_windowEventConnection;
+	
 };
 
 }} // namespace CapEngine

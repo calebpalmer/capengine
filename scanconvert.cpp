@@ -233,6 +233,13 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y){
   free(pixel);
 }
 
+//! Writes a pixel to a given location in a surface
+/** 
+ \param surface - The surface to write the pixel to.
+ \param x - The x location in the surface to write to.
+ \param y - The y location in the surface to write to.
+ \param colour - The pixel to write.
+*/
 void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine::Colour colour){
   // convert to screen coordinates
   int yNew = (surface->h - 1)- y;
@@ -266,6 +273,18 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine:
   }
     
   free(pixel);
+}
+
+
+//! Writes a pixel to a given location in a surface
+/** 
+ \param surface - The surface to write the pixel to.
+ \param x - The x location in the surface to write to.
+ \param y - The y location in the surface to write to.
+ \param pixel - The pixel to write.
+*/
+void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, const Pixel &pixel){
+	writePixel(surface, x, y, Colour({pixel.r, pixel.b, pixel.g, pixel.a}));
 }
 
 void CapEngine::writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colour, int bufWidth, int bufHeight){

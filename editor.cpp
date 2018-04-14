@@ -13,6 +13,7 @@
 #include "label.h"
 #include "uibutton.h"
 #include "orientable.h"
+#include "control.h"
 
 #include <memory>
 #include <iostream>
@@ -77,7 +78,7 @@ bool Editor::onLoad(CapEngine::UI::WidgetState &widgetState){
 /** 
  \return - true if successful, false otherwise.
 */
-bool Editor::onDestroy(CapEngine::UI::WidgetState &widgetState){
+bool Editor::onDestroy(CapEngine::UI::WidgetState& /*widgetStat*/){
 	return true;
 }
 
@@ -97,8 +98,9 @@ int main(int argc, char* argv[]){
     std::cerr << boost::diagnostic_information(e) << std::endl;
     return -1;
   }
-  catch(...){
-    std::cerr << "Unknown exception caught." << std::endl;
+	catch(const std::exception &e){
+		std::cerr << boost::diagnostic_information(e) << std::endl;
 		return -1;
-  }
+	}
 }
+

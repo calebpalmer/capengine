@@ -4,6 +4,7 @@
 #include "gamestate.h"
 #include "IEventSubscriber.h"
 #include "timestep.h"
+#include "control.h"
 
 #include <SDL2/SDL.h>
 #include <memory>

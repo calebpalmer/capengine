@@ -29,15 +29,22 @@ namespace CapEngine {
   class Editor {
   public:
     Editor(EditorArgs args);
+
 		bool onLoad(CapEngine::UI::WidgetState &widgetState);
 		bool onDestroy(CapEngine::UI::WidgetState &widgetState);
+		
   private:
+		//! The path to the map configuration path
     std::string m_mapPath;
+		//! The tileset
     std::shared_ptr<TileSet> m_pTileset;
+		//! The map
     std::shared_ptr<Map2D> m_pMap;
+		//! The map panel
     std::shared_ptr<UI::MapPanel> m_pMapPanel;
+		//! The tileset panel
 		std::shared_ptr<UI::TileSetPanel> m_pTileSetPanel;
-};
+	};
 }
 
 #endif // EDITOR_H

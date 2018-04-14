@@ -6,7 +6,7 @@
 #include <memory>
 #include <SDL2/SDL.h>
 
-namespace CapEngine { namespace UI{
+namespace CapEngine { namespace UI {
 
 		class Widget{
 		public:
@@ -22,11 +22,11 @@ namespace CapEngine { namespace UI{
 			virtual void setParent(Widget *pParent) { m_pParent = pParent; }
 			virtual void setWindowId(Uint32 windowId) { m_windowId = windowId; }
 
-			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) {}
-			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) {}
-			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) {}
-			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) {}
-			virtual void handleWindowEvent(SDL_WindowEvent event) {}
+			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
+			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent /*event*/) {}
+			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent /*event*/) {}
+			virtual void handleKeyboardEvent(SDL_KeyboardEvent /*event*/) {}
+			virtual void handleWindowEvent(SDL_WindowEvent /*event*/) {}
 
 		protected:
 			Uint32 m_windowId = VideoManager::kInvalidWindowId; //<! The owning window id

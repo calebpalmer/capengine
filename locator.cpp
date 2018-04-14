@@ -34,8 +34,6 @@ bool Locator::insert(const std::string &id, boost::any item){
 //! Insert an item with the Locator.
 /** 
 
-		Throws if the item already exists.
-
  \param id - The id of the  item to register.
  \param item - The item to register.
 */
@@ -56,7 +54,7 @@ void Locator::insertOrReplace(const std::string& id, boost::any item){
 boost::any Locator::locate(const std::string &id){
 	auto itemItr = itemMap.find(id);
 	if(itemItr != itemMap.end())
-		return *itemItr;
+		return itemItr->second;
 
 	else
 		return boost::none;
