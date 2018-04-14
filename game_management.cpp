@@ -72,7 +72,7 @@ void loadAssetFile(std::string assetsFile){
   Locator::assetManager = pAssetManager.release();
 }
 
-void startLoop(std::unique_ptr<GameState> pGameState){
+void startLoop(std::shared_ptr<GameState> pGameState){
   Runner::getInstance().pushState(std::move(pGameState));
   Runner::getInstance().loop();
 }
@@ -81,7 +81,7 @@ void end(){
   Runner::getInstance().end();
 }
 
-void switchState(std::unique_ptr<GameState> pGameState){
+void switchState(std::shared_ptr<GameState> pGameState){
   Runner::getInstance().switchState(std::move(pGameState));
 }
 
@@ -89,7 +89,7 @@ void popState(){
   Runner::getInstance().popState();
 }
 
-void pushState(std::unique_ptr<GameState> pGameState){
+void pushState(std::shared_ptr<GameState> pGameState){
   Runner::getInstance().pushState(std::move(pGameState));
 }
 

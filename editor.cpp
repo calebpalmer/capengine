@@ -90,9 +90,9 @@ int main(int argc, char* argv[]){
     auto args = EditorArgs::parseArgs(argc, argv);
 		Editor editor(args);
 
-		std::unique_ptr<UI::WidgetState>
+		std::shared_ptr<UI::WidgetState>
 			pWidgetState(new UI::WidgetState(std::bind(&Editor::onLoad, &editor, std::placeholders::_1), std::bind(&Editor::onDestroy, &editor, std::placeholders::_1)));
-		CapEngine::startLoop(std::move(pWidgetState));		
+		CapEngine::startLoop(pWidgetState);
   }
   catch(const boost::exception& e){
     std::cerr << boost::diagnostic_information(e) << std::endl;

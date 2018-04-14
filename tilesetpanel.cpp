@@ -143,6 +143,7 @@ void TileSetPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 		int x = event.x;
 		int y = event.y;
 
+		// if pointing to tile, enable TileCopyControl for copying tiles
 		for(auto && tileLocation : m_tiles){
 			if(pointInRect(Point({x, y}), tileLocation.dstRect)){
 				auto pTileCopyControl = std::make_shared<TileCopyControl>(m_pTileSet, tileLocation.index);

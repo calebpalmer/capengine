@@ -29,14 +29,14 @@ void Runner::popState(){
   }
 }
 
-void Runner::pushState(std::unique_ptr<GameState> pGameState){
+void Runner::pushState(std::shared_ptr<GameState> pGameState){
   m_gameStates.push_back(std::move(pGameState));
  if(m_gameStates.back()->onLoad() == false){
     Locator::logger->log("Failed to init pushed state", Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
-void Runner::switchState(std::unique_ptr<GameState> pGameState){
+void Runner::switchState(std::shared_ptr<GameState> pGameState){
   while(!m_gameStates.empty()){
     this->popState();
   }

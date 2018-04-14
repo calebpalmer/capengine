@@ -19,9 +19,9 @@ namespace CapEngine{
   class Runner : public IEventSubscriber {
   public:
     static Runner& getInstance();
-    void switchState(std::unique_ptr<GameState> pGameState);
+    void switchState(std::shared_ptr<GameState> pGameState);
     void popState();
-    void pushState(std::unique_ptr<GameState> pGameState);
+    void pushState(std::shared_ptr<GameState> pGameState);
     void receiveEvent(const SDL_Event event, CapEngine::Time* time) override;  // IEventSubscriber
     void loop();
     void end();
@@ -35,7 +35,7 @@ namespace CapEngine{
     void update();
 
     static Runner* s_pRunner;
-    std::vector< std::unique_ptr<GameState> > m_gameStates;
+    std::vector<std::shared_ptr<GameState> > m_gameStates;
 		std::vector<std::shared_ptr<UI::Widget>> m_widgets;
     bool m_quit;
     bool m_showFPS;
