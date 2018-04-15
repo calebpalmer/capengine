@@ -67,7 +67,7 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	return true;
 }
 
-bool onDestroy(CapEngine::UI::WidgetState &widgetState){
+bool onDestroy(CapEngine::UI::WidgetState& /*widgetState*/){
 	return true;
 }
 
@@ -80,7 +80,7 @@ int main(){
 		WindowParams params;
 		CapEngine::init(params, true);
 
-		std::unique_ptr<UI::WidgetState> pWidgetTestState(new UI::WidgetState(onLoad, onDestroy));
+		std::shared_ptr<UI::WidgetState> pWidgetTestState = UI::WidgetState::create(onLoad, onDestroy);
 		CapEngine::startLoop(std::move(pWidgetTestState));
 	}
 	catch(const boost::exception &e){

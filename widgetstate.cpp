@@ -5,7 +5,6 @@
 
 #include <functional>
 
-
 namespace CapEngine { namespace UI {
 
 
@@ -20,7 +19,6 @@ WidgetState::WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFun
 
 	// create a register a control stack with the locator
 	m_pUiControls = std::make_shared<std::vector<std::shared_ptr<UI::Control>>>();
-	Locator::insert(kControlStackId, m_pUiControls);
 
 	// register our event handlers with eventsubscriber signals
 	assert(Locator::eventSubscriber != nullptr);
@@ -39,6 +37,21 @@ WidgetState::WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFun
 
 	m_windowEventConnection =
 		Locator::eventSubscriber->m_windowEventSignal.connect(std::bind(&WidgetState::handleWindowEvent, this, std::placeholders::_1));
+}
+
+//! creates a WidgetState
+/** 
+ \param onLoadFunctor - Code to call when loading the GameState
+ \param onDestroyFunctor - Function to call when destroying the GameState
+ \return - The WidgetState
+*/
+std::shared_ptr<WidgetState> WidgetState::create(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
+																		std::function<bool(WidgetState& widgetState)> onDestroyFunctor)
+{
+	std::shared_ptr<WidgetState>pWidgetState(new WidgetState(onLoadFunctor, onDestroyFunctor));
+
+	Locator::insert(kWidgetStateLocatorId, pWidgetState);
+	return pWidgetState;
 }
 
 
@@ -71,6 +84,14 @@ void WidgetState::render(){
 
 //! @copydoc GameState::update()
 void WidgetState::update(double ms){
+	if(m_pQueuedUiControl != nullptr){
+
+		assert(m_pUiControls != nullptr);
+		m_pUiControls->push_back(m_pQueuedUiControl);
+
+		m_pQueuedUiControl.reset();
+	}
+	
 	for(auto && pWindow : m_pWindows){
 		CAP_THROW_NULL(pWindow, "Window is null");
 		pWindow->update(ms);
@@ -191,6 +212,46 @@ void WidgetState::handleWindowEvent(SDL_WindowEvent event){
 		pControl->handleWindowEvent(event);
 	}
 
+}
+
+//! Adds a control to the control.
+/** 
+ \param pControl - The control to add.
+*/
+void WidgetState::addControl(std::shared_ptr<UI::Control> pControl){
+	assert(pControl != nullptr);
+	m_pQueuedUiControl = pControl;
+}
+
+//! Removes the current control and returns it
+/** 
+ \return - The current control.  boost::none if there isn't one.
+*/
+boost::optional<std::shared_ptr<UI::Control>> WidgetState::popControl(){
+	assert(m_pUiControls != nullptr);
+
+	auto pControl = this->peekControl();
+	m_pUiControls->pop_back();
+	return pControl;
+}
+
+//! Gets the active control
+/** 
+ \return - The current control.  boost::none if there isn't one.
+*/
+boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
+	assert(m_pUiControls != nullptr);
+
+	if(m_pUiControls->size() > 0){
+		auto pControl = m_pUiControls->back();
+		assert(pControl != nullptr);
+
+		return pControl;
+	}
+
+	else{
+		return boost::none;
+	}
 }
 
 

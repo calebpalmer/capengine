@@ -18,9 +18,11 @@ namespace CapEngine { namespace UI {
 			virtual void render() override;
 
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 
 		private:
 			void loadTexture();
+			void remove();
 			
 			//! The tileset
 			std::shared_ptr<TileSet> m_pTileSet;

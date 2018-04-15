@@ -3,7 +3,7 @@
 #include "locator.h"
 #include "CapEngineException.h"
 #include "scanconvert.h"
-#include "editorutils.h"
+#include "widgetstate.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/lexical_cast.hpp>
@@ -99,19 +99,27 @@ void TileCopyControl::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 
 	if(event.type == SDL_MOUSEBUTTONDOWN){
 		// remove this control from the control stack
-		std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>> pControlStack =
-			getControlStack();
-		
-		assert(pControlStack != nullptr);
-
-		assert(pControlStack->size() > 0);
-
-		auto pCurrentControl = pControlStack->back();
-		assert(pCurrentControl != nullptr);
-		assert(pCurrentControl.get() == this);
-
-		pControlStack->pop_back();
+		this->remove();
 	}
+}
+
+//! \copydoc Widget::handleKeyboardEvent
+void TileCopyControl::handleKeyboardEvent(SDL_KeyboardEvent event){
+	if(event.keysym.sym == SDLK_ESCAPE){
+		this->remove();
+	}
+}
+
+//! removes this Control
+void TileCopyControl::remove(){
+	boost::any maybeWidgetState = Locator::locate(WidgetState::kWidgetStateLocatorId);
+	auto pWidgetState = boost::any_cast<std::shared_ptr<WidgetState>>(maybeWidgetState);
+	assert(pWidgetState != nullptr);
+
+	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
+	assert(maybeControl);
+	assert(this == maybeControl->get());
+	pWidgetState->popControl();
 }
 
 }}

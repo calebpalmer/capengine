@@ -149,21 +149,11 @@ void TileSetPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 				auto pTileCopyControl = std::make_shared<TileCopyControl>(m_pTileSet, tileLocation.index);
 				pTileCopyControl->setWindowId(this->m_windowId);
 				pTileCopyControl->setParent(this->m_pParent);
-				
-				boost::any maybeControlStack = Locator::locate(WidgetState::kControlStackId);
 
-				std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>> pControlStack;
-				try{
-					pControlStack = boost::any_cast<std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>>>(maybeControlStack);
-				}
-				catch(const boost::bad_any_cast &e){
-					assert(Locator::logger != nullptr);
-					Locator::logger->log(e, Logger::CWARNING, __FILE__, __LINE__);
-					BOOST_THROW_EXCEPTION(CapEngineException("Could not locate control stack"));
-				}
-
-				assert(pControlStack != nullptr);
-				pControlStack->push_back(pTileCopyControl);
+				boost::any maybeWidgetState = Locator::locate(WidgetState::kWidgetStateLocatorId);
+				auto pWidgetState = boost::any_cast<std::shared_ptr<WidgetState>>(maybeWidgetState);
+				assert(pWidgetState != nullptr);
+				pWidgetState->addControl(pTileCopyControl);
 				
 				break;
 			}

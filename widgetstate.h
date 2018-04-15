@@ -8,20 +8,24 @@
 
 #include <functional>
 #include <boost/signals2/signal.hpp>
+#include <boost/optional.hpp>
 
 namespace CapEngine { namespace UI {
 
 class WidgetState : public GameState {
  public:
-	WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
-							std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
-
+	static std::shared_ptr<WidgetState> create(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
+																			std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
+	
 	void render() override;
 	void update(double ms) override;
 	bool onLoad() override;
 	bool onDestroy() override;
 
 	std::shared_ptr<WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
+	void addControl(std::shared_ptr<UI::Control> pControl);
+	boost::optional<std::shared_ptr<UI::Control>> popControl();
+	boost::optional<std::shared_ptr<UI::Control>> peekControl();
 
 	boost::signals2::scoped_connection connectPostRenderSignal(std::function<void(WidgetState&)> slot);
 
@@ -32,9 +36,13 @@ class WidgetState : public GameState {
 	virtual void handleWindowEvent(SDL_WindowEvent event);
 
  public:
-	static constexpr char const* kControlStackId = "WindowWidgetControlStack";
+	static constexpr char const* kControlStackLocatorId = "WindowWidgetControlStack";
+	static constexpr char const* kWidgetStateLocatorId = "WidgetState";
 
 private:
+	WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
+							std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
+
 	//! The list of windows
 	std::vector<std::shared_ptr<UI::WindowWidget>> m_pWindows;
 	//! callback function that is called when widget state is loaded
@@ -43,6 +51,9 @@ private:
 	std::function<bool(WidgetState& widgetState)> m_onDestroyFunctor;
 	//! ui controls managed by this state
 	std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>> m_pUiControls;
+	//! uiControl to add to stack
+	std::shared_ptr<UI::Control> m_pQueuedUiControl;
+	
 	//! signal that is called after state is rendered
 	boost::signals2::signal<void(WidgetState&)> m_postRenderSignal;
 
