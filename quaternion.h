@@ -4,21 +4,30 @@
 #include "vector.h"
 
 namespace CapEngine {
-	
+
+	//! Quaternion class for managing angular displacement
 	class Quaternion {
 	public:
 		Quaternion(const Vector &v, double angle);
-
-		Quaternion negate() const;
-	protected:
 		Quaternion(double w, double x, double y, double z);
+
+		double getW() const;
+		double getX() const;
+		double getY() const;
+		double getZ() const;
 		
+		Quaternion negate() const;
+		Quaternion conjugate() const;
+
+		bool operator==(const Quaternion& q2);
+
+	protected:
 		double m_w = 0;
 		double m_x = 0;
 		double m_y = 0;
 		double m_z = 0;
 	};
-	
+
 }
 
 #endif // CAPENGINE_QUATERNIAN_H
