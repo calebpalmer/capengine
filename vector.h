@@ -48,7 +48,7 @@ namespace CapEngine{
     real operator*(const Vector& vec) const;  //TODO Dot Product
     void scale(real factor);
     real magnitude() const;
-    Vector& normalize() const;
+    Vector normalize() const;
     Vector absolute() const;
     real slope() const;
     PolarVector* toPolarVector() const;
@@ -62,11 +62,11 @@ namespace CapEngine{
 
   };
 
-  Vector& crossProduct(const Vector& vec1, const Vector& vec2);
+  Vector crossProduct(const Vector& vec1, const Vector& vec2);
   real dotProduct(const Vector& vec1, const Vector& vec2);
-  Vector& projectedVector(const Vector& vec1, const Vector& vec2); 
-  Vector& projectedPerpendicularVector(const Vector& vec1, const Vector& vec2); 
-  Vector& surfaceNormal(const Vector& vec1, const Vector& vec2);
+  Vector projectedVector(const Vector& vec1, const Vector& vec2); 
+  Vector projectedPerpendicularVector(const Vector& vec1, const Vector& vec2); 
+  Vector surfaceNormal(const Vector& vec1, const Vector& vec2);
   real distance(const Vector& vec1, const Vector& vec2);
   real angle(const Vector& vec1, const Vector& vec2);
 }

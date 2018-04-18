@@ -197,10 +197,9 @@ real Vector::magnitude() const{
   \return 
   \li ptr to a normalized Vector
 */
-Vector& Vector::normalize() const{
+Vector Vector::normalize() const{
   real mag = this->magnitude();
-  unique_ptr<Vector> normalVec(new Vector(x/mag, y/mag, z/mag));
-  return *(normalVec.release());
+  return Vector(x/mag, y/mag, z/mag);
 }
 
 /*
@@ -223,13 +222,12 @@ real dotProduct(const Vector& vec1, const Vector& vec2){
   \return
   \li the cross product of the two vectors
 */
-Vector& crossProduct(const Vector& vec1, const Vector& vec2){
+Vector crossProduct(const Vector& vec1, const Vector& vec2){
   real newx = vec1.getY()*vec2.getZ() + vec1.getZ()*vec2.getY();
   real newy = vec1.getZ()*vec2.getX() + vec1.getX()*vec2.getZ();
   real newz = vec1.getX()*vec2.getY() + vec1.getY()*vec2.getX();
   
-  unique_ptr<Vector> retVal(new Vector(newx, newy, newz));
-  return *(retVal.release());
+  return Vector(newx, newy, newz);
 }
 
 /*
@@ -238,12 +236,12 @@ Vector& crossProduct(const Vector& vec1, const Vector& vec2){
   \return
   \li the project vector of this onto vec
 */
-Vector& projectedVector(const Vector& vec1, const Vector& vec2){
+Vector projectedVector(const Vector& vec1, const Vector& vec2){
   real dotProd = CapEngine::dotProduct(vec1, vec2);
   real magVec = vec2.magnitude();
-  unique_ptr<Vector> retVal(new Vector(vec2));
-  retVal->scale( dotProd / (magVec * magVec) );
-  return *(retVal.release());
+  Vector v(vec2);
+  v.scale( dotProd / (magVec * magVec) );
+	return v;
 }
 
 /*
@@ -252,10 +250,9 @@ Vector& projectedVector(const Vector& vec1, const Vector& vec2){
   \return
   \li the project vector of this onto vec
 */
-Vector& projectedPerpendicularVector(const Vector& vec1, const Vector& vec2){
-  unique_ptr<Vector> pVector(&(CapEngine::projectedVector(vec1, vec2)));
-  unique_ptr<Vector> retVal(new Vector(vec2 - *pVector));
-  return *(retVal.release());
+Vector projectedPerpendicularVector(const Vector& vec1, const Vector& vec2){
+  Vector v = CapEngine::projectedVector(vec1, vec2);
+  return Vector(vec2 - v);
 }
 
 /*
@@ -275,10 +272,9 @@ real angle(const Vector& vec1, const Vector& vec2){
 //! Not implemented for 2d vectors.  Throws exception.
 /*!
  */
-Vector& surfaceNormal(const Vector& vec1, const Vector& vec2){
-  Vector& temp = CapEngine::crossProduct(vec1, vec2);
-  Vector& retVal = temp.normalize();
-  return retVal;
+Vector surfaceNormal(const Vector& vec1, const Vector& vec2){
+  Vector v = CapEngine::crossProduct(vec1, vec2);
+  return v.normalize();
 }
 
 //! return a PolarVector version of current vector
