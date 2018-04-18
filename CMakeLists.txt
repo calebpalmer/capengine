@@ -2,19 +2,21 @@ cmake_minimum_required(VERSION 3.9)
 
 project(capengine)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/sdl2-cmake-scripts")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/cmake-scripts")
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(LibXml2 REQUIRED)
+find_package(cppunit REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIR}
                     ${SDL2_IMAGE_INCLUDE_DIR}
                     ${SDL2_TTF_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${LIBXML2_INCLUDE_DIR}
+		    ${CPPUNIT_INCLUDE_DIRS}}
 		    "./thirdparty/jsoncons/include"
                     )
 
@@ -34,18 +36,31 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp mapobjectdescriptor.cpp eventsubscriber.cpp
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
-	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp
+	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp editorutils.cpp quaternion.cpp
 	    )
 
 add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
 
 add_executable(widgettest widget_test.cpp)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+add_executable(runtests test/test.cpp)	  
+
+
 target_link_libraries(capengine ${SDL2_LIBRARY} 
                       ${SDL2_IMAGE_LIBRARIES}
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
+		      libsndfile.so
+                      )
+target_link_libraries(runtests capengine
+		      ${SDL2_LIBRARY} 
+                      ${SDL2_IMAGE_LIBRARIES}
+                      ${SDL2_TTF_LIBRARIES}
+                      ${Boost_LIBRARIES}
+                      ${LIBXML2_LIBRARIES}
+		      ${CPPUNIT_LIBRARIES}
 		      libsndfile.so
                       )
 
@@ -65,5 +80,5 @@ target_link_libraries(widgettest capengine
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
 		      libsndfile.so
-)
+		      )
 

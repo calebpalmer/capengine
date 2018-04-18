@@ -5,10 +5,14 @@
 
 namespace CapEngine {
 	
-	class Quaternian {
+	class Quaternion {
 	public:
-		Quaternian(const Vector &v, double angle);
-	private:
+		Quaternion(const Vector &v, double angle);
+
+		Quaternion negate() const;
+	protected:
+		Quaternion(double w, double x, double y, double z);
+		
 		double m_w = 0;
 		double m_x = 0;
 		double m_y = 0;

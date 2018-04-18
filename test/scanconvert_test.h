@@ -46,9 +46,9 @@ class ScanconvertTest : public CppUnit::TestFixture {
  public:
   void setUp() {
     WindowParams windowParams =
-      {
-	"test", 320, 210, 32, false, false, false
-      };
+    {
+			"test", 320, 210, 32, false, false, false, "test"
+		};
 
     init(windowParams);
     m_videoManager = Locator::videoManager;

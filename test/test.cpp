@@ -8,6 +8,7 @@
 #include "matrixtest.h"
 #include "rectangletest.h"
 #include "scanconvert_test.h"
+#include "quaterniontest.h"
 
 int main(){
   CppUnit::TextUi::TestRunner runner;
@@ -17,6 +18,7 @@ int main(){
   runner.addTest(MatrixTest::suite());
   runner.addTest(RectangleTest::suite());
   runner.addTest(ScanconvertTest::suite());
+	runner.addTest(CapEngine::QuaternionTest::suite());
   
   if (runner.run() ){
     return EXIT_SUCCESS;
