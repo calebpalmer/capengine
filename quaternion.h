@@ -18,6 +18,7 @@ namespace CapEngine {
 		
 		Quaternion negate() const;
 		Quaternion conjugate() const;
+		Quaternion inverse() const;
 
 		bool operator==(const Quaternion& q2);
 

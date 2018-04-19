@@ -36,6 +36,8 @@ Quaternion::Quaternion(const Vector &v, double angle){
 Quaternion::Quaternion(double w, double x, double y, double z) :
 	m_w(w), m_x(x), m_y(y), m_z(z)
 {
+	// TODO need a way to make sure that this is valid, or just make
+	// it non public.
 }
 
 //! Getter for w
@@ -72,6 +74,18 @@ Quaternion Quaternion::negate() const{
  */
 Quaternion Quaternion::conjugate() const{
 	return Quaternion(m_w, -m_x, -m_y, -m_z);
+}
+
+
+
+//! Get the inverse of the quaternion
+/** 
+ \return - The inverse
+*/
+Quaternion Quaternion::inverse() const {
+	// since the vector representing the axis is always a unit vector
+	// (we ensured this during construction) the inverse == conjugate
+	return this->conjugate();
 }
 
 //! operato==

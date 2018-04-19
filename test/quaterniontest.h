@@ -14,11 +14,13 @@ namespace CapEngine {
 		void testNormalizes();
 		void testNegate();
 		void testConjugate();
+		void testInverse();
 		
 		CPPUNIT_TEST_SUITE(QuaternionTest);
 		CPPUNIT_TEST(testNegate);
 		CPPUNIT_TEST(testNormalizes);
 		CPPUNIT_TEST(testConjugate);
+		CPPUNIT_TEST(testInverse);
 		CPPUNIT_TEST_SUITE_END();
 	};
 
@@ -48,11 +50,20 @@ namespace CapEngine {
 
 	void QuaternionTest::testConjugate(){
 		Quaternion q(1.0, 2.0, 3.0, 4.0);
-		Quaternion qNeg = q.conjugate();
-		CPPUNIT_ASSERT(qNeg.getW() == 1.0 && qNeg.getX() == -2.0 &&
-									 qNeg.getY() == -3.0 && qNeg.getZ() == -4.0);
+		Quaternion q2 = q.conjugate();
+		CPPUNIT_ASSERT(q2.getW() == 1.0 && q2.getX() == -2.0 &&
+									 q2.getY() == -3.0 && q2.getZ() == -4.0);
 		
 	}
+
+	void QuaternionTest::testInverse(){
+		Quaternion q(1.0, 2.0, 3.0, 4.0);
+		Quaternion q2 = q.conjugate();
+		CPPUNIT_ASSERT(q2.getW() == 1.0 && q2.getX() == -2.0 &&
+									 q2.getY() == -3.0 && q2.getZ() == -4.0);
+		
+	}
+
 
 }
 
