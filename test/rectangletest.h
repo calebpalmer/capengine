@@ -9,59 +9,58 @@
 class RectangleTest : public CppUnit::TestFixture {
   public:
     CapEngine::Rectangle testRect;
-    double delta = 0.0001;
 
     void setUp() {
-      testRect = CapEngine::Rectangle(1.0, 1.0, 5.0, 5.0); 
+      testRect = CapEngine::Rectangle(1, 1, 5, 5); 
     }
 
     void tearDown() {}
     
     void testCreateRectangle(){
-      CapEngine::Rectangle rect(1.0, 2.0, 5.0, 3.2);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, rect.x, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, rect.y, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, rect.width, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(3.2, rect.height, delta);
+      CapEngine::Rectangle rect(1, 2, 5, 3);
+      CPPUNIT_ASSERT_EQUAL(1, rect.x);
+      CPPUNIT_ASSERT_EQUAL(2, rect.y);
+      CPPUNIT_ASSERT_EQUAL(5, rect.width);
+      CPPUNIT_ASSERT_EQUAL(3, rect.height);
     }
     
     void testRaiseBottom(){
       auto newRect = testRect.raiseBottom(2);
 
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.x, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.y, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.width, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, newRect.height, delta);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.x);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.y);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.width);
+      CPPUNIT_ASSERT_EQUAL(3, newRect.height);
 
     }
 
     void testLowerTop(){
       auto newRect = testRect.lowerTop(2);
 
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.x, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, newRect.y, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.width, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.height, delta);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.x);
+      CPPUNIT_ASSERT_EQUAL(3, newRect.y);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.width);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.height);
 
     }
 
     void testNarrowRight(){
       auto newRect = testRect.narrowRight(2);
 
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.x, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.y, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, newRect.width, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.height, delta);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.x);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.y);
+      CPPUNIT_ASSERT_EQUAL(3, newRect.width);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.height);
 
     }
 
     void testNarrowLeft(){
       auto newRect = testRect.narrowLeft(2);
 
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, newRect.x, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, newRect.y, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.width, delta);
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0, newRect.height, delta);
+      CPPUNIT_ASSERT_EQUAL(3, newRect.x);
+      CPPUNIT_ASSERT_EQUAL(1, newRect.y);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.width);
+      CPPUNIT_ASSERT_EQUAL(5, newRect.height);
 
     }
 
