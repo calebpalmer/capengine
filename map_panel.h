@@ -51,6 +51,9 @@ namespace CapEngine { namespace UI {
     void handleMiddleMouseButtonDown(SDL_MouseButtonEvent event);
 
     bool isInMap(int x, int y) const;
+		SDL_Rect getMapExtents() const;
+		SDL_Rect getVisibleMapExtents() const;
+		double getScaledTileSize() const;
 
 		//! the map that is being edited
     std::shared_ptr<Map2D> m_pMap;

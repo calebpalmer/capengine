@@ -12,8 +12,10 @@ Viewport::Viewport(int x, int y,
   m_transformationMatrix(Matrix::createIdentityMatrix()),
   m_width(width), m_height(height)
 {
-  m_transformationMatrix.getRowVectorRef(0).setD((-1) * x);
-  m_transformationMatrix.getRowVectorRef(1).setD(y);
+  // TODO commented this out when trying to fix matrix stuff
+  // TODO need to figure out if this is needed
+  //m_transformationMatrix.getRowVectorRef(0).setD((-1) * x);
+  //m_transformationMatrix.getRowVectorRef(1).setD(y);
 }
 
 int Viewport::getX() const
@@ -23,7 +25,8 @@ int Viewport::getX() const
 
 void Viewport::setX(int x)
 {
-  m_transformationMatrix.getRowVectorRef(0).setD(-x);
+  // TODO same as above
+  //m_transformationMatrix.getRowVectorRef(0).setD(-x);
 }
 
 int Viewport::getY() const
@@ -33,7 +36,8 @@ int Viewport::getY() const
 
 void Viewport::setY(int y)
 {
-  m_transformationMatrix.getRowVectorRef(1).setD(y);
+  //TODO same as above
+  //m_transformationMatrix.getRowVectorRef(1).setD(y);
 }
 
 Rect Viewport::transformRect(Rect in_rect) const

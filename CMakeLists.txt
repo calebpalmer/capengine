@@ -25,7 +25,7 @@ include_directories(${SDL2_INCLUDE_DIR}
 if (MSVC)
   add_compile_options(/W4)
 else()
-  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused -std=c++14)
+  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused -std=c++17)
 endif()
 
 add_definitions(-DUNIX -DDEBUG)

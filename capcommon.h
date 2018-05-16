@@ -5,6 +5,7 @@
 #include <functional>
 
 namespace CapEngine {
+
 #ifdef WIN
 #define LINESEP "\r\n"
 #endif
@@ -21,6 +22,7 @@ namespace CapEngine {
   std::string strip(const std::string str);
   std::string replace(const std::string str, const std::string rep, const std::string val);
   void sdlTry(std::function<int()> func);
+	bool doubles_equal(const double& left, const double& right);
 }
 
 #endif

@@ -9,6 +9,26 @@ using namespace std;
 
 namespace CapEngine {
 
+
+//! Create a Matrix
+/** 
+	 
+ Each Vector passed represents a column in the matrix.  eg:
+
+ Matrix({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {2, 3, 0, 1})
+ actually looks like this:
+ 
+ [ 1 0 0 2 ]
+ [ 0 1 0 3 ]
+ [ 0 0 1 0 ]
+ [ 0 0 0 1 ]
+
+ \param vec1
+ \param vec2
+ \param vec3
+ \parem vec4
+ \return 
+*/
 Matrix::Matrix(CapEngine::Vector vec1, CapEngine::Vector vec2, CapEngine::Vector vec3, CapEngine::Vector vec4){
   vectors.push_back(vec1);
   vectors.push_back(vec2);
@@ -76,10 +96,10 @@ Matrix Matrix::createIdentityMatrix(){
 }
 
 Matrix Matrix::createTranslationMatrix(real x, real y, real z){
-  Vector vec1(1.0, 0.0, 0.0, x);
-  Vector vec2(0.0, 1.0, 0.0, y);
-  Vector vec3(0.0, 0.0, 1.0, z);
-  Vector vec4(0.0, 0.0, 0.0, 1.0);
+  Vector vec1(1.0, 0.0, 0.0, 0.0);
+  Vector vec2(0.0, 1.0, 0.0, 0.0);
+  Vector vec3(0.0, 0.0, 1.0, 0.0);
+  Vector vec4(x, y, z, 1.0);
   Matrix matrix(vec1, vec2, vec3, vec4);
   return matrix;
 }
@@ -136,106 +156,59 @@ const MatrixContainer& Matrix::getVectors() const{
   return vectors;
 }
 
-Matrix Matrix::operator*(const Matrix& right) const{
-  real cell1, cell2, cell3, cell4;
-  // column 1
-  // multiply the first row by the first column vector (column major matrix)
-  cell1 = (vectors[0].getX() * right.getVectors()[0].getX()) + (vectors[1].getX() * right.getVectors()[0].getY()) 
-    + (vectors[2].getX() * right.getVectors()[0].getZ()) + (vectors[3].getX() * right.getVectors()[0].getD());
-					       
-  cell2 = (vectors[0].getY() * right.getVectors()[0].getX()) + (vectors[1].getY() * right.getVectors()[0].getY()) 
-    + (vectors[2].getY() * right.getVectors()[0].getZ()) + (vectors[3].getY() * right.getVectors()[0].getD());
+//! matrix multiplication
+/** 
+ \param other - The other matrix to multipy
+ \return - The new matrix
+*/
+Matrix Matrix::operator*(const Matrix& other) const{
+	assert(this->vectors.size() == 4);
+	assert(other.vectors.size() == 4);
 
-  cell3 = (vectors[0].getZ() * right.getVectors()[0].getX()) + (vectors[1].getZ() * right.getVectors()[0].getY()) 
-    + (vectors[2].getZ() * right.getVectors()[0].getZ()) + (vectors[3].getZ() * right.getVectors()[0].getD());
+	// column vector 1
+	Vector v1(dotProduct(this->getRowVector(0), other.getColumnVector(0)),
+						dotProduct(this->getRowVector(1), other.getColumnVector(0)),
+						dotProduct(this->getRowVector(2), other.getColumnVector(0)),
+						dotProduct(this->getRowVector(3), other.getColumnVector(0)));
 
-  cell4 = (vectors[0].getD() * right.getVectors()[0].getX()) + (vectors[1].getD() * right.getVectors()[0].getY()) 
-    + (vectors[2].getD() * right.getVectors()[0].getZ()) + (vectors[3].getD() * right.getVectors()[0].getD());
+	// column vector 2
+	Vector v2(dotProduct(this->getRowVector(0), other.getColumnVector(1)),
+						dotProduct(this->getRowVector(1), other.getColumnVector(1)),
+						dotProduct(this->getRowVector(2), other.getColumnVector(1)),
+						dotProduct(this->getRowVector(3), other.getColumnVector(1)));
 
-  Vector column1(cell1, cell2, cell3, cell4);
+	// column vector 3
+	Vector v3(dotProduct(this->getRowVector(0), other.getColumnVector(2)),
+						dotProduct(this->getRowVector(1), other.getColumnVector(2)),
+						dotProduct(this->getRowVector(2), other.getColumnVector(2)),
+						dotProduct(this->getRowVector(3), other.getColumnVector(2)));
 
-  // column 2
-    cell1 = (vectors[0].getX() * right.getVectors()[1].getX()) + (vectors[1].getX() * right.getVectors()[1].getY()) 
-    + (vectors[2].getX() * right.getVectors()[1].getZ()) + (vectors[3].getX() * right.getVectors()[1].getD());
-					       
-  cell2 = (vectors[0].getY() * right.getVectors()[1].getX()) + (vectors[1].getY() * right.getVectors()[1].getY()) 
-    + (vectors[2].getY() * right.getVectors()[1].getZ()) + (vectors[3].getY() * right.getVectors()[1].getD());
+	// column vector 4
+	Vector v4(dotProduct(this->getRowVector(0), other.getColumnVector(3)),
+						dotProduct(this->getRowVector(1), other.getColumnVector(3)),
+						dotProduct(this->getRowVector(2), other.getColumnVector(3)),
+						dotProduct(this->getRowVector(3), other.getColumnVector(3)));
 
-  cell3 = (vectors[0].getZ() * right.getVectors()[1].getX()) + (vectors[1].getZ() * right.getVectors()[1].getY()) 
-    + (vectors[2].getZ() * right.getVectors()[1].getZ()) + (vectors[3].getZ() * right.getVectors()[1].getD());
-
-  cell4 = (vectors[0].getD() * right.getVectors()[1].getX()) + (vectors[1].getD() * right.getVectors()[1].getY()) 
-    + (vectors[2].getD() * right.getVectors()[1].getZ()) + (vectors[3].getD() * right.getVectors()[1].getD());
-
-  Vector column2(cell1, cell2, cell3, cell4);
-
-  // column 3
-  cell1 = (vectors[0].getX() * right.getVectors()[2].getX()) + (vectors[1].getX() * right.getVectors()[2].getY()) 
-    + (vectors[2].getX() * right.getVectors()[2].getZ()) + (vectors[3].getX() * right.getVectors()[2].getD());
-					       
-  cell2 = (vectors[0].getY() * right.getVectors()[2].getX()) + (vectors[1].getY() * right.getVectors()[2].getY()) 
-    + (vectors[2].getY() * right.getVectors()[2].getZ()) + (vectors[3].getY() * right.getVectors()[2].getD());
-
-  cell3 = (vectors[0].getZ() * right.getVectors()[2].getX()) + (vectors[1].getZ() * right.getVectors()[2].getY()) 
-    + (vectors[2].getZ() * right.getVectors()[2].getZ()) + (vectors[3].getZ() * right.getVectors()[2].getD());
-
-  cell4 = (vectors[0].getD() * right.getVectors()[2].getX()) + (vectors[1].getD() * right.getVectors()[2].getY()) 
-    + (vectors[2].getD() * right.getVectors()[2].getZ()) + (vectors[3].getD() * right.getVectors()[2].getD());
-
-  Vector column3(cell1, cell2, cell3, cell4);
-
-  // column 4
-  cell1 = (vectors[0].getX() * right.getVectors()[3].getX()) + (vectors[1].getX() * right.getVectors()[3].getY()) 
-    + (vectors[2].getX() * right.getVectors()[3].getZ()) + (vectors[3].getX() * right.getVectors()[3].getD());
-					       
-  cell2 = (vectors[0].getY() * right.getVectors()[3].getX()) + (vectors[1].getY() * right.getVectors()[3].getY()) 
-    + (vectors[2].getY() * right.getVectors()[3].getZ()) + (vectors[3].getY() * right.getVectors()[3].getD());
-
-  cell3 = (vectors[0].getZ() * right.getVectors()[3].getX()) + (vectors[1].getZ() * right.getVectors()[3].getY()) 
-    + (vectors[2].getZ() * right.getVectors()[3].getZ()) + (vectors[3].getZ() * right.getVectors()[3].getD());
-
-  cell4 = (vectors[0].getD() * right.getVectors()[3].getX()) + (vectors[1].getD() * right.getVectors()[3].getY()) 
-    + (vectors[2].getD() * right.getVectors()[3].getZ()) + (vectors[3].getD() * right.getVectors()[3].getD());
-
-  Vector column4(cell1, cell2, cell3, cell4);
-
-  Matrix newMatrix(column1, column2, column3, column4);
-  return newMatrix;
+	return Matrix(v1, v2, v3, v4);
 }
 
-Vector Matrix::operator*(const Vector& in_right) const{
-  
-  Vector right(in_right);
-  
-  Vector xTransform = this->vectors[0];
-  real x =
-    right.getX() * xTransform.getX() +
-    right.getY() * xTransform.getY() +
-    right.getZ() * xTransform.getZ() +
-    right.getD() * xTransform.getD();
-  
-  Vector yTransform = this->vectors[1];
-  real y =
-    right.getX() * yTransform.getX() +
-    right.getY() * yTransform.getY() +
-    right.getZ() * yTransform.getZ() +
-    right.getD() * yTransform.getD();
-    
-  Vector zTransform = this->vectors[2];
-  real z =
-    right.getX() * zTransform.getX() +
-    right.getY() * zTransform.getY() +
-    right.getZ() * zTransform.getZ() +
-    right.getD() * zTransform.getD();
-  
-  Vector dTransform = this->vectors[3];
-  real d =
-    right.getX() * dTransform.getX() +
-    right.getY() * dTransform.getY() +
-    right.getZ() * dTransform.getZ() +
-    right.getD() * dTransform.getD();
 
-  return Vector(x, y, z, d);
+
+//! Multiply a vector by a matrix
+/** 
+
+ The vector is on the right hand side so it is
+ a column vector.
+
+ \param v - The Vector to multiply.
+ \return - The transformed vector.
+*/
+Vector Matrix::operator*(const Vector& v) const {
+  
+	return 	Vector(dotProduct(this->getRowVector(0), v),
+								 dotProduct(this->getRowVector(1), v),
+								 dotProduct(this->getRowVector(2), v),
+								 dotProduct(this->getRowVector(3), v));
 }
 
 Matrix Matrix::operator+(const Matrix& right) const{
@@ -272,12 +245,12 @@ Matrix Matrix::operator-(const Matrix& right) const {
 		leftVec4 - rightVec4);
 }
 
-Vector Matrix::getColumnVector(int index) const{
+Vector Matrix::getRowVector(int index) const{
   if(index > 3 || index < 0){
     throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
   }
 
-  int x, y, z, d = 0;
+  real x, y, z, d = 0.0;
   switch(index){
   case 0:
     x = vectors[0].x;
@@ -311,7 +284,7 @@ Vector Matrix::getColumnVector(int index) const{
   return retVector;
 }
 
-Vector Matrix::getRowVector(int index) const{
+Vector Matrix::getColumnVector(int index) const{
   if(index > 3 || index < 0){
     throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
   }
@@ -320,7 +293,7 @@ Vector Matrix::getRowVector(int index) const{
   return retVector;
 }
 
-Vector& Matrix::getRowVectorRef(int index){
+Vector& Matrix::getColumnVectorRef(int index){
   if(index > 3 || index < 0){
     throw CapEngineException("Matrix indexes must be less than or equal to 3 and greater than or equal to 0");
   }
@@ -338,6 +311,40 @@ std::ostream& operator<<(std::ostream& stream, const CapEngine::Matrix& matrix){
   }
   stream << ")";
   return stream;
+}
+
+
+
+//! Returns a string representation
+/** 
+ \return - The string representation
+*/
+std::string Matrix::toString(bool pretty) const{
+	std::stringstream stream;
+  for(size_t i = 0; i < 4; i++){
+    auto && vector = this->getRowVector(i);
+    stream << "(" << vector.getX() << ", " << vector.getY()
+	   << ", " << vector.getZ() << ", " << vector.getD() << ")";
+		if(pretty){
+			stream << std::endl;
+		}
+  }
+  stream << ")";
+  return stream.str();
+}
+
+//! operator==
+bool Matrix::operator==(const Matrix& other) const{
+	bool equal = true;
+	if(this->vectors.size() != other.vectors.size())
+		return false;
+
+	for(size_t i = 0; i < vectors.size(); i++){
+		if(this->vectors[i] != other.vectors[i])
+			return false;
+	}
+
+	return true;
 }
 
 }

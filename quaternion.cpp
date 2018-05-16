@@ -1,8 +1,10 @@
 #include "quaternion.h"
 
-#include <cmath>
-
 #include "trigonometry.h"
+#include "capcommon.h"
+#include "CapEngineException.h"
+
+#include <cmath>
 
 namespace CapEngine {
 
@@ -36,8 +38,11 @@ Quaternion::Quaternion(const Vector &v, double angle){
 Quaternion::Quaternion(double w, double x, double y, double z) :
 	m_w(w), m_x(x), m_y(y), m_z(z)
 {
-	// TODO need a way to make sure that this is valid, or just make
-	// it non public.
+	// TODO want to check if the quaternion is valid, but below is not working
+// 	double magnitude = this->magnitude();
+// 	if(!doubles_equal(1.0, magnitude)){
+// 		BOOST_THROW_EXCEPTION(CapEngineException("Not a valid quaternion"));
+// 	}
 }
 
 //! Getter for w
@@ -94,12 +99,47 @@ Quaternion Quaternion::inverse() const {
  \param q2 - the rhs
  \return true if they are equal,false otherwise
 */
-bool Quaternion::operator==(const Quaternion& q2){
+bool Quaternion::operator==(const Quaternion& q2) const{
 	return
 		this->getW() == q2.getW() &&
 		this->getX() == q2.getX() &&
 		this->getY() == q2.getY() &&
 		this->getZ() == q2.getZ();
+}
+
+//! Performs quaternion multiplication
+/** 
+ \param q2 - The quaternion to multiply by
+ \return - The resulting quaternion
+*/
+Quaternion Quaternion::operator*(const Quaternion& q2) const{
+	const Quaternion& q1 = *this;
+	/**
+		 q1 * q2 = 
+		     w' = w1 * w2 - v1 dot v2
+				 v' = (w1 * v2) + (w2 * v1) + v2 cross v1
+	 */
+
+	Vector v1(q1.m_x, q1.m_y, q1.m_z);
+	Vector v2(q2.m_x, q2.m_y, q2.m_z);
+
+	double w3 = (q1.m_w * q2.m_w) - dotProduct(v1, v2);
+	Vector v3 = (v2 * q1.m_w) + (v1 * q2.m_w) + crossProduct(v2, v1);
+
+	return Quaternion(w3, v3.x, v3.y, v3.z);
+}
+
+
+//! Computes the magnitude of the quaternion.
+/** 
+		
+ Should always be 1.
+
+ \return - The magnitude of the quaternion
+*/
+double Quaternion::magnitude() const {
+	return std::sqrt(std::pow(m_w, 2) +
+									 std::pow(Vector(m_x, m_y, m_x).magnitude(), 2));
 }
 
 }

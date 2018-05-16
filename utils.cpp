@@ -1,4 +1,7 @@
 #include "utils.h"
+#include "collision.h"
+
+#include <algorithm>
 
 namespace CapEngine {
 
@@ -53,19 +56,43 @@ SDL_Rect clipRect(const SDL_Rect &srcRect, const SDL_Rect &dstRect){
 	clippedRect.x = srcRect.x < dstRect.x ? dstRect.x : srcRect.x;
 	clippedRect.y = srcRect.y < dstRect.y ? dstRect.y : srcRect.y;
 
-	if(clippedRect.x + srcRect.w > dstRect.x + dstRect.w)
+	if(srcRect.x + srcRect.w > dstRect.x + dstRect.w)
 		clippedRect.w = dstRect.x + dstRect.w - clippedRect.x;
 
 	else
 		clippedRect.w = srcRect.w;
 
-	if(clippedRect.y + srcRect.h > dstRect.y + dstRect.h)
+	if(srcRect.y + srcRect.h > dstRect.y + dstRect.h)
 		clippedRect.h = dstRect.y + dstRect.h - clippedRect.y;
 	else
 		clippedRect.h = srcRect.h;
 
 
 	return clippedRect;
+}
+
+
+
+//! Returns the intersection of two rectangles
+/** 
+ \param r1 - a rect
+ \param r2 - a rect
+ \return - The intersection
+*/
+std::optional<SDL_Rect> intersectRects(const SDL_Rect &r1, const SDL_Rect &r2){
+	auto relation = MBRRelate(r1, r2);
+
+	if(relation != OUTSIDE){
+		int l = std::max(r1.x, r2.x);
+		int r = std::min(r1.x + r1.w, r2.x + r2.w);
+		int b = std::max(r1.y, r2.y);
+		int t = std::min(r1.y + r1.h, r2.y + r2.h);
+	
+		SDL_Rect r3 = {l, b, r - l + 1, t - b + 1};
+		return r3;
+	}
+
+	return std::nullopt;
 }
 
 }

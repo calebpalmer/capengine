@@ -20,7 +20,7 @@ namespace CapEngine {
     
     Vector getColumnVector(int index) const;
     Vector getRowVector(int index) const;
-    Vector& getRowVectorRef(int index);
+		Vector& getColumnVectorRef(int index);
 
     void setRowVector(int index, Vector vector);
 
@@ -32,14 +32,16 @@ namespace CapEngine {
     static Matrix createYRotationMatrix(real degrees);
     static Matrix createZRotationMatrix(real degrees);
 
+		std::string toString(bool pretty = false) const;
 
     // overloaded operators
     Matrix operator*(const Matrix& right) const;
     Matrix operator+(const Matrix& right) const;
     Matrix operator-(const Matrix& right) const;    
     Vector operator*(const Vector& right) const;
+		bool operator==(const Matrix& other) const;
     friend std::ostream& operator<<(std::ostream& stream, const Matrix& matix);
-    
+		
     std::unique_ptr<float> getGLMatrix() const;
     const MatrixContainer& getVectors() const;
   protected:

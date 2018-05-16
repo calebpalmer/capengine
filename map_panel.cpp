@@ -9,12 +9,14 @@
 #include "colour.h"
 #include "utils.h"
 #include "scopeguard.h"
+#include "editorutils.h"
+#include "control.h"
+#include "tilecopycontrol.h"
 
 #include <sstream>
 #include <iostream>
 #include <cassert>
 #include <cmath>
-
 
 namespace CapEngine { namespace UI {
 
@@ -154,21 +156,28 @@ void MapPanel::render()
 
 //! \copydoc Widget::handleMouseMotionevent
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
-	if(m_dragState == DRAGSTATE_PAN){
-		Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
-			Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
-
-		// m_translationMatrix = m_translationMatrix +
-		// 	Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
-
+	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+	assert(pWidgetState != nullptr);
+	
+	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
+	if(maybeControl != boost::none){
+		auto pTileCopyControl = std::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
+		if(pTileCopyControl){
+			// TODO change the tile here
+		}
 	}
+	else{
+		if(m_dragState == DRAGSTATE_PAN){
+			Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
+				Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
 
-	else if(m_dragState == DRAGSTATE_NONE){
-		// set the hovered tile
-		m_hoveredTile = getHoveredTile(event.x, event.y);
+			// m_translationMatrix = m_translationMatrix +
+			// 	Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
+
+		}
+
+		m_lastMotionLocation = {event.x, event.y};
 	}
-
-	m_lastMotionLocation = {event.x, event.y};
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
@@ -292,19 +301,23 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
 
     case SDLK_RIGHT:
       m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix((-1.0) * kTranslationIncrement, 0.0, 0.0);
-      m_translationMatrix.getRowVectorRef(3).setD(1.0);
+			// TODO fix this
+      //m_translationMatrix.getRowVectorRef(3).setD(1.0);
       break;
     case SDLK_LEFT:
       m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(kTranslationIncrement, 0.0, 0.0);
-      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+			// TODO fix this
+      //m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     case SDLK_UP:
       m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(0.0, kTranslationIncrement, 0.0);
-      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+			// TODO fix this
+      //m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     case SDLK_DOWN:
       m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(0.0, (-1.0) * kTranslationIncrement, 0.0);
-      m_translationMatrix.getRowVectorRef(3).setD(1.0);      
+			// TODO fix ths
+      //m_translationMatrix.getRowVectorRef(3).setD(1.0);      
       break;
     default:
       break;
@@ -330,9 +343,8 @@ void MapPanel::drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
 
   for(auto && tile : tiles){
 		
-    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);    
-    real scaleFactor = m_scaleMatrix.getRowVector(0).getX();    
-    double scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;
+		Vector mapOrigin = m_translationMatrix * Vector(static_cast<double>(m_x), static_cast<double>(m_y), 0.0, 1.0);
+		double scaledTileSize = this->getScaledTileSize();
 
     Rect dstRect = {0, 0,
 										static_cast<int>(round(scaledTileSize)),
@@ -344,10 +356,16 @@ void MapPanel::drawTileOutlines(const std::vector<std::pair<int, int>> &tiles,
 	}
 }
 
+//! Draws an outline over any map tile that the mouse is on top of
 void MapPanel::drawHoveredTileOutline(){
-  if(m_hoveredTile.first != -1 && m_hoveredTile.second != -1){
+	int x = 0;
+	int y = 0;
+	SDL_GetMouseState(&x, &y);
+	
+	std::pair<int, int> hoveredTile = getHoveredTile(x, y);
+  if(hoveredTile.first != -1 && hoveredTile.second != -1){
 		std::vector<std::pair<int,int>> tiles(1);
-		tiles[0] = m_hoveredTile;
+		tiles[0] = hoveredTile;
 		drawTileOutlines(tiles, outlineColour);
 	}
 }
@@ -373,12 +391,10 @@ void MapPanel::drawMouseDrag(){
 }
 
 std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
-  real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-  
   if(isInMap(x, y))
   {
-    int scaledTileSize = static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
-    Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
+		double scaledTileSize = this->getScaledTileSize();
+    Vector mapOrigin = m_translationMatrix * Vector(static_cast<double>(m_x), static_cast<double>(m_y), 0.0, 1.0);
 
     int xTile = (x - mapOrigin.getX()) / scaledTileSize;
     int yTile = (y - mapOrigin.getY()) / scaledTileSize;
@@ -390,18 +406,61 @@ std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
   
 }
 
-bool MapPanel::isInMap(int x, int y) const{
-  real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
-  int mapWidth = m_pMap->getWidth();
-  int mapHeight = m_pMap->getHeight();
-      
-  Vector mapOrigin = m_translationMatrix * Vector(0.0, 0.0, 0.0, 1.0);
-  Vector mapDims = m_scaleMatrix * Vector(mapWidth, mapHeight, 0.0, 1.0);
 
-  // is this click in our map?
-  return (x >= mapOrigin.getX() && x < mapOrigin.getX() + (m_pMap->getWidth() * scaleFactor) &&
-	  y >= mapOrigin.getY() && y < mapOrigin.getY() + (m_pMap->getHeight() * scaleFactor));
-   
+//! checks if the location in window coordinates is in the map.
+/** 
+ \param 
+ \param 
+ \return 
+*/
+bool MapPanel::isInMap(int x, int y) const{
+	SDL_Rect mapExtents = this->getVisibleMapExtents();
+
+  return x >= mapExtents.x && x < mapExtents.x + mapExtents.w &&
+				 y >= mapExtents.y && y < mapExtents.y + mapExtents.h;
+}
+
+//! Gets the location and dimensions of the map within the window
+/** 
+ \return - The SDL_Rect representing its location and dimensions.
+*/
+SDL_Rect MapPanel::getMapExtents() const{
+
+	Vector mapOrigin = m_translationMatrix * Vector(static_cast<double>(m_x), static_cast<double>(m_y), 0.0, 1.0);
+  Vector mapDims = m_scaleMatrix * Vector(m_pMap->getWidth(), m_pMap->getHeight(), 0.0, 1.0);
+
+	return { static_cast<int>(mapOrigin.getX()),
+			     static_cast<int>(mapOrigin.getY()),
+			     static_cast<int>(mapDims.getX()),
+			     static_cast<int>(mapDims.getY())
+			};
+	
+}
+
+//! Gets the visible extents of the map
+/** 
+ \return - The SDL_Rect representing the visible extents of the map
+*/
+SDL_Rect MapPanel::getVisibleMapExtents() const{
+	SDL_Rect mapExtents = this->getMapExtents();
+	SDL_Rect drawExtents = {m_x, m_y, m_width, m_height};
+
+	std::optional<SDL_Rect> maybeVisibleMapExtents = intersectRects(mapExtents, drawExtents);
+
+	if(maybeVisibleMapExtents != std::nullopt)
+		return *maybeVisibleMapExtents;
+
+	return {0, 0, 0, 0};
+}
+
+
+//! Gets the current scaled display size of tiles in the map.
+/** 
+ \return The scaled tile size
+*/
+double MapPanel::getScaledTileSize() const{
+  real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
+	return static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
 }
   
 }}

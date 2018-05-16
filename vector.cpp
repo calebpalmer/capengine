@@ -4,6 +4,7 @@
 #include "vector.h"
 #include "trigonometry.h"
 #include "CapEngineException.h"
+#include "capcommon.h"
 
 #include <cstddef>
 #include <cmath>
@@ -132,10 +133,21 @@ Vector Vector::operator-(const Vector& vec2) const{
   return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
 }
 
+
+//! multipllies vector by a scalar
+/** 
+ \param scalar - The scalar to multiply by.
+ \return - The resulting Vector
+*/
+Vector Vector::operator*(real scalar) const{
+	// TODO does not scale d.  Is this right?
+	return Vector(x * scalar, y * scalar, z * scalar, d);
+}
+
 // TODO: fix this so that it returns a proper value
 /*
   \fn operator= definition
-  \param vec1
+  \param vec1q
   \param vec2
   \return Vector
 */
@@ -150,10 +162,16 @@ Vector& Vector::operator=(const Vector& vec){
 
 
 bool Vector::operator==(const Vector& vec) const{
-  return this->x == vec.x
-    && this->y == vec.y
-    && this->z == vec.z
-    && this->d == vec.d;
+
+	return doubles_equal(this->x, vec.x)
+		&& doubles_equal(this->y, vec.y)
+		&& doubles_equal(this->z, vec.z)
+		&& doubles_equal(this->d, vec.d);
+}
+
+//! operator!=
+bool Vector::operator!=(const Vector& other) const{
+	return !(*this == other);
 }
 
 //TODO
@@ -213,7 +231,10 @@ Vector Vector::normalize() const{
   \li the dot product
 */
 real dotProduct(const Vector& vec1, const Vector& vec2){
-  return (vec1.getX() * vec2.getX() + vec1.getY() * vec2.getY() + vec1.getZ() * vec2.getZ());
+  return ((vec1.getX() * vec2.getX()) +
+					(vec1.getY() * vec2.getY()) +
+					(vec1.getZ() * vec2.getZ()) +
+					(vec1.getD() * vec2.getD()));
 }
 
 /*

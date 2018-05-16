@@ -19,8 +19,10 @@ namespace CapEngine {
 		Quaternion negate() const;
 		Quaternion conjugate() const;
 		Quaternion inverse() const;
+		double magnitude() const;
 
-		bool operator==(const Quaternion& q2);
+		bool operator==(const Quaternion& q2) const;
+		Quaternion operator*(const Quaternion& q2) const;
 
 	protected:
 		double m_w = 0;

@@ -6,31 +6,45 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "../vector.h"
 
-class VectorTest : public CppUnit::TestFixture {
- public:
-  void setUp() {}
+namespace CapEngine {
+	
+	class VectorTest : public CppUnit::TestFixture {
+	public:
+		void testVectorAdditionLessThanOne();
+		void testOperatorEquals();
+		void testScalarMultiplication();
 
-  void tearDown() {}
+		CPPUNIT_TEST_SUITE(VectorTest);
+		CPPUNIT_TEST(testVectorAdditionLessThanOne);
+		CPPUNIT_TEST(testOperatorEquals);
+		CPPUNIT_TEST(testScalarMultiplication);
+		CPPUNIT_TEST_SUITE_END();
 
-  void testVectorAdditionLessThanOne(){
-    CapEngine::Vector v1(1.0, 1.0, 1.0);
-    CapEngine::Vector v2(0.25, 0.25, 0.25);
+	};
+
+  void VectorTest::testVectorAdditionLessThanOne(){
+    CapEngine::Vector v1(1.0f, 1.0f, 1.0f);
+    CapEngine::Vector v2(0.25f, 0.25f, 0.25f);
     CapEngine::Vector v3 = v1 + v2;
-    CPPUNIT_ASSERT(v3.x == 1.25 && v3.y == 1.25 && v3.z == 1.25);
+    CPPUNIT_ASSERT(v3.x == 1.25f && v3.y == 1.25f && v3.z == 1.25f);
   }
 
-  void testOperatorEquals(){
-    CapEngine::Vector v1(1.0, 1.0, 1.0);
-    CapEngine::Vector v2(2.0, 2.0, 2.0);
+  void VectorTest::testOperatorEquals(){
+    CapEngine::Vector v1(1.0f, 1.0f, 1.0f);
+    CapEngine::Vector v2(2.0f, 2.0f, 2.0f);
     v1 = v2;
-    CPPUNIT_ASSERT(v1.x == 2.0 && v1.y == 2.0 && v1.z == 2.0);
+    CPPUNIT_ASSERT(v1.x == 2.0f && v1.y == 2.0f && v1.z == 2.0f);
   }
 
-  CPPUNIT_TEST_SUITE(VectorTest);
-  CPPUNIT_TEST(testVectorAdditionLessThanOne);
-  CPPUNIT_TEST(testOperatorEquals);
-  CPPUNIT_TEST_SUITE_END();
+	void VectorTest::testScalarMultiplication(){
+		real scalar = 1.2;
+		Vector v(1.0f, 2.0f, 3.0f);
 
-};
+		Vector result = v * scalar;
+		Vector expected(1.2f, 2.4f, 3.6f);
+		CPPUNIT_ASSERT_EQUAL(expected, result);
+	}
+
+} // namespace CapEngine
 
 #endif //VECTORTEST

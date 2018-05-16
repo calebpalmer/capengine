@@ -66,4 +66,19 @@ void sdlTry(std::function<int()> func){
   }
 }
 
+
+//! checks if two double are equal
+/** 
+
+ https://stackoverflow.com/questions/4010240/comparing-doubles
+
+ \param left
+ \param right
+ \return - true if they are equal, false otherwise
+*/
+bool doubles_equal(const double& left, const double& right){
+		return left == right || 
+		std::abs(left - right) < std::abs(std::min(left, right)) * std::numeric_limits<double>::epsilon();
+}
+
 }
