@@ -416,8 +416,8 @@ std::pair<int, int> MapPanel::getHoveredTile(int x, int y) const{
 bool MapPanel::isInMap(int x, int y) const{
 	SDL_Rect mapExtents = this->getVisibleMapExtents();
 
-  return x >= mapExtents.x && x < mapExtents.x + mapExtents.w &&
-				 y >= mapExtents.y && y < mapExtents.y + mapExtents.h;
+  return x > mapExtents.x && x < mapExtents.x + mapExtents.w - 1 &&
+				 y > mapExtents.y && y < mapExtents.y + mapExtents.h - 1;
 }
 
 //! Gets the location and dimensions of the map within the window
