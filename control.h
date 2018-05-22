@@ -12,6 +12,7 @@ namespace CapEngine { namespace UI {
 
 			virtual void setPosition(int x, int y) {};
 			virtual void setSize(int width, int height) {};
+			virtual void setHandled() {};
 		};
 		
 }}

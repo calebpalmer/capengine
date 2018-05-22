@@ -4,6 +4,7 @@
 #include "CapEngineException.h"
 #include "scanconvert.h"
 #include "widgetstate.h"
+#include "uiutils.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/lexical_cast.hpp>
@@ -97,9 +98,7 @@ void TileCopyControl::loadTexture(){
 //! \copydoc Widget::handleMouseButtonEvent
 void TileCopyControl::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 
-	if(event.type == SDL_MOUSEBUTTONDOWN){
-		// remove this control from the control stack
-		this->remove();
+	if(event.type == SDL_MOUSEBUTTONUP){
 	}
 }
 
@@ -119,6 +118,18 @@ void TileCopyControl::remove(){
 	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
 	assert(maybeControl);
 	assert(this == maybeControl->get());
+	pWidgetState->popControl();
+}
+
+//! \copydoc Control::setHandledd
+void TileCopyControl::setHandled(){
+	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+	assert(pWidgetState != nullptr);
+
+	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
+	assert(maybeControl != boost::none);
+	assert((*maybeControl).get() == this);
+
 	pWidgetState->popControl();
 }
 

@@ -78,7 +78,7 @@ void sdlTry(std::function<int()> func){
 */
 bool doubles_equal(const double& left, const double& right){
 		return left == right || 
-		std::abs(left - right) < std::abs(std::min(left, right)) * std::numeric_limits<double>::epsilon();
+		std::abs(left - right) <= std::abs(std::min(left, right)) * std::numeric_limits<double>::epsilon();
 }
 
 }

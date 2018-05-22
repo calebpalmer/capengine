@@ -9,7 +9,7 @@
 #include "colour.h"
 #include "utils.h"
 #include "scopeguard.h"
-#include "editorutils.h"
+#include "uiutils.h"
 #include "control.h"
 #include "tilecopycontrol.h"
 
@@ -17,6 +17,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <boost/polymorphic_pointer_cast.hpp>
 
 namespace CapEngine { namespace UI {
 
@@ -156,28 +157,6 @@ void MapPanel::render()
 
 //! \copydoc Widget::handleMouseMotionevent
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
-	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
-	assert(pWidgetState != nullptr);
-	
-	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
-	if(maybeControl != boost::none){
-		auto pTileCopyControl = std::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
-		if(pTileCopyControl){
-			// TODO change the tile here
-		}
-	}
-	else{
-		if(m_dragState == DRAGSTATE_PAN){
-			Vector translationVector = Vector(event.x, event.y, 0.0, 1.0) -
-				Vector(m_lastMotionLocation.first, m_lastMotionLocation.second, 0.0, 1.0);;
-
-			// m_translationMatrix = m_translationMatrix +
-			// 	Matrix::createTranslationMatrix(translationVector.getX(), translationVector.getY(), translationVector.getZ());
-
-		}
-
-		m_lastMotionLocation = {event.x, event.y};
-	}
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
@@ -203,81 +182,42 @@ void MapPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 
 void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 
-  // Mouse button Up
-  if((m_dragState == DRAGSTATE_NONE) ||
-     (m_dragStart.first == event.x && m_dragStart.second == event.y)){
-    // we're not dragging
-    std::pair<int, int> selectedTile = getHoveredTile(event.x, event.y);
-    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
-    CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
-      
-    bool addKeyPressed = keyboardState[SDL_SCANCODE_LCTRL] == 1
-      || keyboardState[SDL_SCANCODE_RCTRL] == 1;
-
-    // remove it if it's already selected
-    auto searchedTile = std::find(m_selectedTiles.begin(), m_selectedTiles.end(), selectedTile);
-    if(searchedTile != m_selectedTiles.end())
-      m_selectedTiles.erase(searchedTile);
-    // insert it otherwise
-    else{
-      if(!addKeyPressed)
-				m_selectedTiles.clear();
-      m_selectedTiles.push_back(selectedTile);
-	  
-    }
-    
-    m_dragStart = {-1, -1};
-  }
-
-  else{
-    // we're dragging
-		m_dragState = DRAGSTATE_NONE;
-    m_selectedTiles.clear();
-    auto index1 = getHoveredTile(m_dragStart.first, m_dragStart.second);
-    auto index2 = getHoveredTile(event.x, event.y);
-    m_dragStart = {-1, -1};
+	int x = 0;
+	int y = 0;
+	SDL_GetMouseState(&x, &y);
+	if(!pointInRect({x, y}, {m_x, m_y, m_width, m_height}))
+		return;
 	
-    auto && leftIndex = index1.first < index2.first ? index1 : index2;
-    auto && rightIndex = index1.first > index2.first ? index1 : index2;
+	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+	assert(pWidgetState != nullptr);
 
-    for(int i = leftIndex.first; i <= rightIndex.first; i++){
-      int j = leftIndex.second;
-      if(j <= rightIndex.second){
-				for(; j <= rightIndex.second; j++)
-					m_selectedTiles.push_back(std::make_pair(i, j));
-      }
-      else{
-				for(; j >= rightIndex.second; j--)
-					m_selectedTiles.push_back(std::make_pair(i, j));
-      }
-    }
-  }
+	boost::optional<std::shared_ptr<UI::Control>> maybeControl =
+		pWidgetState->peekControl();
+
+	// TileCopyControl
+	if(maybeControl != boost::none){
+		std::shared_ptr<TileCopyControl> pTileCopyControl =
+			boost::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
+		if(pTileCopyControl != nullptr){
+		
+			// find the current loccation in the map
+			std::pair<int, int> hoveredTile = getHoveredTile(x, y);
+			if(hoveredTile.first != -1 && hoveredTile.second != -1)
+				{
+					m_pMap->setTile(hoveredTile.first, hoveredTile.second, pTileCopyControl->getIndex());
+				}
+		}// end tile copy control
+
+	}
 }
 
 void MapPanel::handleLeftMouseButtonDown(SDL_MouseButtonEvent event){
-  if(isInMap(event.x, event.y)){
-    if(m_dragState == DRAGSTATE_NONE){
-      m_dragState = DRAGSTATE_SELECT;
-      m_dragStart = {event.x, event.y};
-    }
-
-  }
 }
 
 void MapPanel::handleMiddleMouseButtonUp(SDL_MouseButtonEvent event){
-  if(m_dragState == DRAGSTATE_PAN){
-    m_dragState = DRAGSTATE_NONE;
-  }
 }
 
 void MapPanel::handleMiddleMouseButtonDown(SDL_MouseButtonEvent event){
-  if(isInMap(event.x, event.y)){
-    if(event.button == SDL_BUTTON_MIDDLE && m_dragState == DRAGSTATE_NONE){
-      m_dragState = DRAGSTATE_PAN;
-      m_dragStart = {event.x, event.y};
-			m_lastMotionLocation = {event.x, event.y};
-    }
-  }
 }
 
 
@@ -286,7 +226,7 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
   if(event.type == SDL_KEYDOWN){
     switch(event.keysym.sym){
     case SDLK_EQUALS:
-      {
+      {	
     const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
     CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
 

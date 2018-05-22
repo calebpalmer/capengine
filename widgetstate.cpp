@@ -84,12 +84,12 @@ void WidgetState::render(){
 
 //! @copydoc GameState::update()
 void WidgetState::update(double ms){
-	if(m_pQueuedUiControl != nullptr){
+	if(m_pQueuedUiControl != boost::none){
 
 		assert(m_pUiControls != nullptr);
-		m_pUiControls->push_back(m_pQueuedUiControl);
+		m_pUiControls->push_back(*m_pQueuedUiControl);
 
-		m_pQueuedUiControl.reset();
+		m_pQueuedUiControl = boost::none;
 	}
 	
 	for(auto && pWindow : m_pWindows){
@@ -219,6 +219,7 @@ void WidgetState::handleWindowEvent(SDL_WindowEvent event){
  \param pControl - The control to add.
 */
 void WidgetState::addControl(std::shared_ptr<UI::Control> pControl){
+	// TODO What should it do if there is a queued control already?
 	assert(pControl != nullptr);
 	m_pQueuedUiControl = pControl;
 }
@@ -253,6 +254,5 @@ boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
 		return boost::none;
 	}
 }
-
 
 }} // namespace CapEngine::UI

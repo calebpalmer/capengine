@@ -5,12 +5,23 @@
 #include "captypes.h"
 #include "collision.h"
 #include "VideoManager.h"
+#include "CapEngineException.h"
 
 #include <memory>
 #include <fstream>
 
 namespace CapEngine{
-  
+
+  //! Exception class for when an invalid location index into the map.
+  class MapIndexException : public CapEngineException {
+  public:
+    MapIndexException(int x, int y);
+    const char* what();
+  private:
+    int m_x; //!< The x index.
+    int m_y; //!< The y index.
+  };
+
   class Map2D{
 
   public:
@@ -49,6 +60,7 @@ namespace CapEngine{
     void setWidth(int width);
     void setHeight(int height);
     void deleteTile(int x, int y);
+    void setTile(int x, int y, int tileSetIndex);
     
 		std::shared_ptr<TileSet> getTileSet();
 		
@@ -61,9 +73,10 @@ namespace CapEngine{
     std::string tileSetPath;
     std::shared_ptr<TileSet> tileSet;
     std::vector<std::vector<TileTup>> tiles;
-    Surface* surface;
-    unsigned int width;
-    unsigned int height;
+    Surface* surface = nullptr;
+    bool m_surfaceDirty = true;
+    unsigned int width = 0;
+    unsigned int height = 0;
   };
 
 }

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.9)
 
 project(capengine)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/cmake-scripts")
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/cmake-scripts")
+LIST(APPEND CMAKE_MODULE_PATH "./cmake/cmake-scripts") 
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
@@ -36,7 +37,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp mapobjectdescriptor.cpp eventsubscriber.cpp
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
-	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp editorutils.cpp quaternion.cpp
+	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp uiutils.cpp quaternion.cpp
 	    )
 
 add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)

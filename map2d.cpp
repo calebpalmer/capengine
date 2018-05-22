@@ -13,10 +13,32 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 using namespace std;
 
 namespace CapEngine{
+
+//! Constructor.
+/**
+  \param x
+    \li The x index into the map.
+  \param y
+    \li The y index into the map.
+*/
+MapIndexException::MapIndexException(int x, int y) 
+  : CapEngineException(""), m_x(x), m_y(y)
+{
+}
+
+//! Returns the exception message.
+/**
+  \return 
+    \li The exception message.
+*/
+const char* MapIndexException::what(){
+  return (boost::format("Invalid map index: %1%, %2%") % m_x % m_y).str().c_str();
+}
 
 Map2D::~Map2D(){
   CAP_THROW_ASSERT(Locator::videoManager != nullptr, "Video Manager is null");
@@ -181,7 +203,7 @@ void Map2D::drawSurface(){
   if(Locator::videoManager->initialized == false){
     BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
   }
-  surface = Locator::videoManager->createSurface(width, height);
+  SDL_Surface* newSurface = Locator::videoManager->createSurface(width, height);
 
 	std::shared_ptr<SDL_Surface> pTileSurface = tileSet->getSurface();
 	assert(pTileSurface != nullptr);
@@ -193,21 +215,11 @@ void Map2D::drawSurface(){
     for(auto && column : row){
       int destX = columnNum * tileSet->getTileSize();
       int destY = rowNum * tileSet->getTileSize();;
-      Locator::videoManager->blitSurface(pTileSurface.get(), column.tile.xpos, column.tile.ypos, column.tile.width, column.tile.height, surface, destX, destY);
+      Locator::videoManager->blitSurface(pTileSurface.get(), column.tile.xpos, column.tile.ypos, column.tile.width, column.tile.height, newSurface, destX, destY);
       columnNum++;
     }
     rowNum++;
   }
-
-  // vector<TileTup>::iterator iter;
-  // for(iter = tiles.begin(); iter != tiles.end(); iter++){
-  //   if(xRes >= width){
-  //     xRes = 0;
-  //     yRes += iter->tile.height;
-  //   }
-  //   Locator::videoManager->blitSurface((tileSet->surface), iter->tile.xpos, iter->tile.ypos, iter->tile.width, iter->tile.height, surface, xRes, yRes);
-  //   xRes += iter->tile.width;
-  // }
 
 #ifdef DEBUG
   boost::filesystem::path path(this->configPath);
@@ -216,13 +228,16 @@ void Map2D::drawSurface(){
   filename << path.stem() << ".bmp";
   boost::filesystem::path filePath = dir /= boost::filesystem::path(filename.str());
     
-  Locator::videoManager->saveSurface(surface, filePath.string());
+  Locator::videoManager->saveSurface(newSurface, filePath.string());
   std::ostringstream msg;
   msg << "Saved map surface as " << filePath;
   Locator::logger->log(msg.str(), Logger::CDEBUG);
 #endif
 
-  
+  if(surface == nullptr)
+    SDL_FreeSurface(surface);
+
+  surface = newSurface;
   Locator::logger->log("Drew consolidated map texture", Logger::CDEBUG, __FILE__, __LINE__);
 }
 
@@ -280,6 +295,12 @@ vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle& mbr){
 }
 
 Surface* Map2D::getSurface(){
+
+  if(m_surfaceDirty){
+    drawSurface();
+		m_surfaceDirty = false;
+	}
+
   return surface;
 }
 
@@ -330,6 +351,37 @@ void Map2D::deleteTile(int x, int y){
 std::shared_ptr<TileSet> Map2D::getTileSet(){
 	return tileSet;
 }
+
+//! Set a tile at the given index.
+/**
+  \param x
+    \li The x location of the tile to set.
+  \param y
+    \li The y location of the tile to set.
+*/
+void Map2D::setTile(int x, int y, int tileSetIndex){
+  assert(tileSet != nullptr);
+  int widthInTiles = this->width / tileSet->getTileWidth();
+  int heightInTiles = this->height / tileSet->getTileHeight();
+
+  if(x > widthInTiles || y > heightInTiles ||
+    x < 0 || y < 0)
+  {
+    throw MapIndexException(x, y);
+  }
+
+  Tile tile = tileSet->getTile(tileSetIndex);
+
+  TileTup tiletup;
+  tiletup.tileLookupStatus =TileLookupStatus_Found;
+  tiletup.index = tileSetIndex;
+  tiletup.tile = tile;
+
+  assert(static_cast<size_t>(y) < tiles.size());
+  assert(static_cast<size_t>(x) < tiles[y].size());
+  tiles[y][x] = tiletup;
+	m_surfaceDirty =  true;
+} 
 
 
 } // namespace CapEngine

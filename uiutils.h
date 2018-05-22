@@ -1,5 +1,5 @@
-#ifndef CAPENGINE_EDITORUTILS_H
-#define CAPENGINE_EDITORUTILS_H
+#ifndef CAPENGINE_UIUTILS_H
+#define CAPENGINE_UIUTILS_H
 
 #include "widgetstate.h"
 
@@ -12,4 +12,4 @@ namespace CapEngine { namespace UI {
 
 }}
 
-#endif // CAPENGINE_EDITORUTILS_H
+#endif // CAPENGINE_UIUTILS_H

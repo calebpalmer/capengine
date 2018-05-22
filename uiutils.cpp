@@ -1,4 +1,4 @@
-#include "editorutils.h"
+#include "uiutils.h"
 
 #include "locator.h"
 

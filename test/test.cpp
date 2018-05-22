@@ -2,6 +2,7 @@
 #include <cppunit/TestCaller.h>
 #include <cstdlib>
 
+#include "../filesystem.h"
 #include "vectortest.h"
 #include "capcommontest.h"
 #include "xml_parser_test.h"
@@ -11,6 +12,9 @@
 #include "quaterniontest.h"
 
 int main(){
+	// set current directory
+	CapEngine::setCurrentDir(CapEngine::stripPath(CapEngine::getCurrentExecutablePath()));
+	
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(VectorTest::suite());
   runner.addTest(CapCommonTest::suite());
