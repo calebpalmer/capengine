@@ -9,6 +9,7 @@
 #include "widgetstate.h"
 
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/pointer_cast.hpp>
 
 namespace CapEngine { namespace UI {
 
@@ -153,6 +154,13 @@ void TileSetPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 				boost::any maybeWidgetState = Locator::locate(WidgetState::kWidgetStateLocatorId);
 				auto pWidgetState = boost::any_cast<std::shared_ptr<WidgetState>>(maybeWidgetState);
 				assert(pWidgetState != nullptr);
+
+				// if the top control is a TileCopyControl, remove it
+				boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
+				if(maybeControl != boost::none &&
+					 boost::dynamic_pointer_cast<TileCopyControl>(*maybeControl) != nullptr)
+					pWidgetState->popControl();
+				
 				pWidgetState->addControl(pTileCopyControl);
 				
 				break;
