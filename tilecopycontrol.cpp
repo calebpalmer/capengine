@@ -57,7 +57,7 @@ void TileCopyControl::render(){
 }
 
 
-//! load the texture that ges drawn with the cursor
+//! load the texture that gets drawn with the cursor
 void TileCopyControl::loadTexture(){
 	assert(Locator::videoManager != nullptr);
 	assert(m_pTileSet != nullptr);
@@ -81,8 +81,8 @@ void TileCopyControl::loadTexture(){
 
 	// add alpha for some transparency
 	uint8_t alpha = 128;
-	for(size_t x = 0; x < tileWidth; x++){
-		for(size_t y = 0; y < tileHeight; y++){
+	for(size_t y = 0; y < tileWidth; y++){
+		for(size_t x = 0; x < tileHeight; x++){
 			Pixel pixel = getPixelComponents(pSurface.get(), x, y);
 			pixel.a = alpha;
 			writePixel(pSurface.get(), x, y, pixel);
@@ -98,8 +98,6 @@ void TileCopyControl::loadTexture(){
 //! \copydoc Widget::handleMouseButtonEvent
 void TileCopyControl::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 
-	if(event.type == SDL_MOUSEBUTTONUP){
-	}
 }
 
 //! \copydoc Widget::handleKeyboardEvent

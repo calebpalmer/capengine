@@ -246,9 +246,9 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine:
 
   // calculate offset into pixel buffer of (x, y)
   // pitch is the length of a row in pixels
-  int offset = (surface->pitch / surface->format->BytesPerPixel)
-    * (yNew * surface->format->BytesPerPixel)
-    + (x * surface->format->BytesPerPixel);
+  int offset = (surface->pitch / surface->format->BytesPerPixel) // how many pixels in a row
+    * (yNew * surface->format->BytesPerPixel) // select the row
+    + (x * surface->format->BytesPerPixel); // add the offset in the row
 
   assert(offset >= 0 && offset <= surface->pitch * surface ->h);
 	
@@ -284,7 +284,7 @@ void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, CapEngine:
  \param pixel - The pixel to write.
 */
 void CapEngine::writePixel(CapEngine::Surface* surface, int x, int y, const Pixel &pixel){
-	writePixel(surface, x, y, Colour({pixel.r, pixel.b, pixel.g, pixel.a}));
+	writePixel(surface, x, y, Colour({pixel.r, pixel.g, pixel.b, pixel.a}));
 }
 
 void CapEngine::writePixel(Uint32* buffer, int x, int y, CapEngine::Colour colour, int bufWidth, int bufHeight){
