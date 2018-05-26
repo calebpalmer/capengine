@@ -20,8 +20,9 @@
 #include <sstream>
 #include <exception>
 #include <functional>
+#include <boost/polymorphic_pointer_cast.hpp>
 
-using namespace CapEngine;
+namespace CapEngine { namespace UI {
 
 namespace {
 
@@ -46,20 +47,34 @@ EditorArgs EditorArgs::parseArgs(int argc, char* argv[]){
   return EditorArgs(mapPath);
 }
 
-Editor::Editor(EditorArgs args)
-  : m_mapPath(args.m_map)
+Editor::Editor(const EditorArgs &args)
+  : WidgetState(), m_mapPath(args.m_map)
 {
 	m_pMap.reset(new Map2D(m_mapPath));
 	m_pTileset = m_pMap->getTileSet();
+}
+
+
+//! creates an Editor WidgetState
+/** 
+ \param args
+   The parsed command line arguments.
+ \return 
+   The pointer to a new Editor object.
+*/
+std::shared_ptr<Editor> Editor::create(const EditorArgs &args){
+	std::shared_ptr<Editor> pEditor(new Editor(args));
+	Locator::insert(kWidgetStateLocatorId, boost::polymorphic_pointer_cast<WidgetState>(pEditor));
+	return pEditor;
 }
 
 //! called by WidgetState when starting up.
 /** 
  \return - true if successful, false otherwise
 */
-bool Editor::onLoad(CapEngine::UI::WidgetState &widgetState){
+bool Editor::onLoad(){
 
-	std::shared_ptr<UI::WindowWidget> pWindow = widgetState.createWindow("Editor", 1280, 800);
+	std::shared_ptr<UI::WindowWidget> pWindow = this->createWindow("Editor", 1280, 800);
 	pWindow->show();
 
 	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2);
@@ -78,21 +93,23 @@ bool Editor::onLoad(CapEngine::UI::WidgetState &widgetState){
 /** 
  \return - true if successful, false otherwise.
 */
-bool Editor::onDestroy(CapEngine::UI::WidgetState& /*widgetStat*/){
+bool Editor::onDestroy(){
 	return true;
 }
 
+}} // CapEngine::UI
+
 int main(int argc, char* argv[]){
   try{
-    WindowParams windowParams;
+		CapEngine::WindowParams windowParams;
 		CapEngine::init(windowParams, true);
 		
-    auto args = EditorArgs::parseArgs(argc, argv);
-		Editor editor(args);
+    auto args = CapEngine::UI::EditorArgs::parseArgs(argc, argv);
 
-		std::shared_ptr<UI::WidgetState> pWidgetState =
-			UI::WidgetState::create(std::bind(&Editor::onLoad, &editor, std::placeholders::_1), std::bind(&Editor::onDestroy, &editor, std::placeholders::_1));
-		CapEngine::startLoop(pWidgetState);
+		// std::shared_ptr<CapEngine::UI::WidgetState> pWidgetState =
+		// 	CapEngine::UI::WidgetState::create(std::bind(&CapEngine::UI::Editor::onLoad, &editor, std::placeholders::_1), std::bind(&CapEngine::UI::Editor::onDestroy, &editor, std::placeholders::_1));
+		std::shared_ptr<CapEngine::UI::Editor> pEditor = CapEngine::UI::Editor::create(args);
+		CapEngine::startLoop(pEditor);
   }
   catch(const boost::exception& e){
     std::cerr << boost::diagnostic_information(e) << std::endl;
@@ -102,5 +119,6 @@ int main(int argc, char* argv[]){
 		std::cerr << boost::diagnostic_information(e) << std::endl;
 		return -1;
 	}
+	return 0;
 }
 

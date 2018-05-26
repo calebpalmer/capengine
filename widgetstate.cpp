@@ -8,6 +8,10 @@
 namespace CapEngine { namespace UI {
 
 
+//! default Constructor
+WidgetState::WidgetState()
+	: WidgetState([](WidgetState&) {return true;}, [](WidgetState&) {return true;}) {}
+
 //! Constructor
 /** 
  \param onLoadFunctor - Code to call when loading the GameState
@@ -53,7 +57,6 @@ std::shared_ptr<WidgetState> WidgetState::create(std::function<bool(WidgetState&
 	Locator::insert(kWidgetStateLocatorId, pWidgetState);
 	return pWidgetState;
 }
-
 
 //! @copydoc GameState::onLoad()
 bool WidgetState::onLoad(){

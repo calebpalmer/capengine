@@ -39,7 +39,8 @@ class WidgetState : public GameState {
 	static constexpr char const* kControlStackLocatorId = "WindowWidgetControlStack";
 	static constexpr char const* kWidgetStateLocatorId = "WidgetState";
 
-private:
+protected:
+	WidgetState();
 	WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
 							std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
 

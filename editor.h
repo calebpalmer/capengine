@@ -13,9 +13,9 @@
 #include <map>
 #include <boost/signals2.hpp>
 
-namespace CapEngine {
+namespace CapEngine { namespace UI {
 
-  class EditorArgs{
+  class EditorArgs {
   public:
   EditorArgs(std::string mapPath) :
     m_map(mapPath) {}
@@ -26,14 +26,16 @@ namespace CapEngine {
     Uint32 m_windowId = -1;
   };
 
-  class Editor {
+  class Editor : public WidgetState {
   public:
-    Editor(EditorArgs args);
-
-		bool onLoad(CapEngine::UI::WidgetState &widgetState);
-		bool onDestroy(CapEngine::UI::WidgetState &widgetState);
+		static std::shared_ptr<Editor> create(const EditorArgs &args);
+		
+		bool onLoad() override;
+		bool onDestroy() override;
 		
   private:
+    Editor(const EditorArgs &args);
+
 		//! The path to the map configuration path
     std::string m_mapPath;
 		//! The tileset
@@ -45,6 +47,6 @@ namespace CapEngine {
 		//! The tileset panel
 		std::shared_ptr<UI::TileSetPanel> m_pTileSetPanel;
 	};
-}
+}} // CapEngine::UI
 
 #endif // EDITOR_H
