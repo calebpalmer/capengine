@@ -23,6 +23,7 @@ class WidgetState : public GameState {
 	bool onDestroy() override;
 
 	std::shared_ptr<WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
+	
 	void addControl(std::shared_ptr<UI::Control> pControl);
 	boost::optional<std::shared_ptr<UI::Control>> popControl();
 	boost::optional<std::shared_ptr<UI::Control>> peekControl();

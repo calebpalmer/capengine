@@ -45,7 +45,7 @@ add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
 add_executable(widgettest widget_test.cpp)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-add_executable(runtests test/test.cpp)	  
+add_executable(runtests test/test.cpp)
 
 
 target_link_libraries(capengine ${SDL2_LIBRARY} 
@@ -83,3 +83,8 @@ target_link_libraries(widgettest capengine
 		      libsndfile.so
 		      )
 
+
+add_custom_target(
+  doc
+  COMMAND doxygen doxygenfile
+)		    
