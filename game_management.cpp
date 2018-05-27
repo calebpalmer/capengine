@@ -93,6 +93,16 @@ void pushState(std::shared_ptr<GameState> pGameState){
   Runner::getInstance().pushState(std::move(pGameState));
 }
 
+
+//! get the state at the top of the stack
+/** 
+ \return 
+   The GameState
+*/
+std::shared_ptr<GameState> peekState(){
+	return Runner::getInstance().peekState();
+}
+
 //! creates a Window Widget
 /**
 

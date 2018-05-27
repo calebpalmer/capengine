@@ -227,12 +227,12 @@ void MapPanel::handleKeyboardEvent(SDL_KeyboardEvent event){
     switch(event.keysym.sym){
     case SDLK_EQUALS:
       {	
-    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
-    CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
-
-	if(keyboardState[SDL_SCANCODE_LSHIFT] == 1
-	   || keyboardState[SDL_SCANCODE_RSHIFT] == 1)
-	  scaleMatrix(m_scaleMatrix, kScaleIncrement);
+				const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+				CAP_THROW_ASSERT(keyboardState != nullptr, "SDL Keyboard state returned null");
+				
+				if(keyboardState[SDL_SCANCODE_LSHIFT] == 1
+					 || keyboardState[SDL_SCANCODE_RSHIFT] == 1)
+					scaleMatrix(m_scaleMatrix, kScaleIncrement);
       }
       break;
     case SDLK_MINUS:

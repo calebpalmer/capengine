@@ -97,6 +97,25 @@ bool Editor::onDestroy(){
 	return true;
 }
 
+
+//! \copydoc WidgetState::handleKeyboardEvent
+void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
+	WidgetState::handleKeyboardEvent(event);
+
+	if(event.type == SDL_KEYUP){
+		switch(event.keysym.sym){
+		case SDLK_s:
+			doSave();
+			break;
+		}
+	}
+}
+
+//! Save the map
+void Editor::doSave(){
+	this->showOkCancelDialog("Save?", [](bool) {} );
+}
+
 }} // CapEngine::UI
 
 int main(int argc, char* argv[]){

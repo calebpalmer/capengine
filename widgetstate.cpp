@@ -2,6 +2,7 @@
 
 #include "game_management.h"
 #include "locator.h"
+#include "dialogstate.h"
 
 #include <functional>
 
@@ -257,5 +258,18 @@ boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
 		return boost::none;
 	}
 }
+
+//! Shows a yes/no modal dialog
+/** 
+ \param msg
+   The message to display
+ \param callback
+   \The callback function to call.
+*/
+void WidgetState::showOkCancelDialog(const std::string &msg, std::function<void(bool)> callback){
+	std::shared_ptr<DialogState> pDialogState = DialogState::create(msg, callback);
+	CapEngine::pushState(pDialogState);
+}
+
 
 }} // namespace CapEngine::UI

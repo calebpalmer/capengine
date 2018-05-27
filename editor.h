@@ -32,9 +32,13 @@ namespace CapEngine { namespace UI {
 		
 		bool onLoad() override;
 		bool onDestroy() override;
+
+		void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 		
   private:
     Editor(const EditorArgs &args);
+
+		void doSave();
 
 		//! The path to the map configuration path
     std::string m_mapPath;

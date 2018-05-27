@@ -2,6 +2,8 @@
 
 #include "VideoManager.h"
 #include "locator.h"
+#include "game_management.h"
+#include "dialogstate.h"
 
 namespace CapEngine { namespace UI {
 

@@ -36,6 +36,19 @@ void Runner::pushState(std::shared_ptr<GameState> pGameState){
   }
 }
 
+
+//! Get the state at the top of the stack.
+/** 
+ \return 
+   The GameState if there is one.  null if their isn't.
+*/
+std::shared_ptr<GameState> Runner::peekState(){
+	if(m_gameStates.size() > 0)
+		return m_gameStates.back();
+
+	return std::shared_ptr<GameState>();
+}
+
 void Runner::switchState(std::shared_ptr<GameState> pGameState){
   while(!m_gameStates.empty()){
     this->popState();

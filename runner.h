@@ -22,6 +22,7 @@ namespace CapEngine{
     void switchState(std::shared_ptr<GameState> pGameState);
     void popState();
     void pushState(std::shared_ptr<GameState> pGameState);
+		std::shared_ptr<GameState> peekState();
     void receiveEvent(const SDL_Event event, CapEngine::Time* time) override;  // IEventSubscriber
     void loop();
     void end();

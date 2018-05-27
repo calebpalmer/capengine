@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 #include <limits>
+#include <functional>
 #include <boost/signals2.hpp>
 
 namespace CapEngine {

@@ -6,6 +6,7 @@
 #include "windowwidget.h"
 #include "control.h"
 
+#include <map>
 #include <functional>
 #include <boost/signals2/signal.hpp>
 #include <boost/optional.hpp>
@@ -16,6 +17,7 @@ class WidgetState : public GameState {
  public:
 	static std::shared_ptr<WidgetState> create(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
 																			std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
+	virtual ~WidgetState() = default;
 	
 	void render() override;
 	void update(double ms) override;
@@ -23,6 +25,7 @@ class WidgetState : public GameState {
 	bool onDestroy() override;
 
 	std::shared_ptr<WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
+	void showOkCancelDialog(const std::string &msg, std::function<void(bool)> callback);
 	
 	void addControl(std::shared_ptr<UI::Control> pControl);
 	boost::optional<std::shared_ptr<UI::Control>> popControl();
@@ -45,6 +48,9 @@ protected:
 	WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
 							std::function<bool(WidgetState& widgetState)> onDestroyFunctor);
 
+	WidgetState(const WidgetState&) = delete;
+	WidgetState& operator=(const WidgetState&) = delete;
+	
 	//! The list of windows
 	std::vector<std::shared_ptr<UI::WindowWidget>> m_pWindows;
 	//! callback function that is called when widget state is loaded

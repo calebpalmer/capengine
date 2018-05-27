@@ -18,6 +18,7 @@ namespace CapEngine {
   void switchState(std::shared_ptr<GameState> pGameState);
   void popState();
   void pushState(std::shared_ptr<GameState> pGameState);
+	std::shared_ptr<GameState> peekState();
 	std::shared_ptr<UI::WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
 }
 
