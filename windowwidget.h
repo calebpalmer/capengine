@@ -41,6 +41,7 @@ namespace CapEngine {
 			void show();
 			void close();
 			void setLayout(std::shared_ptr<Widget> pLayout);
+			boost::signals2::scoped_connection registerWindowClosedSignal(std::function<void(WindowWidget*)> slot);
 
 		private:
 			WindowWidget(const std::string &name, int width, int height, bool resizable=true);
@@ -64,6 +65,9 @@ namespace CapEngine {
 			boost::signals2::scoped_connection m_handleMouseWheelConnection;
 			boost::signals2::scoped_connection m_handleKeyboardConnection;
 			boost::signals2::scoped_connection m_handleWindowConnection;
+
+			// signals
+			boost::signals2::signal<void(WindowWidget*)> m_windowClosedSignal;
 		};
 
 	}

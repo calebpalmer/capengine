@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-using namespace CapEngine;
+namespace CapEngine {
 
 Runner::Runner() : m_quit(false), m_msPerUpdate(16.67), m_showFPS(false) {}
 
@@ -26,6 +26,9 @@ void Runner::popState(){
     if(pPoppedState->onDestroy() == false){
       Locator::logger->log("Failed to destroy popped state", Logger::CWARNING, __FILE__, __LINE__);
     }
+
+		if(m_gameStates.size() == 0)
+			m_quit = true;
   }
 }
 
@@ -92,7 +95,8 @@ void Runner::exit(){
 }
 
 void Runner::update(){
-  (m_gameStates.back())->update(m_msPerUpdate);
+	if(m_gameStates.size() > 0)
+		(m_gameStates.back())->update(m_msPerUpdate);
 
 	// update any Widgets (usually WindowWidgets) if there are any
 	for(auto && pWidget : m_widgets){
@@ -102,23 +106,27 @@ void Runner::update(){
 
 void Runner::render(double frameFactor){
   Locator::videoManager->clearAll();
-  m_gameStates.back()->render();
+	if(m_gameStates.size() > 0)
+		m_gameStates.back()->render();
   Locator::videoManager->drawAll();
 }
 
 void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   if(event.type == SDL_WINDOWEVENT){
-    if(event.window.event == SDL_WINDOWEVENT_CLOSE){
+    if(event.window.event == SDL_WINDOWEVENT_CLOSE && m_defaultQuitEventsEnabled){
       m_quit = true;
     }
   }
   
   // exit when 'q' is pressed
   if ((event.type == SDL_KEYUP && ((SDL_KeyboardEvent*)&event)->keysym.sym == SDLK_q)) {
-    m_quit = true;
-    Locator::logger->log("quitting. ", Logger::CDEBUG, __FILE__, __LINE__);
-    return;
+		if(m_defaultQuitEventsEnabled){
+			m_quit = true;
+			Locator::logger->log("quitting. ", Logger::CDEBUG, __FILE__, __LINE__);
+			return;
+		}
   }
+	
   // update the keyboard
   else if(event.type == SDL_KEYUP || event.type == SDL_KEYDOWN){
     SDL_Keycode ksym = ((SDL_KeyboardEvent*)&event)->keysym.sym;
@@ -164,27 +172,27 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
     if(((SDL_MouseButtonEvent*)&event)->type == SDL_MOUSEBUTTONDOWN){
       switch(((SDL_MouseButtonEvent*)&event)->button){
       case SDL_BUTTON_LEFT:
-	Locator::mouse->setButtonState(0, true);
-	break;
+				Locator::mouse->setButtonState(0, true);
+				break;
       case SDL_BUTTON_MIDDLE:
-	Locator::mouse->setButtonState(1, true);
-	break;
+				Locator::mouse->setButtonState(1, true);
+				break;
       case SDL_BUTTON_RIGHT:
-	Locator::mouse->setButtonState(2, true);
-	break;
+				Locator::mouse->setButtonState(2, true);
+				break;
       }
     }
     if(((SDL_MouseButtonEvent*)&event)->type == SDL_MOUSEBUTTONUP){
       switch(((SDL_MouseButtonEvent*)&event)->button){
       case SDL_BUTTON_LEFT:
-	Locator::mouse->setButtonState(0, false);
-	break;
+				Locator::mouse->setButtonState(0, false);
+				break;
       case SDL_BUTTON_MIDDLE:
-	Locator::mouse->setButtonState(1, false);
-	break;
+				Locator::mouse->setButtonState(1, false);
+				break;
       case SDL_BUTTON_RIGHT:
-	Locator::mouse->setButtonState(2, false);
-	break;
+				Locator::mouse->setButtonState(2, false);
+				break;
       }
     }
   }
@@ -193,20 +201,31 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
     SDL_Keycode ksym = ((SDL_KeyboardEvent*)&event)->keysym.sym;
     if(ksym == SDLK_TAB){
       if(m_showFPS == true){
-	m_showFPS = false;
-	Locator::videoManager->displayFPS(false);
+				m_showFPS = false;
+				Locator::videoManager->displayFPS(false);
       }
       else{
-	m_showFPS = true;
-	std::ostringstream ttfStream;
-	ttfStream << getCurrentDir() << "/res/fonts/tahoma.ttf";
-	Uint8 r = 255;
-	Uint8 g = 255;
-	Uint8 b = 255;
-	Locator::videoManager->displayFPS(true, ttfStream.str(), r, g, b);
+				m_showFPS = true;
+				std::ostringstream ttfStream;
+				ttfStream << getCurrentDir() << "/res/fonts/tahoma.ttf";
+				Uint8 r = 255;
+				Uint8 g = 255;
+				Uint8 b = 255;
+				Locator::videoManager->displayFPS(true, ttfStream.str(), r, g, b);
       }
 
     }
   }
 
 }
+
+//! Enables/Disables default quit events (window close and q key)
+/** 
+ \param enabled
+   if true then enabled, false then disabled.
+*/
+void Runner::setDefaultQuitEvents(bool enabled){
+	m_defaultQuitEventsEnabled = enabled;
+}
+
+} // namespace CapEngine

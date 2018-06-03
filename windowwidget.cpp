@@ -53,6 +53,7 @@ void WindowWidget::show(){
 	m_windowId = Locator::videoManager->createNewWindow(windowParams);
 
 	Locator::videoManager->setBackgroundColour(m_backgroundColour);
+	m_shown = true;
 }
 
 //! Close the window
@@ -60,6 +61,9 @@ void WindowWidget::close(){
 	CAP_THROW_ASSERT(Locator::videoManager != nullptr, "VideoManager is null");
 	Locator::videoManager->closeWindow(m_windowId);
 	m_windowId = VideoManager::kInvalidWindowId;
+
+	// call signal to notify listeners
+	m_windowClosedSignal(this);
 }
 
 //! Destructor
@@ -142,11 +146,13 @@ void WindowWidget::update(double ms){
 
 //! @copydoc Widget::render()
 void WindowWidget::render(){
-	CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
-	CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "WindowId is invalid");
-	
-	if(m_pLayout)
-		m_pLayout->render();
+	if(m_shown){
+		CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
+		CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId, "WindowId is invalid");
+
+		if(m_pLayout)
+			m_pLayout->render();
+	}
 }
 
 //! @copydoc Widget::handleMouseMotionEvent()
@@ -177,12 +183,19 @@ void WindowWidget::handleKeyboardEvent(SDL_KeyboardEvent event) {
 void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
 	if(event.windowID == m_windowId){
 
-		CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
-			
-		int width = Locator::videoManager->getWindowWidth(m_windowId);
-		int height = Locator::videoManager->getWindowHeight(m_windowId);
+		if(event.event == SDL_WINDOWEVENT_CLOSE){
+			this->close();
+			m_shown = false;
+		}
 
-		this->updateSize(width, height);
+		else{
+			CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
+			
+			int width = Locator::videoManager->getWindowWidth(m_windowId);
+			int height = Locator::videoManager->getWindowHeight(m_windowId);
+
+			this->updateSize(width, height);
+		}
 	}
 }
 
@@ -205,6 +218,18 @@ void WindowWidget::registerSignals(EventSubscriber &eventSubscriber){
 
 	m_handleWindowConnection =
 		eventSubscriber.m_windowEventSignal.connect(std::bind(&WindowWidget::handleWindowEvent, this, std::placeholders::_1));
+}
+
+
+//! Registers a slot with the window closed signal.
+/** 
+ \param slot
+   \li The slot to register.
+ \return 
+   \li the signal connection objet
+*/
+boost::signals2::scoped_connection WindowWidget::registerWindowClosedSignal(std::function<void(WindowWidget*)> slot){
+	return m_windowClosedSignal.connect(slot);
 }
 
 }} // namespace CapEngine::UI

@@ -39,6 +39,8 @@ class WidgetState : public GameState {
 	virtual void handleKeyboardEvent(SDL_KeyboardEvent event);
 	virtual void handleWindowEvent(SDL_WindowEvent event);
 
+	virtual void handleWindowCloseSignal(WindowWidget* windowWidget);
+
  public:
 	static constexpr char const* kControlStackLocatorId = "WindowWidgetControlStack";
 	static constexpr char const* kWidgetStateLocatorId = "WidgetState";
@@ -52,7 +54,9 @@ protected:
 	WidgetState& operator=(const WidgetState&) = delete;
 	
 	//! The list of windows
-	std::vector<std::shared_ptr<UI::WindowWidget>> m_pWindows;
+	std::vector<std::shared_ptr<UI::WindowWidget>> m_windows;
+	//! signal connections with window
+	std::vector<boost::signals2::scoped_connection> m_windowConnections;
 	//! callback function that is called when widget state is loaded
 	std::function<bool(WidgetState& widgetState)> m_onLoadFunctor;
 	//! callback function that is called when widget state is destroyed

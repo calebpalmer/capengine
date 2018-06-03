@@ -113,7 +113,9 @@ void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
 
 //! Save the map
 void Editor::doSave(){
-	this->showOkCancelDialog("Save?", [](bool) {} );
+	this->showOkCancelDialog("Save?", [](bool) {
+	  
+	});
 }
 
 }} // CapEngine::UI
@@ -125,8 +127,6 @@ int main(int argc, char* argv[]){
 		
     auto args = CapEngine::UI::EditorArgs::parseArgs(argc, argv);
 
-		// std::shared_ptr<CapEngine::UI::WidgetState> pWidgetState =
-		// 	CapEngine::UI::WidgetState::create(std::bind(&CapEngine::UI::Editor::onLoad, &editor, std::placeholders::_1), std::bind(&CapEngine::UI::Editor::onDestroy, &editor, std::placeholders::_1));
 		std::shared_ptr<CapEngine::UI::Editor> pEditor = CapEngine::UI::Editor::create(args);
 		CapEngine::startLoop(pEditor);
   }

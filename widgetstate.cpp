@@ -15,11 +15,11 @@ WidgetState::WidgetState()
 
 //! Constructor
 /** 
- \param onLoadFunctor - Code to call when loading the GameState
- \param onDestroyFunctor - Function to call when destroying the GameState
+		\param onLoadFunctor - Code to call when loading the GameState
+		\param onDestroyFunctor - Function to call when destroying the GameState
 */
 WidgetState::WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
-						std::function<bool(WidgetState& widgetState)> onDestroyFunctor) :
+												 std::function<bool(WidgetState& widgetState)> onDestroyFunctor) :
 	m_onLoadFunctor(onLoadFunctor), m_onDestroyFunctor(onDestroyFunctor) {
 
 	// create a register a control stack with the locator
@@ -42,16 +42,19 @@ WidgetState::WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFun
 
 	m_windowEventConnection =
 		Locator::eventSubscriber->m_windowEventSignal.connect(std::bind(&WidgetState::handleWindowEvent, this, std::placeholders::_1));
+
+	// disable default quit events
+	CapEngine::setDefaultQuitEvents(false);
 }
 
 //! creates a WidgetState
 /** 
- \param onLoadFunctor - Code to call when loading the GameState
- \param onDestroyFunctor - Function to call when destroying the GameState
- \return - The WidgetState
+		\param onLoadFunctor - Code to call when loading the GameState
+		\param onDestroyFunctor - Function to call when destroying the GameState
+		\return - The WidgetState
 */
 std::shared_ptr<WidgetState> WidgetState::create(std::function<bool(WidgetState& widgetState)> onLoadFunctor,
-																		std::function<bool(WidgetState& widgetState)> onDestroyFunctor)
+																								 std::function<bool(WidgetState& widgetState)> onDestroyFunctor)
 {
 	std::shared_ptr<WidgetState>pWidgetState(new WidgetState(onLoadFunctor, onDestroyFunctor));
 
@@ -71,7 +74,7 @@ bool WidgetState::onDestroy(){
 
 //! @copydoc GameState::render()
 void WidgetState::render(){
-	for(auto && pWindow : m_pWindows){
+	for(auto && pWindow : m_windows){
 		CAP_THROW_NULL(pWindow, "Window is null");
 		pWindow->render();
 	}
@@ -96,7 +99,7 @@ void WidgetState::update(double ms){
 		m_pQueuedUiControl = boost::none;
 	}
 	
-	for(auto && pWindow : m_pWindows){
+	for(auto && pWindow : m_windows){
 		CAP_THROW_NULL(pWindow, "Window is null");
 		pWindow->update(ms);
 	}
@@ -104,17 +107,19 @@ void WidgetState::update(double ms){
 
 //! create a window
 /** 
- \param name - The name of the window
- \param width - The width of the window
- \param height - The height of the window
- \return The WindowWidget
+		\param name - The name of the window
+		\param width - The width of the window
+		\param height - The height of the window
+		\return The WindowWidget
 */
 std::shared_ptr<WindowWidget> WidgetState::createWindow(const std::string &name, int width, int height, bool resizable){
 	// not using CapEngine::createWindow because we want to handle receiving the event signals here
 	// and passing them to any child windows
 	std::shared_ptr<WindowWidget> pWindowWidget = WindowWidget::create(name, width, height, resizable);
 	CAP_THROW_NULL(pWindowWidget, "Error creating window.  Window is null");
-	m_pWindows.push_back(pWindowWidget);
+	m_windows.push_back(pWindowWidget);
+
+	m_windowConnections.push_back(pWindowWidget->registerWindowClosedSignal(std::bind(&WidgetState::handleWindowCloseSignal, this,  std::placeholders::_1)));
 
 	return pWindowWidget;
 }
@@ -122,8 +127,8 @@ std::shared_ptr<WindowWidget> WidgetState::createWindow(const std::string &name,
 
 //! registers a handler for post render signals
 /** 
- \param slot
- \return - The scoped_connection for the signal/slot
+		\param slot
+		\return - The scoped_connection for the signal/slot
 */
 boost::signals2::scoped_connection WidgetState::connectPostRenderSignal(std::function<void (WidgetState &)> slot){
 	return m_postRenderSignal.connect(slot);
@@ -132,7 +137,7 @@ boost::signals2::scoped_connection WidgetState::connectPostRenderSignal(std::fun
 //! \copydoc Widget::handleMouseMotionEvent
 void WidgetState::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	// send event to windows
-	for(auto&& pWindow : m_pWindows){
+	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
 		pWindow->handleMouseMotionEvent(event);
 	}
@@ -149,7 +154,7 @@ void WidgetState::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 //! \copydoc Widget::handleMouseButtonEvent
 void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 	// send event to windows
-	for(auto&& pWindow : m_pWindows){
+	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
 		pWindow->handleMouseButtonEvent(event);
 	}
@@ -167,12 +172,12 @@ void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 //! \copydoc Widget::handleMouseWheelEvent
 void WidgetState::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 	// send event to windows
-	for(auto&& pWindow : m_pWindows){
+	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
 		pWindow->handleMouseWheelEvent(event);
 	}
 
-		// send event to active control
+	// send event to active control
 	assert(m_pUiControls != nullptr);
 	if(m_pUiControls->size() > 0){
 		auto pControl = m_pUiControls->back();
@@ -185,7 +190,7 @@ void WidgetState::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 //! \copydoc Widget::handleKeyboardEvent
 void WidgetState::handleKeyboardEvent(SDL_KeyboardEvent event){
 	// send event to windows
-	for(auto&& pWindow : m_pWindows){
+	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
 		pWindow->handleKeyboardEvent(event);
 	}
@@ -200,10 +205,10 @@ void WidgetState::handleKeyboardEvent(SDL_KeyboardEvent event){
 
 }
 
-//! \copydoc Widget::handleWindowEvent
+//! \copydoc Widget::handleWindowevent
 void WidgetState::handleWindowEvent(SDL_WindowEvent event){
 	// send event to windows
-	for(auto&& pWindow : m_pWindows){
+	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
 		pWindow->handleWindowEvent(event);
 	}
@@ -220,7 +225,7 @@ void WidgetState::handleWindowEvent(SDL_WindowEvent event){
 
 //! Adds a control to the control.
 /** 
- \param pControl - The control to add.
+		\param pControl - The control to add.
 */
 void WidgetState::addControl(std::shared_ptr<UI::Control> pControl){
 	// TODO What should it do if there is a queued control already?
@@ -230,7 +235,7 @@ void WidgetState::addControl(std::shared_ptr<UI::Control> pControl){
 
 //! Removes the current control and returns it
 /** 
- \return - The current control.  boost::none if there isn't one.
+		\return - The current control.  boost::none if there isn't one.
 */
 boost::optional<std::shared_ptr<UI::Control>> WidgetState::popControl(){
 	assert(m_pUiControls != nullptr);
@@ -242,7 +247,7 @@ boost::optional<std::shared_ptr<UI::Control>> WidgetState::popControl(){
 
 //! Gets the active control
 /** 
- \return - The current control.  boost::none if there isn't one.
+		\return - The current control.  boost::none if there isn't one.
 */
 boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
 	assert(m_pUiControls != nullptr);
@@ -261,15 +266,29 @@ boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
 
 //! Shows a yes/no modal dialog
 /** 
- \param msg
-   The message to display
- \param callback
-   \The callback function to call.
+		\param msg
+		The message to display
+		\param callback
+		\The callback function to call.
 */
 void WidgetState::showOkCancelDialog(const std::string &msg, std::function<void(bool)> callback){
 	std::shared_ptr<DialogState> pDialogState = DialogState::create(msg, callback);
 	CapEngine::pushState(pDialogState);
 }
 
+
+//! receive window close signals
+void WidgetState::handleWindowCloseSignal(WindowWidget* pWindowWidget){
+	auto window = std::find_if(m_windows.begin(), m_windows.end(), [&](const decltype(m_windows)::value_type &pWindow){
+		return pWindow.get() == pWindowWidget;
+	});
+
+	if(window != m_windows.end())
+		m_windows.erase(window);
+
+	if(m_windows.size() == 0){
+		CapEngine::popState();
+	}
+} 
 
 }} // namespace CapEngine::UI

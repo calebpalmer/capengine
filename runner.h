@@ -27,6 +27,8 @@ namespace CapEngine{
     void loop();
     void end();
 
+		void setDefaultQuitEvents(bool enabled=true);
+
   protected:
     Runner();
     Runner(const Runner&);
@@ -42,6 +44,8 @@ namespace CapEngine{
     bool m_showFPS;
     TimeStep m_timeStep;
     double m_msPerUpdate;  // 16.67 = 60fps, 33.33 = 30fps
+		//! flag indicating if exiting on window close/q keypress is enabled.
+		bool m_defaultQuitEventsEnabled = true;
   };
 
 }

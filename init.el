@@ -29,5 +29,4 @@
 (setq gdb-many-windows nil)
 (setq gdb-show-main t)
 
-;; lsp-mode
-(lsp-cquery-enable)
+(projectile-mode)

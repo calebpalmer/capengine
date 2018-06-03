@@ -125,4 +125,14 @@ std::shared_ptr<UI::WindowWidget> createWindow(const std::string &name, int widt
 	return pWindowWidget;
 }
 
+
+//! Enables/Disables default quit events (window close and q key)
+/** 
+ \param enabled
+   if true then enabled, false then disabled.
+*/
+void setDefaultQuitEvents(bool enabled){
+	Runner::getInstance().setDefaultQuitEvents(enabled);
+}
+
 }
