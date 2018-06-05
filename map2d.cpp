@@ -19,6 +19,16 @@ using namespace std;
 
 namespace CapEngine{
 
+namespace {
+
+const char kWidthParameterName[] = "width";
+const char kHeightParameterName[] = "height";
+const char kTilesetParamaterName[] = "tileset";
+const char kTileArrayParameterName[] = "tiles";
+const char kIndexParameterName[] = "index";
+
+} // namespace
+
 //! Constructor.
 /**
   \param x
@@ -147,39 +157,39 @@ void Map2D::readTiles(ifstream& stream){
       boost::trim_right(value);
 
       try{
-	int tileIndex = boost::lexical_cast<int>(value);
+				int tileIndex = boost::lexical_cast<int>(value);
 
-	if(!tileSet->tileExists(tileIndex)){
-	  Locator::logger->log("Unable to load map.  Tile does not exist: " + tileIndex, Logger::CWARNING);
+				if(!tileSet->tileExists(tileIndex)){
+					Locator::logger->log("Unable to load map.  Tile does not exist: " + tileIndex, Logger::CWARNING);
 
-	  TileTup tileTup;
-	  memset(&tileTup, 0, sizeof(tileTup));
-	  tileTup.index = -1;
-	  tileTup.tileLookupStatus = TileLookupStatus_NotFound;
-	  rowOfTiles.push_back(tileTup);
-	  continue;
-	}
+					TileTup tileTup;
+					memset(&tileTup, 0, sizeof(tileTup));
+					tileTup.index = -1;
+					tileTup.tileLookupStatus = TileLookupStatus_NotFound;
+					rowOfTiles.push_back(tileTup);
+					continue;
+				}
 
-	TileTup tileTup;
-	tileTup.tile = tileSet->getTile(tileIndex);
-	tileTup.index = tileIndex;
-	tileTup.tileLookupStatus = TileLookupStatus_Found;
-	rowOfTiles.push_back(tileTup);
+				TileTup tileTup;
+				tileTup.tile = tileSet->getTile(tileIndex);
+				tileTup.index = tileIndex;
+				tileTup.tileLookupStatus = TileLookupStatus_Found;
+				rowOfTiles.push_back(tileTup);
 
       }
 
       catch(boost::bad_lexical_cast& e){
-	TileTup tileTup;
-	memset(&tileTup, 0, sizeof(tileTup));
-	tileTup.index = -1;
-	tileTup.tileLookupStatus = TileLookupStatus_NoTile;
+				TileTup tileTup;
+				memset(&tileTup, 0, sizeof(tileTup));
+				tileTup.index = -1;
+				tileTup.tileLookupStatus = TileLookupStatus_NoTile;
 	
-	if(value != ""){
-	  Locator::logger->log("Unknowne tile" + value, Logger::CWARNING);
-	  tileTup.tileLookupStatus = TileLookupStatus_NotFound;
-	}
+				if(value != ""){
+					Locator::logger->log("Unknowne tile" + value, Logger::CWARNING);
+					tileTup.tileLookupStatus = TileLookupStatus_NotFound;
+				}
 
-	rowOfTiles.push_back(tileTup);
+				rowOfTiles.push_back(tileTup);
       }
 
       oldPosition = position + 1;
@@ -381,7 +391,62 @@ void Map2D::setTile(int x, int y, int tileSetIndex){
   assert(static_cast<size_t>(x) < tiles[y].size());
   tiles[y][x] = tiletup;
 	m_surfaceDirty =  true;
-} 
+}
+
+//! Saves the map to the given file.
+/** 
+ \param filepath
+   \li the filepath to write to.
+*/
+void Map2D::save(const std::string &filepath) const{
+	const std::string path = filepath == "" ? configPath : filepath;
+	std::ofstream f(path);
+
+	// header information
+	f << kWidthParameterName << "=" << std::to_string(this->getWidth()) << std::endl
+		<< kHeightParameterName << "=" << std::to_string(this->getHeight()) << std::endl
+		<< kTilesetParamaterName << "=" << this->tileSetPath << std::endl
+		<< kTileArrayParameterName << "=" << std::endl;
+
+	// tiles
+	for(auto && row : tiles){
+		for(auto && tileTup : row){
+			f << tileTup.index << ",";
+		}
+
+		f << std::endl;
+	}
+}
+
+
+//! return json representationof the map 
+/** 
+ \return 
+   \li The json representation of the map
+*/
+jsoncons::json Map2D::json() const{
+	jsoncons::json json;
+
+	json.insert_or_assign(kWidthParameterName, this->getWidth());
+	json.insert_or_assign(kWidthParameterName, this->getHeight());
+	json.insert_or_assign(kTilesetParamaterName, tileSetPath);
+
+	// the tiles array
+	jsoncons::json::array rows;
+	for(auto && row : tiles){
+		jsoncons::json::array cols;
+		for(auto && tileTup : row){
+			jsoncons::json tile;
+			tile.insert_or_assign(kIndexParameterName, tileTup.index);
+			cols.emplace_back(tile);
+		}
+		rows.emplace_back(cols);
+	}
+
+	json.insert_or_assign(kTileArrayParameterName, rows);
+
+	return json;
+}
 
 
 } // namespace CapEngine

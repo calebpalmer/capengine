@@ -113,8 +113,10 @@ void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
 
 //! Save the map
 void Editor::doSave(){
-	this->showOkCancelDialog("Save?", [](bool) {
-	  
+	this->showOkCancelDialog("Save?", [this](bool ok){
+	  if(ok)
+			assert(this->m_pMap != nullptr);
+			this->m_pMap->save();
 	});
 }
 

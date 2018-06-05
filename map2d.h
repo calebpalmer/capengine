@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <fstream>
+#include <jsoncons/json.hpp>
 
 namespace CapEngine{
 
@@ -61,8 +62,11 @@ namespace CapEngine{
     void setHeight(int height);
     void deleteTile(int x, int y);
     void setTile(int x, int y, int tileSetIndex);
-    
+
 		std::shared_ptr<TileSet> getTileSet();
+
+		void save(const std::string &filepath="") const;
+		jsoncons::json json() const;
 		
   private:
     void readTiles(std::ifstream& stream);
