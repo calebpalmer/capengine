@@ -69,7 +69,6 @@ namespace CapEngine{
 		jsoncons::json json() const;
 		
   private:
-    void readTiles(std::ifstream& stream);
 		void load(jsoncons::json json);
     void drawSurface();
     std::unique_ptr<Rectangle> getTileMBR(int index);
