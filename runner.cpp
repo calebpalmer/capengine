@@ -106,9 +106,11 @@ void Runner::update(){
 
 void Runner::render(double frameFactor){
   Locator::videoManager->clearAll();
-	if(m_gameStates.size() > 0)
-		m_gameStates.back()->render();
-  Locator::videoManager->drawAll();
+
+	for(auto && pGameState : m_gameStates)
+		pGameState->render();
+		
+	Locator::videoManager->drawAll();
 }
 
 void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
