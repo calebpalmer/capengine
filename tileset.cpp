@@ -181,7 +181,7 @@ void TileSet::validate(){
     }*/
 }
 
-bool TileSet::tileExists(unsigned int index){
+bool TileSet::tileExists(unsigned int index) const{
   if(index >= m_tiles.size()){
     return false;
   }
@@ -190,7 +190,7 @@ bool TileSet::tileExists(unsigned int index){
   }
 }
 
-Tile TileSet::getTile(unsigned int index){
+Tile TileSet::getTile(unsigned int index) const{
   if(index >= m_tiles.size()){
     throw CapEngineException("Tile does not exist at index " + std::to_string(index));
   }

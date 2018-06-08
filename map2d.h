@@ -26,7 +26,6 @@ namespace CapEngine{
   class Map2D{
 
   public:
-
     enum TileLookupStatus{
       TileLookupStatus_Found,
       TileLookupStatus_NotFound,
@@ -44,6 +43,7 @@ namespace CapEngine{
       CollisionType collisionType;
     };
 
+	public:
     Map2D(const std::string mapConfigPath);
     ~Map2D();
 
@@ -70,6 +70,7 @@ namespace CapEngine{
 		
   private:
     void readTiles(std::ifstream& stream);
+		void load(jsoncons::json json);
     void drawSurface();
     std::unique_ptr<Rectangle> getTileMBR(int index);
 
@@ -82,7 +83,6 @@ namespace CapEngine{
     unsigned int width = 0;
     unsigned int height = 0;
   };
-
 }
 
 #endif //MAP2D_H

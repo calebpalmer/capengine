@@ -31,8 +31,8 @@ namespace CapEngine{
   public:
     TileSet(const std::string& configPath);
 
-    bool tileExists(unsigned int index);
-    Tile getTile(unsigned int index);
+    bool tileExists(unsigned int index) const;
+    Tile getTile(unsigned int index) const;
     unsigned int getTileSize() const;
 		unsigned int getNumTiles() const;
 

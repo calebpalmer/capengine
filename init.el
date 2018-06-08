@@ -1,11 +1,11 @@
 (defun my-launch-editor-nodebug ()
   (interactive)
-  (shell-command "./editor test_files/map1.cem &")
+  (shell-command "./editor test_files/map1.json &")
   )
 
 (defun my-launch-editor-debug ()
   (interactive)
-   (gdb "gdb -i=mi --args editor test_files/map1.cem")
+   (gdb "gdb -i=mi --args editor test_files/map1.json")
    )
 
 (defun my-launch-tests-nodebug ()

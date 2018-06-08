@@ -27,6 +27,33 @@ const char kTilesetParamaterName[] = "tileset";
 const char kTileArrayParameterName[] = "tiles";
 const char kIndexParameterName[] = "index";
 
+
+
+//! return a TileTup for the given index into the tileset.
+/** 
+ \param tileset 
+   \li The tileset object.
+ \param index
+   \li The index into the tileset
+ \return
+   \li the tiletup
+*/
+Map2D::TileTup lookupTile(const TileSet& tileset, int index){
+	Map2D::TileTup tileTup;
+
+	if(!tileset.tileExists(index)){
+		tileTup.index = -1;
+		tileTup.tileLookupStatus = Map2D::TileLookupStatus_NotFound;
+	}
+	else{
+		tileTup.index = index;
+		tileTup.tileLookupStatus = Map2D::TileLookupStatus_Found;
+		tileTup.tile = tileset.getTile(index);
+	}
+
+	return tileTup;
+}
+
 } // namespace
 
 //! Constructor.
@@ -55,18 +82,98 @@ Map2D::~Map2D(){
   Locator::videoManager->closeSurface(surface);
 }
 
+//! Construct a map from json
+/** 
+ \param json
+   \li The json with the map data
+*/
+void Map2D::load(jsoncons::json json){
+	// this must be called from main constructor so do some asserts
+	assert(!(this->configPath.empty()));
+
+	// get header information
+	if(!json.has_key(kWidthParameterName))
+		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kWidthParameterName));
+	this->width = json[kWidthParameterName].as<unsigned int>();
+
+	if(!json.has_key(kHeightParameterName))
+		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kHeightParameterName));
+	this->height = json[kHeightParameterName].as<unsigned int>();
+
+	if(!json.has_key(kTilesetParamaterName))
+		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kTilesetParamaterName));
+	this->tileSetPath = json[kTilesetParamaterName].as<std::string>();
+
+	namespace fs = boost::filesystem;
+	fs::path tileSetPath = fs::path(stripPath(configPath)) / fs::path(this->tileSetPath);
+	if(!fs::exists(tileSetPath)){
+		BOOST_THROW_EXCEPTION(CapEngineException((boost::format("Tileset path does not exist: %1%") % tileSetPath.string()).str()));
+	}
+	
+	tileSet.reset(new TileSet(tileSetPath.string()));
+
+	// make sure tileset path is not empty
+	if(this->tileSetPath.empty())
+		BOOST_THROW_EXCEPTION(CapEngineException((boost::format("The property %1% cannot be empty.") % kTilesetParamaterName).str()));
+	
+	if(!json.has_key(kTileArrayParameterName))
+		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kTileArrayParameterName));
+
+	// Get tiles
+	jsoncons::json tileArray = json[kTileArrayParameterName];
+	if(!tileArray.is_array())
+		BOOST_THROW_EXCEPTION(CapEngineException("Invalid Tile Array"));
+
+	int i = 0;
+	for(auto && row : tileArray.array_range()){
+
+		if(!row.is_array())
+			BOOST_THROW_EXCEPTION(CapEngineException("Invalid row in Tile Array"));
+
+		std::vector<TileTup> rowOfTiles;
+		for(auto && tile : row.array_range()){
+			if(!tile.has_key(kIndexParameterName))
+				BOOST_THROW_EXCEPTION(CapEngineException((boost::format("Array value missing %1% property") % kIndexParameterName).str()));
+				
+			const int index = tile[kIndexParameterName].as<int>();
+			
+			assert(tileSet != nullptr);
+			TileTup tileTup = lookupTile(*tileSet, index);
+			rowOfTiles.push_back(std::move(tileTup));
+		}
+
+		tiles.push_back(std::move(rowOfTiles));
+	}
+	
+}
+
 Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
-  // test that configPath exists and throw exception if it doesn't
+	// test that configPath exists and throw exception if it doesn't
   if(!fileExists(mapConfigPath)){
     BOOST_THROW_EXCEPTION(CapEngineException(mapConfigPath + " is not a valid path"));
   }
-  this->configPath = mapConfigPath;
-  
-  // read config file
-  ifstream configStream(configPath);
+
+	configPath = mapConfigPath;
+
+	// read config file
+  ifstream configStream(mapConfigPath);
   if(!configStream.good()){
-    throw CapEngineException("unable to open file: " + configPath);
+    throw CapEngineException("unable to open file: " + mapConfigPath);
   }
+
+	try {
+		jsoncons::json json;
+		configStream >> json;
+
+		// it's json,  so lets use the json constructor
+		this->load(json);
+		return;
+	}
+	catch(const jsoncons::parse_error& e){
+		// eat it
+	}
+
+	// otherwise its old text format
   string line;
   while(configStream.good()){
     getline(configStream, line);
@@ -403,19 +510,7 @@ void Map2D::save(const std::string &filepath) const{
 	std::ofstream f(path);
 
 	// header information
-	f << kWidthParameterName << "=" << std::to_string(this->getWidth()) << std::endl
-		<< kHeightParameterName << "=" << std::to_string(this->getHeight()) << std::endl
-		<< kTilesetParamaterName << "=" << this->tileSetPath << std::endl
-		<< kTileArrayParameterName << "=" << std::endl;
-
-	// tiles
-	for(auto && row : tiles){
-		for(auto && tileTup : row){
-			f << tileTup.index << ",";
-		}
-
-		f << std::endl;
-	}
+	f << this->json();
 }
 
 
@@ -428,7 +523,7 @@ jsoncons::json Map2D::json() const{
 	jsoncons::json json;
 
 	json.insert_or_assign(kWidthParameterName, this->getWidth());
-	json.insert_or_assign(kWidthParameterName, this->getHeight());
+	json.insert_or_assign(kHeightParameterName, this->getHeight());
 	json.insert_or_assign(kTilesetParamaterName, tileSetPath);
 
 	// the tiles array
@@ -447,6 +542,5 @@ jsoncons::json Map2D::json() const{
 
 	return json;
 }
-
 
 } // namespace CapEngine
