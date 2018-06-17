@@ -23,4 +23,20 @@ std::shared_ptr<WidgetState> getWidgetState(){
 	}
 }
 
+
+//! Get the current active control if there is one.
+/** 
+ \return
+   \li The control if there is one.
+*/
+boost::optional<std::shared_ptr<Control>> getCurrentControl(){
+	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+	if(pWidgetState == nullptr)
+		return boost::none;
+
+	return pWidgetState->peekControl();
+
+	
+}
+
 }}

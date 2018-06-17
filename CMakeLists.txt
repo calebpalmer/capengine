@@ -21,7 +21,7 @@ include_directories(${SDL2_INCLUDE_DIR}
 		    "./thirdparty/jsoncons/include"
                     )
 
-#linhhk_directories()
+#link_directories()
 
 if (MSVC)
   add_compile_options(/W4)
@@ -37,7 +37,7 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    runner.cpp platformermap.cpp colour.cpp button_group.cpp controller.cpp physics.cpp IEventSubscriber.cpp 
 	    flashing_animation.cpp viewport.cpp objectfactory.cpp tools.cpp animator.cpp mapobjectdescriptor.cpp eventsubscriber.cpp
 	    windowwidget.cpp absolutelayout.cpp label.cpp captypes.cpp widgetstate.cpp widget.cpp gridlayout.cpp utils.cpp linearlayout.cpp
-	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp uiutils.cpp quaternion.cpp dialogstate.cpp
+	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp uiutils.cpp quaternion.cpp dialogstate.cpp pancontrol.cpp
 	    )
 
 add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)

@@ -12,6 +12,7 @@
 #include "uiutils.h"
 #include "control.h"
 #include "tilecopycontrol.h"
+#include "pancontrol.h"
 
 #include <sstream>
 #include <iostream>
@@ -157,6 +158,22 @@ void MapPanel::render()
 
 //! \copydoc Widget::handleMouseMotionevent
 void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
+
+	boost::optional<std::shared_ptr<Control>> maybeControl = getCurrentControl();
+	if(maybeControl != boost::none){
+
+		auto pPanControl = std::dynamic_pointer_cast<PanControl>(*maybeControl);
+		if(pPanControl != nullptr){
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+
+			int old_x, old_y;
+			std::tie(old_x, old_y) = pPanControl->getLocation();
+
+			m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(x - old_x, y - old_y, 0);
+			pPanControl->setLocation(x, y);
+		}
+	}
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
@@ -188,16 +205,12 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 	if(!pointInRect({x, y}, {m_x, m_y, m_width, m_height}))
 		return;
 	
-	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
-	assert(pWidgetState != nullptr);
+	boost::optional<std::shared_ptr<UI::Control>> maybeControl = getCurrentControl();
 
-	boost::optional<std::shared_ptr<UI::Control>> maybeControl =
-		pWidgetState->peekControl();
-
-	// TileCopyControl
 	if(maybeControl != boost::none){
-		std::shared_ptr<TileCopyControl> pTileCopyControl =
-			boost::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
+
+		// tile copy control
+		auto pTileCopyControl = std::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
 		if(pTileCopyControl != nullptr){
 		
 			// find the current loccation in the map
@@ -207,11 +220,26 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 					m_pMap->setTile(hoveredTile.first, hoveredTile.second, pTileCopyControl->getIndex());
 				}
 		}// end tile copy control
-
 	}
 }
 
 void MapPanel::handleLeftMouseButtonDown(SDL_MouseButtonEvent event){
+
+	boost::optional<std::shared_ptr<Control>> maybeControl = getCurrentControl();
+	if(maybeControl == boost::none){
+		// if there is no control, and cursor is on map, push on a pan control.
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+
+		if(isInMap(x, y)){
+			auto pPanControl = std::make_shared<PanControl>(x, y);
+
+			std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+			assert(pWidgetState != nullptr);
+
+			pWidgetState->addControl(pPanControl);
+		}
+	}
 }
 
 void MapPanel::handleMiddleMouseButtonUp(SDL_MouseButtonEvent event){

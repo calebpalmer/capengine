@@ -27,8 +27,8 @@ namespace {
   }
 
   std::vector<Pixel> getPixels(VideoManager& videoManager, SurfacePtr surface){
-    real width = videoManager.getSurfaceWidth(surface.get());
-    real height = videoManager.getSurfaceHeight(surface.get());
+		CapEngine::real width = videoManager.getSurfaceWidth(surface.get());
+		CapEngine::real height = videoManager.getSurfaceHeight(surface.get());
 
     std::vector<Pixel> pixels(width * height);
     for(int i = 0; i < width; i++){
@@ -87,13 +87,13 @@ class ScanconvertTest : public CppUnit::TestFixture {
     }
     
     Pixel solidPixel = { 0x00, 0x00, 0x00, 0xFF };
-    boost::optional<real> slope = getSlopeAtPixel(surface.get(), 15, 15, solidPixel, 3);
+    boost::optional<CapEngine::real> slope = getSlopeAtPixel(surface.get(), 15, 15, solidPixel, 3);
     
     CPPUNIT_ASSERT(!slope);
 
     slope = getSlopeAtPixel(surface.get(), 5, m_videoManager->toScreenCoord(surface.get(), 5), solidPixel, 3);
     std::cout << slope.get() << std::endl;
-    real expected = 1.0;
+		CapEngine::real expected = 1.0;
 
     std::cout << "Expected: " << expected << std::endl
 	      << "Actual" << slope.get() << std::endl;

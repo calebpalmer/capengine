@@ -8,7 +8,8 @@
 
 namespace CapEngine { namespace UI {
 
-		std::shared_ptr<WidgetState> getWidgetState();
+std::shared_ptr<WidgetState> getWidgetState();
+boost::optional<std::shared_ptr<Control>> getCurrentControl();
 
 }}
 

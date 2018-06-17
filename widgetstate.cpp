@@ -8,6 +8,28 @@
 
 namespace CapEngine { namespace UI {
 
+namespace {
+
+
+//! Removes controls that are finished.
+/** 
+ \param controls
+   The list of controls.
+*/
+void checkForFinishedControls(std::vector<std::shared_ptr<UI::Control>> &controls){
+	while(controls.size() > 0){
+		auto pControl = controls.back();
+		assert(pControl != nullptr);
+
+		if(!pControl->isHandled())
+			break;
+
+		controls.pop_back();
+	}
+}
+
+}
+
 
 //! default Constructor
 WidgetState::WidgetState()
@@ -251,6 +273,7 @@ boost::optional<std::shared_ptr<UI::Control>> WidgetState::popControl(){
 */
 boost::optional<std::shared_ptr<UI::Control>> WidgetState::peekControl(){
 	assert(m_pUiControls != nullptr);
+	checkForFinishedControls(*m_pUiControls);
 
 	if(m_pUiControls->size() > 0){
 		auto pControl = m_pUiControls->back();

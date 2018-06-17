@@ -19,7 +19,7 @@ namespace CapEngine { namespace UI {
 
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
-			virtual void setHandled();
+			virtual void setHandled(bool handled);
 
 		private:
 			void loadTexture();

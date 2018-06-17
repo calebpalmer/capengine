@@ -120,15 +120,17 @@ void TileCopyControl::remove(){
 }
 
 //! \copydoc Control::setHandledd
-void TileCopyControl::setHandled(){
-	std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
-	assert(pWidgetState != nullptr);
+void TileCopyControl::setHandled(bool handled){
+	if(handled){
+		std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+		assert(pWidgetState != nullptr);
 
-	boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
-	assert(maybeControl != boost::none);
-	assert((*maybeControl).get() == this);
+		boost::optional<std::shared_ptr<UI::Control>> maybeControl = pWidgetState->peekControl();
+		assert(maybeControl != boost::none);
+		assert((*maybeControl).get() == this);
 
-	pWidgetState->popControl();
+		pWidgetState->popControl();
+	}
 }
 
 }}
