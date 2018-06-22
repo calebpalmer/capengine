@@ -201,22 +201,24 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
   // check to see if fps should be shown
   if(event.type == SDL_KEYUP){
     SDL_Keycode ksym = ((SDL_KeyboardEvent*)&event)->keysym.sym;
-    if(ksym == SDLK_TAB){
-      if(m_showFPS == true){
-				m_showFPS = false;
-				Locator::videoManager->displayFPS(false);
-      }
-      else{
-				m_showFPS = true;
-				std::ostringstream ttfStream;
-				ttfStream << getCurrentDir() << "/res/fonts/tahoma.ttf";
-				Uint8 r = 255;
-				Uint8 g = 255;
-				Uint8 b = 255;
-				Locator::videoManager->displayFPS(true, ttfStream.str(), r, g, b);
-      }
+		if(m_defaultQuitEventsEnabled){
+			if(ksym == SDLK_TAB){
+				if(m_showFPS == true){
+					m_showFPS = false;
+					Locator::videoManager->displayFPS(false);
+				}
+				else{
+					m_showFPS = true;
+					std::ostringstream ttfStream;
+					ttfStream << getCurrentDir() << "/res/fonts/tahoma.ttf";
+					Uint8 r = 255;
+					Uint8 g = 255;
+					Uint8 b = 255;
+					Locator::videoManager->displayFPS(true, ttfStream.str(), r, g, b);
+				}
 
-    }
+			}
+		}
   }
 
 }

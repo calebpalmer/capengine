@@ -11,8 +11,14 @@ namespace CapEngine { namespace UI {
 
 //! Constructor
 /** 
- \param numRows - The number of rows 
- \param numColumns - The number of columns
+ \param numRows
+   \li The number of rows 
+ \param numColumns
+   \li The number of columns
+ \param maybeRowHeights
+   \li optional row height configuration
+ \param maybeColWidths
+   \li optional column width configuration
 */
 GridLayout::GridLayout(int numRows, 
 	int numColumns,
@@ -68,9 +74,16 @@ GridLayout::GridLayout(int numRows,
 
 //! creates a GridLayout
 /** 
- \param numRows - The number of rows 
- \param numColumns - The number of columns
- \return - The grid layout
+ \param numRows
+   \liThe number of rows 
+ \param numColumns
+   \li The number of columns
+ \param maybeRowHeights
+   \li optional row height configuration
+ \param maybeColWidths
+   \li optional column width configuration
+ \return 
+   \li The grid layout
 */
 std::shared_ptr<GridLayout> GridLayout::create(int numRows, int numColumns,
 				boost::optional<std::vector<int>> maybeRowHeights,
