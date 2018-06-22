@@ -1,6 +1,10 @@
 #include "gridlayout.h"
+#include "locator.h"
+#include "logger.h"
 
 #include "CapEngineException.h"
+
+#include <algorithm>
 
 namespace CapEngine { namespace UI {
 
@@ -10,11 +14,55 @@ namespace CapEngine { namespace UI {
  \param numRows - The number of rows 
  \param numColumns - The number of columns
 */
-GridLayout::GridLayout(int numRows, int numColumns) :
-	m_numRows(numRows), m_numColumns(numColumns)
+GridLayout::GridLayout(int numRows, 
+	int numColumns,
+	boost::optional<std::vector<int>> maybeRowHeights,
+    boost::optional<std::vector<int>> maybeColWidths) 
+	: m_numRows(numRows), m_numColumns(numColumns)
 {
 	for(int i = 0; i < numRows; i++){
 		m_widgetGrid.push_back(std::vector<std::shared_ptr<Widget>>(numColumns));
+	}
+
+	// row height configuration
+	if(maybeRowHeights != boost::none){
+		m_rowHeights = std::move(*maybeRowHeights);
+
+		if(m_rowHeights->size() != static_cast<unsigned int>(numRows)){
+			CAP_LOG(Locator::logger, "Row height configuration does not match number of rows.", Logger::CWARNING);
+			m_rowHeights = boost::none;
+		}
+		
+		int totalPercentage = 0;
+		for(auto && i : *m_rowHeights){
+			totalPercentage += i;
+		}
+		
+		if(totalPercentage != 100){
+			CAP_LOG(Locator::logger, "Row height configuration does not add up to 100%", Logger::CWARNING);
+			m_rowHeights = boost::none;
+		}
+	}
+
+	// column width configuration
+	if(maybeColWidths != boost::none){
+		m_colWidths = std::move(*maybeColWidths);
+		
+		if(m_colWidths->size() != static_cast<unsigned int>(numColumns)){
+			CAP_LOG(Locator::logger, "Column width configuration does not match number of columns", Logger::CWARNING);
+			m_colWidths = boost::none;
+		}
+
+		int totalPercentage = 0;
+		for(auto && i : *m_colWidths){
+			totalPercentage += i;
+		}
+		
+		if(totalPercentage != 100){
+			CAP_LOG(Locator::logger, "Column width configuration does not add up to 100%", Logger::CWARNING);
+			m_rowHeights = boost::none;
+		}
+		
 	}
 }
 
@@ -24,8 +72,10 @@ GridLayout::GridLayout(int numRows, int numColumns) :
  \param numColumns - The number of columns
  \return - The grid layout
 */
-std::shared_ptr<GridLayout> GridLayout::create(int numRows, int numColumns){
-	return std::shared_ptr<GridLayout>(new GridLayout(numRows, numColumns));
+std::shared_ptr<GridLayout> GridLayout::create(int numRows, int numColumns,
+				boost::optional<std::vector<int>> maybeRowHeights,
+			    boost::optional<std::vector<int>> maybeColWidths){
+	return std::shared_ptr<GridLayout>(new GridLayout(numRows, numColumns, maybeRowHeights, maybeColWidths));
 }
 
 
@@ -202,19 +252,40 @@ void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 //! Updates the size and position of children widgets
 void GridLayout::updateChildren(){
 	int cellWidth = m_position.w / m_numColumns;
-	int cellHeight = m_position.h / m_numRows;
+	int cellHeight = m_position.h / m_numRows;	
 
-	for(int i = 0; i < m_numRows; i++){
-		for(int j = 0; j < m_numColumns; j++){
+	int totalWidth = cellWidth * m_numColumns;
+	int totalHeight = cellHeight * m_numRows;
 
-			int x = j * cellWidth;
-			int y = i * cellHeight;
+	int y = 0;
+	for(unsigned int i = 0; i < static_cast<unsigned int>(m_numRows); i++){
+		// calculate current cell height
+		int currentCellHeight = cellHeight;
+		if(m_rowHeights != boost::none){
+			assert(i < m_rowHeights->size());
+			currentCellHeight = static_cast<double>(totalHeight) * (static_cast<double>((*m_rowHeights)[i]) / 100.0);
+		}
+
+		int x = 0;
+		for(unsigned int j = 0; j < static_cast<unsigned int>(m_numColumns); j++){
+			// calculate current cell width
+			int currentCellWidth = cellWidth;
+			if(m_colWidths != boost::none){
+				assert(j < m_colWidths->size());
+				currentCellWidth = static_cast<double>(totalWidth) * (static_cast<double>((*m_colWidths)[j]) / 100.0);
+			}
 
 			if(m_widgetGrid[i][j].get() != nullptr){
 				m_widgetGrid[i][j]->setPosition(x, y);
-				m_widgetGrid[i][j]->setSize(cellWidth, cellHeight);
+				m_widgetGrid[i][j]->setSize(currentCellWidth, currentCellHeight);
 			}
+
+			// increment x position
+			x += currentCellWidth;
 		}
+
+		// increment y position
+		y += currentCellHeight;
 	}
 }
 

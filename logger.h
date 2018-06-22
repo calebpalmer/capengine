@@ -5,10 +5,12 @@
 #include <ostream>
 #include <iostream>
 
-#define CAP_LOG(logger, msg, level)	\
-	logger->log(msg, level, __FILE__, __LINE__)
+#define CAP_LOG(logger, msg, level) \
+	assert(logger != nullptr); \
+	logger->log(msg, level, __FILE__, __LINE__);
 
 #define CAP_LOG_SDL_ERROR(logger, level) \
+	assert(logger != nullptr); \
 	logger->logSDLError(level, __FILE__, __LINE__);
 
 namespace CapEngine {

@@ -14,6 +14,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <jsoncons/json_serializing_options.hpp>
 
 using namespace std;
 
@@ -358,7 +359,9 @@ void Map2D::save(const std::string &filepath) const{
 	std::ofstream f(path);
 
 	// header information
-	f << this->json();
+	jsoncons::json_serializing_options options;
+	options.object_array_split_lines(jsoncons::line_split_kind::new_line);
+	f << jsoncons::pretty_print(this->json(), options);
 }
 
 

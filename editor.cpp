@@ -14,6 +14,7 @@
 #include "uibutton.h"
 #include "orientable.h"
 #include "control.h"
+#include "uicommon.h"
 
 #include <memory>
 #include <iostream>
@@ -77,7 +78,7 @@ bool Editor::onLoad(){
 	std::shared_ptr<UI::WindowWidget> pWindow = this->createWindow("Editor", 1280, 800);
 	pWindow->show();
 
-	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2);
+	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2, boost::none, std::vector<int>({25, 75}));
 	pWindow->setLayout(pLayout);
 	
 	m_pTileSetPanel = UI::TileSetPanel::create(this->m_pTileset);

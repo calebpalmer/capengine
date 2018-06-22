@@ -14,7 +14,11 @@ namespace CapEngine { namespace UI {
 		class GridLayout : public Widget {
 
 		public:
-			static std::shared_ptr<GridLayout> create(int numRows, int numCols);
+			static std::shared_ptr<GridLayout> create(int numRows,
+				int numCols,
+				boost::optional<std::vector<int>> maybeRowHeights = boost::none,
+			  boost::optional<std::vector<int>> maybeColWidths = boost::none);
+
 			
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
@@ -35,13 +39,19 @@ namespace CapEngine { namespace UI {
 			std::shared_ptr<Widget> getWidget(int row, int column);
 
 		private:
-			GridLayout(int numRows, int numColumns);
+			GridLayout(int numRows, int numColumns,
+			boost::optional<std::vector<int>> maybeRowHeights = boost::none,
+		    boost::optional<std::vector<int>> maybeColWidths = boost::none);
 
 			void updateChildren();
 
 			// members
 			//! The widgets this layout holds
 			std::vector<std::vector<std::shared_ptr<Widget>>> m_widgetGrid;
+			//! The row heights as percentages
+			boost::optional<std::vector<int>> m_rowHeights;
+			//! the column widths as percentages
+			boost::optional<std::vector<int>> m_colWidths;
 			//! The number of rows in the layout
 			int m_numRows;
 			//! The number of columns in the layout
