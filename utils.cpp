@@ -50,7 +50,10 @@ SDL_Rect expandRectToFit(const SDL_Rect &srcRect, const SDL_Rect &containingRect
  \param dstRect - The rect to clip to.
  \return - The clipped rect.
 */
-SDL_Rect clipRect(const SDL_Rect &srcRect, const SDL_Rect &dstRect){
+std::optional<SDL_Rect> clipRect(const SDL_Rect &srcRect, const SDL_Rect &dstRect){
+	
+	if(detectMBRCollision(srcRect, dstRect) == COLLISION_NONE)
+		return std::nullopt;
 
 	SDL_Rect clippedRect;
 	clippedRect.x = srcRect.x < dstRect.x ? dstRect.x : srcRect.x;

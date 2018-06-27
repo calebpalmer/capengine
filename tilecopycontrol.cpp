@@ -5,11 +5,18 @@
 #include "scanconvert.h"
 #include "widgetstate.h"
 #include "uiutils.h"
+#include "colour.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace CapEngine { namespace UI {
+
+namespace {
+
+const Colour kMouseDragColour(255, 0, 0, 255);
+
+} // namespace
 
 
 //!  Getter for Tileset
@@ -33,6 +40,7 @@ int TileCopyControl::getIndex() const{
 
 //! \copydoc Widget::render
 void TileCopyControl::render(){
+	// Draw the tile on the cursor
 	if(!m_pTexture)
 		loadTexture();
 
@@ -54,6 +62,21 @@ void TileCopyControl::render(){
 
 	assert(Locator::videoManager != nullptr);
 	Locator::videoManager->drawTexture(m_windowId, m_pTexture.get(), &srcRect, &dstRect);
+
+	// if dragging draw outline
+	if(m_isDragging){
+		assert(m_initialCoords != boost::none);
+		
+		int x = -1;
+    int y = -1;
+    SDL_GetMouseState(&x, &y);
+    Rect rect = {m_initialCoords->first, m_initialCoords->second,
+								 x - m_initialCoords->first,
+								 y - m_initialCoords->second};
+
+    Locator::videoManager->drawRect(m_windowId, rect, kMouseDragColour);
+
+	}
 }
 
 
@@ -97,7 +120,22 @@ void TileCopyControl::loadTexture(){
 
 //! \copydoc Widget::handleMouseButtonEvent
 void TileCopyControl::handleMouseButtonEvent(SDL_MouseButtonEvent event){
+	// start dragging
+	if(event.type == SDL_MOUSEBUTTONDOWN
+		 && event.button == SDL_BUTTON_LEFT
+		 && m_windowId == event.windowID)
+	{
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		m_initialCoords = std::make_pair(x, y);
+		m_isDragging = true;
+	}
 
+	// end dragging
+	if(event.type == SDL_MOUSEBUTTONUP){
+		m_isDragging = false;
+		m_initialCoords = boost::none;
+	}
 }
 
 //! \copydoc Widget::handleKeyboardEvent
@@ -131,6 +169,26 @@ void TileCopyControl::setHandled(bool handled){
 
 		pWidgetState->popControl();
 	}
+}
+
+
+//! check if dragging is activated.
+/** 
+ \return 
+   \li true if it is dragging, false otherwise.
+*/
+bool TileCopyControl::isDragging() const{
+	return m_isDragging;
+}
+
+//! Gets the initial drag coordinates.
+/** 
+ \return 
+   \li a pair of coordinates if it is dragging;
+	 \li boost::none if not.
+*/
+boost::optional<std::pair<int, int>> TileCopyControl::getInitialCoords() const{
+	return m_initialCoords;
 }
 
 }}

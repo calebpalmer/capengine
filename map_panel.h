@@ -54,6 +54,8 @@ namespace CapEngine { namespace UI {
 		SDL_Rect getMapExtents() const;
 		SDL_Rect getVisibleMapExtents() const;
 		double getScaledTileSize() const;
+		std::vector<std::tuple<int, int, bool, SDL_Rect>> getTileRects() const;
+		std::vector<std::pair<int, int>> getTilesInRect(const SDL_Rect &rect) const;
 
 		//! the map that is being edited
     std::shared_ptr<Map2D> m_pMap;
@@ -87,13 +89,13 @@ namespace CapEngine { namespace UI {
     std::pair<int, int> m_hoveredTile = {-1, -1};
 		//! The currently selected tiles
     std::vector<std::pair<int, int>> m_selectedTiles;
+		//! Tiles that should be outlined (drag operation?)
+		std::vector<std::pair<int, int>> m_outlinedTiles;
 
 		//! The current state of dragging
     DragState m_dragState = DRAGSTATE_NONE;
 		//! the cursor location where dragging started
     std::pair<int, int> m_dragStart = {-1, -1};
-		//! The location of the cursor after the last motion event
-		std::pair<int, int> m_lastMotionLocation = {0.0, 0.0};
   };
 	
 }}

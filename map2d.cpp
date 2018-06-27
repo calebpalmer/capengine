@@ -63,7 +63,7 @@ Map2D::TileTup lookupTile(const TileSet& tileset, int index){
     \li The y index into the map.
 */
 MapIndexException::MapIndexException(int x, int y) 
-  : CapEngineException(""), m_x(x), m_y(y)
+  : CapEngineException((boost::format("Invalid Tile index %1%, %2%") % x % y).str()), m_x(x), m_y(y)
 {
 }
 

@@ -34,7 +34,6 @@ namespace CapEngine{
 		int x;
 		int y;
 	};
-
   
   enum CollisionType {
     COLLISION_NONE,

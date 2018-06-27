@@ -149,10 +149,11 @@ void AbsoluteLayout::updateWidgetPositions(){
 		
 		SDL_Rect dstRect = { m_x, m_y, m_width, m_height };
 
-		SDL_Rect clippedRect = clipRect(srcRect, dstRect);
+		std::optional<SDL_Rect> clippedRect = clipRect(srcRect, dstRect);
+		assert(clippedRect != std::nullopt);
 
-		pWidget->setPosition(clippedRect.x, clippedRect.y);		
-		pWidget->setSize(clippedRect.w, clippedRect.h);
+		pWidget->setPosition(clippedRect->x, clippedRect->y);		
+		pWidget->setSize(clippedRect->w, clippedRect->h);
 	}
 
 	m_updateWidgets = false;

@@ -143,9 +143,9 @@ void MapPanel::render()
 		videoManager->setClipRect(m_windowId, &clipRect);
 		
     Locator::videoManager->drawTexture(m_windowId, texture.get(), &srcRect, &dstRect, false);
-    this->drawSelectedTileOutlines();
-    this->drawHoveredTileOutline();
-    this->drawMouseDrag();
+
+		// draw outlines over tiles (drag?)
+		this->drawTileOutlines(m_outlinedTiles, Colour(0, 0, 0, 255));
   }
 
   else{
@@ -162,6 +162,8 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	boost::optional<std::shared_ptr<Control>> maybeControl = getCurrentControl();
 	if(maybeControl != boost::none){
 
+
+		// pan control?
 		auto pPanControl = std::dynamic_pointer_cast<PanControl>(*maybeControl);
 		if(pPanControl != nullptr){
 			int x, y;
@@ -172,6 +174,25 @@ void MapPanel::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 
 			m_translationMatrix = m_translationMatrix * Matrix::createTranslationMatrix(x - old_x, y - old_y, 0);
 			pPanControl->setLocation(x, y);
+		}
+
+		//? tile copy control?
+		auto pTileCopyControl = std::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
+		if(pTileCopyControl != nullptr){
+			if(pTileCopyControl->isDragging()){
+				int x = -1;
+				int y = -1;
+				SDL_GetMouseState(&x, &y);
+
+				boost::optional maybeInitialCoords = pTileCopyControl->getInitialCoords();
+				assert(maybeInitialCoords != boost::none);
+				
+				Rect dragRect = {maybeInitialCoords->first, maybeInitialCoords->second,
+												 x - maybeInitialCoords->first,
+												 y - maybeInitialCoords->second};
+
+				m_outlinedTiles = this->getTilesInRect(dragRect);
+			}
 		}
 	}
 }
@@ -212,13 +233,36 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 		// tile copy control
 		auto pTileCopyControl = std::dynamic_pointer_cast<TileCopyControl>(*maybeControl);
 		if(pTileCopyControl != nullptr){
-		
-			// find the current loccation in the map
-			std::pair<int, int> hoveredTile = getHoveredTile(x, y);
-			if(hoveredTile.first != -1 && hoveredTile.second != -1)
-				{
+
+			// not dragging, edit individual location
+			if(!pTileCopyControl->isDragging()){
+				// find the current loccation in the map
+				std::pair<int, int> hoveredTile = getHoveredTile(x, y);
+				if(hoveredTile.first != -1 && hoveredTile.second != -1){
 					m_pMap->setTile(hoveredTile.first, hoveredTile.second, pTileCopyControl->getIndex());
 				}
+			}
+
+			// dragging, multi location tile copy
+			else{
+				int x = -1;
+				int y = -1;
+				SDL_GetMouseState(&x, &y);
+
+				boost::optional maybeInitialCoords = pTileCopyControl->getInitialCoords();
+				assert(maybeInitialCoords != boost::none);
+				
+				Rect dragRect = {maybeInitialCoords->first, maybeInitialCoords->second,
+										 x - maybeInitialCoords->first,
+										 y - maybeInitialCoords->second};
+
+				std::vector<std::pair<int, int>> tilesInDrag = this->getTilesInRect(dragRect);
+				for(auto &&i : tilesInDrag){
+					m_pMap->setTile(i.first, i.second, pTileCopyControl->getIndex());
+				}
+
+				m_outlinedTiles.clear();
+			}
 		}// end tile copy control
 	}
 }
@@ -429,6 +473,76 @@ SDL_Rect MapPanel::getVisibleMapExtents() const{
 double MapPanel::getScaledTileSize() const{
   real scaleFactor = m_scaleMatrix.getRowVector(0).getX();
 	return static_cast<double>(m_pMap->getTileSize()) * scaleFactor;	
+}
+
+//! Get a list of tile rects at the given size and location.
+/** 
+ \return 
+   \li The list of pairs
+	 \li first is if the tile is visible
+	 \li second is the rectangle.
+*/
+std::vector<std::tuple<int, int, bool, SDL_Rect>> MapPanel::getTileRects() const {
+	double scaledTileSize = this->getScaledTileSize();
+	SDL_Rect visibleExtents = this->getVisibleMapExtents();
+	Vector mapOrigin = m_translationMatrix * Vector(static_cast<double>(m_x), static_cast<double>(m_y), 0.0, 1.0);
+	int tileSize = m_pMap->getTileSize();
+	int numTilesWide = m_pMap->getWidth() / tileSize;
+	int numTilesHigh = m_pMap->getHeight() / tileSize;
+
+	std::vector<std::tuple<int, int, bool, SDL_Rect>> rects;
+	for(int x = 0; x < numTilesWide; x++){
+		for(int y = 0; y < numTilesHigh; y++){
+			SDL_Rect rect;
+			rect.w = scaledTileSize;
+			rect.h = scaledTileSize;
+
+			Vector location(mapOrigin.getX() + (x * scaledTileSize),
+											mapOrigin.getY() + (y * scaledTileSize), 0, 1);
+
+			rect.x = location.getX();
+			rect.y = location.getY();
+
+			bool visible = detectMBRCollision(rect, visibleExtents) != COLLISION_NONE;
+
+			rects.emplace_back(std::make_tuple(x, numTilesHigh - y, visible, rect));
+		}
+	}
+
+	return std::move(rects);
+}
+
+
+//! Gets all tiles that are in or intersect with the given rect.
+/** 
+ \param rect
+   \li The rect to test intersection with.
+ \return 
+   \li The list off tiles in the form of pairs or x,y indexes into the map.
+*/
+std::vector<std::pair<int, int>> MapPanel::getTilesInRect(const SDL_Rect &rect) const{
+	std::vector<std::pair<int, int>> tilesInRect;
+	std::vector<std::tuple<int, int, bool, SDL_Rect>> tileRects = this->getTileRects();
+	Rect visibleMapRect = this->getVisibleMapExtents();
+
+	std::optional<Rect> clippedRect = clipRect(rect, visibleMapRect);
+	if(clippedRect != std::nullopt){
+		int tileSize = m_pMap->getTileSize();
+		int numTilesWide = m_pMap->getWidth() / tileSize;
+		int numTilesHigh = m_pMap->getHeight() / tileSize;
+					
+		for(unsigned int i = 0; i < tileRects.size(); i++){
+			int x, y;
+			bool visible;
+			SDL_Rect rect;
+			std::tie(x, y, visible, rect) = tileRects[i];
+			if(visible	&& detectMBRCollision(rect, *clippedRect) != COLLISION_NONE){
+				tilesInRect.push_back(std::make_pair(x, numTilesHigh - y));
+			}
+		}
+	}
+
+	return tilesInRect;
 }
   
 }}

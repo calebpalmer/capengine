@@ -5,6 +5,8 @@
 #include "tileset.h"
 #include "captypes.h"
 
+#include <boost/optional.hpp>
+
 namespace CapEngine { namespace UI {
 
 		class TileCopyControl : public Control {
@@ -21,6 +23,9 @@ namespace CapEngine { namespace UI {
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 			virtual void setHandled(bool handled);
 
+			bool isDragging() const;
+			boost::optional<std::pair<int, int>> getInitialCoords() const;
+
 		private:
 			void loadTexture();
 			void remove();
@@ -33,6 +38,10 @@ namespace CapEngine { namespace UI {
 			TexturePtr m_pTexture = getNullTexturePtr();
 			//! flag indicating if this control has been handled.
 			bool m_handled = false;
+			//! if doing mouse drag
+			bool m_isDragging = false;
+			//! The initial coordinates of a drag if dragging.
+			boost::optional<std::pair<int, int>> m_initialCoords;
 		};
 
 }}
