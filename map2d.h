@@ -57,6 +57,7 @@ namespace CapEngine{
     int getWidth() const;
     int getHeight() const;
     int getTileSize() const;
+		bool isDirty() const;
 
     void setWidth(int width);
     void setHeight(int height);
@@ -81,6 +82,8 @@ namespace CapEngine{
     bool m_surfaceDirty = true;
     unsigned int width = 0;
     unsigned int height = 0;
+		//! flag indicating if data has been changed since last save.
+		mutable bool m_isDirty = false;
   };
 }
 

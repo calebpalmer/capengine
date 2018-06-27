@@ -280,10 +280,12 @@ int Map2D::getHeight() const{
 
 void Map2D::setWidth(int newWidth){
   width = newWidth;
+	m_isDirty = true;
 }
 
 void Map2D::setHeight(int newHeight){
   height = newHeight;
+	m_isDirty = true;
 }
 
 int Map2D::getTileSize() const{
@@ -306,6 +308,8 @@ void Map2D::deleteTile(int x, int y){
   tiletup.tileLookupStatus = TileLookupStatus_NoTile;
 
   tiles[x][y] = tiletup;
+
+	m_isDirty = true;
 }
 
 
@@ -346,7 +350,9 @@ void Map2D::setTile(int x, int y, int tileSetIndex){
   assert(static_cast<size_t>(y) < tiles.size());
   assert(static_cast<size_t>(x) < tiles[y].size());
   tiles[y][x] = tiletup;
+
 	m_surfaceDirty =  true;
+	m_isDirty = true;
 }
 
 //! Saves the map to the given file.
@@ -356,6 +362,9 @@ void Map2D::setTile(int x, int y, int tileSetIndex){
 */
 void Map2D::save(const std::string &filepath) const{
 	const std::string path = filepath == "" ? configPath : filepath;
+	if(path == configPath)
+		m_isDirty = false;
+	
 	std::ofstream f(path);
 
 	// header information
@@ -392,6 +401,16 @@ jsoncons::json Map2D::json() const{
 	json.insert_or_assign(kTileArrayParameterName, rows);
 
 	return json;
+}
+
+
+//! Check if Map has been changed since loaded/saved.
+/** 
+ \return 
+   \li the isDirty flag.
+*/
+bool Map2D::isDirty() const{
+	return m_isDirty;
 }
 
 } // namespace CapEngine
