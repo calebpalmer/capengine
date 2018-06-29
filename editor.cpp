@@ -3,6 +3,7 @@
 #include "CapEngineException.h"
 #include "locator.h"
 #include "logger.h"
+#include "keyboard.h"
 #include "game_management.h"
 #include "editorconstants.h"
 #include "windowwidget.h"
@@ -102,12 +103,27 @@ bool Editor::onDestroy(){
 //! \copydoc WidgetState::handleKeyboardEvent
 void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
 	WidgetState::handleKeyboardEvent(event);
-
-	if(event.type == SDL_KEYUP){
+	assert(Locator::keyboard != nullptr);
+	bool lCtrlPressed = Locator::keyboard->keyMap[Keyboard::CAP_LCTRL].state == Keyboard::CAP_PRESSED;
+	
+	if(event.type == SDL_KEYDOWN){
 		switch(event.keysym.sym){
 		case SDLK_s:
 			doSave();
 			break;
+		case SDLK_z:
+			if(lCtrlPressed)
+				m_commandManager.undo();
+			break;
+		case SDLK_y:
+			if(lCtrlPressed)
+				m_commandManager.redo();
+			break;			{
+				assert(Locator::keyboard != nullptr);
+			}
+			{
+				assert(Locator::keyboard != nullptr);
+			}
 		}
 	}
 }
@@ -115,10 +131,21 @@ void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
 //! Save the map
 void Editor::doSave(){
 	this->showOkCancelDialog("Save?", [this](bool ok){
-	  if(ok)
+		if(ok){
 			assert(this->m_pMap != nullptr);
 			this->m_pMap->save();
+		}
 	});
+}
+
+
+//! Gets the command manager
+/** 
+ \return 
+   \li The CommandManager
+*/
+CommandManager& Editor::getCommandManager(){
+	return m_commandManager;
 }
 
 }} // CapEngine::UI

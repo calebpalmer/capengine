@@ -146,7 +146,7 @@ void Map2D::load(jsoncons::json json){
 	
 }
 
-Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
+Map2D::Map2D(const string &mapConfigPath) : tileSet(nullptr) {
 	// test that configPath exists and throw exception if it doesn't
   if(!fileExists(mapConfigPath)){
     BOOST_THROW_EXCEPTION(CapEngineException(mapConfigPath + " is not a valid path"));
@@ -163,6 +163,19 @@ Map2D::Map2D(const string mapConfigPath) : tileSet(nullptr) {
 	jsoncons::json json;
 	configStream >> json;
 	this->load(json);
+}
+
+
+//! Copy constructor.
+/** 
+ \param other
+   \li The other map to copy.
+*/
+Map2D::Map2D(const Map2D &other)
+	: configPath(other.configPath), tileSetPath(other.tileSetPath), tileSet(other.tileSet),
+		tiles(other.tiles), m_surfaceDirty(other.m_surfaceDirty), width(other.width), height(other.height),
+		m_isDirty(other.m_isDirty)
+{
 }
 
 void Map2D::drawSurface(){
@@ -337,7 +350,7 @@ void Map2D::setTile(int x, int y, int tileSetIndex){
   if(x > widthInTiles || y > heightInTiles ||
     x < 0 || y < 0)
   {
-    throw MapIndexException(x, y);
+    BOOST_THROW_EXCEPTION(MapIndexException(x, y));
   }
 
   Tile tile = tileSet->getTile(tileSetIndex);
@@ -411,6 +424,31 @@ jsoncons::json Map2D::json() const{
 */
 bool Map2D::isDirty() const{
 	return m_isDirty;
+}
+
+
+//! Gets the tile index at the given location.
+/** 
+ \param x
+   \li the x location in the map.
+ \param y
+   \li the y location in the map.
+ \return 
+   \li Tile index
+*/
+int Map2D::getTileIndex(int x, int y) const{
+	assert(tileSet != nullptr);
+	int numTilesWide = width / tileSet->getTileWidth();
+	int numTilesHigh = height / tileSet->getTileHeight();
+
+	if(x < 0 || x >= numTilesWide ||
+		 y < 0 || y >= numTilesHigh)
+	{
+		BOOST_THROW_EXCEPTION(MapIndexException(x, y));
+	}
+
+	TileTup tile = tiles[y][x];
+	return tile.index;
 }
 
 } // namespace CapEngine

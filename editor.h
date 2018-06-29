@@ -9,6 +9,7 @@
 #include "map2d.h"
 #include "gamestate.h"
 #include "widgetstate.h"
+#include "commandmanager.h"
 
 #include <map>
 #include <boost/signals2.hpp>
@@ -34,6 +35,8 @@ namespace CapEngine { namespace UI {
 		bool onDestroy() override;
 
 		void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+
+		CommandManager& getCommandManager();
 		
   private:
     Editor(const EditorArgs &args);
@@ -45,11 +48,13 @@ namespace CapEngine { namespace UI {
 		//! The tileset
     std::shared_ptr<TileSet> m_pTileset;
 		//! The map
-    std::shared_ptr<Map2D> m_pMap;
+		std::shared_ptr<Map2D> m_pMap;
 		//! The map panel
     std::shared_ptr<UI::MapPanel> m_pMapPanel;
 		//! The tileset panel
 		std::shared_ptr<UI::TileSetPanel> m_pTileSetPanel;
+		//! command manager for doing undo/redo
+		CommandManager m_commandManager;
 	};
 }} // CapEngine::UI
 

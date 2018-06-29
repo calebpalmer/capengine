@@ -157,6 +157,15 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
     case SDLK_ESCAPE:
       Locator::keyboard->keyMap[Keyboard::CAP_ESCAPE].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
       break;
+    case SDLK_z:
+      Locator::keyboard->keyMap[Keyboard::CAP_Z].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
+      break;
+    case SDLK_y:
+      Locator::keyboard->keyMap[Keyboard::CAP_Y].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
+      break;
+    case SDLK_LCTRL:
+      Locator::keyboard->keyMap[Keyboard::CAP_LCTRL].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
+      break;
 
     default:
       break;

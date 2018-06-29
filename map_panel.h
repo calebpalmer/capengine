@@ -33,6 +33,9 @@ namespace CapEngine { namespace UI {
     virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
     virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
     virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+
+		std::shared_ptr<Map2D> getMap() const;
+		void setMap(std::shared_ptr<Map2D> pMap);
     
   private:
     MapPanel(std::shared_ptr<Map2D> pMap);
@@ -72,7 +75,7 @@ namespace CapEngine { namespace UI {
 		int m_panelHeight = 0;
 		
 		//! The x position of the map within the panel
-    int m_x= 0;
+    int m_x = 0;
 		//! The y position of the map within the panel
     int m_y = 0;
 		//! The width of the map

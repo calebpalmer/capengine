@@ -44,11 +44,12 @@ namespace CapEngine{
     };
 
 	public:
-    Map2D(const std::string mapConfigPath);
+    Map2D(const std::string &mapConfigPath);
+		Map2D(const Map2D& map);
     ~Map2D();
 
     // deleted
-    Map2D(const Map2D& map) = delete;
+
     Map2D& operator=(const Map2D& map) = delete;
 
     std::string toString();
@@ -57,6 +58,7 @@ namespace CapEngine{
     int getWidth() const;
     int getHeight() const;
     int getTileSize() const;
+		int getTileIndex(int x, int y) const;
 		bool isDirty() const;
 
     void setWidth(int width);

@@ -13,6 +13,9 @@
 #include "control.h"
 #include "tilecopycontrol.h"
 #include "pancontrol.h"
+#include "simplecommand.h"
+#include "aggregatecommand.h"
+#include "editor.h"
 
 #include <sstream>
 #include <iostream>
@@ -33,6 +36,28 @@ const float kTranslationIncrement = 4.0;
 
 void scaleMatrix(CapEngine::Matrix& matrix, float scaleIncrement){
   matrix = matrix + CapEngine::Matrix::createScaleMatrix(scaleIncrement, scaleIncrement, scaleIncrement);
+}
+
+
+//! Creates a command for setting a tile in a map.
+/** 
+ \param pMap
+   \li The map to change.
+ \param x
+   \li The x index into the map.
+ \param y 
+   \li The y index into the map.
+ \param tileIndex
+   \li The index into the tileset to set.
+ \return 
+*/
+std::unique_ptr<Command> makeSetTileCommand(std::shared_ptr<Map2D> pMap, int x, int y, int tileIndex){
+	auto execute = [pMap, x, y, tileIndex]() { pMap->setTile(x, y, tileIndex); };
+
+	int oldTileIndex = pMap->getTileIndex(x, y);
+	auto unExecute = [pMap, x, y, oldTileIndex]() { pMap->setTile(x, y, oldTileIndex); };
+
+	return std::make_unique<SimpleCommand>(execute, unExecute);
 }
 
 }
@@ -225,6 +250,9 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 	SDL_GetMouseState(&x, &y);
 	if(!pointInRect({x, y}, {m_x, m_y, m_width, m_height}))
 		return;
+
+	std::shared_ptr<Editor> pEditor = std::dynamic_pointer_cast<Editor>(getWidgetState());
+	assert(pEditor != nullptr);
 	
 	boost::optional<std::shared_ptr<UI::Control>> maybeControl = getCurrentControl();
 
@@ -239,7 +267,11 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 				// find the current loccation in the map
 				std::pair<int, int> hoveredTile = getHoveredTile(x, y);
 				if(hoveredTile.first != -1 && hoveredTile.second != -1){
-					m_pMap->setTile(hoveredTile.first, hoveredTile.second, pTileCopyControl->getIndex());
+					std::unique_ptr<Command> pSetTileCommand =
+						makeSetTileCommand(m_pMap, hoveredTile.first, hoveredTile.second, pTileCopyControl->getIndex());
+					assert(pSetTileCommand != nullptr);
+
+					pEditor->getCommandManager().runCommand(std::move(pSetTileCommand));
 				}
 			}
 
@@ -257,9 +289,19 @@ void MapPanel::handleLeftMouseButtonUp(SDL_MouseButtonEvent event){
 										 y - maybeInitialCoords->second};
 
 				std::vector<std::pair<int, int>> tilesInDrag = this->getTilesInRect(dragRect);
+				std::vector<std::unique_ptr<Command>> commands;
+				commands.reserve(tilesInDrag.size());
+
 				for(auto &&i : tilesInDrag){
-					m_pMap->setTile(i.first, i.second, pTileCopyControl->getIndex());
+					std::unique_ptr<Command> pSetTileCommand =
+						makeSetTileCommand(m_pMap, i.first, i.second, pTileCopyControl->getIndex());
+					assert(pSetTileCommand != nullptr);
+					
+					commands.push_back(std::move(pSetTileCommand));
 				}
+
+				auto pAggregateCommand = std::make_unique<AggregateCommand>(std::move(commands));
+				pEditor->getCommandManager().runCommand(std::move(pAggregateCommand));
 
 				m_outlinedTiles.clear();
 			}
@@ -543,6 +585,25 @@ std::vector<std::pair<int, int>> MapPanel::getTilesInRect(const SDL_Rect &rect) 
 	}
 
 	return tilesInRect;
+}
+
+
+//! Gets the map held by the panel.
+/** 
+ \return 
+   \li The map
+*/
+std::shared_ptr<Map2D> MapPanel::getMap() const{
+	return m_pMap;
+}
+
+//! Set the path on the panel.
+/** 
+ \param pMap
+   \li The map to set,
+*/
+void MapPanel::setMap(std::shared_ptr<Map2D> pMap){
+	m_pMap = pMap;
 }
   
 }}
