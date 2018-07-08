@@ -9,6 +9,7 @@
 #include "logger.h"
 #include "locator.h"
 
+#include <filesystem>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -103,11 +104,13 @@ void Map2D::load(jsoncons::json json){
 		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kTilesetParamaterName));
 	this->tileSetPath = json[kTilesetParamaterName].as<std::string>();
 
-	namespace fs = boost::filesystem;
-	fs::path tileSetPath = fs::path(stripPath(configPath)) / fs::path(this->tileSetPath);
+	//namespace fs = boost::filesystem;
+	namespace fs = std::filesystem;
+	fs::path tileSetPath = fs::absolute(fs::path(stripPath(configPath)) / fs::path(this->tileSetPath));
 	if(!fs::exists(tileSetPath)){
 		BOOST_THROW_EXCEPTION(CapEngineException((boost::format("Tileset path does not exist: %1%") % tileSetPath.string()).str()));
 	}
+	this->tileSetPath = tileSetPath;
 	
 	tileSet.reset(new TileSet(tileSetPath.string()));
 
@@ -380,7 +383,6 @@ void Map2D::save(const std::string &filepath) const{
 	
 	std::ofstream f(path);
 
-	// header information
 	jsoncons::json_serializing_options options;
 	options.object_array_split_lines(jsoncons::line_split_kind::new_line);
 	f << jsoncons::pretty_print(this->json(), options);
@@ -449,6 +451,16 @@ int Map2D::getTileIndex(int x, int y) const{
 
 	TileTup tile = tiles[y][x];
 	return tile.index;
+}
+
+
+//! Get the path to the tileset configuration file.
+/** 
+ \return 
+   \li The path to the tileset config file.
+*/
+std::string Map2D::getTileSetPath() const{
+	return this->tileSetPath;
 }
 
 } // namespace CapEngine

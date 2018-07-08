@@ -2,25 +2,108 @@
 
 #include "filesystem.h"
 #include "locator.h"
+#include "logger.h"
 #include "CapEngineException.h"
 
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <filesystem>
 #include <boost/filesystem.hpp>
 
-using namespace CapEngine;
 using namespace std;
+
+namespace CapEngine {
+
+namespace {
+
+// json schema peroperty names.
+const char kSurfaceFileProperty[] = "imagePath";
+const char kTileCountProperty[] = "numTiles";
+const char kTileWidthProperty[] = "tileWidth";
+const char kTileHeightProperty[] = "tileHeight";
+const char kTileArrayProperty[] = "tiles";
+const char kTilePositionProperty[] = "position";
+const char kTilePositionXProperty[] = "x";
+const char kTilePositionYProperty[] = "y";
+const char kTilePositionWidthProperty[] = "width";
+const char kTilePositionHeightProperty[] = "height";
+const char kTileTypeProperty[] = "type";
+
+
+//! Returns string representation of TileType
+/** 
+ \param tileType
+   \li The TileType
+ \return 
+   \li The string representation of the TileType
+*/
+std::string tileTypeToString(TileType tileType){
+	switch(tileType){
+	case TILE_NORMAL:
+		return "Normal";
+	case TILE_SOLID:
+		return "Solid";
+	default:
+		return "Unknown";
+	}
+}
+
+
+//! Converts string to TileType 
+/** 
+ \param tileType
+   \li The string to convert.
+ \return 
+   \li The TileType
+*/
+TileType stringToTileType(const std::string &tileType){
+	if(tileType == tileTypeToString(TILE_NORMAL))
+		return TILE_NORMAL;
+
+	else if(tileType == tileTypeToString(TILE_SOLID))
+		return TILE_SOLID;
+
+	else
+		return TILE_UNKNOWN;
+}
+
+}
 
 TileSet::TileSet(const string& configPath) {
   // test that configPath exists and throw exception if it doesn't
   if(!fileExists(configPath)){
     BOOST_THROW_EXCEPTION(CapEngineException(configPath + " is not a valid path"));
   }
-  this->m_configFilePath = configPath;
 
   // read configFile loading
   ifstream configIn(configPath);
+
+	// try read json first
+	jsoncons::json_decoder<jsoncons::json> decoder;
+	jsoncons::json_reader reader(configIn,decoder);
+
+	try{
+		reader.read();
+		jsoncons::json j = decoder.get_result();
+
+		TileSet other(j);
+		*this = std::move(other);
+
+		this->m_configFilePath = configPath;
+		this->loadSurface();
+		this->validate();
+
+		return;
+	}
+	catch (const jsoncons::parse_error& e)
+	{
+	}
+
+
+	// otherwise use old method
+	this->m_configFilePath = configPath;
+
   string line;
   int linenum = 1;
 
@@ -86,12 +169,56 @@ TileSet::TileSet(const string& configPath) {
   }
 
   //// Load surface
-	assert(Locator::videoManager != nullptr);
-	m_pSurface = std::shared_ptr<SDL_Surface>(Locator::videoManager->loadSurface(m_surfaceFilePath), SDL_FreeSurface);
-	assert(m_pSurface != nullptr);
+	this->loadSurface();
+  this->validate();
+}
 
-  validate();
-  configIn.close();
+
+//! Constructor.
+/** 
+ \param json
+   \li The json to read the Tileset from.
+*/
+TileSet::TileSet(const jsoncons::json &json){
+	m_surfaceFilePath = json[kSurfaceFileProperty].as<std::string>();;
+	m_tileCount = json[kTileCountProperty].as<int>();
+	m_tileWidth = json[kTileWidthProperty].as<int>();
+	m_tileHeight = json[kTileHeightProperty].as<int>();
+
+	// get the tiles
+	for(auto && jsonTile : json[kTileArrayProperty].array_range()){
+		try{
+			Tile tile;
+			tile.type = stringToTileType(jsonTile[kTileTypeProperty].as<std::string>());
+
+			jsoncons::json tilePosition = jsonTile[kTilePositionProperty];
+			tile.xpos = tilePosition[kTilePositionXProperty].as<int>();
+			tile.ypos = tilePosition[kTilePositionYProperty].as<int>();
+			tile.width = tilePosition[kTilePositionWidthProperty].as<int>();
+			tile.height = tilePosition[kTilePositionHeightProperty].as<int>();
+
+			m_tiles.push_back(tile);
+		}
+
+		catch(jsoncons::json_exception &e){
+			CAP_LOG(Locator::logger, e, Logger::CWARNING);
+		}
+	}
+}
+
+//! Copy constructor
+/** 
+ \param other
+   \li The other TileSet to copy from.
+*/
+TileSet::TileSet(const TileSet &other){
+	this->copy(other);
+}
+
+//! Copy assignment operator.
+TileSet& TileSet::operator=(const TileSet &other){
+	this->copy(other);
+	return *this;
 }
 
 Tile TileSet::parseTile(const string& line){
@@ -265,3 +392,75 @@ unsigned int TileSet::getTileHeight() const{
 	return m_tileHeight;
 }
 
+
+//! Gets json representation of tileset
+/** 
+ \return 
+   \li The json repr of the TileSet.
+*/
+jsoncons::json TileSet::json() const{
+	jsoncons::json json;
+	json.insert_or_assign(kSurfaceFileProperty, m_surfaceFilePath);
+	json.insert_or_assign(kTileCountProperty, m_tileCount);
+	json.insert_or_assign(kTileWidthProperty, m_tileWidth);
+	json.insert_or_assign(kTileHeightProperty, m_tileHeight);
+
+	jsoncons::json::array tiles(m_tiles.size());
+	for(size_t i = 0; i < m_tiles.size(); i++){
+
+		const Tile &tile = m_tiles[i];
+		jsoncons::json jsonTile;
+		
+		jsoncons::json position;
+		position.insert_or_assign(kTilePositionXProperty, tile.xpos);
+		position.insert_or_assign(kTilePositionYProperty, tile.ypos);
+		position.insert_or_assign(kTilePositionWidthProperty, tile.width);
+		position.insert_or_assign(kTilePositionHeightProperty, tile.height);
+		jsonTile.insert_or_assign(kTilePositionProperty, std::move(position));
+	
+		jsonTile.insert_or_assign(kTileTypeProperty, tileTypeToString(tile.type));
+
+		tiles[i] = std::move(jsonTile);
+	}
+
+	json.insert_or_assign(kTileArrayProperty, std::move(tiles));
+	return std::move(json);
+}
+
+
+//! Saves the tileset.
+/** 
+ \param filepath
+   \li The filepath to where it will be saved.
+*/
+void TileSet::save(const std::string &filepath){
+	std::ofstream f(filepath);
+
+	jsoncons::json_serializing_options options;
+	options.object_array_split_lines(jsoncons::line_split_kind::new_line);
+	f << jsoncons::pretty_print(this->json(), options);
+}
+
+
+//! Copies from another TileSet
+/** 
+ \param other
+   \li The TileSet to copy from.
+*/
+void TileSet::copy(const TileSet &other){
+	this->m_configFilePath = other.m_configFilePath;
+	this->m_surfaceFilePath = other.m_surfaceFilePath;
+	this->m_tiles = other.m_tiles;
+	this->m_tileCount = other.m_tileCount;
+	this->m_tileWidth = other.m_tileWidth;
+	this->m_tileHeight = other.m_tileHeight;
+}
+
+// Load the surface
+void TileSet::loadSurface(){
+	assert(Locator::videoManager != nullptr);
+	m_pSurface = std::shared_ptr<SDL_Surface>(Locator::videoManager->loadSurface(m_surfaceFilePath), SDL_FreeSurface);
+	assert(m_pSurface != nullptr);
+}
+
+}

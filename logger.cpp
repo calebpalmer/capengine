@@ -53,7 +53,7 @@ void Logger::log(const string& message, LogLevel level,
 
 
 
-//! Logsan exception
+//! Log an exception
 /** 
  \param e - The exception to log.
  \param level - The log level
@@ -66,6 +66,18 @@ void Logger::log(const std::exception &e, LogLevel level, char const* file, int 
 	msg << boost::diagnostic_information(e);
 
 	this->log(msg.str(), level, file, lineno);
+}
+
+//! Log a json exception
+/** 
+ \param e - The exception to log.
+ \param level - The log level
+ \param file - The file this is logged from
+ \param lineno - The line number where this is logged from.
+ \return 
+*/
+void Logger::log(const jsoncons::json_exception &e, LogLevel level, char const* file, int lineno){
+	this->log(e.what(), level, file, lineno);
 }
 
 

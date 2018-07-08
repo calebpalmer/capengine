@@ -56,7 +56,6 @@ Editor::Editor(const EditorArgs &args)
 	m_pTileset = m_pMap->getTileSet();
 }
 
-
 //! creates an Editor WidgetState
 /** 
  \param args

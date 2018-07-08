@@ -67,6 +67,7 @@ namespace CapEngine{
     void setTile(int x, int y, int tileSetIndex);
 
 		std::shared_ptr<TileSet> getTileSet();
+		std::string getTileSetPath() const;
 
 		void save(const std::string &filepath="") const;
 		jsoncons::json json() const;

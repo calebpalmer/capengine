@@ -55,6 +55,7 @@ target_link_libraries(capengine ${SDL2_LIBRARY}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
 		      libsndfile.so
+		      stdc++fs
                       )
 target_link_libraries(runtests capengine
 		      ${SDL2_LIBRARY} 
@@ -64,6 +65,7 @@ target_link_libraries(runtests capengine
                       ${LIBXML2_LIBRARIES}
 		      ${CPPUNIT_LIBRARIES}
 		      libsndfile.so
+		      stdc++fs
                       )
 
 target_link_libraries(editor capengine
@@ -73,6 +75,7 @@ target_link_libraries(editor capengine
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
 		      libsndfile.so
+		      stdc++fs
                       )
 
 target_link_libraries(widgettest capengine
@@ -82,6 +85,7 @@ target_link_libraries(widgettest capengine
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
 		      libsndfile.so
+		      stdc++fs
 		      )
 
 
