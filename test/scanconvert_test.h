@@ -47,7 +47,7 @@ class ScanconvertTest : public CppUnit::TestFixture {
   void setUp() {
     WindowParams windowParams =
     {
-			"test", 320, 210, 32, false, false, false, "test"
+		 "test", 320, 210, 32, false, false, false, false, "test"
 		};
 
     init(windowParams);

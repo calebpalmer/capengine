@@ -75,7 +75,9 @@ std::shared_ptr<Editor> Editor::create(const EditorArgs &args){
 */
 bool Editor::onLoad(){
 
-	std::shared_ptr<UI::WindowWidget> pWindow = this->createWindow("Editor", 1280, 800);
+	bool resizable = true;
+	std::shared_ptr<UI::WindowWidget> pWindow = this->createWindow("Editor", 1280, 800, resizable);
+	pWindow->setMaximized(true);
 	pWindow->show();
 
 	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2, boost::none, std::vector<int>({25, 75}));

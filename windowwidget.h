@@ -41,6 +41,9 @@ namespace CapEngine {
 			void show();
 			void close();
 			void setLayout(std::shared_ptr<Widget> pLayout);
+			void setMaximized(bool maximized=true);
+			void setFullScreen(bool fullScreen=true);
+
 			boost::signals2::scoped_connection registerWindowClosedSignal(std::function<void(WindowWidget*)> slot);
 
 		private:
@@ -54,6 +57,8 @@ namespace CapEngine {
 			int m_width = 0; //<! The width of the window
 			int m_height = 0; //<! The height of the window
 			bool m_resizable = true; //<! flag indicating if the window is resizable
+			bool m_maximized = false; //<! flag indicating if the window is maximized
+			bool m_fullScreen = false; //<! flag indicating if window starts full screen
 			bool m_shown = false; //<! flag indicacting if window has been shown yet
 			std::shared_ptr<Widget> m_pLayout; //<! The layout of the window
 			Colour m_backgroundColour = { 150, 150, 150, 255 };

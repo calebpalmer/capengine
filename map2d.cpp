@@ -384,7 +384,7 @@ void Map2D::save(const std::string &filepath) const{
 	std::ofstream f(path);
 
 	jsoncons::json_serializing_options options;
-	options.object_array_split_lines(jsoncons::line_split_kind::new_line);
+	options = options.array_object_split_lines(jsoncons::line_split_kind::same_line);
 	f << jsoncons::pretty_print(this->json(), options);
 }
 

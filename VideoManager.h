@@ -28,12 +28,13 @@ namespace CapEngine {
 
   struct WindowParams{
     std::string windowName;
-    int width;
-    int height;
-    int pDepth;
-    bool fullScreen;
-    bool opengl;
-    bool resizable;
+    int width = 0;
+    int height = 0;
+    int pDepth = 0;
+    bool fullScreen = false;
+    bool opengl = false;
+    bool resizable = true;
+		bool maximized = false;
     std::string name;
   };
 
@@ -50,7 +51,7 @@ namespace CapEngine {
 
   class FontManager;
 
-  static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false, false, "main"};
+static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false, true, false, "main"};
 
   // free functions
   TexturePtr textureToTexturePtr(Texture* texture);
@@ -77,6 +78,8 @@ namespace CapEngine {
     int getWindowHeight(Uint32 windowID);
 		void setWindowPosition(Uint32 windowId, int x, int y);
 		void setWindowSize(Uint32 windowId, int width, int height);
+		void maximizeWindow(Uint32 windowId);
+		void setWindowFullScreen(Uint32 windowId, bool fullScreen);
 		
     void setViewport();
     void setBackgroundColour(Colour colour);

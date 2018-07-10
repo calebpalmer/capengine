@@ -132,6 +132,8 @@ void WidgetState::update(double ms){
 		\param name - The name of the window
 		\param width - The width of the window
 		\param height - The height of the window
+		\param fullScreen
+		  \li Flag indicating if window is created full screen.
 		\return The WindowWidget
 */
 std::shared_ptr<WindowWidget> WidgetState::createWindow(const std::string &name, int width, int height, bool resizable){
@@ -145,7 +147,6 @@ std::shared_ptr<WindowWidget> WidgetState::createWindow(const std::string &name,
 
 	return pWindowWidget;
 }
-
 
 //! registers a handler for post render signals
 /** 

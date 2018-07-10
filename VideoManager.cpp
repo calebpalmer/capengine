@@ -673,9 +673,12 @@ SDL_Window* VideoManager::createWindow(WindowParams windowParams){
   }
   else{
     // windowed
-    if(windowParams.resizable){
+    if(windowParams.resizable)
       flags = flags | SDL_WINDOW_RESIZABLE;
-    }
+
+		if(windowParams.maximized)
+			flags = flags | SDL_WINDOW_MAXIMIZED;
+		
     pWindow = SDL_CreateWindow(windowParams.windowName.c_str(), SDL_WINDOWPOS_UNDEFINED,
 				 SDL_WINDOWPOS_UNDEFINED, windowParams.width, windowParams.height, flags);
   
@@ -753,6 +756,36 @@ void VideoManager::closeWindow(Uint32 windowID){
   catch(...) {
     
   }
+}
+
+//! Maximize a window
+/** 
+ \param windowId
+   \li The if of the window to maximize.
+*/
+void VideoManager::maximizeWindow(Uint32 windowId){
+	Window window = this->getWindow(windowId);
+
+	assert(window.m_window != nullptr);
+	SDL_MaximizeWindow(window.m_window);
+}
+
+//! Set the window to fullscreen or not.
+/** 
+ \param windowId
+   \li The id of the window.
+ \param fullScreen
+   \li flag indicating if window should be full screen or not.
+*/
+void VideoManager::setWindowFullScreen(Uint32 windowId, bool fullScreen){
+	Window window = this->getWindow(windowId);
+
+	assert(window.m_window != nullptr);
+	if(fullScreen)
+		SDL_SetWindowFullscreen(window.m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+	else
+		SDL_SetWindowFullscreen(window.m_window, 0);
 }
 
 /**

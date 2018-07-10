@@ -43,9 +43,10 @@ void WindowWidget::show(){
 		m_width,
     m_height,
     32, // bpp,
-    false, // fullscreen,
+    m_fullScreen, // fullscreen,
     false, // opengl
     m_resizable, // resizable
+		m_maximized,
     m_windowName
   };
 
@@ -54,6 +55,41 @@ void WindowWidget::show(){
 
 	Locator::videoManager->setBackgroundColour(m_backgroundColour);
 	m_shown = true;
+}
+
+//! Sets if window should be maximized or not.
+/** 
+ \param maximized
+   \li Flag indicating if window should be maximized.
+*/
+void WindowWidget::setMaximized(bool maximized){
+	m_maximized = maximized;
+
+	if(m_shown && m_resizable && m_maximized){
+		assert(Locator::videoManager != nullptr);
+		assert(m_windowId != VideoManager::kInvalidWindowId);
+		
+		Locator::videoManager->maximizeWindow(m_windowId);
+	}
+}
+
+//! Set the window to full screen.
+/** 
+ \param fullScreen
+   \li flag indicating if it should be full screen.
+ \param 
+ \return 
+*/
+void WindowWidget::setFullScreen(bool fullScreen){
+	m_fullScreen = fullScreen;
+
+	if(m_shown && m_resizable){
+		assert(Locator::videoManager != nullptr);
+		assert(m_windowId != VideoManager::kInvalidWindowId);
+		
+		Locator::videoManager->setWindowFullScreen(m_windowId, fullScreen);
+	}
+	
 }
 
 //! Close the window

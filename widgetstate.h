@@ -25,6 +25,7 @@ class WidgetState : public GameState {
 	bool onDestroy() override;
 
 	std::shared_ptr<WindowWidget> createWindow(const std::string &name, int width, int height, bool resizable=true);
+
 	void showOkCancelDialog(const std::string &msg, std::function<void(bool)> callback);
 	
 	void addControl(std::shared_ptr<UI::Control> pControl);
