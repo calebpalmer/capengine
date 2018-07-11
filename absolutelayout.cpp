@@ -3,6 +3,8 @@
 
 #include "CapEngineException.h"
 
+#include <algorithm>
+
 namespace CapEngine { namespace UI {
 
 //! Constructor
@@ -157,6 +159,20 @@ void AbsoluteLayout::updateWidgetPositions(){
 	}
 
 	m_updateWidgets = false;
+}
+
+//! Widget::getChildren
+std::vector<std::shared_ptr<Widget>> AbsoluteLayout::getChildren() {
+	std::vector<std::shared_ptr<Widget>> widgets(m_widgets.size());
+	std::transform(m_widgets.begin(), m_widgets.end(), widgets.begin(),
+								 [&widgets](const WidgetLocation &widgetLocation) { return widgetLocation.pWidget; } );
+
+	return widgets;
+}
+
+//! Widget::getPosition
+SDL_Rect AbsoluteLayout::getPosition() const {
+	return { m_x, m_y, m_width, m_height };
 }
 
 }} // namespace CapEngine::UI

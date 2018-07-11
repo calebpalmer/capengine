@@ -251,4 +251,9 @@ boost::signals2::scoped_connection Button::addOnButtonClickedHandler(std::functi
 	return m_onButtonClicked.connect(f);
 }
 
+//! \copydoc Widget::getPosition
+SDL_Rect Button::getPosition() const {
+	return m_rect;
+}
+
 }}

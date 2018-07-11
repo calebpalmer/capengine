@@ -10,6 +10,8 @@ class Control : public Widget {
 public:
 	virtual ~Control() = default;
 
+	virtual SDL_Rect getPosition() const override { return {}; }
+	
 	//! \copydoc Widget::setPosition
 	virtual void setPosition(int x, int y) {};
 

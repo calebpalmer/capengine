@@ -136,4 +136,14 @@ void LinearLayout::handleWindowEvent(SDL_WindowEvent event){
 	}
 }
 
+//! Widget:getChildren
+std::vector<std::shared_ptr<Widget>> LinearLayout::getChildren(){
+	return m_widgets;
+}
+
+//! \copydoc Widget::getPosition
+SDL_Rect LinearLayout::getPosition() const {
+	return m_rect;
+}
+
 }}

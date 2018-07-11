@@ -21,6 +21,7 @@ namespace CapEngine{ namespace UI {
 		public:
 			static std::shared_ptr<Button> create(const std::string &text);
 
+			virtual SDL_Rect getPosition() const override;
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;

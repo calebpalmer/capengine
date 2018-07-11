@@ -268,4 +268,14 @@ boost::signals2::scoped_connection WindowWidget::registerWindowClosedSignal(std:
 	return m_windowClosedSignal.connect(slot);
 }
 
+// \copydoc Widget::getChildren
+std::vector<std::shared_ptr<Widget>> WindowWidget::getChildren() {
+	return { m_pLayout };
+}
+
+//! Widget::getPosition
+SDL_Rect WindowWidget::getPosition() const {
+	return { 0, 0, m_width, m_height };
+}
+
 }} // namespace CapEngine::UI

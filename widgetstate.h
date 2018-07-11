@@ -66,6 +66,8 @@ protected:
 	std::shared_ptr<std::vector<std::shared_ptr<UI::Control>>> m_pUiControls;
 	//! uiControl to add to stack
 	boost::optional<std::shared_ptr<UI::Control>> m_pQueuedUiControl;
+	//! focused widget
+	std::shared_ptr<UI::Widget> m_pFocusedWidget;
 	
 	//! signal that is called after state is rendered
 	boost::signals2::signal<void(WidgetState&)> m_postRenderSignal;

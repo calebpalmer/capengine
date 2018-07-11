@@ -141,4 +141,9 @@ void Label::setText(const std::string &text){
 	m_texture.release();
 }
 
+//! \copydoc Widget::getPosition
+SDL_Rect Label::getPosition() const {
+	return { m_x, m_y, m_width, m_height };
+}
+
 }} // namespace CapEngine::UI

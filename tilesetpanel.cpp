@@ -169,4 +169,9 @@ void TileSetPanel::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 	}
 }
 
+//! \copydoc Widget::getPosition
+SDL_Rect TileSetPanel::getPosition() const {
+	return m_rect;
+}
+
 }}

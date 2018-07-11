@@ -19,11 +19,12 @@ namespace CapEngine { namespace UI {
 				boost::optional<std::vector<int>> maybeRowHeights = boost::none,
 			  boost::optional<std::vector<int>> maybeColWidths = boost::none);
 
-			
+			virtual SDL_Rect getPosition() const override;
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
 			virtual void update(double ms) override;
+			virtual std::vector<std::shared_ptr<Widget>> getChildren() override;
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;

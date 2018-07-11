@@ -260,8 +260,6 @@ void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 	this->updateChildren();
 }
 
-
-
 //! Updates the size and position of children widgets
 void GridLayout::updateChildren(){
 	int cellWidth = m_position.w / m_numColumns;
@@ -302,6 +300,24 @@ void GridLayout::updateChildren(){
 	}
 }
 
+//! \copydoc Widget::getChildren
+std::vector<std::shared_ptr<Widget>> GridLayout::getChildren(){
+	std::vector<std::shared_ptr<Widget>> widgets;
+
+	for(auto && row : m_widgetGrid){
+		for(auto && pWidget : row){
+			if(pWidget != nullptr)
+				widgets.push_back(pWidget);
+		}
+	}
+
+	return widgets;
+}
+
+//! \copydoc Widget::getPosition
+SDL_Rect GridLayout::getPosition() const {
+	return m_position;
+}
 
 }} // CapEngine::UI
 

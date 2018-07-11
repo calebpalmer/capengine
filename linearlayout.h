@@ -21,11 +21,13 @@ namespace CapEngine { namespace UI {
 			
 			virtual ~LinearLayout() = default;
 
+			virtual SDL_Rect getPosition() const override;
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;
 			virtual void update(double ms) override;
 			virtual void setWindowId(Uint32 windowId) override;
+			virtual std::vector<std::shared_ptr<Widget>> getChildren() override;
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;

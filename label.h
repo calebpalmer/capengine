@@ -16,6 +16,7 @@ namespace CapEngine { namespace UI {
 			static std::shared_ptr<Label> create(const std::string &text, const std::string &font="");
 
 			// Widget virtuals
+			virtual SDL_Rect getPosition() const override;
 			virtual void setPosition(int x, int y) override;
 			virtual void setSize(int width, int height) override;
 			virtual void render() override;

@@ -24,6 +24,7 @@ namespace CapEngine { namespace UI {
 		static std::shared_ptr<MapPanel> create(std::shared_ptr<Map2D> pMap);
     ~MapPanel() = default;
 
+		virtual SDL_Rect getPosition() const override;
 		virtual void setPosition(int x, int y) override;
 		virtual void setSize(int width, int height) override;
 		virtual void render() override;

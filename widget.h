@@ -4,6 +4,7 @@
 #include "VideoManager.h"
 
 #include <memory>
+#include <optional>
 #include <SDL2/SDL.h>
 
 namespace CapEngine { namespace UI {
@@ -15,12 +16,16 @@ namespace CapEngine { namespace UI {
 			
 			virtual ~Widget() = default;
 
+			virtual SDL_Rect getPosition() const = 0;
 			virtual void setPosition(int x, int y) = 0;
 			virtual void setSize(int width, int height) = 0;
 			virtual void render() = 0;
 			virtual void update(double ms) {};
 			virtual void setParent(Widget *pParent) { m_pParent = pParent; }
 			virtual void setWindowId(Uint32 windowId) { m_windowId = windowId; }
+			virtual std::vector<std::shared_ptr<Widget>> getChildren() { return {}; }
+			virtual bool canFocus() const { return false; }
+			virtual bool doFocus(bool /* focus */, const std::optional<std::pair<int, int>>& /*position*/) { return false; }
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent /*event*/) {}
@@ -35,5 +40,41 @@ namespace CapEngine { namespace UI {
 
 	}
 }
+
+
+/** 
+ \fn Widget::getPosition
+ \brief Gets the position of the widget.
+ \return 
+   \li The position of the widget.
+*/
+
+/** 
+ \fn Widget::getChildren
+ \brief Gets the child widgets of this widget.
+ \return 
+   \li The child widgets
+*/
+
+
+/** 
+ \fn Widget::canFocus
+ \brief Checks if widgets can take focus or not.
+ \return 
+   \li true if focusable; false otherwise.
+*/
+
+
+/** 
+ \fn Widget::doFocus
+ \brief handle focus/unfocus requests
+ \param focus
+   \li flag indicating if focus is given or removed
+ \param position
+   \li optional argument giving position if focus changed by mouse click.
+ \return 
+   \li true if focus was received, false otherwise.
+*/
+
 
 #endif // WIDGET_H

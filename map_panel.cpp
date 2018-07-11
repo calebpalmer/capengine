@@ -605,6 +605,11 @@ std::shared_ptr<Map2D> MapPanel::getMap() const{
 void MapPanel::setMap(std::shared_ptr<Map2D> pMap){
 	m_pMap = pMap;
 }
+
+//! \copydoc Wiget::getPosition
+SDL_Rect MapPanel::getPosition() const {
+	return { m_x, m_y, m_width, m_height };
+}
   
 }}
 

@@ -26,6 +26,7 @@ namespace CapEngine { namespace UI {
 			TileSetPanel(const TileSetPanel&) = delete;
 			TileSetPanel& operator=(const TileSetPanel&) = delete;
 
+			virtual SDL_Rect getPosition() const override;
 			virtual void setPosition(int x, int y);
 			virtual void setSize(int width, int height);
 			virtual void render();
