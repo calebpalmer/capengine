@@ -53,6 +53,8 @@ protected:
 
 	WidgetState(const WidgetState&) = delete;
 	WidgetState& operator=(const WidgetState&) = delete;
+
+	bool handleMouseFocusChange(Widget &widget, int x, int y);
 	
 	//! The list of windows
 	std::vector<std::shared_ptr<UI::WindowWidget>> m_windows;
@@ -68,6 +70,11 @@ protected:
 	boost::optional<std::shared_ptr<UI::Control>> m_pQueuedUiControl;
 	//! focused widget
 	std::shared_ptr<UI::Widget> m_pFocusedWidget;
+
+	//! The previous location the mouse button was pressed down.
+	std::pair<int, int> m_lastMouseDownPosition;
+	//! the id of the previous window the mouse button was pressed down.
+	Uint32 m_lastMouseDownWindowId;
 	
 	//! signal that is called after state is rendered
 	boost::signals2::signal<void(WidgetState&)> m_postRenderSignal;

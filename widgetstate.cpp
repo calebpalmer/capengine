@@ -5,6 +5,7 @@
 #include "dialogstate.h"
 
 #include <functional>
+#include <algorithm>
 
 namespace CapEngine { namespace UI {
 
@@ -176,6 +177,27 @@ void WidgetState::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 
 //! \copydoc Widget::handleMouseButtonEvent
 void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
+	if(event.type == SDL_MOUSEBUTTONDOWN){
+		m_lastMouseDownPosition.first = event.x;
+		m_lastMouseDownPosition.second = event.y;
+		m_lastMouseDownWindowId = event.windowID;
+	}
+
+	else if(event.type == SDL_MOUSEBUTTONUP){
+		// UI focus change handling
+		if(event.windowID == m_lastMouseDownWindowId){
+			auto maybeWindow =
+				std::find_if(m_windows.begin(), m_windows.end(),
+													[this](std::shared_ptr<WindowWidget> pWindow)
+													{
+														return pWindow->getWindowId() == this->m_lastMouseDownWindowId;
+													});
+
+				if(maybeWindow != m_windows.end())
+					this->handleMouseFocusChange(**maybeWindow, event.x, event.y);
+		}
+	}
+	
 	// send event to windows
 	for(auto&& pWindow : m_windows){
 		assert(pWindow != nullptr);
@@ -313,6 +335,34 @@ void WidgetState::handleWindowCloseSignal(WindowWidget* pWindowWidget){
 	if(m_windows.size() == 0){
 		CapEngine::popState();
 	}
-} 
+}
+
+
+//! Recursively check for focus change based on mouse click
+/** 
+ \param widget
+   \li The window where the moust was clicked.
+ \param x
+   \li The x position of the mouse click.
+ \param y
+   \li The y position of the mouse click
+*/
+bool WidgetState::handleMouseFocusChange(Widget &widget, int x, int y){
+	bool handled = false;
+	if(widget.canFocus()){
+		handled = widget.doFocus(true, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+	}
+
+	if(!handled){
+		for(auto && pWidget : widget.getChildren()){
+			handled = handleMouseFocusChange(*pWidget, x, y);
+
+			if(handled)
+				break;
+		}
+	}
+	
+	return handled;
+}
 
 }} // namespace CapEngine::UI

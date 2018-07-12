@@ -22,10 +22,11 @@ namespace CapEngine { namespace UI {
 			virtual void render() = 0;
 			virtual void update(double ms) {};
 			virtual void setParent(Widget *pParent) { m_pParent = pParent; }
+			virtual Uint32 getWindowId() const { return m_windowId; }
 			virtual void setWindowId(Uint32 windowId) { m_windowId = windowId; }
 			virtual std::vector<std::shared_ptr<Widget>> getChildren() { return {}; }
 			virtual bool canFocus() const { return false; }
-			virtual bool doFocus(bool /* focus */, const std::optional<std::pair<int, int>>& /*position*/) { return false; }
+			virtual bool doFocus(bool, int, int, int, int) { return false; }
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent /*event*/) {}
@@ -70,11 +71,27 @@ namespace CapEngine { namespace UI {
  \brief handle focus/unfocus requests
  \param focus
    \li flag indicating if focus is given or removed
- \param position
-   \li optional argument giving position if focus changed by mouse click.
+ \param downX
+   \li The x location in the window where click ocurred.
+ \param downY
+   \li The y location in the window where click ovurred.
+ \param upX
+   \li The x location in the window where click ocurred.
+ \param upY
+   \li The y location in the window where click ovurred.
+
  \return 
    \li true if focus was received, false otherwise.
 */
+
+
+/** 
+ \fn Widget::getWindowId
+ \brief Gets the window id of the widget.
+ \return 
+   \li The window id
+*/
+
 
 
 #endif // WIDGET_H
