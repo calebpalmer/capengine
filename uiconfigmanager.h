@@ -1,5 +1,5 @@
 #ifndef CAPENGINE_UICONFIGMANAGER_H
-#define CAPENGINE_UUICONFIGMANAGER_H
+#define CAPENGINE_UICONFIGMANAGER_H
 
 #include "colour.h"
 
@@ -8,30 +8,30 @@
 
 namespace CapEngine { namespace UI {
 
-		// settings paths
-		const std::string kDefaultFontSettingsPath = "$.font.path";
-		const std::string kDefaultFontSizeSettingsPath = "$.font.size";
+// settings paths
+const std::string kDefaultFontSettingsPath = "$.font.path";
+const std::string kDefaultFontSizeSettingsPath = "$.font.size";
 
-		// defaults
-		const int kDefaultFontSize = 13;
+// defaults
+const int kDefaultFontSize = 13;
 
-		class UIConfigManager {
-		public:
-			static UIConfigManager& getInstance();
+class UIConfigManager {
+public:
+	static UIConfigManager& getInstance();
 
-			boost::optional<jsoncons::json> getSetting(const std::string &settingPath);
+	boost::optional<jsoncons::json> getSetting(const std::string &settingPath);
 
-		private:
-			UIConfigManager();
+private:
+	UIConfigManager();
 
-			jsoncons::json m_settings;
-		};
+	jsoncons::json m_settings;
+};
 
-		boost::optional<Colour> getColour(const jsoncons::json &object);
-		jsoncons::json getProperty(jsoncons::json object,
-															 const std::string &propertyName,
-															 jsoncons::json defaultValue=jsoncons::json::object());
+boost::optional<Colour> getColour(const jsoncons::json &object);
+jsoncons::json getProperty(jsoncons::json object,
+													 const std::string &propertyName,
+													 jsoncons::json defaultValue=jsoncons::json::object());
 
-	}}
+}}
 
 #endif // CAPENGINE_UICONFIGMANAGERH_

@@ -11,6 +11,7 @@
 #include "label.h"
 #include "uibutton.h"
 #include "orientable.h"
+#include "textbox.h"
 
 #include <memory>
 #include <iostream>
@@ -33,35 +34,40 @@ bool onLoad(CapEngine::UI::WidgetState &widgetState){
 	pWindow->show();
 
 	
-	// std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
-	// pWindow->setLayout(pGridLayout);
+	std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
+	pWindow->setLayout(pGridLayout);
 
-	// auto pLabel = UI::Label::create("test");
-	// pGridLayout->addWidget(pLabel, 1, 0);
+	auto pLabel = UI::Label::create("test");
+	pGridLayout->addWidget(pLabel, 1, 0);
 
-	// std::shared_ptr<UI::LinearLayout> pLinearLayout =
-	// 	UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Horizontal);
+	std::shared_ptr<UI::LinearLayout> pLinearLayout =
+		UI::LinearLayout::create(CapEngine::UI::LinearLayout::Orientation::Horizontal);
 
-	// std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
-	// pLabelLeft->setHorizontalAlignment(UI::Orientable::HorizontalAlignment::Right);
+	std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
+	pLabelLeft->setHorizontalAlignment(UI::Orientable::HorizontalAlignment::Right);
 
-	// std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
-	// static boost::signals2::scoped_connection connection = pButton->addOnButtonClickedHandler(std::bind(onButtonClicked, pLabelLeft));
+	std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
+	static boost::signals2::scoped_connection connection = pButton->addOnButtonClickedHandler(std::bind(onButtonClicked, pLabelLeft));
 		
-	// pLinearLayout->addWidget(pLabelLeft);
-	// pLinearLayout->addWidget(pButton);
+	pLinearLayout->addWidget(pLabelLeft);
+	pLinearLayout->addWidget(pButton);
 
-	// pGridLayout->addWidget(pLinearLayout, 0, 1);
+	pGridLayout->addWidget(pLinearLayout, 0, 1);
 
-	auto pAbsLayout = UI::AbsoluteLayout::create();
-	pWindow->setLayout(pAbsLayout);
+	auto pTextBox = UI::TextBox::create("This is a textbox");
+	pGridLayout->addWidget(pTextBox, 1, 1);
+	
+	pWindow->setLayout(pGridLayout);
 
-	// layout for the top
-	auto pLinearLayout = UI::LinearLayout::create();
-	pAbsLayout->addWidget(pLinearLayout, 0, 0, 100, 30, UI::Unit::Percentage, UI::Unit::Pixels);
+	// auto pAbsLayout = UI::AbsoluteLayout::create();
+	// pWindow->setLayout(pAbsLayout);
 
-	auto pLabel = UI::Label::create("I'm at the top");
-	pLinearLayout->addWidget(pLabel);
+	// // layout for the top
+	// auto pLinearLayout = UI::LinearLayout::create();
+	// pAbsLayout->addWidget(pLinearLayout, 0, 0, 100, 30, UI::Unit::Percentage, UI::Unit::Pixels);
+
+	// auto pLabel = UI::Label::create("I'm at the top");
+	// pLinearLayout->addWidget(pLabel);
 
 	
 	return true;

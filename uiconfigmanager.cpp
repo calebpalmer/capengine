@@ -57,7 +57,8 @@ boost::optional<jsoncons::json> UIConfigManager::getSetting(const std::string &s
 		if(result.size() > 0)
 			return result;
 
-		return boost::none;
+		else
+			return boost::none;
 	}
 	catch(const std::exception &e){
 		assert(Locator::logger != nullptr);

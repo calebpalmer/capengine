@@ -18,12 +18,16 @@
   (gdb "gdb -i=mi test/runtests")
   )
 
+(defun cap/cmake ()
+  (interactive)
+  (shell-command "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 . && rc -J")
+  )
 
 (global-set-key (kbd "C-<f5>") 'my-launch-editor-nodebug)
 (global-set-key (kbd "<f5>") 'my-launch-editor-debug)
 (global-set-key (kbd "C-<f6>") 'my-launch-tests-nodebug)
 (global-set-key (kbd "<f6>") 'my-launch-tests-debug)
-
+(global-set-key (kbd "C-<f12>") 'cap/cmake)
 
 ;; gdb
 (setq gdb-many-windows nil)
