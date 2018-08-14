@@ -123,6 +123,13 @@ void AbsoluteLayout::handleWindowEvent(SDL_WindowEvent event) {
 	}
 }
 
+//! @copydoc Widget::handleTextInputEvent()
+void AbsoluteLayout::handleTextInputEvent(SDL_TextInputEvent event) {
+	for(auto && widgetLocation : m_widgets){
+		widgetLocation.pWidget->handleTextInputEvent(event);
+	}
+}
+
 //! \copydoc Widget::setWindowId
 void AbsoluteLayout::setWindowId(Uint32 windowId){
 	Widget::setWindowId(windowId);

@@ -33,6 +33,7 @@ namespace CapEngine { namespace UI {
 			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent /*event*/) {}
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent /*event*/) {}
 			virtual void handleWindowEvent(SDL_WindowEvent /*event*/) {}
+			virtual void handleTextInputEvent(SDL_TextInputEvent /*event*/) {}
 
 		protected:
 			Uint32 m_windowId = VideoManager::kInvalidWindowId; //<! The owning window id
@@ -91,6 +92,15 @@ namespace CapEngine { namespace UI {
  \return 
    \li The window id
 */
+
+
+/** 
+ \fn Widget::handleTextInputEvent
+ \brief Handles Text Input events
+ \param event
+   \li The text input event tohandle.
+*/
+
 
 
 

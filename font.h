@@ -1,8 +1,12 @@
 #ifndef CAPENGINE_FONT_H
 #define CAPENGINE_FONT_H
 
+#include "captypes.h"
+#include "colour.h"
+
 #include <string>
 #include <memory>
+#include <optional>
 #include <SDL2/SDL_ttf.h>
 
 namespace CapEngine {
@@ -18,6 +22,10 @@ namespace CapEngine {
 		Font& operator=(Font &&other) = default;
 
 		int getFontHeight() const;
+		SurfacePtr getTextSurface(const std::string &text,
+															const Colour &colour,
+															std::optional<int> maxWidth=std::nullopt,
+															bool wrap=false);
 
 	private:
 		std::unique_ptr<TTF_Font, decltype(&TTF_CloseFont)> m_pTTFFont;

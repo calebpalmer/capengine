@@ -39,6 +39,7 @@ namespace CapEngine {
 			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 			virtual void handleWindowEvent(SDL_WindowEvent event) override;
+			virtual void handleTextInputEvent(SDL_TextInputEvent event) override;
 
 			void show();
 			void close();
@@ -72,6 +73,7 @@ namespace CapEngine {
 			boost::signals2::scoped_connection m_handleMouseWheelConnection;
 			boost::signals2::scoped_connection m_handleKeyboardConnection;
 			boost::signals2::scoped_connection m_handleWindowConnection;
+			boost::signals2::scoped_connection m_handleTextInputConnection;
 
 			// signals
 			boost::signals2::signal<void(WindowWidget*)> m_windowClosedSignal;

@@ -31,6 +31,8 @@ namespace CapEngine{
     boost::signals2::signal<void(SDL_MouseWheelEvent)> m_mouseWheelEventSignal;
 		//! The window event signal
     boost::signals2::signal<void(SDL_WindowEvent)> m_windowEventSignal;
+		//! a text edit event
+		boost::signals2::signal<void(SDL_TextInputEvent)> m_textInputEventSignal;
 	};
 }
 

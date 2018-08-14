@@ -213,7 +213,13 @@ void WindowWidget::handleMouseWheelEvent(SDL_MouseWheelEvent event) {
 void WindowWidget::handleKeyboardEvent(SDL_KeyboardEvent event) {
 	if(event.windowID == m_windowId)
 		m_pLayout->handleKeyboardEvent(event);
-}  
+}
+
+//! \copydoc Widget::handleTextInputEvent()
+void WindowWidget::handleTextInputEvent(SDL_TextInputEvent event){
+	if(event.windowID == m_windowId)
+		m_pLayout->handleTextInputEvent(event);
+}
 
 //! @copydoc Widget::handleWindowEvent()
 void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
@@ -254,6 +260,9 @@ void WindowWidget::registerSignals(EventSubscriber &eventSubscriber){
 
 	m_handleWindowConnection =
 		eventSubscriber.m_windowEventSignal.connect(std::bind(&WindowWidget::handleWindowEvent, this, std::placeholders::_1));
+
+	m_handleTextInputConnection =
+		eventSubscriber.m_textInputEventSignal.connect(std::bind(&WindowWidget::handleTextInputEvent, this, std::placeholders::_1));
 }
 
 

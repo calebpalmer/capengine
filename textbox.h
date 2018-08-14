@@ -19,8 +19,14 @@ public:
 	virtual void setPosition(int x, int y) override;
 	virtual void setSize(int width, int height) override;
 	virtual void render() override;
+	virtual void update(double ms) override;
 	virtual bool canFocus() const override;
 	virtual bool doFocus(bool, int, int, int, int) override;
+
+	// handled events
+	virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+	virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+	virtual void handleTextInputEvent(SDL_TextInputEvent event) override;
 
 private:
 	static const Colour kDefaultFontColour;
@@ -44,10 +50,17 @@ private:
 	Rect m_boxRect = {0, 0, 0, 0}; //<! The size and location of the actual textbox.
 	bool m_hasFocus = false; //<! flag indicating if textbox has focus.
 	std::string m_text; //<! The text to display.
+	int m_position = 0; //<! The position in the textbox
 	TexturePtr m_texture; //<! The texture to display.
 	bool m_textureDirty = true; //<! flag indicating if texture needs to be updated.
 	DisplaySettings m_displaySettings; //<! The display settings
 	Font m_font;  //<! The font to use for rendering the text.
+
+	SDL_Cursor *m_pPreviousCursor = nullptr; //<! The previous cursor
+	static SDL_Cursor *s_pHoverCursor; //<! The cursor to show when hovering over the textbox.
+	unsigned int m_cursorTimerMs = 0; //<! used for timing cursor visibility.
+	bool m_cursorState = false; //<! true=visible, not visible otherwise.
+	
 	
 };
 

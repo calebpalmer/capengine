@@ -42,4 +42,23 @@ int Font::getFontHeight() const {
 	return TTF_FontHeight(m_pTTFFont.get());
 }
 
+
+//! Render some text.
+/** 
+ \param 
+ \param 
+ \return 
+*/
+SurfacePtr Font::getTextSurface(const std::string &text,
+													const Colour &colour,
+													std::optional<int> maxWidth,
+													bool wrap)
+{
+	SDL_Colour sdlColour{colour.m_r, colour.m_g, colour.m_b, colour.m_a};
+	SurfacePtr surface(TTF_RenderText_Solid(m_pTTFFont.get(), text.c_str(), sdlColour), SDL_FreeSurface);;
+
+	return std::move(surface);
+}
+
+
 }

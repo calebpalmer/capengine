@@ -64,6 +64,8 @@ void Runner::end(){
 }
 
 void Runner::loop() {
+	assert(Locator::eventDispatcher != nullptr);
+	
   int subscriptionMask = mouseEvent | keyboardEvent | systemEvent | windowEvent;
   //Locator::eventDispatcher->subscribe(this, subscriptionMask);
   IEventSubscriber::subscribe(Locator::eventDispatcher, subscriptionMask);

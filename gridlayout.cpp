@@ -213,6 +213,17 @@ void GridLayout::handleWindowEvent(SDL_WindowEvent event){
 	}
 }
 
+//! \copydoc Widget::handleTextInputEvent
+void GridLayout::handleTextInputEvent(SDL_TextInputEvent event){
+	for(int i = 0; i < m_numRows; i++){
+		for(int j = 0; j < m_numColumns; j++){
+			if(m_widgetGrid[i][j].get() != nullptr){
+				m_widgetGrid[i][j]->handleTextInputEvent(event);
+			}
+		}
+	}
+}
+
 //! Return the wiget in the given grid location
 /** 
  \param row - The row of the widget

@@ -3,6 +3,7 @@
 
 #include "matrix.h"
 #include "captypes.h"
+#include "collision.h"
 
 namespace CapEngine{
   class Viewport
@@ -13,6 +14,7 @@ namespace CapEngine{
 	     int width, int height);
     ~Viewport() = default;
 
+		Point transform(const Point& in_point);
     Rect transformRect(Rect in_rect) const;
     void centerOnObject(Rect objectToCenter,
 			      Rect mapDims);

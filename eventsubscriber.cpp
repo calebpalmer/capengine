@@ -26,6 +26,10 @@ void EventSubscriber::receiveEvent(SDL_Event event, Time *time){
 		m_keyboardEventSignal(event.key);
 		break;
 
+	case SDL_TEXTINPUT:
+		m_textInputEventSignal(event.text);
+		break;
+
 	case SDL_MOUSEMOTION:
 		m_mouseMotionEventSignal(event.motion);
 		break;

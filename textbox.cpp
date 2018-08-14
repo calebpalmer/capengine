@@ -4,9 +4,11 @@
 #include "uiconfigmanager.h"
 #include "logger.h"
 #include "locator.h"
+#include "colour.h"
+#include "scopeguard.h"
 
 #include <boost/format.hpp>
-#include <iostream> // TODO remove me
+#include <atomic>
 
 namespace CapEngine { namespace UI {
 
@@ -17,10 +19,14 @@ const char kBackgroundColourProperty[] = "background-colour";
 const char kFontColourProperty[] = "font-colour";
 const char kColourProperty[] = "colour";
 
+const unsigned int kCursorBlinkTime = 500; // ms
+
 } // namespace
 
 const Colour TextBox::kDefaultFontColour{0, 0, 0, 255};
 const Colour TextBox::kDefaultBackgroundColour{255, 255, 255, 255};
+
+SDL_Cursor *TextBox::s_pHoverCursor = nullptr;
 
 //! Constructor
 /** 
@@ -32,7 +38,10 @@ TextBox::TextBox(std::string initialText)
 		m_displaySettings(getDisplaySettings()),
 		m_font(Font(m_displaySettings.fontPath, m_displaySettings.fontSize))
 {
-	
+	static std::atomic<bool> cursorInitialized = false;
+	if(!std::atomic_exchange(&cursorInitialized, true)){
+		s_pHoverCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	}
 }
 
 //! Creates a textbox
@@ -66,13 +75,54 @@ void TextBox::setSize(int width, int height) {
 	m_textureDirty = true;
 }
 
+//! \copydoc Widget::update
+void TextBox::update(double ms){
+	//update cursor state
+	if(m_cursorTimerMs + ms >= kCursorBlinkTime){
+		m_cursorState = !m_cursorState;
+		m_cursorTimerMs = (m_cursorTimerMs + static_cast<unsigned int>(ms + 0.5)) % kCursorBlinkTime;
+	}
+	else{
+		m_cursorTimerMs += ms;
+	}
+}
+
 //! \copydoc Widget::render
 void TextBox::render() {
 	if(m_textureDirty)
 		this->updateTexture();
 
+	// draw the box
 	assert(Locator::videoManager != nullptr);
 	Locator::videoManager->drawFillRect(m_windowId, m_boxRect, m_displaySettings.backgroundColour);
+
+	// draw the cursor
+	if(m_hasFocus && m_cursorState == true){
+		int leftPadding = 1;
+		int verticalPadding = 2;
+		assert(Locator::videoManager != nullptr);
+
+		int xStart = m_boxRect.x + leftPadding;
+		if(m_texture != nullptr){
+			int width = Locator::videoManager->getTextureWidth(m_texture.get());
+			xStart = m_boxRect.x + width + leftPadding;
+		}
+		
+		Locator::videoManager->drawLine(m_windowId,
+																		xStart,
+																		m_boxRect.y + verticalPadding,
+																		xStart,
+																		m_boxRect.y + m_boxRect.h - verticalPadding,
+																		{0, 0, 0, 255});
+	}
+
+	// draw the text
+	if(m_texture != nullptr){
+		ScopeGuard guard([&]() { Locator::videoManager->setClipRect(m_windowId, nullptr); });	
+		Locator::videoManager->setClipRect(m_windowId, &m_boxRect);
+
+		Locator::videoManager->drawTexture(m_windowId, m_boxRect.x, m_boxRect.y, m_texture.get());
+	}
 }
 
 //! \copydoc Widget::canFocus
@@ -83,13 +133,30 @@ bool TextBox::canFocus() const {
 //! \copydoc Widget::doFocus
 bool TextBox::doFocus(bool focus, int downX, int downY, int upX, int upY) {
 	if(focus == false) {
-		m_hasFocus = false;
+		if(m_hasFocus){
+			SDL_StopTextInput();
+			assert(!SDL_IsTextInputActive());
+			
+			m_hasFocus = false;
+		}
+
 		return false;
 	}
 
 	else {
-		if(pointInRect( { downX, downY }, m_rect) && pointInRect( { upX, upY }, m_rect)){
-			m_hasFocus = true;
+		if(pointInRect( { downX, downY }, m_boxRect) && pointInRect( { upX, upY }, m_boxRect)){
+			if(!m_hasFocus){
+
+				SDL_StartTextInput();
+				SDL_SetTextInputRect(nullptr);
+				
+				assert(SDL_IsTextInputActive());
+				
+				m_hasFocus = true;
+				m_cursorTimerMs = 0;
+				m_cursorState = false;
+			}
+			
 			return true;
 		}
 
@@ -107,7 +174,17 @@ void TextBox::updateTexture() {
 
 
 	// render the text
+	if(m_text.size() > 0){
+		Colour textColour{0, 0, 0, 255};
+		SurfacePtr surfacePtr = m_font.getTextSurface(m_text, textColour);
 
+		assert(Locator::videoManager != nullptr);
+		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surfacePtr.get());
+	}
+	else{
+		m_texture.release();
+	}
+	
 	m_textureDirty = false;
 }
 
@@ -132,7 +209,6 @@ TextBox::DisplaySettings TextBox::getDisplaySettings(){
 	// get the font size
 	boost::optional<jsoncons::json> maybeFontSizeJson = configManager.getSetting(kDefaultFontSizeSettingsPath);
 	if(maybeFontSizeJson != boost::none){
-		std::cout << jsoncons::print(*maybeFontSizeJson) << std::endl;
 		settings.fontSize = (*maybeFontSizeJson)[0].as<int>();
 	}
 
@@ -159,6 +235,53 @@ TextBox::DisplaySettings TextBox::getDisplaySettings(){
 	}	
 
 	return settings;
+}
+
+//! \copydoc Widget::handleMouseMotionEvent
+void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event){
+	assert(s_pHoverCursor != nullptr);
+	SDL_Cursor *pCurrentCursor = SDL_GetCursor();
+
+	// no mouse?
+	if(pCurrentCursor == nullptr)
+		return;
+	
+	if(pointInRect({event.x, event.y}, m_boxRect) &&
+		  pCurrentCursor != s_pHoverCursor)
+	{
+		m_pPreviousCursor = pCurrentCursor;
+		SDL_SetCursor(s_pHoverCursor);
+	}
+
+	else{
+		if(pCurrentCursor == s_pHoverCursor){
+			SDL_SetCursor(m_pPreviousCursor);
+		}
+	}
+}
+
+// \copydoc Widget::handleKeyboardEvent
+void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
+	if(event.type == SDL_KEYDOWN){
+		
+		SDL_Keycode keycode = event.keysym.sym;
+		if(keycode == SDLK_BACKSPACE && m_text.size() > 0){
+			m_text.pop_back();
+			m_textureDirty = true;
+		}
+
+		else{
+			// m_text.push_back(keycode);
+			// m_textureDirty = true;
+		}
+		
+	}
+}
+
+//! \copydoc Widget::handleTextInputEvent
+void TextBox::handleTextInputEvent(SDL_TextInputEvent event){
+	m_text += event.text;
+	m_textureDirty = true;
 }
 
 }}

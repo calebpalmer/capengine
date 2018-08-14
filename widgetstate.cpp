@@ -66,6 +66,10 @@ WidgetState::WidgetState(std::function<bool(WidgetState& widgetState)> onLoadFun
 	m_windowEventConnection =
 		Locator::eventSubscriber->m_windowEventSignal.connect(std::bind(&WidgetState::handleWindowEvent, this, std::placeholders::_1));
 
+	m_textInputEventConnection =
+		Locator::eventSubscriber->m_textInputEventSignal.connect(std::bind(&WidgetState::handleTextInputEvent, this, std::placeholders::_1));
+	
+
 	// disable default quit events
 	CapEngine::setDefaultQuitEvents(false);
 }
@@ -193,8 +197,14 @@ void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 														return pWindow->getWindowId() == this->m_lastMouseDownWindowId;
 													});
 
-				if(maybeWindow != m_windows.end())
-					this->handleMouseFocusChange(**maybeWindow, event.x, event.y);
+			if(maybeWindow != m_windows.end()){
+					bool handled = this->handleMouseFocusChange(*maybeWindow, event.x, event.y);
+					
+					if(!handled){
+						m_pFocusedWidget->doFocus(false, -1, -1, -1, -1);
+						m_pFocusedWidget = nullptr;
+					}
+			}
 		}
 	}
 	
@@ -266,6 +276,23 @@ void WidgetState::handleWindowEvent(SDL_WindowEvent event){
 		pControl->handleWindowEvent(event);
 	}
 
+}
+
+//! \copydoc Widget::handleWindowevent
+void WidgetState::handleTextInputEvent(SDL_TextInputEvent event){
+	// send event to windows
+	for(auto&& pWindow : m_windows){
+		assert(pWindow != nullptr);
+		pWindow->handleTextInputEvent(event);
+	}
+
+	// send event to active control
+	assert(m_pUiControls != nullptr);
+	if(m_pUiControls->size() > 0){
+		auto pControl = m_pUiControls->back();
+		assert(pControl != nullptr);
+		pControl->handleTextInputEvent(event);
+	}
 }
 
 //! Adds a control to the control.
@@ -347,22 +374,31 @@ void WidgetState::handleWindowCloseSignal(WindowWidget* pWindowWidget){
  \param y
    \li The y position of the mouse click
 */
-bool WidgetState::handleMouseFocusChange(Widget &widget, int x, int y){
+bool WidgetState::handleMouseFocusChange(std::shared_ptr<Widget> widget, int x, int y){
+	assert(widget != nullptr);
+	
 	bool handled = false;
-	if(widget.canFocus()){
-		handled = widget.doFocus(true, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+	if(widget->canFocus()){
+		handled = widget->doFocus(true, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+		if(handled){
+			if(m_pFocusedWidget != nullptr && m_pFocusedWidget.get() != widget.get()){
+				m_pFocusedWidget->doFocus(false, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+			}
+
+			m_pFocusedWidget = widget;
+		}
 	}
 
 	if(!handled){
-		for(auto && pWidget : widget.getChildren()){
-			handled = handleMouseFocusChange(*pWidget, x, y);
+		for(auto && pWidget : widget->getChildren()){
+			handled = handleMouseFocusChange(pWidget, x, y);
 
 			if(handled)
 				break;
 		}
 	}
-	
+
 	return handled;
 }
 
-}} // namespace CapEngine::UI
+}} // namespace CapEngine

@@ -3,6 +3,12 @@
 
 #include "VideoManager.h"
 
+#include "logger.h"
+#include "EventDispatcher.h"
+#include "collision.h"
+#include "CapEngineException.h"
+#include "scopeguard.h"
+
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -10,11 +16,6 @@
 #include <exception>
 
 #include <SDL2/SDL_image.h>
-
-#include "logger.h"
-#include "EventDispatcher.h"
-#include "collision.h"
-#include "CapEngineException.h"
 
 using namespace std;
 
@@ -601,9 +602,53 @@ void VideoManager::loadControllerMapFromFile(std::string path){
   }
 }
 
+
+//! Draws a line.
+/** 
+ \param x1
+   \li The x coordinate to start at.
+ \param y1
+   \li The y coordinate to start at.
+ \param x2
+   \li The x coordinate to end with.
+ \param y2
+   \li The y coordinate to end with.
+ \param strokeColour
+   \li The colour of the line.
+*/
+void VideoManager::drawLine(Uint32 windowID, int x1, int y1, int x2, int y2, const Colour &strokeColour){
+  auto window = getWindow(windowID);
+  auto pRenderer = window.m_renderer;
+  Viewport viewport = getViewport(windowID);
+  
+  //Transform the dstRect
+	Point point1{x1, y1};
+	point1 = viewport.transform(point1);
+
+	Point point2{x2, y2};
+	point2 = viewport.transform(point2);
+
+	// set the colour
+	Uint8 r, g, b, a;
+	int rcode = SDL_GetRenderDrawColor(pRenderer, &r, &g, &b, &a);
+	if(rcode != 0){
+		CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
+		return;
+	}
+
+	ScopeGuard resetColour([&]() {
+							 SDL_SetRenderDrawColor(pRenderer, r, g, b, a);
+						 });
+
+	SDL_SetRenderDrawColor(pRenderer, strokeColour.m_r, strokeColour.m_g, strokeColour.m_b, strokeColour.m_a);
+	SDL_RenderDrawLine(pRenderer, point1.x, point1.y, point2.x, point2.y);
+}
+
 void VideoManager::drawFillRect(Uint32 windowID, Rect rect, Colour fillColour){
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
+	assert(pRenderer != nullptr);
+	
   Viewport viewport = getViewport(windowID);
   
   //Transform the dstRect

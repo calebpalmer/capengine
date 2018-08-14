@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <cassert>
+#include <iostream>
 
 using namespace CapEngine;
 using namespace std;
@@ -39,85 +40,83 @@ void EventDispatcher::enqueue(SDL_Event event){
 }
 
 void EventDispatcher::flushQueue(){
-  vector<subscription>::iterator subscriberIter = subscribers.begin();
-  vector<SDL_Event>::iterator eventIter = eventQueue.begin();
-  while(eventIter != eventQueue.end()){
-    SDL_Event curEvent = *eventIter;
+	for(auto && event : eventQueue){
 
     // Call the reshape function if SDL is being used
-    if(curEvent.type == SDL_WINDOWEVENT_RESIZED){
-      int w = ((SDL_WindowEvent*)&curEvent)->data1;
-      int h = ((SDL_WindowEvent*)&curEvent)->data2;
+    if(event.type == SDL_WINDOWEVENT_RESIZED){
+      int w = ((SDL_WindowEvent*)&event)->data1;
+      int h = ((SDL_WindowEvent*)&event)->data2;
       videoManager->callReshapeFunc(w, h); 
     }
-    while(subscriberIter != subscribers.end()){
-      subscription* curSubscription = &(*subscriberIter);
+
+		for (auto && subscriber : subscribers){
       // check to see if subscriber subscribes to current event types
-      switch(curEvent.type){
+      switch(event.type){
       case SDL_KEYDOWN:
-	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
       case SDL_KEYUP:
-	if(curSubscription->subscriptionType & keyboardEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & keyboardEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
+			case SDL_TEXTINPUT:
+				if(subscriber.subscriptionType & keyboardEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
+			case SDL_TEXTEDITING:
+				if(subscriber.subscriptionType & keyboardEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_MOUSEMOTION:
-	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & mouseEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_MOUSEBUTTONDOWN:
-	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & mouseEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_MOUSEBUTTONUP:
-	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & mouseEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_MOUSEWHEEL:
-	if(curSubscription->subscriptionType & mouseEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & mouseEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_QUIT:
-	if(curSubscription->subscriptionType & systemEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & systemEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_WINDOWEVENT:
-	  if(curSubscription->subscriptionType & windowEvent){
-	    // TODO when multiple window support is added, a window identifier should be passed along to the receiver
-	    (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	  }
-	break;
+				if(subscriber.subscriptionType & windowEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
       case SDL_CONTROLLERAXISMOTION:
       case SDL_CONTROLLERBUTTONDOWN:
-	if(curSubscription->subscriptionType & controllerEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & controllerEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
 
       case SDL_CONTROLLERBUTTONUP:
       case SDL_CONTROLLERDEVICEADDED:
       case SDL_CONTROLLERDEVICEREMOVED:
       case SDL_CONTROLLERDEVICEREMAPPED:
-	if(curSubscription->subscriptionType & controllerEvent){
-	  (curSubscription->subscriber)->receiveEvent(curEvent, nullptr);
-	}
-	break;
+				if(subscriber.subscriptionType & controllerEvent){
+					(subscriber.subscriber)->receiveEvent(event, nullptr);
+				}
+				break;
 
       }
-      subscriberIter++;
     }
-    //delete *eventIter;
-    eventIter++;
   }
-  //eventQueue.erase(eventQueue.begin(), eventQueue.end());
   eventQueue.clear();
 }
 

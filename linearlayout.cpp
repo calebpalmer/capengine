@@ -136,6 +136,13 @@ void LinearLayout::handleWindowEvent(SDL_WindowEvent event){
 	}
 }
 
+//! \copydoc Widget::handleTextInputEvent
+void LinearLayout::handleTextInputEvent(SDL_TextInputEvent event){
+	for(auto && pWidget : m_widgets){
+		pWidget->handleTextInputEvent(event);
+	}
+}
+
 //! Widget:getChildren
 std::vector<std::shared_ptr<Widget>> LinearLayout::getChildren(){
 	return m_widgets;

@@ -1,6 +1,7 @@
 #include "viewport.h"
 
 #include "vector.h"
+#include "collision.h"
 #include "CapEngineException.h"
 
 using namespace CapEngine;
@@ -38,6 +39,19 @@ void Viewport::setY(int y)
 {
   //TODO same as above
   //m_transformationMatrix.getRowVectorRef(1).setD(y);
+}
+
+
+//! Perform viewport transformation on point.
+/** 
+ \param points
+   \li The point to transform
+ \return 
+   \li The new point
+*/
+Point Viewport::transform(const Point &point){
+	auto vector = m_transformationMatrix * Vector(point.x, point.y, 0, 1);
+	return {static_cast<int>(vector.getX() + 0.5), static_cast<int>(vector.getY() + 0.5)};
 }
 
 Rect Viewport::transformRect(Rect in_rect) const

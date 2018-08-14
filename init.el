@@ -28,6 +28,7 @@
 (global-set-key (kbd "C-<f6>") 'my-launch-tests-nodebug)
 (global-set-key (kbd "<f6>") 'my-launch-tests-debug)
 (global-set-key (kbd "C-<f12>") 'cap/cmake)
+(global-set-key (kbd "<f10>") 'gdb-many-windows)
 
 ;; gdb
 (setq gdb-many-windows nil)

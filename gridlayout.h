@@ -31,6 +31,7 @@ namespace CapEngine { namespace UI {
 			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
 			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 			virtual void handleWindowEvent(SDL_WindowEvent event) override;
+			virtual void handleTextInputEvent(SDL_TextInputEvent event) override;			
 
 			virtual void setWindowId(Uint32 windowId) override;
 

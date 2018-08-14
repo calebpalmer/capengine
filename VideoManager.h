@@ -123,6 +123,7 @@ static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false,
     // input
     void loadControllerMapFromFile(std::string filePath);
     //Drawing
+		void drawLine(Uint32 windowID, int x1, int y1, int x2, int y2, const Colour &strokeColour);
     void drawFillRect(Uint32 windowID, Rect rect, Colour fillColour);
     void drawRect(Uint32 windowID, Rect rect, Colour fillColour);    
 

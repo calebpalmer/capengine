@@ -5,21 +5,22 @@ project(capengine)
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/cmake-scripts")
 LIST(APPEND CMAKE_MODULE_PATH "./cmake/cmake-scripts") 
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
+#find_package(SDL2 REQUIRED)
+#find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(LibXml2 REQUIRED)
 find_package(cppunit REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIR}
-                    ${SDL2_IMAGE_INCLUDE_DIR}
-                    ${SDL2_TTF_INCLUDE_DIRS}
+include_directories(  ${SDL2_TTF_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${LIBXML2_INCLUDE_DIR}
-		    ${CPPUNIT_INCLUDE_DIRS}}
+		    ${CPPUNIT_INCLUDE_DIRS}
 		    "./thirdparty/jsoncons/include"
+		    "./thirdparthy/include"
                     )
+
+link_directories("./thirdparty/lib")
 
 #link_directories()
 
@@ -49,8 +50,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
 add_executable(runtests test/test.cpp)
 
 
-target_link_libraries(capengine ${SDL2_LIBRARY} 
-                      ${SDL2_IMAGE_LIBRARIES}
+target_link_libraries(capengine SDL2
+                      SDL2_image
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
@@ -58,8 +59,8 @@ target_link_libraries(capengine ${SDL2_LIBRARY}
 		      stdc++fs
                       )
 target_link_libraries(runtests capengine
-		      ${SDL2_LIBRARY} 
-                      ${SDL2_IMAGE_LIBRARIES}
+		      SDL2
+                      SDL2_image
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
@@ -69,8 +70,8 @@ target_link_libraries(runtests capengine
                       )
 
 target_link_libraries(editor capengine
-		      ${SDL2_LIBRARY} 
-                      ${SDL2_IMAGE_LIBRARIES}
+		      SDL2
+                      SDL2_image
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
@@ -79,8 +80,8 @@ target_link_libraries(editor capengine
                       )
 
 target_link_libraries(widgettest capengine
-		      ${SDL2_LIBRARY} 
-                      ${SDL2_IMAGE_LIBRARIES}
+		      SDL2
+                      SDL2_image
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}

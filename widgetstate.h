@@ -38,6 +38,7 @@ class WidgetState : public GameState {
 	virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event);
 	virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event);
 	virtual void handleKeyboardEvent(SDL_KeyboardEvent event);
+	virtual void handleTextInputEvent(SDL_TextInputEvent event);
 	virtual void handleWindowEvent(SDL_WindowEvent event);
 
 	virtual void handleWindowCloseSignal(WindowWidget* windowWidget);
@@ -54,7 +55,7 @@ protected:
 	WidgetState(const WidgetState&) = delete;
 	WidgetState& operator=(const WidgetState&) = delete;
 
-	bool handleMouseFocusChange(Widget &widget, int x, int y);
+	bool handleMouseFocusChange(std::shared_ptr<Widget> widget, int x, int y);
 	
 	//! The list of windows
 	std::vector<std::shared_ptr<UI::WindowWidget>> m_windows;
@@ -90,7 +91,9 @@ protected:
 	boost::signals2::scoped_connection m_mouseWheelEventConnection;
 	//! connection for window events
 	boost::signals2::scoped_connection m_windowEventConnection;
-	
+	//! connection for text input events
+	boost::signals2::scoped_connection m_textInputEventConnection;
+
 };
 
 }} // namespace CapEngine
