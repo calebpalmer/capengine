@@ -60,5 +60,22 @@ SurfacePtr Font::getTextSurface(const std::string &text,
 	return std::move(surface);
 }
 
+//! Get the width of the text if rendered with this font.
+/** 
+ \return 
+   \li The width of the rendered text.
+*/
+int Font::getTextSize(const std::string &text){
+	assert(m_pTTFFont != nullptr);
+
+	int width = 0;
+	int height = 0;
+
+	if(TTF_SizeText(m_pTTFFont.get(), text.c_str(), &width, &height)){
+		BOOST_THROW_EXCEPTION(CapEngineException(std::string("Font could not be rendered: ") + std::string(TTF_GetError())));
+  }
+
+	return width;
+}
 
 }

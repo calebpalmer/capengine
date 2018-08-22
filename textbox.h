@@ -39,6 +39,13 @@ private:
 		int fontSize = kDefaultFontSize;
 		std::string fontPath;
 	};
+
+	//! Describes the current state of selection.
+	enum class SelectionState {
+    NoSelection,
+	  MouseSelection,
+	  KeyboardSelection
+	};
 	
 private:
 	TextBox(std::string initialText);
@@ -48,6 +55,7 @@ private:
 	
 	Rect m_rect = {0, 0, 0, 0}; //<! The location of the textboxs bounding box.
 	Rect m_boxRect = {0, 0, 0, 0}; //<! The size and location of the actual textbox.
+	Rect m_textRect = {0, 0, 0, 0};
 	bool m_hasFocus = false; //<! flag indicating if textbox has focus.
 	std::string m_text; //<! The text to display.
 	int m_position = 0; //<! The position in the textbox
@@ -60,7 +68,11 @@ private:
 	static SDL_Cursor *s_pHoverCursor; //<! The cursor to show when hovering over the textbox.
 	unsigned int m_cursorTimerMs = 0; //<! used for timing cursor visibility.
 	bool m_cursorState = false; //<! true=visible, not visible otherwise.
-	
+
+	//! The current state of selection.
+	SelectionState m_selectionState = SelectionState::NoSelection;
+	int m_cursorPosition = 0; //<! The position of the cursor
+	std::optional<int> m_cursorSelectStart; //<! if highlighting, 
 	
 };
 

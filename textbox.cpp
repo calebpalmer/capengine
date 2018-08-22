@@ -21,6 +21,24 @@ const char kColourProperty[] = "colour";
 
 const unsigned int kCursorBlinkTime = 500; // ms
 
+//! Checks if there is a special key squence input.
+/** 
+ \param textInputEvent
+   \li The TextInput even to check
+ \return 
+   \li true if it's a special key sequence, false otherwise
+*/
+bool isSpecialKeySequence(const SDL_TextInputEvent &textInputEvent){
+	if( (textInputEvent.text[0] == 'c' || textInputEvent.text[0] == 'C'  ||
+			 textInputEvent.text[0] == 'v' || textInputEvent.text[0] == 'V') &&
+			 SDL_GetModState() & KMOD_CTRL )
+	{
+		return true;
+	}
+
+	return false;
+}
+
 } // namespace
 
 const Colour TextBox::kDefaultFontColour{0, 0, 0, 255};
@@ -36,7 +54,8 @@ SDL_Cursor *TextBox::s_pHoverCursor = nullptr;
 TextBox::TextBox(std::string initialText)
 	: m_text(std::move(initialText)), m_texture(getNullTexturePtr()),
 		m_displaySettings(getDisplaySettings()),
-		m_font(Font(m_displaySettings.fontPath, m_displaySettings.fontSize))
+		m_font(Font(m_displaySettings.fontPath, m_displaySettings.fontSize)),
+		m_cursorPosition(m_text.size())
 {
 	static std::atomic<bool> cursorInitialized = false;
 	if(!std::atomic_exchange(&cursorInitialized, true)){
@@ -96,33 +115,65 @@ void TextBox::render() {
 	assert(Locator::videoManager != nullptr);
 	Locator::videoManager->drawFillRect(m_windowId, m_boxRect, m_displaySettings.backgroundColour);
 
-	// draw the cursor
-	if(m_hasFocus && m_cursorState == true){
-		int leftPadding = 1;
-		int verticalPadding = 2;
-		assert(Locator::videoManager != nullptr);
+	assert(m_texture != nullptr);
+	int textureWidth = Locator::videoManager->getTextureWidth(m_texture.get());
 
-		int xStart = m_boxRect.x + leftPadding;
-		if(m_texture != nullptr){
-			int width = Locator::videoManager->getTextureWidth(m_texture.get());
-			xStart = m_boxRect.x + width + leftPadding;
-		}
-		
-		Locator::videoManager->drawLine(m_windowId,
-																		xStart,
-																		m_boxRect.y + verticalPadding,
-																		xStart,
-																		m_boxRect.y + m_boxRect.h - verticalPadding,
-																		{0, 0, 0, 255});
+	if(m_textRect.x == 0 && m_textRect.y == 0 &&
+		 m_textRect.w == 0 && m_textRect.h == 0)
+	{
+		m_textRect.x = m_boxRect.x;
+		m_textRect.y = m_boxRect.y;
+		m_textRect.h = m_boxRect.h;
+	}
+	
+	if(m_textRect.w != textureWidth && textureWidth > m_boxRect.w){
+
+		m_textRect.w = textureWidth;
+		// move it to the end, and then adjust for the cursor?
+		int difference = m_boxRect.w - textureWidth;
+		m_textRect.x = m_boxRect.x - difference;
 	}
 
+	// find where the cursor would be drawn if we have focus
+	int verticalPadding = 2;
+
+	int cursorDrawOffset = 0;
+	// draw the cursor
+	if(m_cursorPosition > 0){
+		//int width = Locator::videoManager->getTextureWidth(m_texture.get());
+		int width = m_font.getTextSize(m_text.substr(0, m_cursorPosition));
+		cursorDrawOffset = width;
+	}
+		
 	// draw the text
 	if(m_texture != nullptr){
 		ScopeGuard guard([&]() { Locator::videoManager->setClipRect(m_windowId, nullptr); });	
 		Locator::videoManager->setClipRect(m_windowId, &m_boxRect);
 
-		Locator::videoManager->drawTexture(m_windowId, m_boxRect.x, m_boxRect.y, m_texture.get());
+		// cursor position is not visible to the left
+		while(m_textRect.x + cursorDrawOffset < m_boxRect.x){
+			m_textRect.x++;
+		}
+
+		// cursor position is not visible to the right
+		while(m_textRect.x + cursorDrawOffset > m_boxRect.x + m_boxRect.w){
+			m_textRect.x--;
+		}
+
+		Locator::videoManager->drawTexture(m_windowId, m_textRect.x, m_textRect.y, m_texture.get());
+
 	}
+
+	// draw the cursor
+	if(m_hasFocus && m_cursorState == true){
+		Locator::videoManager->drawLine(m_windowId,
+																		m_textRect.x + cursorDrawOffset,
+																		m_boxRect.y + verticalPadding,
+																		m_textRect.x + cursorDrawOffset,
+																		m_boxRect.y + m_boxRect.h - verticalPadding,
+																		{0, 0, 0, 255});
+	}
+	
 }
 
 //! \copydoc Widget::canFocus
@@ -262,26 +313,78 @@ void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 
 // \copydoc Widget::handleKeyboardEvent
 void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
-	if(event.type == SDL_KEYDOWN){
-		
+	if(m_hasFocus){
 		SDL_Keycode keycode = event.keysym.sym;
-		if(keycode == SDLK_BACKSPACE && m_text.size() > 0){
-			m_text.pop_back();
-			m_textureDirty = true;
-		}
-
-		else{
-			// m_text.push_back(keycode);
-			// m_textureDirty = true;
-		}
 		
+		// keydown
+		if(event.type == SDL_KEYDOWN){
+
+			// backspace
+			if(keycode == SDLK_BACKSPACE && m_text.size() > 0 && m_cursorPosition > 0){
+				m_text.erase(m_cursorPosition - 1, 1);
+
+				m_cursorPosition--;
+				if(m_cursorPosition < 0)
+					m_cursorPosition = 0;
+
+				m_textureDirty = true;
+			}
+
+			// ctrl + c = copy
+			else if(keycode == SDLK_c && SDL_GetModState() & KMOD_CTRL){
+				//SDL_SetClipboardText( inputText.c_str() );
+				// Not yet supported
+			}
+
+			// ctrl + v = paste
+			else if(keycode == SDLK_v && SDL_GetModState() & KMOD_CTRL ){
+				m_text += SDL_GetClipboardText();
+			}
+			
+			// shift key, start or stop text selection
+			else if(keycode == SDLK_LSHIFT || keycode == SDLK_RSHIFT){
+					m_cursorSelectStart = m_cursorPosition;
+					m_selectionState = SelectionState::KeyboardSelection;
+			}
+
+			// escape
+			else if(keycode == SDLK_ESCAPE){
+				m_cursorSelectStart = std::nullopt;
+			}
+
+			// move cursor to the right
+			else if(keycode == SDLK_RIGHT){
+				m_cursorPosition++;;
+				if(m_cursorPosition > static_cast<int>(m_text.size()))
+					m_cursorPosition = m_text.size();
+
+			}
+
+			// move cursor to the left
+			else if(keycode == SDLK_LEFT){
+				m_cursorPosition--;
+				if(m_cursorPosition < 0)
+					m_cursorPosition = 0;
+			}
+
+		}
+		// keyup
+		else{
+			if(keycode == SDLK_LSHIFT || keycode == SDLK_RSHIFT){
+				m_selectionState = SelectionState::NoSelection;
+			}
+		}
 	}
 }
 
 //! \copydoc Widget::handleTextInputEvent
 void TextBox::handleTextInputEvent(SDL_TextInputEvent event){
-	m_text += event.text;
-	m_textureDirty = true;
+	if(!(isSpecialKeySequence(event)) && m_hasFocus)
+	{
+		m_text += event.text;
+		m_cursorPosition++;
+		m_textureDirty = true;
+	}
 }
 
 }}

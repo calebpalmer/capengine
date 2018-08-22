@@ -26,6 +26,7 @@ namespace CapEngine {
 															const Colour &colour,
 															std::optional<int> maxWidth=std::nullopt,
 															bool wrap=false);
+		int getTextSize(const std::string &text);
 
 	private:
 		std::unique_ptr<TTF_Font, decltype(&TTF_CloseFont)> m_pTTFFont;
