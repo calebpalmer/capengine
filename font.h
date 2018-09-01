@@ -24,8 +24,7 @@ namespace CapEngine {
 		int getFontHeight() const;
 		SurfacePtr getTextSurface(const std::string &text,
 															const Colour &colour,
-															std::optional<int> maxWidth=std::nullopt,
-															bool wrap=false);
+															std::optional<Colour> bgColour = std::nullopt);
 		int getTextSize(const std::string &text);
 
 	private:

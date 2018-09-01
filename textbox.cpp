@@ -55,7 +55,8 @@ TextBox::TextBox(std::string initialText)
 	: m_text(std::move(initialText)), m_texture(getNullTexturePtr()),
 		m_displaySettings(getDisplaySettings()),
 		m_font(Font(m_displaySettings.fontPath, m_displaySettings.fontSize)),
-		m_cursorPosition(m_text.size())
+		m_cursorPosition(m_text.size()), m_cursorSelectStart(m_cursorPosition),
+		m_cursorSelectEnd(m_cursorPosition)
 {
 	static std::atomic<bool> cursorInitialized = false;
 	if(!std::atomic_exchange(&cursorInitialized, true)){
@@ -215,7 +216,7 @@ bool TextBox::doFocus(bool focus, int downX, int downY, int upX, int upY) {
 	}
 }
 
-//! Updates the texture that is displayed.
+//! Update the texture that is displayed.
 void TextBox::updateTexture() {
 	// get the height of the textbox based on the font
 	m_boxRect.w = m_rect.w;
@@ -223,16 +224,99 @@ void TextBox::updateTexture() {
 	m_boxRect.x = m_rect.x;
 	m_boxRect.y = (m_rect.y + (m_rect.h / 2)) - (m_boxRect.h / 2);
 
-
 	// render the text
 	if(m_text.size() > 0){
-		Colour textColour{0, 0, 0, 255};
-		SurfacePtr surfacePtr = m_font.getTextSurface(m_text, textColour);
-
 		assert(Locator::videoManager != nullptr);
-		m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surfacePtr.get());
+
+		Colour textColour{0, 0, 0, 255};
+
+		// there is not text selected
+		if(m_cursorSelectStart == m_cursorSelectEnd){
+			SurfacePtr surfacePtr = m_font.getTextSurface(m_text, textColour);
+
+			m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surfacePtr.get());
+		}
+
+		// text is selected
+		else {
+			assert(m_cursorSelectStart < m_cursorSelectEnd);
+			
+			SurfacePtr beforeText = getNullSurfacePtr();
+			SurfacePtr selectedText = getNullSurfacePtr();
+			SurfacePtr afterText = getNullSurfacePtr();
+
+			// render non selected at beginning if there is any
+			if(m_cursorSelectStart > 0){
+				beforeText = m_font.getTextSurface(m_text.substr(0, m_cursorSelectStart), textColour);
+			}
+			
+			// render the selected text
+			Colour selectedTextColour{255, 255, 255, 255};
+			Colour bgColour{100,100,100,255};
+			selectedText = m_font.getTextSurface(m_text.substr(m_cursorSelectStart,
+																												 m_cursorSelectEnd - m_cursorSelectStart),
+																					 selectedTextColour, bgColour);
+			assert(selectedText != nullptr);
+			
+
+			// render non selected text at the end if there is any
+			if(m_cursorSelectEnd < static_cast<int>(m_text.size())){
+				afterText = m_font.getTextSurface(m_text.substr(m_cursorSelectEnd,
+																												static_cast<int>(m_text.size()) - m_cursorSelectEnd)
+																					, textColour);
+			}
+
+			// stich them together
+			int textureWidth = Locator::videoManager->getSurfaceWidth(selectedText.get()) +
+				(beforeText != nullptr ? Locator::videoManager->getSurfaceWidth(beforeText.get()) : 0) +
+				(beforeText != nullptr ? Locator::videoManager->getSurfaceWidth(beforeText.get()) : 0);
+
+			int textureHeight = m_boxRect.h;
+			SurfacePtr combinedText = Locator::videoManager->createSurfacePtr(textureWidth, textureHeight);
+
+			// there is text before selected text
+			if(beforeText != nullptr){
+				int beforeTextWidth = Locator::videoManager->getSurfaceWidth(beforeText.get());
+				Locator::videoManager->blitSurface(beforeText.get(), 0, 0,
+																					 beforeTextWidth,
+																					 Locator::videoManager->getSurfaceHeight(beforeText.get()),
+																					 combinedText.get(), 0, 0);
+
+				Locator::videoManager->blitSurface(selectedText.get(), 0, 0,
+																					 Locator::videoManager->getSurfaceWidth(selectedText.get()),
+																					 Locator::videoManager->getSurfaceHeight(selectedText.get()),
+																					 combinedText.get(), beforeTextWidth, 0);
+			}
+
+			// no text before selected text
+			else{
+				Locator::videoManager->blitSurface(selectedText.get(), 0, 0,
+																					 Locator::videoManager->getSurfaceWidth(selectedText.get()),
+																					 Locator::videoManager->getSurfaceHeight(selectedText.get()),
+																					 combinedText.get(), 0, 0);
+				
+			}
+
+			// there is text after selected text
+			if(afterText != nullptr){
+				int xStart = beforeText != nullptr ?
+					Locator::videoManager->getSurfaceWidth(beforeText.get()) + Locator::videoManager->getSurfaceWidth(selectedText.get()) :
+					Locator::videoManager->getSurfaceWidth(selectedText.get());
+					
+				Locator::videoManager->blitSurface(afterText.get(), 0, 0,
+																					 Locator::videoManager->getSurfaceWidth(afterText.get()),
+																					 Locator::videoManager->getSurfaceHeight(afterText.get()),
+																					 combinedText.get(),
+																					 xStart, 0);
+
+			}
+
+			
+			m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, combinedText.get());
+		}
 	}
 	else{
+		// no text, no need to hold onto a texture anymore.
 		m_texture.release();
 	}
 	
@@ -315,6 +399,13 @@ void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 	if(m_hasFocus){
 		SDL_Keycode keycode = event.keysym.sym;
+
+		auto printCursorPositions = [&]()
+													{
+														std::stringstream output;
+														output << "start: " << m_cursorSelectStart << " end: " << m_cursorSelectEnd << std::endl;
+														CAP_LOG(Locator::logger, output.str(), Logger::CDEBUG);
+													};
 		
 		// keydown
 		if(event.type == SDL_KEYDOWN){
@@ -330,6 +421,16 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 				m_textureDirty = true;
 			}
 
+			//escape key
+			else if(keycode == SDLK_ESCAPE){
+				if(m_cursorSelectEnd != m_cursorPosition || m_cursorSelectStart != m_cursorPosition)
+					m_textureDirty = true;
+				
+				m_selectionState = SelectionState::NoSelection;
+				m_cursorSelectStart = m_cursorPosition;
+				m_cursorSelectEnd = m_cursorPosition;
+			}
+
 			// ctrl + c = copy
 			else if(keycode == SDLK_c && SDL_GetModState() & KMOD_CTRL){
 				//SDL_SetClipboardText( inputText.c_str() );
@@ -341,37 +442,65 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 				m_text += SDL_GetClipboardText();
 			}
 			
-			// shift key, start or stop text selection
-			else if(keycode == SDLK_LSHIFT || keycode == SDLK_RSHIFT){
-					m_cursorSelectStart = m_cursorPosition;
-					m_selectionState = SelectionState::KeyboardSelection;
-			}
-
-			// escape
-			else if(keycode == SDLK_ESCAPE){
-				m_cursorSelectStart = std::nullopt;
-			}
-
 			// move cursor to the right
 			else if(keycode == SDLK_RIGHT){
-				m_cursorPosition++;;
-				if(m_cursorPosition > static_cast<int>(m_text.size()))
+				// update the cursor position
+				m_cursorPosition++;
+				bool moved = true;
+				if(m_cursorPosition > static_cast<int>(m_text.size())){
 					m_cursorPosition = m_text.size();
+					moved = false;
+				}
 
+				if(moved)
+					m_textureDirty = true;
+
+				// set selection end position if selecting
+				if(SDL_GetModState() & KMOD_SHIFT && moved){
+					if(m_cursorSelectEnd >= m_cursorPosition &&
+						 m_cursorSelectEnd > m_cursorSelectStart)
+						m_cursorSelectStart++;
+
+					else
+						m_cursorSelectEnd++;
+
+					printCursorPositions();
+				}
+				else{
+					m_cursorSelectEnd = m_cursorPosition;
+					m_cursorSelectStart = m_cursorPosition;
+				}
 			}
 
 			// move cursor to the left
 			else if(keycode == SDLK_LEFT){
+				// update the cursor position
 				m_cursorPosition--;
-				if(m_cursorPosition < 0)
-					m_cursorPosition = 0;
-			}
 
-		}
-		// keyup
-		else{
-			if(keycode == SDLK_LSHIFT || keycode == SDLK_RSHIFT){
-				m_selectionState = SelectionState::NoSelection;
+				bool moved = true;
+				if(m_cursorPosition < 0){
+					m_cursorPosition = 0;
+					moved = false;
+				}
+				
+				if(moved)
+					m_textureDirty = true;
+				
+				// set selection end position if selecting
+				if(SDL_GetModState() & KMOD_SHIFT && moved){
+					if(m_cursorSelectStart <= m_cursorPosition  &&
+						 m_cursorSelectStart < m_cursorSelectEnd)
+						m_cursorSelectEnd--;
+
+					else
+						m_cursorSelectStart--;
+
+					printCursorPositions();
+				}
+				else{
+					m_cursorSelectEnd = m_cursorPosition;
+					m_cursorSelectStart = m_cursorPosition;
+				}
 			}
 		}
 	}

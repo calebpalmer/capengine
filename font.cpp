@@ -45,19 +45,31 @@ int Font::getFontHeight() const {
 
 //! Render some text.
 /** 
- \param 
- \param 
+ \param text
+   \li The text to render.
+ \param colour
+   \li The foreground colour.
+ \param bgColour
+   \li Optional background colour.
  \return 
 */
 SurfacePtr Font::getTextSurface(const std::string &text,
 													const Colour &colour,
-													std::optional<int> maxWidth,
-													bool wrap)
+																std::optional<Colour> bgColour)
 {
 	SDL_Colour sdlColour{colour.m_r, colour.m_g, colour.m_b, colour.m_a};
-	SurfacePtr surface(TTF_RenderText_Solid(m_pTTFFont.get(), text.c_str(), sdlColour), SDL_FreeSurface);;
+	SurfacePtr surface = getNullSurfacePtr();
 
-	return std::move(surface);
+	if(bgColour == std::nullopt){
+		surface.reset(TTF_RenderText_Solid(m_pTTFFont.get(), text.c_str(), sdlColour));
+	}
+
+	else{
+		SDL_Colour sdlBgColour{bgColour->m_r, bgColour->m_g, bgColour->m_b, bgColour->m_a};
+		surface.reset(TTF_RenderText_Shaded(m_pTTFFont.get(), text.c_str(), sdlColour, sdlBgColour));
+	}
+
+	return surface;
 }
 
 //! Get the width of the text if rendered with this font.

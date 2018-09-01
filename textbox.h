@@ -72,7 +72,8 @@ private:
 	//! The current state of selection.
 	SelectionState m_selectionState = SelectionState::NoSelection;
 	int m_cursorPosition = 0; //<! The position of the cursor
-	std::optional<int> m_cursorSelectStart; //<! if highlighting, 
+	int m_cursorSelectStart = 0; //<! if selecting text,
+	int m_cursorSelectEnd = 0; //<! if selecting text.
 	
 };
 
