@@ -233,6 +233,7 @@ void TextBox::updateTexture() {
 		// there is not text selected
 		if(m_cursorSelectStart == m_cursorSelectEnd){
 			SurfacePtr surfacePtr = m_font.getTextSurface(m_text, textColour);
+			assert(surfacePtr != nullptr);
 
 			m_texture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, surfacePtr.get());
 		}
@@ -247,29 +248,25 @@ void TextBox::updateTexture() {
 
 			// render non selected at beginning if there is any
 			if(m_cursorSelectStart > 0){
-				beforeText = m_font.getTextSurface(m_text.substr(0, m_cursorSelectStart), textColour);
+				beforeText = m_font.getTextSurface(this->getTextBeforeSelection(), textColour);
 			}
 			
 			// render the selected text
 			Colour selectedTextColour{255, 255, 255, 255};
 			Colour bgColour{100,100,100,255};
-			selectedText = m_font.getTextSurface(m_text.substr(m_cursorSelectStart,
-																												 m_cursorSelectEnd - m_cursorSelectStart),
-																					 selectedTextColour, bgColour);
+			selectedText = m_font.getTextSurface(this->getSelectedText(), selectedTextColour, bgColour);
 			assert(selectedText != nullptr);
 			
 
 			// render non selected text at the end if there is any
 			if(m_cursorSelectEnd < static_cast<int>(m_text.size())){
-				afterText = m_font.getTextSurface(m_text.substr(m_cursorSelectEnd,
-																												static_cast<int>(m_text.size()) - m_cursorSelectEnd)
-																					, textColour);
+				afterText = m_font.getTextSurface(this->getTextAfterSelection(), textColour);
 			}
 
-			// stich them together
+			// stitch them together
 			int textureWidth = Locator::videoManager->getSurfaceWidth(selectedText.get()) +
 				(beforeText != nullptr ? Locator::videoManager->getSurfaceWidth(beforeText.get()) : 0) +
-				(beforeText != nullptr ? Locator::videoManager->getSurfaceWidth(beforeText.get()) : 0);
+				(afterText != nullptr ? Locator::videoManager->getSurfaceWidth(afterText.get()) : 0);
 
 			int textureHeight = m_boxRect.h;
 			SurfacePtr combinedText = Locator::videoManager->createSurfacePtr(textureWidth, textureHeight);
@@ -423,12 +420,11 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 
 			//escape key
 			else if(keycode == SDLK_ESCAPE){
-				if(m_cursorSelectEnd != m_cursorPosition || m_cursorSelectStart != m_cursorPosition)
-					m_textureDirty = true;
-				
-				m_selectionState = SelectionState::NoSelection;
-				m_cursorSelectStart = m_cursorPosition;
-				m_cursorSelectEnd = m_cursorPosition;
+				this->unsetSelection();
+			}
+
+			else if(keycode == SDLK_DELETE){
+				this->deleteSelection();
 			}
 
 			// ctrl + c = copy
@@ -458,7 +454,7 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 				// set selection end position if selecting
 				if(SDL_GetModState() & KMOD_SHIFT && moved){
 					if(m_cursorSelectEnd >= m_cursorPosition &&
-						 m_cursorSelectEnd > m_cursorSelectStart)
+						 m_cursorSelectEnd >= m_cursorSelectStart)
 						m_cursorSelectStart++;
 
 					else
@@ -514,6 +510,70 @@ void TextBox::handleTextInputEvent(SDL_TextInputEvent event){
 		m_cursorPosition++;
 		m_textureDirty = true;
 	}
+}
+
+
+//! unselects any selected text.
+void TextBox::unsetSelection(){
+	if(m_cursorSelectEnd != m_cursorPosition || m_cursorSelectStart != m_cursorPosition)
+		m_textureDirty = true;
+				
+	m_selectionState = SelectionState::NoSelection;
+	m_cursorSelectStart = m_cursorPosition;
+	m_cursorSelectEnd = m_cursorPosition;
+}
+
+//! deletes a selection if there is one
+void TextBox::deleteSelection(){
+	if(m_cursorSelectStart != m_cursorSelectEnd){
+
+		std::string start = this->getTextBeforeSelection();
+		std::string end = this->getTextAfterSelection();
+
+		m_text = std::string(start) + std::string(end);
+		
+		m_cursorPosition = start.size();
+
+		this->unsetSelection();
+		m_textureDirty = true;
+	}
+}
+
+//! Gets text before selection
+/** 
+ \return 
+   \li The text.
+*/
+std::string TextBox::getTextBeforeSelection() const {
+	return m_text.substr(0, m_cursorSelectStart);
+}
+
+//! Gets text after selection
+/** 
+ \return 
+   \li The text.
+*/
+std::string TextBox::getTextAfterSelection() const {
+	if(m_cursorSelectStart != m_cursorSelectEnd &&
+		 m_cursorSelectEnd < static_cast<int>(m_text.size()) - 1)
+	{
+		return m_text.substr(m_cursorSelectEnd, static_cast<int>(m_text.size()) - m_cursorSelectEnd);
+	}
+
+	return {};
+}
+
+//! Gets selected text.
+/** 
+ \return 
+   \li The text.
+*/
+std::string TextBox::getSelectedText() const {
+	if(m_cursorSelectStart != m_cursorSelectEnd){
+		return m_text.substr(m_cursorSelectStart, m_cursorSelectEnd - m_cursorSelectStart);
+	}
+
+	return {};
 }
 
 }}

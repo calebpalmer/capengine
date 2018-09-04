@@ -51,6 +51,12 @@ private:
 	TextBox(std::string initialText);
 
 	void updateTexture();
+	void unsetSelection();
+	void deleteSelection();
+	std::string getTextBeforeSelection() const;
+	std::string getSelectedText() const;
+	std::string getTextAfterSelection() const;
+	
 	static DisplaySettings getDisplaySettings();
 	
 	Rect m_rect = {0, 0, 0, 0}; //<! The location of the textboxs bounding box.
