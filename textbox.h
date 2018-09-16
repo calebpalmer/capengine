@@ -54,7 +54,7 @@ private:
 
 	void updateTexture();
 	void unsetSelection();
-	void deleteSelection();
+	void deleteText();
 	std::string getTextBeforeSelection() const;
 	std::string getSelectedText() const;
 	std::string getTextAfterSelection() const;

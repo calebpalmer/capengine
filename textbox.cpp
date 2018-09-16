@@ -429,8 +429,14 @@ void TextBox::unsetSelection(){
 }
 
 //! deletes a selection if there is one
-void TextBox::deleteSelection(){
-	if(m_cursorSelectStart != m_cursorSelectEnd){
+void TextBox::deleteText(){
+	if(m_cursorSelectStart == m_cursorSelectEnd){
+		if(m_text.size() > static_cast<size_t>(m_cursorPosition)){
+			m_text.erase(m_cursorPosition, 1);
+			m_textureDirty = true;
+		}
+	}
+	else{
 
 		std::string start = this->getTextBeforeSelection();
 		std::string end = this->getTextAfterSelection();
@@ -460,7 +466,7 @@ std::string TextBox::getTextBeforeSelection() const {
 */
 std::string TextBox::getTextAfterSelection() const {
 	if(m_cursorSelectStart != m_cursorSelectEnd &&
-		 m_cursorSelectEnd < static_cast<int>(m_text.size()) - 1)
+		 m_cursorSelectEnd < static_cast<int>(m_text.size()))
 	{
 		return m_text.substr(m_cursorSelectEnd, static_cast<int>(m_text.size()) - m_cursorSelectEnd);
 	}
@@ -528,7 +534,7 @@ void TextBox::handleEscapeKey(const SDL_KeyboardEvent &event){
 */
 void TextBox::handleDeleteKey(const SDL_KeyboardEvent &event){
 	if(event.type == SDL_KEYDOWN)	{	
-		this->deleteSelection();
+		this->deleteText();
 	}
 }
 
