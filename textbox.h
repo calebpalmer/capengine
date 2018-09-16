@@ -68,6 +68,8 @@ private:
 	void handleVKey(const SDL_KeyboardEvent &event);
 	void handleRightArrowKey(const SDL_KeyboardEvent &event);
 	void handleLeftArrowKey(const SDL_KeyboardEvent &event);
+	void handleEndKey(const SDL_KeyboardEvent &event);
+	void handleHomeKey(const SDL_KeyboardEvent &event);
 	
 	static DisplaySettings getDisplaySettings();
 	

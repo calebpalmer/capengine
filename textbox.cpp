@@ -496,6 +496,8 @@ void TextBox::registerKeypressHandlers(){
 	m_keyPressHandlers.emplace(SDLK_v, std::bind(&TextBox::handleVKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_RIGHT, std::bind(&TextBox::handleRightArrowKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_LEFT, std::bind(&TextBox::handleLeftArrowKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_HOME, std::bind(&TextBox::handleHomeKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_END, std::bind(&TextBox::handleEndKey, this, std::placeholders::_1));
 }
 
 
@@ -635,5 +637,47 @@ void TextBox::handleLeftArrowKey(const SDL_KeyboardEvent &event){
 		}
 	}
 }
+
+//! handler for home key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleHomeKey(const SDL_KeyboardEvent &event){
+	if(SDL_GetModState() & KMOD_SHIFT){
+		m_cursorSelectStart = 0;
+		m_cursorPosition = 0;
+		m_textureDirty = true;
+	}
+
+	else{
+		m_cursorPosition = 0;
+		this->unsetSelection();
+
+	}
+}
+
+//! handler for end key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleEndKey(const SDL_KeyboardEvent &event){
+	auto position = m_text.size();
+
+	if(SDL_GetModState() & KMOD_SHIFT){
+		m_cursorSelectEnd = position;
+		m_cursorPosition = position;
+		m_textureDirty = true;
+	}
+
+	else{
+		m_cursorPosition = position;
+		this->unsetSelection();
+
+	}
+	
+}
+
 
 }}
