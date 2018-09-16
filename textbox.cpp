@@ -9,6 +9,7 @@
 
 #include <boost/format.hpp>
 #include <atomic>
+#include <functional>
 
 namespace CapEngine { namespace UI {
 
@@ -62,6 +63,8 @@ TextBox::TextBox(std::string initialText)
 	if(!std::atomic_exchange(&cursorInitialized, true)){
 		s_pHoverCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
 	}
+
+	registerKeypressHandlers();
 }
 
 //! Creates a textbox
@@ -397,107 +400,9 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 	if(m_hasFocus){
 		SDL_Keycode keycode = event.keysym.sym;
 
-		auto printCursorPositions = [&]()
-													{
-														std::stringstream output;
-														output << "start: " << m_cursorSelectStart << " end: " << m_cursorSelectEnd << std::endl;
-														CAP_LOG(Locator::logger, output.str(), Logger::CDEBUG);
-													};
-		
-		// keydown
-		if(event.type == SDL_KEYDOWN){
-
-			// backspace
-			if(keycode == SDLK_BACKSPACE && m_text.size() > 0 && m_cursorPosition > 0){
-				m_text.erase(m_cursorPosition - 1, 1);
-
-				m_cursorPosition--;
-				if(m_cursorPosition < 0)
-					m_cursorPosition = 0;
-
-				m_textureDirty = true;
-			}
-
-			//escape key
-			else if(keycode == SDLK_ESCAPE){
-				this->unsetSelection();
-			}
-
-			else if(keycode == SDLK_DELETE){
-				this->deleteSelection();
-			}
-
-			// ctrl + c = copy
-			else if(keycode == SDLK_c && SDL_GetModState() & KMOD_CTRL){
-				//SDL_SetClipboardText( inputText.c_str() );
-				// Not yet supported
-			}
-
-			// ctrl + v = paste
-			else if(keycode == SDLK_v && SDL_GetModState() & KMOD_CTRL ){
-				m_text += SDL_GetClipboardText();
-			}
-			
-			// move cursor to the right
-			else if(keycode == SDLK_RIGHT){
-				// update the cursor position
-				m_cursorPosition++;
-				bool moved = true;
-				if(m_cursorPosition > static_cast<int>(m_text.size())){
-					m_cursorPosition = m_text.size();
-					moved = false;
-				}
-
-				if(moved)
-					m_textureDirty = true;
-
-				// set selection end position if selecting
-				if(SDL_GetModState() & KMOD_SHIFT && moved){
-					if(m_cursorSelectEnd >= m_cursorPosition &&
-						 m_cursorSelectEnd >= m_cursorSelectStart)
-						m_cursorSelectStart++;
-
-					else
-						m_cursorSelectEnd++;
-
-					printCursorPositions();
-				}
-				else{
-					m_cursorSelectEnd = m_cursorPosition;
-					m_cursorSelectStart = m_cursorPosition;
-				}
-			}
-
-			// move cursor to the left
-			else if(keycode == SDLK_LEFT){
-				// update the cursor position
-				m_cursorPosition--;
-
-				bool moved = true;
-				if(m_cursorPosition < 0){
-					m_cursorPosition = 0;
-					moved = false;
-				}
-				
-				if(moved)
-					m_textureDirty = true;
-				
-				// set selection end position if selecting
-				if(SDL_GetModState() & KMOD_SHIFT && moved){
-					if(m_cursorSelectStart <= m_cursorPosition  &&
-						 m_cursorSelectStart < m_cursorSelectEnd)
-						m_cursorSelectEnd--;
-
-					else
-						m_cursorSelectStart--;
-
-					printCursorPositions();
-				}
-				else{
-					m_cursorSelectEnd = m_cursorPosition;
-					m_cursorSelectStart = m_cursorPosition;
-				}
-			}
+		auto handler = m_keyPressHandlers.find(keycode);
+		if(handler != m_keyPressHandlers.end()){
+			handler->second(event);
 		}
 	}
 }
@@ -574,6 +479,155 @@ std::string TextBox::getSelectedText() const {
 	}
 
 	return {};
+}
+
+//! Registers the keypress handler functions
+void TextBox::registerKeypressHandlers(){
+	m_keyPressHandlers.emplace(SDLK_BACKSPACE, std::bind(&TextBox::handleBackspaceKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_ESCAPE, std::bind(&TextBox::handleEscapeKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_DELETE, std::bind(&TextBox::handleDeleteKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_c, std::bind(&TextBox::handleCKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_v, std::bind(&TextBox::handleVKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_RIGHT, std::bind(&TextBox::handleRightArrowKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_LEFT, std::bind(&TextBox::handleLeftArrowKey, this, std::placeholders::_1));
+}
+
+
+//! handler for backspace key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleBackspaceKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN){
+		m_text.erase(m_cursorPosition - 1, 1);
+
+		m_cursorPosition--;
+		if(m_cursorPosition < 0)
+			m_cursorPosition = 0;
+
+		m_textureDirty = true;
+	}
+}
+
+//! handler for escape key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleEscapeKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{
+		this->unsetSelection();
+	}
+}
+
+//! handler for delete key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleDeleteKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{	
+		this->deleteSelection();
+	}
+}
+
+//! handler for C key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleCKey(const SDL_KeyboardEvent &event){
+	// if(event.type == SDL_KEYDOWN)	{		
+	// 	// if(SDL_GetModState() & KMOD_CTRL){
+	// 	// 	//SDL_SetClipboardText( inputText.c_str() );
+	// 	// 	// Not yet supported
+	// 	// }
+	// }
+}
+
+//! handler for V key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleVKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{	
+		if(SDL_GetModState() & KMOD_CTRL){
+			m_text += SDL_GetClipboardText();
+		}
+	}
+}
+
+//! handler for backspacright arrow key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleRightArrowKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN){
+		// update the cursor position
+		m_cursorPosition++;
+		bool moved = true;
+		if(m_cursorPosition > static_cast<int>(m_text.size())){
+			m_cursorPosition = m_text.size();
+			moved = false;
+		}
+
+		if(moved)
+			m_textureDirty = true;
+
+		// set selection end position if selecting
+		if(SDL_GetModState() & KMOD_SHIFT && moved){
+			if(m_cursorSelectEnd >= m_cursorPosition &&
+				 m_cursorSelectEnd >= m_cursorSelectStart)
+				m_cursorSelectStart++;
+
+			else
+				m_cursorSelectEnd++;
+
+		}
+		else{
+			m_cursorSelectEnd = m_cursorPosition;
+			m_cursorSelectStart = m_cursorPosition;
+		}
+	}
+}
+
+//! handler for left arrow key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleLeftArrowKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN){	
+		// update the cursor position
+		m_cursorPosition--;
+
+		bool moved = true;
+		if(m_cursorPosition < 0){
+			m_cursorPosition = 0;
+			moved = false;
+		}
+				
+		if(moved)
+			m_textureDirty = true;
+				
+		// set selection end position if selecting
+		if(SDL_GetModState() & KMOD_SHIFT && moved){
+			if(m_cursorSelectStart <= m_cursorPosition  &&
+				 m_cursorSelectStart < m_cursorSelectEnd)
+				m_cursorSelectEnd--;
+
+			else
+				m_cursorSelectStart--;
+
+		}
+		else{
+			m_cursorSelectEnd = m_cursorPosition;
+			m_cursorSelectStart = m_cursorPosition;
+		}
+	}
 }
 
 }}

@@ -1,12 +1,14 @@
 #ifndef CAPENGINE_TEXTBOX_H
 #define CAPENGINE_TEXTBOX_H
 
-#include <optional>
-
 #include "widget.h"
 #include "font.h"
 #include "captypes.h"
 #include "uiconfigmanager.h"
+
+#include <optional>
+#include <functional>
+#include <map>
 
 namespace CapEngine { namespace UI {
 
@@ -56,6 +58,16 @@ private:
 	std::string getTextBeforeSelection() const;
 	std::string getSelectedText() const;
 	std::string getTextAfterSelection() const;
+
+	// keypress handlers
+	void registerKeypressHandlers();
+	void handleBackspaceKey(const SDL_KeyboardEvent &event);
+	void handleEscapeKey(const SDL_KeyboardEvent &event);
+	void handleDeleteKey(const SDL_KeyboardEvent &event);
+	void handleCKey(const SDL_KeyboardEvent &event);
+	void handleVKey(const SDL_KeyboardEvent &event);
+	void handleRightArrowKey(const SDL_KeyboardEvent &event);
+	void handleLeftArrowKey(const SDL_KeyboardEvent &event);
 	
 	static DisplaySettings getDisplaySettings();
 	
@@ -64,12 +76,12 @@ private:
 	Rect m_textRect = {0, 0, 0, 0};
 	bool m_hasFocus = false; //<! flag indicating if textbox has focus.
 	std::string m_text; //<! The text to display.
-	int m_position = 0; //<! The position in the textbox
 	TexturePtr m_texture; //<! The texture to display.
 	bool m_textureDirty = true; //<! flag indicating if texture needs to be updated.
 	DisplaySettings m_displaySettings; //<! The display settings
 	Font m_font;  //<! The font to use for rendering the text.
 
+	// mouse info cursor 
 	SDL_Cursor *m_pPreviousCursor = nullptr; //<! The previous cursor
 	static SDL_Cursor *s_pHoverCursor; //<! The cursor to show when hovering over the textbox.
 	unsigned int m_cursorTimerMs = 0; //<! used for timing cursor visibility.
@@ -80,6 +92,9 @@ private:
 	int m_cursorPosition = 0; //<! The position of the cursor
 	int m_cursorSelectStart = 0; //<! if selecting text,
 	int m_cursorSelectEnd = 0; //<! if selecting text.
+
+	//! handlers for various keypresses
+	std::map<SDL_Keycode, std::function<void(const SDL_KeyboardEvent&)>> m_keyPressHandlers;
 	
 };
 
