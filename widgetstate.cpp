@@ -200,7 +200,7 @@ void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 			if(maybeWindow != m_windows.end()){
 					bool handled = this->handleMouseFocusChange(*maybeWindow, event.x, event.y);
 					
-					if(!handled){
+					if(!handled && m_pFocusedWidget != nullptr){
 						m_pFocusedWidget->doFocus(false, -1, -1, -1, -1);
 						m_pFocusedWidget = nullptr;
 					}
