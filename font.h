@@ -25,7 +25,7 @@ namespace CapEngine {
 		SurfacePtr getTextSurface(const std::string &text,
 															const Colour &colour,
 															std::optional<Colour> bgColour = std::nullopt);
-		int getTextSize(const std::string &text);
+		int getTextSize(const std::string &text) const;
 
 	private:
 		std::unique_ptr<TTF_Font, decltype(&TTF_CloseFont)> m_pTTFFont;

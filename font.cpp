@@ -21,7 +21,6 @@ Font::Font(const std::string &fontPath, int size) :
 
 	if(pFont == nullptr){
 		std::string ttf_error = TTF_GetError();
-		TTF_CloseFont(pFont);
 		std::stringstream errorMsg;
 		errorMsg << "Unable to open font: " << fontPath << std::endl
 						 << "\tDetails: " << ttf_error;
@@ -77,7 +76,7 @@ SurfacePtr Font::getTextSurface(const std::string &text,
  \return 
    \li The width of the rendered text.
 */
-int Font::getTextSize(const std::string &text){
+int Font::getTextSize(const std::string &text) const{
 	assert(m_pTTFFont != nullptr);
 
 	int width = 0;

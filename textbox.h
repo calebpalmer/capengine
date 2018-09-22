@@ -27,6 +27,7 @@ public:
 
 	// handled events
 	virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+	virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
 	virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
 	virtual void handleTextInputEvent(SDL_TextInputEvent event) override;
 
@@ -52,9 +53,15 @@ private:
 private:
 	TextBox(std::string initialText);
 
+	TextBox(const TextBox&) = delete;
+	TextBox& operator=(const TextBox&) = delete;
+
 	void updateTexture();
 	void unsetSelection();
 	void deleteText();
+	int getCursorPositionFromMousePosition(int x, int y) const;
+	void setCursorSelectStart(int pos);
+	void setCursorSelectEnd(int pos);
 	std::string getTextBeforeSelection() const;
 	std::string getSelectedText() const;
 	std::string getTextAfterSelection() const;
@@ -88,9 +95,8 @@ private:
 	static SDL_Cursor *s_pHoverCursor; //<! The cursor to show when hovering over the textbox.
 	unsigned int m_cursorTimerMs = 0; //<! used for timing cursor visibility.
 	bool m_cursorState = false; //<! true=visible, not visible otherwise.
+	std::optional<std::pair<int, int>> m_lastMouseDownPosition; //<! The previous mouse down position.
 
-	//! The current state of selection.
-	SelectionState m_selectionState = SelectionState::NoSelection;
 	int m_cursorPosition = 0; //<! The position of the cursor
 	int m_cursorSelectStart = 0; //<! if selecting text,
 	int m_cursorSelectEnd = 0; //<! if selecting text.

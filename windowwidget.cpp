@@ -230,7 +230,8 @@ void WindowWidget::handleWindowEvent(SDL_WindowEvent event) {
 			m_shown = false;
 		}
 
-		else{
+		else if(event.event == SDL_WINDOWEVENT_RESIZED ||
+						event.event == SDL_WINDOWEVENT_SIZE_CHANGED){
 			CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
 			
 			int width = Locator::videoManager->getWindowWidth(m_windowId);

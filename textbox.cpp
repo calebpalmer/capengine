@@ -128,6 +128,7 @@ void TextBox::render() {
 		m_textRect.x = m_boxRect.x;
 		m_textRect.y = m_boxRect.y;
 		m_textRect.h = m_boxRect.h;
+		m_textRect.w = textureWidth;
 	}
 	
 	if(m_textRect.w != textureWidth && textureWidth > m_boxRect.w){
@@ -202,16 +203,14 @@ bool TextBox::doFocus(bool focus, int downX, int downY, int upX, int upY) {
 		if(pointInRect( { downX, downY }, m_boxRect) && pointInRect( { upX, upY }, m_boxRect)){
 			if(!m_hasFocus){
 
-				SDL_StartTextInput();
-				SDL_SetTextInputRect(nullptr);
-				
+				SDL_StartTextInput();				
 				assert(SDL_IsTextInputActive());
 				
 				m_hasFocus = true;
 				m_cursorTimerMs = 0;
 				m_cursorState = false;
 			}
-			
+
 			return true;
 		}
 
@@ -380,7 +379,8 @@ void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	// no mouse?
 	if(pCurrentCursor == nullptr)
 		return;
-	
+
+	// check if cursor needs to be changed if in the textbox
 	if(pointInRect({event.x, event.y}, m_boxRect) &&
 		  pCurrentCursor != s_pHoverCursor)
 	{
@@ -391,6 +391,52 @@ void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	else{
 		if(pCurrentCursor == s_pHoverCursor){
 			SDL_SetCursor(m_pPreviousCursor);
+		}
+	}
+
+	// do possible text selection
+	if(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)){
+		int prevCursorPosition =
+			this->getCursorPositionFromMousePosition(m_lastMouseDownPosition->first, m_lastMouseDownPosition->second);
+		
+		int currentCursorPosition =
+			this->getCursorPositionFromMousePosition(event.x, event.y);
+
+		// check to see if dragging was done for text selection
+		if(currentCursorPosition != prevCursorPosition){
+			if(prevCursorPosition < currentCursorPosition){
+				this->setCursorSelectStart(prevCursorPosition);
+				this->setCursorSelectEnd(currentCursorPosition);
+			}
+
+			else{
+				this->setCursorSelectEnd(prevCursorPosition);
+				this->setCursorSelectStart(currentCursorPosition);
+			}
+		}
+	}
+}
+
+//! \copydoc Widget::handleMouseButtonEvent
+void TextBox::handleMouseButtonEvent(SDL_MouseButtonEvent event){
+	if(event.button == SDL_BUTTON_LEFT && event.state == SDL_PRESSED){
+		m_lastMouseDownPosition = std::make_pair(event.x, event.y);
+	}
+	
+	else if(event.button == SDL_BUTTON_LEFT && event.state == SDL_RELEASED){
+
+		// only set the cursor based on click if the button down and button released
+		// were in the textbox.
+		if(m_lastMouseDownPosition != std::nullopt &&
+			 pointInRect(Point(*m_lastMouseDownPosition), m_boxRect) &&
+			 pointInRect(Point{event.x, event.y}, m_boxRect))
+		{
+			int currentCursorPosition =
+				this->getCursorPositionFromMousePosition(event.x, event.y);
+
+			// set the current cursor position
+			m_cursorPosition = currentCursorPosition;
+			m_lastMouseDownPosition = std::nullopt;
 		}
 	}
 }
@@ -420,12 +466,8 @@ void TextBox::handleTextInputEvent(SDL_TextInputEvent event){
 
 //! unselects any selected text.
 void TextBox::unsetSelection(){
-	if(m_cursorSelectEnd != m_cursorPosition || m_cursorSelectStart != m_cursorPosition)
-		m_textureDirty = true;
-				
-	m_selectionState = SelectionState::NoSelection;
-	m_cursorSelectStart = m_cursorPosition;
-	m_cursorSelectEnd = m_cursorPosition;
+	this->setCursorSelectStart(m_cursorPosition);
+	this->setCursorSelectEnd(m_cursorPosition);
 }
 
 //! deletes a selection if there is one
@@ -589,15 +631,14 @@ void TextBox::handleRightArrowKey(const SDL_KeyboardEvent &event){
 		if(SDL_GetModState() & KMOD_SHIFT && moved){
 			if(m_cursorSelectEnd >= m_cursorPosition &&
 				 m_cursorSelectEnd >= m_cursorSelectStart)
-				m_cursorSelectStart++;
+				this->setCursorSelectStart(m_cursorSelectStart + 1);
 
 			else
-				m_cursorSelectEnd++;
+				this->setCursorSelectEnd(m_cursorSelectEnd + 1);
 
 		}
 		else{
-			m_cursorSelectEnd = m_cursorPosition;
-			m_cursorSelectStart = m_cursorPosition;
+			this->unsetSelection();
 		}
 	}
 }
@@ -625,15 +666,14 @@ void TextBox::handleLeftArrowKey(const SDL_KeyboardEvent &event){
 		if(SDL_GetModState() & KMOD_SHIFT && moved){
 			if(m_cursorSelectStart <= m_cursorPosition  &&
 				 m_cursorSelectStart < m_cursorSelectEnd)
-				m_cursorSelectEnd--;
+				this->setCursorSelectEnd(m_cursorSelectEnd- 1);
 
 			else
-				m_cursorSelectStart--;
+				this->setCursorSelectStart(m_cursorSelectStart - 1);
 
 		}
 		else{
-			m_cursorSelectEnd = m_cursorPosition;
-			m_cursorSelectStart = m_cursorPosition;
+			this->unsetSelection();
 		}
 	}
 }
@@ -645,7 +685,7 @@ void TextBox::handleLeftArrowKey(const SDL_KeyboardEvent &event){
 */
 void TextBox::handleHomeKey(const SDL_KeyboardEvent &event){
 	if(SDL_GetModState() & KMOD_SHIFT){
-		m_cursorSelectStart = 0;
+		this->setCursorSelectStart(0);
 		m_cursorPosition = 0;
 		m_textureDirty = true;
 	}
@@ -662,7 +702,7 @@ void TextBox::handleHomeKey(const SDL_KeyboardEvent &event){
  \param event
    \li The keyboard event.
 */
-void TextBox::handleEndKey(const SDL_KeyboardEvent &event){
+void TextBox::handleEndKey(const SDL_KeyboardEvent& ){
 	auto position = m_text.size();
 
 	if(SDL_GetModState() & KMOD_SHIFT){
@@ -676,8 +716,69 @@ void TextBox::handleEndKey(const SDL_KeyboardEvent &event){
 		this->unsetSelection();
 
 	}
-	
 }
 
+
+//! gets the cursor position based on mouse click position.
+/** 
+ \param x
+   \li The x position of the mouse.
+ \param y
+   \li y The y position of the mouse.
+ \return 
+   \li The cursor position.
+*/
+int TextBox::getCursorPositionFromMousePosition(int x, int y) const {
+	int cursorPosition = 0;
+
+	if(x > m_textRect.x + m_textRect.w){
+		cursorPosition = m_text.size();
+	}
+
+	else if(x < m_textRect.x){
+		cursorPosition = 0;
+	}
+
+	else{
+
+		// TODO a better algorithm here would be nice
+		for(unsigned int i = 1; i < m_text.size(); i++){
+			auto textWidth = m_font.getTextSize(m_text.substr(0, i));
+			if(x <= m_textRect.x + textWidth){
+				cursorPosition = i;
+				break;
+			}
+		}
+	}
+
+	return cursorPosition;
+}
+
+
+//! Sets the cursor selection start position.
+/** 
+ \param pos
+   \li The start position of selected text.
+*/
+void TextBox::setCursorSelectStart(int pos){
+	if(m_cursorSelectStart != pos){
+		m_textureDirty = true;
+	}
+
+	m_cursorSelectStart = pos;
+}
+
+//! Sets the cursor selection end position.
+/** 
+ \param pos
+   \li The end position of selected text.
+*/
+void TextBox::setCursorSelectEnd(int pos){
+	if(m_cursorSelectEnd != pos){
+		m_textureDirty = true;
+	}
+
+	m_cursorSelectEnd = pos;
+}
 
 }}

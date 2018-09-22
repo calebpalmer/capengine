@@ -33,6 +33,12 @@ namespace CapEngine{
 	struct Point {
 		int x;
 		int y;
+
+		Point(int in_x, int in_y) :
+			x(in_x), y(in_y) {} 
+
+		Point(std::pair<int, int> point) :
+			x(point.first), y(point.second) {}
 	};
   
   enum CollisionType {

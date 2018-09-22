@@ -207,7 +207,7 @@ SDL_Rect Button::getRenderRect() const {
 void Button::handleMouseMotionEvent(SDL_MouseMotionEvent event) {
 	SDL_Rect rect = this->getRenderRect();
 	// hovered
-	if(pointInRect(Point({event.x, event.y}), Rectangle(rect)) &&
+	if(pointInRect(Point{event.x, event.y}, Rectangle(rect)) &&
 		 m_state != State::Pressed)
 	{
 		m_state = State::Hovered;
@@ -222,7 +222,7 @@ void Button::handleMouseButtonEvent(SDL_MouseButtonEvent event) {
 	SDL_Rect rect = this->getRenderRect();
 
 	// button event inside of button
-	if(pointInRect(Point({event.x, event.y}), Rectangle(rect)))
+	if(pointInRect(Point{event.x, event.y}, Rectangle(rect)))
 	{
 		// pressed
 		if(event.type == SDL_MOUSEBUTTONDOWN && m_state != State::Pressed)
