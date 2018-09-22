@@ -119,8 +119,7 @@ void TextBox::render() {
 	assert(Locator::videoManager != nullptr);
 	Locator::videoManager->drawFillRect(m_windowId, m_boxRect, m_displaySettings.backgroundColour);
 
-	assert(m_texture != nullptr);
-	int textureWidth = Locator::videoManager->getTextureWidth(m_texture.get());
+	int textureWidth = m_texture == nullptr ? 0 : Locator::videoManager->getTextureWidth(m_texture.get());
 
 	if(m_textRect.x == 0 && m_textRect.y == 0 &&
 		 m_textRect.w == 0 && m_textRect.h == 0)
@@ -139,15 +138,24 @@ void TextBox::render() {
 		m_textRect.x = m_boxRect.x - difference;
 	}
 
+	// draw the blinking cursor
 	// find where the cursor would be drawn if we have focus
 	int verticalPadding = 2;
 
 	int cursorDrawOffset = 0;
-	// draw the cursor
 	if(m_cursorPosition > 0){
 		//int width = Locator::videoManager->getTextureWidth(m_texture.get());
 		int width = m_font.getTextSize(m_text.substr(0, m_cursorPosition));
 		cursorDrawOffset = width;
+	}
+
+	if(m_hasFocus && m_cursorState == true){
+		Locator::videoManager->drawLine(m_windowId,
+																		m_textRect.x + cursorDrawOffset,
+																		m_boxRect.y + verticalPadding,
+																		m_textRect.x + cursorDrawOffset,
+																		m_boxRect.y + m_boxRect.h - verticalPadding,
+																		{0, 0, 0, 255});
 	}
 		
 	// draw the text
@@ -166,19 +174,7 @@ void TextBox::render() {
 		}
 
 		Locator::videoManager->drawTexture(m_windowId, m_textRect.x, m_textRect.y, m_texture.get());
-
 	}
-
-	// draw the cursor
-	if(m_hasFocus && m_cursorState == true){
-		Locator::videoManager->drawLine(m_windowId,
-																		m_textRect.x + cursorDrawOffset,
-																		m_boxRect.y + verticalPadding,
-																		m_textRect.x + cursorDrawOffset,
-																		m_boxRect.y + m_boxRect.h - verticalPadding,
-																		{0, 0, 0, 255});
-	}
-	
 }
 
 //! \copydoc Widget::canFocus
@@ -536,6 +532,7 @@ void TextBox::registerKeypressHandlers(){
 	m_keyPressHandlers.emplace(SDLK_DELETE, std::bind(&TextBox::handleDeleteKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_c, std::bind(&TextBox::handleCKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_v, std::bind(&TextBox::handleVKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_a, std::bind(&TextBox::handleAKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_RIGHT, std::bind(&TextBox::handleRightArrowKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_LEFT, std::bind(&TextBox::handleLeftArrowKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_HOME, std::bind(&TextBox::handleHomeKey, this, std::placeholders::_1));
@@ -550,13 +547,18 @@ void TextBox::registerKeypressHandlers(){
 */
 void TextBox::handleBackspaceKey(const SDL_KeyboardEvent &event){
 	if(event.type == SDL_KEYDOWN){
-		m_text.erase(m_cursorPosition - 1, 1);
+		if(m_cursorSelectStart != m_cursorSelectEnd){
+			this->deleteText();
+		}
+		else{
+			m_text.erase(m_cursorPosition - 1, 1);
 
-		m_cursorPosition--;
-		if(m_cursorPosition < 0)
-			m_cursorPosition = 0;
+			m_cursorPosition--;
+			if(m_cursorPosition < 0)
+				m_cursorPosition = 0;
 
-		m_textureDirty = true;
+			m_textureDirty = true;
+		}
 	}
 }
 
@@ -605,6 +607,20 @@ void TextBox::handleVKey(const SDL_KeyboardEvent &event){
 	if(event.type == SDL_KEYDOWN)	{	
 		if(SDL_GetModState() & KMOD_CTRL){
 			m_text += SDL_GetClipboardText();
+		}
+	}
+}
+
+//! handler for A key.
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleAKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{	
+		if(SDL_GetModState() & KMOD_CTRL){
+			this->setCursorSelectStart(0);
+			this->setCursorSelectEnd(m_text.size());
 		}
 	}
 }

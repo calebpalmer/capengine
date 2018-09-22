@@ -73,6 +73,7 @@ private:
 	void handleDeleteKey(const SDL_KeyboardEvent &event);
 	void handleCKey(const SDL_KeyboardEvent &event);
 	void handleVKey(const SDL_KeyboardEvent &event);
+	void handleAKey(const SDL_KeyboardEvent &event);
 	void handleRightArrowKey(const SDL_KeyboardEvent &event);
 	void handleLeftArrowKey(const SDL_KeyboardEvent &event);
 	void handleEndKey(const SDL_KeyboardEvent &event);
