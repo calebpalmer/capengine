@@ -6,6 +6,7 @@
 #include "locator.h"
 #include "colour.h"
 #include "scopeguard.h"
+#include "simplecommand.h"
 
 #include <boost/format.hpp>
 #include <atomic>
@@ -473,8 +474,7 @@ void TextBox::unsetSelection(){
 void TextBox::deleteText(){
 	if(!this->isTextSelected()){
 		if(m_text.size() > static_cast<size_t>(m_cursorPosition)){
-			m_text.erase(m_cursorPosition, 1);
-			m_textureDirty = true;
+			m_commandManager.runCommand(this->makeDeleteTextCommand(m_cursorPosition, 1));
 		}
 	}
 	else{
@@ -490,15 +490,8 @@ void TextBox::deleteText(){
 */
 bool TextBox::deleteSelectedText(){
 	if(this->isTextSelected()){
-		std::string start = this->getTextBeforeSelection();
-		std::string end = this->getTextAfterSelection();
-
-		m_text = std::string(start) + std::string(end);
-		
-		m_cursorPosition = start.size();
-
-		this->unsetSelection();
-		m_textureDirty = true;
+		auto deleteCommand = this->makeDeleteTextCommand(m_cursorSelectStart, m_cursorSelectEnd - m_cursorSelectStart);
+		m_commandManager.runCommand(std::move(deleteCommand));
 
 		return true;
 	}
@@ -513,14 +506,68 @@ bool TextBox::deleteSelectedText(){
    \li The text to insert.
 */
 void TextBox::insertText(const std::string &text){
-	assert(m_cursorPosition <= static_cast<int>(m_text.size()));
-	m_text.insert(m_cursorPosition, text);
-
-	m_cursorPosition += text.size();
-
-	this->unsetSelection();
-	m_textureDirty = true;
+	m_commandManager.runCommand(this->makeInsertTextCommand(text));
 }
+
+
+//! Makes a Command object for inserting text.
+/** 
+ \param text
+   \li The text to insert.
+  \return
+	  \li The Command
+*/
+std::unique_ptr<Command> TextBox::makeInsertTextCommand(std::string in_text) {
+	auto executeCommand = [this, text = in_text]()
+												{
+													assert(m_cursorPosition <= static_cast<int>(m_text.size()));
+													m_text.insert(m_cursorPosition, text);
+													m_cursorPosition += text.size();
+													unsetSelection();
+													m_textureDirty = true;
+												};
+	auto unExecuteCommand = [this, currentCursorPosition = this->m_cursorPosition, text = std::move(in_text)]()
+													{
+														assert(currentCursorPosition + text.size() <= m_text.size());
+														m_text.erase(currentCursorPosition, text.size());
+														m_cursorPosition = currentCursorPosition;
+														this->unsetSelection();
+														m_textureDirty = true;
+													};
+
+	return std::make_unique<SimpleCommand>(executeCommand, unExecuteCommand);
+}
+
+//! Makes a Command object for deleting text.
+/** 
+ \param pos
+   \li The position to start deletion from.
+ \param
+   \li The number of characters to delete.
+  \return
+	  \li The Command
+*/
+std::unique_ptr<Command> TextBox::makeDeleteTextCommand(std::size_t pos, std::size_t len) {
+	auto executeCommand = [this, pos, len]()
+												{
+													assert(pos + len <= m_text.size());
+													m_text.erase(pos, len);
+													m_cursorPosition = pos;
+													unsetSelection();
+													m_textureDirty = true;
+												};
+	auto unExecuteCommand = [this, pos, text = m_text.substr(pos, len)]()
+													{
+														assert(pos <= m_text.size());
+														m_text.insert(pos, text);
+														m_cursorPosition = pos + text.size();
+														this->unsetSelection();
+														m_textureDirty = true;
+													};
+
+	return std::make_unique<SimpleCommand>(executeCommand, unExecuteCommand);
+}
+
 
 //! Gets text before selection
 /** 
@@ -577,6 +624,8 @@ void TextBox::registerKeypressHandlers(){
 	m_keyPressHandlers.emplace(SDLK_c, std::bind(&TextBox::handleCKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_x, std::bind(&TextBox::handleXKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_v, std::bind(&TextBox::handleVKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_z, std::bind(&TextBox::handleZKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_y, std::bind(&TextBox::handleYKey, this, std::placeholders::_1));	
 	m_keyPressHandlers.emplace(SDLK_a, std::bind(&TextBox::handleAKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_RIGHT, std::bind(&TextBox::handleRightArrowKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_LEFT, std::bind(&TextBox::handleLeftArrowKey, this, std::placeholders::_1));
@@ -597,14 +646,7 @@ void TextBox::handleBackspaceKey(const SDL_KeyboardEvent &event){
 		}
 		else{
 			if(m_cursorPosition > 0){
-				m_text.erase(m_cursorPosition - 1, 1);
-
-				m_cursorPosition--;
-				if(m_cursorPosition < 0)
-					m_cursorPosition = 0;
-
-				this->unsetSelection();
-				m_textureDirty = true;
+				m_commandManager.runCommand(this->makeDeleteTextCommand(m_cursorPosition - 1, 1));
 			}
 		}
 	}
@@ -675,7 +717,32 @@ void TextBox::handleXKey(const SDL_KeyboardEvent &event){
 			this->copySelectionToClipboard(true);
 		}
 	}
+}
 
+//! handle for Z key
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleZKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{		
+		if(SDL_GetModState() & KMOD_CTRL){
+			m_commandManager.undo();
+		}
+	}
+}
+
+//! handle for Y key
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleYKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{		
+		if(SDL_GetModState() & KMOD_CTRL){
+			m_commandManager.redo();
+		}
+	}
 }
 
 //! handler for V key.

@@ -5,6 +5,7 @@
 #include "font.h"
 #include "captypes.h"
 #include "uiconfigmanager.h"
+#include "commandmanager.h"
 
 #include <optional>
 #include <functional>
@@ -54,6 +55,10 @@ private:
 	void deleteText();
 	bool deleteSelectedText();
 	void insertText(const std::string &text);
+
+	std::unique_ptr<Command> makeInsertTextCommand(std::string text);
+	std::unique_ptr<Command> makeDeleteTextCommand(std::size_t pos, std::size_t len);
+	
 	int getCursorPositionFromMousePosition(int x, int y) const;
 	void setCursorSelectStart(int pos);
 	void setCursorSelectEnd(int pos);
@@ -72,6 +77,8 @@ private:
 	void handleCKey(const SDL_KeyboardEvent &event);
 	void handleXKey(const SDL_KeyboardEvent &event);
 	void handleVKey(const SDL_KeyboardEvent &event);
+	void handleZKey(const SDL_KeyboardEvent &event);
+	void handleYKey(const SDL_KeyboardEvent &event);
 	void handleAKey(const SDL_KeyboardEvent &event);
 	void handleRightArrowKey(const SDL_KeyboardEvent &event);
 	void handleLeftArrowKey(const SDL_KeyboardEvent &event);
@@ -103,6 +110,8 @@ private:
 
 	//! handlers for various keypresses
 	std::map<SDL_Keycode, std::function<void(const SDL_KeyboardEvent&)>> m_keyPressHandlers;
+	//! command manager for undo/redo
+	CommandManager m_commandManager;
 	
 };
 
