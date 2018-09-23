@@ -13,7 +13,7 @@
 namespace CapEngine { namespace UI {
 
 //! A textbox widget for text input.
-class TextBox : public Widget {
+class TextBox final : public Widget {
 public:
 	static std::shared_ptr<TextBox> create(std::string initialText="");
 	
@@ -43,15 +43,8 @@ private:
 		std::string fontPath;
 	};
 
-	//! Describes the current state of selection.
-	enum class SelectionState {
-    NoSelection,
-	  MouseSelection,
-	  KeyboardSelection
-	};
-	
 private:
-	TextBox(std::string initialText);
+	explicit TextBox(std::string initialText);
 
 	TextBox(const TextBox&) = delete;
 	TextBox& operator=(const TextBox&) = delete;
@@ -59,9 +52,14 @@ private:
 	void updateTexture();
 	void unsetSelection();
 	void deleteText();
+	bool deleteSelectedText();
+	void insertText(const std::string &text);
 	int getCursorPositionFromMousePosition(int x, int y) const;
 	void setCursorSelectStart(int pos);
 	void setCursorSelectEnd(int pos);
+	void copySelectionToClipboard(bool deleteSelection = false);
+
+	bool isTextSelected() const;
 	std::string getTextBeforeSelection() const;
 	std::string getSelectedText() const;
 	std::string getTextAfterSelection() const;
@@ -72,6 +70,7 @@ private:
 	void handleEscapeKey(const SDL_KeyboardEvent &event);
 	void handleDeleteKey(const SDL_KeyboardEvent &event);
 	void handleCKey(const SDL_KeyboardEvent &event);
+	void handleXKey(const SDL_KeyboardEvent &event);
 	void handleVKey(const SDL_KeyboardEvent &event);
 	void handleAKey(const SDL_KeyboardEvent &event);
 	void handleRightArrowKey(const SDL_KeyboardEvent &event);
@@ -106,6 +105,19 @@ private:
 	std::map<SDL_Keycode, std::function<void(const SDL_KeyboardEvent&)>> m_keyPressHandlers;
 	
 };
+
+inline bool TextBox::isTextSelected() const {
+	return m_cursorSelectStart != m_cursorSelectEnd;
+}
+
+
+/** 
+ \fn TextBox::isTextSelected
+ \brief check if there is text selected.
+ \return 
+   \li true if there is selected text, false otherwise.
+*/
+
 
 }}
 

@@ -100,35 +100,48 @@ bool WidgetState::onDestroy(){
 }
 
 //! @copydoc GameState::render()
-void WidgetState::render(){
-	for(auto && pWindow : m_windows){
-		CAP_THROW_NULL(pWindow, "Window is null");
-		pWindow->render();
+void WidgetState::render()
+{
+	try{
+		for(auto && pWindow : m_windows){
+			CAP_THROW_NULL(pWindow, "Window is null");
+			pWindow->render();
+		}
+
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->render();
+		}
+	
+		m_postRenderSignal(*this);
 	}
 
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->render();
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
-	
-	m_postRenderSignal(*this);
 }
 
 //! @copydoc GameState::update()
 void WidgetState::update(double ms){
-	if(m_pQueuedUiControl != boost::none){
+	try{
+		if(m_pQueuedUiControl != boost::none){
 
-		assert(m_pUiControls != nullptr);
-		m_pUiControls->push_back(*m_pQueuedUiControl);
+			assert(m_pUiControls != nullptr);
+			m_pUiControls->push_back(*m_pQueuedUiControl);
 
-		m_pQueuedUiControl = boost::none;
-	}
+			m_pQueuedUiControl = boost::none;
+		}
 	
-	for(auto && pWindow : m_windows){
-		CAP_THROW_NULL(pWindow, "Window is null");
-		pWindow->update(ms);
+		for(auto && pWindow : m_windows){
+			CAP_THROW_NULL(pWindow, "Window is null");
+			pWindow->update(ms);
+		}
+	}
+
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
 }
 
@@ -164,135 +177,173 @@ boost::signals2::scoped_connection WidgetState::connectPostRenderSignal(std::fun
 
 //! \copydoc Widget::handleMouseMotionEvent
 void WidgetState::handleMouseMotionEvent(SDL_MouseMotionEvent event){
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleMouseMotionEvent(event);
-	}
+	try {
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleMouseMotionEvent(event);
+		}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleMouseMotionEvent(event);
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleMouseMotionEvent(event);
+		}
+	}
+	
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
 void WidgetState::handleMouseButtonEvent(SDL_MouseButtonEvent event){
-	if(event.type == SDL_MOUSEBUTTONDOWN){
-		m_lastMouseDownPosition.first = event.x;
-		m_lastMouseDownPosition.second = event.y;
-		m_lastMouseDownWindowId = event.windowID;
-	}
+	try{
+		if(event.type == SDL_MOUSEBUTTONDOWN){
+			m_lastMouseDownPosition.first = event.x;
+			m_lastMouseDownPosition.second = event.y;
+			m_lastMouseDownWindowId = event.windowID;
+		}
 
-	else if(event.type == SDL_MOUSEBUTTONUP){
-		// UI focus change handling
-		if(event.windowID == m_lastMouseDownWindowId){
-			auto maybeWindow =
-				std::find_if(m_windows.begin(), m_windows.end(),
-													[this](std::shared_ptr<WindowWidget> pWindow)
-													{
-														return pWindow->getWindowId() == this->m_lastMouseDownWindowId;
-													});
+		else if(event.type == SDL_MOUSEBUTTONUP){
+			// UI focus change handling
+			if(event.windowID == m_lastMouseDownWindowId){
+				auto maybeWindow =
+					std::find_if(m_windows.begin(), m_windows.end(),
+											 [this](std::shared_ptr<WindowWidget> pWindow)
+											 {
+												 return pWindow->getWindowId() == this->m_lastMouseDownWindowId;
+											 });
 
-			if(maybeWindow != m_windows.end()){
+				if(maybeWindow != m_windows.end()){
 					bool handled = this->handleMouseFocusChange(*maybeWindow, event.x, event.y);
 					
 					if(!handled && m_pFocusedWidget != nullptr){
 						m_pFocusedWidget->doFocus(false, -1, -1, -1, -1);
 						m_pFocusedWidget = nullptr;
 					}
+				}
 			}
 		}
-	}
 	
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleMouseButtonEvent(event);
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleMouseButtonEvent(event);
+		}
+
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleMouseButtonEvent(event);
+		}
 	}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleMouseButtonEvent(event);
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
+
 
 }
 
 //! \copydoc Widget::handleMouseWheelEvent
 void WidgetState::handleMouseWheelEvent(SDL_MouseWheelEvent event){
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleMouseWheelEvent(event);
+	try {
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleMouseWheelEvent(event);
+		}
+
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleMouseWheelEvent(event);
+		}
 	}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleMouseWheelEvent(event);
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
+
 
 }
 
 //! \copydoc Widget::handleKeyboardEvent
 void WidgetState::handleKeyboardEvent(SDL_KeyboardEvent event){
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleKeyboardEvent(event);
+	try{
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleKeyboardEvent(event);
+		}
+
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleKeyboardEvent(event);
+		}
+
 	}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleKeyboardEvent(event);
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
-
 }
 
 //! \copydoc Widget::handleWindowevent
 void WidgetState::handleWindowEvent(SDL_WindowEvent event){
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleWindowEvent(event);
+	try{
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleWindowEvent(event);
+		}
+
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleWindowEvent(event);
+		}
 	}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleWindowEvent(event);
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
-
 }
 
 //! \copydoc Widget::handleWindowevent
 void WidgetState::handleTextInputEvent(SDL_TextInputEvent event){
-	// send event to windows
-	for(auto&& pWindow : m_windows){
-		assert(pWindow != nullptr);
-		pWindow->handleTextInputEvent(event);
+	try {
+		// send event to windows
+		for(auto&& pWindow : m_windows){
+			assert(pWindow != nullptr);
+			pWindow->handleTextInputEvent(event);
+		}
+
+		// send event to active control
+		assert(m_pUiControls != nullptr);
+		if(m_pUiControls->size() > 0){
+			auto pControl = m_pUiControls->back();
+			assert(pControl != nullptr);
+			pControl->handleTextInputEvent(event);
+		}
 	}
 
-	// send event to active control
-	assert(m_pUiControls != nullptr);
-	if(m_pUiControls->size() > 0){
-		auto pControl = m_pUiControls->back();
-		assert(pControl != nullptr);
-		pControl->handleTextInputEvent(event);
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
 	}
+
 }
 
 //! Adds a control to the control.
@@ -375,30 +426,38 @@ void WidgetState::handleWindowCloseSignal(WindowWidget* pWindowWidget){
    \li The y position of the mouse click
 */
 bool WidgetState::handleMouseFocusChange(std::shared_ptr<Widget> widget, int x, int y){
-	assert(widget != nullptr);
+	try {
+		assert(widget != nullptr);
 	
-	bool handled = false;
-	if(widget->canFocus()){
-		handled = widget->doFocus(true, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
-		if(handled){
-			if(m_pFocusedWidget != nullptr && m_pFocusedWidget.get() != widget.get()){
-				m_pFocusedWidget->doFocus(false, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+		bool handled = false;
+		if(widget->canFocus()){
+			handled = widget->doFocus(true, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+			if(handled){
+				if(m_pFocusedWidget != nullptr && m_pFocusedWidget.get() != widget.get()){
+					m_pFocusedWidget->doFocus(false, m_lastMouseDownPosition.first, m_lastMouseDownPosition.second, x, y);
+				}
+
+				m_pFocusedWidget = widget;
 			}
-
-			m_pFocusedWidget = widget;
 		}
+
+		if(!handled){
+			for(auto && pWidget : widget->getChildren()){
+				handled = handleMouseFocusChange(pWidget, x, y);
+
+				if(handled)
+					break;
+			}
+		}
+
+		return handled;
+
 	}
 
-	if(!handled){
-		for(auto && pWidget : widget->getChildren()){
-			handled = handleMouseFocusChange(pWidget, x, y);
-
-			if(handled)
-				break;
-		}
+	catch(const std::exception &e){
+		CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CERROR);
+		return false;
 	}
-
-	return handled;
 }
 
 }} // namespace CapEngine

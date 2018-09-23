@@ -144,7 +144,7 @@ void TextBox::render() {
 
 	int cursorDrawOffset = 0;
 	if(m_cursorPosition > 0){
-		//int width = Locator::videoManager->getTextureWidth(m_texture.get());
+		assert(m_cursorPosition <= static_cast<int>(m_text.size()));
 		int width = m_font.getTextSize(m_text.substr(0, m_cursorPosition));
 		cursorDrawOffset = width;
 	}
@@ -453,8 +453,11 @@ void TextBox::handleKeyboardEvent(SDL_KeyboardEvent event){
 void TextBox::handleTextInputEvent(SDL_TextInputEvent event){
 	if(!(isSpecialKeySequence(event)) && m_hasFocus)
 	{
-		m_text += event.text;
-		m_cursorPosition++;
+		if(this->isTextSelected()){
+			this->deleteSelectedText();
+		}
+		
+		this->insertText(event.text);
 		m_textureDirty = true;
 	}
 }
@@ -468,14 +471,25 @@ void TextBox::unsetSelection(){
 
 //! deletes a selection if there is one
 void TextBox::deleteText(){
-	if(m_cursorSelectStart == m_cursorSelectEnd){
+	if(!this->isTextSelected()){
 		if(m_text.size() > static_cast<size_t>(m_cursorPosition)){
 			m_text.erase(m_cursorPosition, 1);
 			m_textureDirty = true;
 		}
 	}
 	else{
+		this->deleteSelectedText();
+	}
+}
 
+
+//! Deletes selected text if there is any.
+/** 
+ \return 
+   \li true if text was deleted, false otherwise.
+*/
+bool TextBox::deleteSelectedText(){
+	if(this->isTextSelected()){
 		std::string start = this->getTextBeforeSelection();
 		std::string end = this->getTextAfterSelection();
 
@@ -485,7 +499,27 @@ void TextBox::deleteText(){
 
 		this->unsetSelection();
 		m_textureDirty = true;
+
+		return true;
 	}
+
+	return false;
+}
+
+
+//! insert text at the current cursor location.
+/** 
+ \param text
+   \li The text to insert.
+*/
+void TextBox::insertText(const std::string &text){
+	assert(m_cursorPosition <= static_cast<int>(m_text.size()));
+	m_text.insert(m_cursorPosition, text);
+
+	m_cursorPosition += text.size();
+
+	this->unsetSelection();
+	m_textureDirty = true;
 }
 
 //! Gets text before selection
@@ -494,6 +528,12 @@ void TextBox::deleteText(){
    \li The text.
 */
 std::string TextBox::getTextBeforeSelection() const {
+	assert(m_cursorSelectStart <= static_cast<int>(m_text.size()));
+	
+	if(m_cursorSelectStart == 0){
+		return "";
+	}
+
 	return m_text.substr(0, m_cursorSelectStart);
 }
 
@@ -509,7 +549,7 @@ std::string TextBox::getTextAfterSelection() const {
 		return m_text.substr(m_cursorSelectEnd, static_cast<int>(m_text.size()) - m_cursorSelectEnd);
 	}
 
-	return {};
+	return "";
 }
 
 //! Gets selected text.
@@ -519,10 +559,14 @@ std::string TextBox::getTextAfterSelection() const {
 */
 std::string TextBox::getSelectedText() const {
 	if(m_cursorSelectStart != m_cursorSelectEnd){
+		assert(m_cursorSelectStart < m_cursorSelectEnd);
+		assert(m_cursorSelectStart >= 0);
+		assert(m_cursorSelectEnd <= static_cast<int>(m_text.size()));
+		
 		return m_text.substr(m_cursorSelectStart, m_cursorSelectEnd - m_cursorSelectStart);
 	}
 
-	return {};
+	return "";
 }
 
 //! Registers the keypress handler functions
@@ -531,6 +575,7 @@ void TextBox::registerKeypressHandlers(){
 	m_keyPressHandlers.emplace(SDLK_ESCAPE, std::bind(&TextBox::handleEscapeKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_DELETE, std::bind(&TextBox::handleDeleteKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_c, std::bind(&TextBox::handleCKey, this, std::placeholders::_1));
+	m_keyPressHandlers.emplace(SDLK_x, std::bind(&TextBox::handleXKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_v, std::bind(&TextBox::handleVKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_a, std::bind(&TextBox::handleAKey, this, std::placeholders::_1));
 	m_keyPressHandlers.emplace(SDLK_RIGHT, std::bind(&TextBox::handleRightArrowKey, this, std::placeholders::_1));
@@ -551,13 +596,16 @@ void TextBox::handleBackspaceKey(const SDL_KeyboardEvent &event){
 			this->deleteText();
 		}
 		else{
-			m_text.erase(m_cursorPosition - 1, 1);
+			if(m_cursorPosition > 0){
+				m_text.erase(m_cursorPosition - 1, 1);
 
-			m_cursorPosition--;
-			if(m_cursorPosition < 0)
-				m_cursorPosition = 0;
+				m_cursorPosition--;
+				if(m_cursorPosition < 0)
+					m_cursorPosition = 0;
 
-			m_textureDirty = true;
+				this->unsetSelection();
+				m_textureDirty = true;
+			}
 		}
 	}
 }
@@ -584,18 +632,50 @@ void TextBox::handleDeleteKey(const SDL_KeyboardEvent &event){
 	}
 }
 
+//! Copies the selected text, if any.  Optionally delete the selected text.
+/**
+	 \param deleteSelection
+	   \li if true, the selected text is also deleted.
+ */
+void TextBox::copySelectionToClipboard(bool deleteSelection){
+	if(this->isTextSelected()){
+		SDL_SetClipboardText(this->getSelectedText().c_str());
+
+		if(deleteSelection){
+			this->deleteSelectedText();
+		}
+	}
+
+	else{
+		SDL_SetClipboardText(m_text.c_str());
+	}
+}
+
 //! handler for C key.
 /** 
  \param event
    \li The keyboard event.
 */
 void TextBox::handleCKey(const SDL_KeyboardEvent &event){
-	// if(event.type == SDL_KEYDOWN)	{		
-	// 	// if(SDL_GetModState() & KMOD_CTRL){
-	// 	// 	//SDL_SetClipboardText( inputText.c_str() );
-	// 	// 	// Not yet supported
-	// 	// }
-	// }
+	if(event.type == SDL_KEYDOWN)	{		
+		if(SDL_GetModState() & KMOD_CTRL){
+			this->copySelectionToClipboard();
+		}
+	}
+}
+
+//! handle for X key
+/** 
+ \param event
+   \li The keyboard event.
+*/
+void TextBox::handleXKey(const SDL_KeyboardEvent &event){
+	if(event.type == SDL_KEYDOWN)	{		
+		if(SDL_GetModState() & KMOD_CTRL){
+			this->copySelectionToClipboard(true);
+		}
+	}
+
 }
 
 //! handler for V key.
@@ -606,7 +686,11 @@ void TextBox::handleCKey(const SDL_KeyboardEvent &event){
 void TextBox::handleVKey(const SDL_KeyboardEvent &event){
 	if(event.type == SDL_KEYDOWN)	{	
 		if(SDL_GetModState() & KMOD_CTRL){
-			m_text += SDL_GetClipboardText();
+			if(this->isTextSelected()){
+				this->deleteSelectedText();
+			}
+
+			this->insertText(SDL_GetClipboardText());
 		}
 	}
 }
