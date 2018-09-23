@@ -89,6 +89,7 @@ SDL_Rect TextBox::getPosition() const {
 void TextBox::setPosition(int x, int y) {
 	m_rect.x = x;
 	m_rect.y = y;
+	m_textRect = {0, 0, 0, 0};
 	m_textureDirty = true;
 }
 
@@ -96,6 +97,7 @@ void TextBox::setPosition(int x, int y) {
 void TextBox::setSize(int width, int height) {
 	m_rect.w = width;
 	m_rect.h = height;
+	m_textRect = {0, 0, 0, 0};
 	m_textureDirty = true;
 }
 
