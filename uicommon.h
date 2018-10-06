@@ -3,10 +3,16 @@
 
 namespace CapEngine { namespace UI {
 
-		enum class Unit {
-			Pixels = 0,
-			Percentage
-		};
+enum class Unit {
+  Pixels = 0,
+	Percentage
+};
+
+enum class BorderStyle {
+	None,
+	Solid											
+};
+
 		
 }}
 

@@ -8,26 +8,25 @@
 
 namespace CapEngine { namespace UI {
 
-
 //! Constructor
 /** 
- \param numRows
-   \li The number of rows 
- \param numColumns
-   \li The number of columns
- \param maybeRowHeights
-   \li optional row height configuration
- \param maybeColWidths
-   \li optional column width configuration
+		\param numRows
+		\li The number of rows 
+		\param numColumns
+		\li The number of columns
+		\param maybeRowHeights
+		\li optional row height configuration
+		\param maybeColWidths
+		\li optional column width configuration
 */
 GridLayout::GridLayout(int numRows, 
-	int numColumns,
-	boost::optional<std::vector<int>> maybeRowHeights,
-    boost::optional<std::vector<int>> maybeColWidths) 
+											 int numColumns,
+											 boost::optional<std::vector<int>> maybeRowHeights,
+											 boost::optional<std::vector<int>> maybeColWidths) 
 	: m_numRows(numRows), m_numColumns(numColumns)
 {
 	for(int i = 0; i < numRows; i++){
-		m_widgetGrid.push_back(std::vector<std::shared_ptr<Widget>>(numColumns));
+		m_widgetGrid.push_back(std::vector<widgetinfo_t>(numColumns));
 	}
 
 	// row height configuration
@@ -74,20 +73,20 @@ GridLayout::GridLayout(int numRows,
 
 //! creates a GridLayout
 /** 
- \param numRows
-   \liThe number of rows 
- \param numColumns
-   \li The number of columns
- \param maybeRowHeights
-   \li optional row height configuration
- \param maybeColWidths
-   \li optional column width configuration
- \return 
-   \li The grid layout
+		\param numRows
+		\liThe number of rows 
+		\param numColumns
+		\li The number of columns
+		\param maybeRowHeights
+		\li optional row height configuration
+		\param maybeColWidths
+		\li optional column width configuration
+		\return 
+		\li The grid layout
 */
 std::shared_ptr<GridLayout> GridLayout::create(int numRows, int numColumns,
-				boost::optional<std::vector<int>> maybeRowHeights,
-			    boost::optional<std::vector<int>> maybeColWidths){
+																							 boost::optional<std::vector<int>> maybeRowHeights,
+																							 boost::optional<std::vector<int>> maybeColWidths){
 	return std::shared_ptr<GridLayout>(new GridLayout(numRows, numColumns, maybeRowHeights, maybeColWidths));
 }
 
@@ -103,7 +102,7 @@ void GridLayout::setPosition(int x, int y){
 //! @copydoc Widget::setSize()
 void GridLayout::setSize(int width, int height){
 	m_position.w = width;
-	m_position.h = height;
+	m_position.h = height;;
 
 	updateChildren();
 }
@@ -114,8 +113,8 @@ void GridLayout::setWindowId(Uint32 windowId){
 
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->setWindowId(windowId);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->setWindowId(windowId);
 			}
 		}
 	}
@@ -124,9 +123,10 @@ void GridLayout::setWindowId(Uint32 windowId){
 //! \copydoc GridLayout::update
 void GridLayout::update(double ms){
 	for (auto && row : m_widgetGrid){
-		for (auto && col : row){
-			if(col != nullptr)
-				col->update(ms);
+		for (auto && cell : row){
+			if(cell.second != nullptr){
+				cell.second->update(ms);
+			}
 		}
 	}
 }
@@ -134,9 +134,8 @@ void GridLayout::update(double ms){
 //! @copydoc Widget::render()
 void GridLayout::render(){
 	for (auto && row : m_widgetGrid){
-		for (auto && col : row){
-			if(col != nullptr)
-				col->render();
+		for (auto && cell : row){
+				this->renderWidget(cell.second, cell.first);
 		}
 	}
 }
@@ -144,7 +143,7 @@ void GridLayout::render(){
 
 //! return the number of rows in the grid
 /** 
- \return The number of rows in the grid
+		\return The number of rows in the grid
 */
 int GridLayout::getNumRows() const {
 	return m_numRows;
@@ -152,7 +151,7 @@ int GridLayout::getNumRows() const {
 
 //! return the number of columns in the grid
 /** 
- \return The number of columns in the grid
+		\return The number of columns in the grid
 */
 int GridLayout::getNumColumns() const {
 	return m_numColumns;
@@ -162,8 +161,8 @@ int GridLayout::getNumColumns() const {
 void GridLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleMouseMotionEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleMouseMotionEvent(event);
 			}
 		}
 	}
@@ -173,8 +172,8 @@ void GridLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event){
 void GridLayout::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleMouseButtonEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleMouseButtonEvent(event);
 			}
 		}
 	}
@@ -184,8 +183,8 @@ void GridLayout::handleMouseButtonEvent(SDL_MouseButtonEvent event){
 void GridLayout::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleMouseWheelEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleMouseWheelEvent(event);
 			}
 		}
 	}
@@ -195,8 +194,8 @@ void GridLayout::handleMouseWheelEvent(SDL_MouseWheelEvent event){
 void GridLayout::handleKeyboardEvent(SDL_KeyboardEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleKeyboardEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleKeyboardEvent(event);
 			}
 		}
 	}
@@ -206,8 +205,8 @@ void GridLayout::handleKeyboardEvent(SDL_KeyboardEvent event){
 void GridLayout::handleWindowEvent(SDL_WindowEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleWindowEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleWindowEvent(event);
 			}
 		}
 	}
@@ -217,8 +216,8 @@ void GridLayout::handleWindowEvent(SDL_WindowEvent event){
 void GridLayout::handleTextInputEvent(SDL_TextInputEvent event){
 	for(int i = 0; i < m_numRows; i++){
 		for(int j = 0; j < m_numColumns; j++){
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->handleTextInputEvent(event);
+			if(m_widgetGrid[i][j].second != nullptr){
+				m_widgetGrid[i][j].second->handleTextInputEvent(event);
 			}
 		}
 	}
@@ -226,27 +225,27 @@ void GridLayout::handleTextInputEvent(SDL_TextInputEvent event){
 
 //! Return the wiget in the given grid location
 /** 
- \param row - The row of the widget
- \param column - The column of the Widget
- \return - The widget
+		\param row - The row of the widget
+		\param column - The column of the Widget
+		\return - The widget
 */
 std::shared_ptr<Widget> GridLayout::getWidget(int row, int column){
 	if(row >= m_numRows || column >= m_numColumns)
 		CAP_THROW(CapEngineException("Index out of bound"));
 
-	return m_widgetGrid[row][column];
+	return m_widgetGrid[row][column].second;
 }
 
 
 //! Add a widget to thelayout
 /** 
- \param pWidget - The widget to add
- \param row - The row to add the widget to
- \param column - The column to add the widget to
- \param replaceExisting
-     \li - If true, replace the existing widget if there is one 
-		 \li - If false, throw an exception if one already exists at given location
- \return 
+		\param pWidget - The widget to add
+		\param row - The row to add the widget to
+		\param column - The column to add the widget to
+		\param replaceExisting
+		\li - If true, replace the existing widget if there is one 
+		\li - If false, throw an exception if one already exists at given location
+		\return 
 */
 void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 													 bool replaceExisting)
@@ -255,14 +254,14 @@ void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 		CAP_THROW(CapEngineException("Index out of bound"));
 
 	if(replaceExisting){
-		m_widgetGrid[row][column] = pWidget;
+		m_widgetGrid[row][column] = std::make_pair(SDL_Rect{}, pWidget);
 		pWidget->setParent(this);
 		pWidget->setWindowId(this->m_windowId);
 	}
 
 	else{
-		if(m_widgetGrid[row][column] == nullptr){
-			m_widgetGrid[row][column] = pWidget;
+		if(m_widgetGrid[row][column].second == nullptr){
+			m_widgetGrid[row][column] = std::make_pair(SDL_Rect{}, pWidget);
 			pWidget->setParent(this);
 			pWidget->setWindowId(this->m_windowId);
 		}
@@ -273,6 +272,37 @@ void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 
 //! Updates the size and position of children widgets
 void GridLayout::updateChildren(){
+	this->updateCellBoxes();
+}
+
+//! \copydoc Widget::getChildren
+std::vector<std::shared_ptr<Widget>> GridLayout::getChildren(){
+	std::vector<std::shared_ptr<Widget>> widgets;
+
+	for(auto && row : m_widgetGrid){
+		for(auto && cell : row){
+			if(cell.second != nullptr){
+				widgets.push_back(cell.second);
+			}
+		}
+	}
+
+	return widgets;
+}
+
+//! \copydoc Widget::getPosition
+SDL_Rect GridLayout::getPosition() const {
+	return m_position;
+}
+
+//! \copydoc Widget::setBorder
+void GridLayout::setBorder(BorderStyle borderStyle, unsigned int borderWidth){
+	m_borderStyle = borderStyle;
+	m_borderWidth = borderWidth;
+}
+
+//! updates the rect of the cells
+void GridLayout::updateCellBoxes() {
 	int cellWidth = m_position.w / m_numColumns;
 	int cellHeight = m_position.h / m_numRows;	
 
@@ -297,9 +327,14 @@ void GridLayout::updateChildren(){
 				currentCellWidth = static_cast<double>(totalWidth) * (static_cast<double>((*m_colWidths)[j]) / 100.0);
 			}
 
-			if(m_widgetGrid[i][j].get() != nullptr){
-				m_widgetGrid[i][j]->setPosition(x, y);
-				m_widgetGrid[i][j]->setSize(currentCellWidth, currentCellHeight);
+			assert(i < m_widgetGrid.size());
+			assert(j < m_widgetGrid[i].size());
+			
+			SDL_Rect position{x, y, currentCellWidth, currentCellHeight};
+			m_widgetGrid[i][j].first = position;
+
+			if(m_widgetGrid[i][j].second != nullptr){
+				this->updateWidgetPosition(*m_widgetGrid[i][j].second, position);
 			}
 
 			// increment x position
@@ -311,24 +346,61 @@ void GridLayout::updateChildren(){
 	}
 }
 
-//! \copydoc Widget::getChildren
-std::vector<std::shared_ptr<Widget>> GridLayout::getChildren(){
-	std::vector<std::shared_ptr<Widget>> widgets;
-
-	for(auto && row : m_widgetGrid){
-		for(auto && pWidget : row){
-			if(pWidget != nullptr)
-				widgets.push_back(pWidget);
-		}
+//! Updates the position of a child widget.
+/** 
+ \param widget
+   \li The widget to update.
+ \param rect
+   \li The position of the widget (including any borders)
+*/
+void GridLayout::updateWidgetPosition(Widget &widget, const SDL_Rect &rect){
+	if(m_borderStyle == BorderStyle::Solid && m_borderWidth > 0){
+		widget.setPosition(rect.x + m_borderWidth, rect.y + m_borderWidth);
+		widget.setSize(rect.w - (2 * m_borderWidth), rect.h - (2 * m_borderWidth));
 	}
-
-	return widgets;
+	else{
+		widget.setPosition(rect.x, rect.y);
+		widget.setSize(rect.w, rect.h);
+	}
 }
 
-//! \copydoc Widget::getPosition
-SDL_Rect GridLayout::getPosition() const {
-	return m_position;
-}
+//! Render a widget and border if there is one.
+/** 
+ \param widget
+   \li The widget to render.
+ \param rect
+   \li The position of the widget including border.
+*/
+void GridLayout::renderWidget(std::shared_ptr<Widget>& widget, const SDL_Rect &rect){
 
+	Locator::videoManager->drawLine(m_windowId, rect.x,
+																	rect.y,
+																	rect.x + rect.w,
+																	rect.y,
+																	Colour{0, 0, 0, 255});
+
+	Locator::videoManager->drawLine(m_windowId, rect.x,
+																	rect.y,
+																	rect.x,
+																	rect.y  + rect.h,
+																	Colour{0, 0, 0, 255});
+
+	Locator::videoManager->drawLine(m_windowId, rect.x,
+																	rect.y + rect.h,
+																	rect.x + rect.w,
+																	rect.y  + rect.h,
+																	Colour{0, 0, 0, 255});
+
+	Locator::videoManager->drawLine(m_windowId, rect.x + rect.w,
+																	rect.y,
+																	rect.x + rect.w,
+																	rect.y  + rect.h,
+																	Colour{0, 0, 0, 255});
+
+	if(widget != nullptr){
+		widget->render();
+	}
+}
+	
 }} // CapEngine::UI
 

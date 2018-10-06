@@ -81,6 +81,7 @@ bool Editor::onLoad(){
 	pWindow->show();
 
 	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2, boost::none, std::vector<int>({25, 75}));
+	pLayout->setBorder(BorderStyle::Solid, 2);
 	pWindow->setLayout(pLayout);
 	
 	m_pTileSetPanel = UI::TileSetPanel::create(this->m_pTileset);

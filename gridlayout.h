@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <functional>
+#include <optional>
 #include <boost/optional.hpp>
 
 namespace CapEngine { namespace UI {
@@ -19,21 +20,22 @@ namespace CapEngine { namespace UI {
 				boost::optional<std::vector<int>> maybeRowHeights = boost::none,
 			  boost::optional<std::vector<int>> maybeColWidths = boost::none);
 
-			virtual SDL_Rect getPosition() const override;
-			virtual void setPosition(int x, int y) override;
-			virtual void setSize(int width, int height) override;
-			virtual void render() override;
-			virtual void update(double ms) override;
-			virtual std::vector<std::shared_ptr<Widget>> getChildren() override;
+			SDL_Rect getPosition() const override;
+			void setPosition(int x, int y) override;
+			void setSize(int width, int height) override;
+			void render() override;
+			void update(double ms) override;
+			std::vector<std::shared_ptr<Widget>> getChildren() override;
+			void setBorder(BorderStyle borderStyle, unsigned int borderWidth) override;
 
-			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
-			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
-			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
-			virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
-			virtual void handleWindowEvent(SDL_WindowEvent event) override;
-			virtual void handleTextInputEvent(SDL_TextInputEvent event) override;			
+			void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+			void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+			void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+			void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+			void handleWindowEvent(SDL_WindowEvent event) override;
+			void handleTextInputEvent(SDL_TextInputEvent event) override;			
 
-			virtual void setWindowId(Uint32 windowId) override;
+			void setWindowId(Uint32 windowId) override;
 
 			void addWidget(std::shared_ptr<Widget>, int row, int column, bool replaceExisting=false);
 			int getNumRows() const;
@@ -46,21 +48,30 @@ namespace CapEngine { namespace UI {
 		    boost::optional<std::vector<int>> maybeColWidths = boost::none);
 
 			void updateChildren();
+			void updateWidgetPosition(Widget &widget, const SDL_Rect &rect);
+			void renderWidget(std::shared_ptr<Widget>& widget, const SDL_Rect &rect);
+			void updateCellBoxes();
+
+			using widgetinfo_t = std::pair<SDL_Rect, std::shared_ptr<Widget>>;
+			using widgetgrid_t = std::vector<std::vector<widgetinfo_t>>;
 
 			// members
 			//! The widgets this layout holds
-			std::vector<std::vector<std::shared_ptr<Widget>>> m_widgetGrid;
+			widgetgrid_t m_widgetGrid;
 			//! The row heights as percentages
 			boost::optional<std::vector<int>> m_rowHeights;
 			//! the column widths as percentages
 			boost::optional<std::vector<int>> m_colWidths;
 			//! The number of rows in the layout
-			int m_numRows;
+			int m_numRows = 0;
 			//! The number of columns in the layout
-			int m_numColumns;
-			// The position of the layout
+			int m_numColumns = 0;
+			//! The position of the layout
 			Rect m_position = { 0, 0, 0, 0 };
-			
+			//! The position of the layout including the border
+			unsigned int m_borderWidth = 0;
+			//! The border style
+			BorderStyle m_borderStyle = BorderStyle::None;
 		};
 }}
 

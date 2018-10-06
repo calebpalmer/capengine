@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include "VideoManager.h"
+#include "uicommon.h"
 
 #include <memory>
 #include <optional>
@@ -27,6 +28,7 @@ namespace CapEngine { namespace UI {
 			virtual std::vector<std::shared_ptr<Widget>> getChildren() { return {}; }
 			virtual bool canFocus() const { return false; }
 			virtual bool doFocus(bool, int, int, int, int) { return false; }
+			virtual void setBorder(BorderStyle borderStyle, unsigned int borderWidth) {}
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent /*event*/) {}
@@ -101,6 +103,15 @@ namespace CapEngine { namespace UI {
    \li The text input event tohandle.
 */
 
+
+/**
+ \fn Widget::setBorder
+ \brief Sets the border on a widget.  This is an optionally implemented virtual function.
+ \param borderStyle
+   \li The border style to use.
+ \param 
+   \li The width of the border.
+*/
 
 
 
