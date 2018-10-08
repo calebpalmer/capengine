@@ -21,6 +21,17 @@ namespace CapEngine{
 	SurfacePtr getNullSurfacePtr();
 	TexturePtr getNullTexturePtr();
 
+	//! Enumeration to represent the type a property is holding.
+	enum class PropertyType {
+		String,
+		Int64,
+		UInt64,
+		Int32,
+		UInt32,
+		Float64,
+		Float32
+	};
+	
 }
 
 #endif //CAPTYPES_H
