@@ -3,6 +3,7 @@
 
 #include "captypes.h"
 #include "propertytraits.h"
+#include "propertyvisitor.h"
 
 #include <optional>
 #include <boost/variant.hpp>
@@ -33,6 +34,7 @@ namespace CapEngine {
 		void setName(std::string name);
 
 		PropertyType getType() const;
+		void accept(PropertyVisitor& visitor);
 		
 	private:
 	private:

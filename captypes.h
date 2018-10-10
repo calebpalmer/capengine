@@ -21,6 +21,7 @@ namespace CapEngine{
 	SurfacePtr getNullSurfacePtr();
 	TexturePtr getNullTexturePtr();
 
+  // TODO this needs a better spot.
 	//! Enumeration to represent the type a property is holding.
 	enum class PropertyType {
 		String,

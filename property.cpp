@@ -54,4 +54,33 @@ PropertyType Property::getType() const {
 	return m_type;
 }
 
+//! accepts a PropertyVisitor object.
+/** 
+ \param vistor
+   The visitor to call.
+*/
+void Property::accept(PropertyVisitor &visitor){
+	if(m_type == PropertyType::String){
+		visitor.visitString(*this);
+	}
+	else if(m_type == PropertyType::Int64){
+		visitor.visitInt64(*this);
+	}
+	else if(m_type == PropertyType::UInt64){
+		visitor.visitUInt64(*this);
+	}
+	else if(m_type == PropertyType::Int32){
+		visitor.visitInt32(*this);
+	}
+	else if(m_type == PropertyType::UInt64){
+		visitor.visitUInt64(*this);
+	}
+	else if(m_type == PropertyType::Float32){
+		visitor.visitFloat32(*this);
+	}
+	else if(m_type == PropertyType::Float64){
+		visitor.visitFloat64(*this);
+	}	
+}
+
 }
