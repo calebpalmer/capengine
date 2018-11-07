@@ -10,7 +10,7 @@
 namespace CapEngine {
 
 //! A class for list properties
-class ListProperty {
+class ListProperty final {
 public:
 	using ListPropertyIterator = std::vector<Property>::iterator;
 	using ConstListPropertyIterator = std::vector<Property>::const_iterator;

@@ -11,7 +11,7 @@ namespace CapEngine {
  \param type
    The type of the property.
 */
-Property::Property(std::string name, PropertyValueType value, PropertyType type) :
+Property::Property(std::string name, boost::any value, PropertyType type) :
 	m_name(std::move(name)), m_value(std::move(value)), m_type(type)
 {
 }
@@ -21,7 +21,7 @@ Property::Property(std::string name, PropertyValueType value, PropertyType type)
  \return 
    The value of the property.
 */
-Property::PropertyValueType Property::getValue() const {
+boost::any Property::getValue() const {
 	return m_value;
 }
 

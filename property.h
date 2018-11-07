@@ -6,19 +6,12 @@
 #include "propertyvisitor.h"
 
 #include <optional>
-#include <boost/variant.hpp>
+#include <boost/any.hpp>
 
 namespace CapEngine {
 
-class ListProperty; // forward declaration
-
 //! Class to represent a property of something.
 class Property final{
-public:
-	using PropertyValueType =
-		boost::variant<std::string, int64_t, uint64_t, int32_t, uint32_t,
-									 float, double>;
-		
 public:
 	template <typename T>
 	static Property create(std::string name, T val);
@@ -26,7 +19,7 @@ public:
 	template <typename T>
 	static std::unique_ptr<Property> createUP(std::string name, T val);
 
-	PropertyValueType getValue() const;
+	boost::any getValue() const;
 	template <typename T>
 	std::optional<T> getValueAs() const;
 
@@ -41,10 +34,10 @@ public:
 		
 private:
 private:
-	explicit Property(std::string name, PropertyValueType value, PropertyType type);
+	explicit Property(std::string name, boost::any value, PropertyType type);
 		
 	std::string m_name; //<! The name of the property.
-	PropertyValueType m_value; //<! The property value.
+	boost::any m_value; //<! The property value.
 	PropertyType m_type; //<! The property type.
 };
 
@@ -82,7 +75,7 @@ std::unique_ptr<Property> Property::createUP(std::string name, T value)
 template <typename T>
 std::optional<T> Property::getValueAs() const
 {
-	if(T *value = boost::get<T>(&m_value)){
+	if(auto&& value = boost::any_cast<T>(&m_value)){
 		return *value;
 	}
 
