@@ -83,4 +83,18 @@ void Property::accept(PropertyVisitor &visitor){
 	}	
 }
 
+//! Add a callback function to be called when the property is changed.
+/** 
+ \param f
+   The callback.
+*/
+void Property::addOnChangeCB(OnChangeCB f){
+	m_onChangeCBs.emplace_back(std::move(f));
+}
+
+//! Clear on change callbacks
+void Property::clearOnChangeCB(){
+	m_onChangeCBs.clear();
+}
+
 }

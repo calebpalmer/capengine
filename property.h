@@ -31,14 +31,18 @@ public:
 
 	PropertyType getType() const;
 	void accept(PropertyVisitor& visitor);
-		
-private:
+
+	using OnChangeCB = std::function<void(const Property& oldProperty, const Property& newProperty)>;
+	void addOnChangeCB(OnChangeCB f);
+	void clearOnChangeCB();
+
 private:
 	explicit Property(std::string name, boost::any value, PropertyType type);
 		
 	std::string m_name; //<! The name of the property.
 	boost::any m_value; //<! The property value.
 	PropertyType m_type; //<! The property type.
+	std::vector<OnChangeCB> m_onChangeCBs; //<! collection of on change callbacks.
 };
 
 	
