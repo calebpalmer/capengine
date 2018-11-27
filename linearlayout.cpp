@@ -92,10 +92,20 @@ void LinearLayout::updateChildren(){
 		CAP_THROW_NULL(m_widgets[i], "Widget is null");
 		m_widgets[i]->setSize(widgetWidth, widgetHeight);
 
-		if(m_orientation == Orientation::Horizontal)
-			m_widgets[i]->setPosition(m_rect.x + i * widgetWidth, m_rect.y);
-		else
+		if(m_orientation == Orientation::Horizontal) {
+			switch(m_alignment){
+			case Alignment::Begin:
+				break;
+			case Alignment::Center:
+				m_widgets[i]->setPosition(m_rect.x + i * widgetWidth, m_rect.y);
+				break;
+			case Alignment::End:
+				break;
+			}
+		}
+		else{
 			m_widgets[i]->setPosition(m_rect.x, m_rect.y + i * widgetHeight);
+		}
 	}
 
 	m_updateChildren = false;
@@ -151,6 +161,25 @@ std::vector<std::shared_ptr<Widget>> LinearLayout::getChildren(){
 //! \copydoc Widget::getPosition
 SDL_Rect LinearLayout::getPosition() const {
 	return m_rect;
+}
+
+
+//! Gets the alignment.
+/** 
+ \return 
+   The alignment
+*/
+LinearLayout::Alignment LinearLayout::getAlignment() const {
+	return m_alignment;
+}
+
+//! Sets the alignment.
+/** 
+ \param alignment
+   The alignment
+*/
+void LinearLayout::setAlignment(Alignment alignment) {
+	m_alignment = alignment;
 }
 
 }}

@@ -23,7 +23,7 @@ namespace {
     SurfacePtr surface = in_videoManager.createSurfacePtr(20, 20);
     fillRectangle(surface.get(), {0, 0, 20, 20}, {0xff, 0xff, 0xff, 0xFF});
     drawLine(2, 2, 8, 8, surface.get());
-    return std::move(surface);
+    return surface;
   }
 
   std::vector<Pixel> getPixels(VideoManager& videoManager, SurfacePtr surface){

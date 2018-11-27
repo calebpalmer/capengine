@@ -16,6 +16,9 @@
 #include "orientable.h"
 #include "control.h"
 #include "uicommon.h"
+#include "uiutils.h"
+#include "map2d.h"
+#include "property.h"
 
 #include <memory>
 #include <iostream>
@@ -31,7 +34,7 @@ namespace {
 const std::string kMainWindowName = "main";
 const std::string kMapWindowName = "map";
 
-}// anonymous namespace
+} // namespace
 
 EditorArgs EditorArgs::parseArgs(int argc, char* argv[]){
   std::string tilesetPath = "";
@@ -76,18 +79,28 @@ std::shared_ptr<Editor> Editor::create(const EditorArgs &args){
 bool Editor::onLoad(){
 
 	bool resizable = true;
-	std::shared_ptr<UI::WindowWidget> pWindow = this->createWindow("Editor", 1280, 800, resizable);
+	std::shared_ptr<WindowWidget> pWindow = this->createWindow("Editor", 1280, 800, resizable);
+	assert(pWindow != nullptr);
 	pWindow->setMaximized(true);
 	pWindow->show();
 
-	std::shared_ptr<UI::GridLayout> pLayout = UI::GridLayout::create(1, 2, boost::none, std::vector<int>({25, 75}));
+	std::shared_ptr<GridLayout> pLayout = UI::GridLayout::create(1, 3, boost::none, std::vector<int>{20, 60, 20});
+	assert(pLayout != nullptr);
 	pLayout->setBorder(BorderStyle::Solid, 2);
 	pWindow->setLayout(pLayout);
-	
+
+	assert(m_pTileset != nullptr);
 	m_pTileSetPanel = UI::TileSetPanel::create(this->m_pTileset);
+
+	assert(m_pMap != nullptr);
 	m_pMapPanel = UI::MapPanel::create(this->m_pMap);
+	
 	pLayout->addWidget(m_pTileSetPanel, 0, 0);
 	pLayout->addWidget(m_pMapPanel, 0, 1);
+
+	std::vector<Property> mapProperties = getMapProperties(m_pMap);
+	std::shared_ptr<Widget> pMapPropertyGrid = createPropertyGrid(mapProperties);
+	pLayout->addWidget(std::move(pMapPropertyGrid), 0, 2);
 	
 	return true;
 }

@@ -15,6 +15,13 @@ namespace CapEngine { namespace UI {
 				Horizontal,
 				Vertical
 			};
+
+			//! The Alignment of the layout
+			enum class Alignment {
+				Begin,
+				Center,
+				End
+			};
 			
 		public:
 			static std::shared_ptr<LinearLayout> create(Orientation orientation=Orientation::Horizontal);
@@ -38,6 +45,9 @@ namespace CapEngine { namespace UI {
 
 			void addWidget(std::shared_ptr<Widget> pWidget);
 
+			Alignment getAlignment() const;
+			void setAlignment(Alignment alignment);
+
 		private:
 			LinearLayout(Orientation orientation);
 
@@ -45,6 +55,8 @@ namespace CapEngine { namespace UI {
 
 			//! The orientation of the layout
 			Orientation m_orientation = Orientation::Horizontal;
+			//! The alignment of the layout.
+			Alignment m_alignment = Alignment::Center;
 			//! holds the widgets in this layout
 			std::vector<std::shared_ptr<Widget>> m_widgets;
 			//! position and size

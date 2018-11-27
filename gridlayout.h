@@ -38,6 +38,8 @@ namespace CapEngine { namespace UI {
 			void setWindowId(Uint32 windowId) override;
 
 			void addWidget(std::shared_ptr<Widget>, int row, int column, bool replaceExisting=false);
+			void removeWidget(int row, int column);
+			void replaceWidget(std::shared_ptr<Widget> pWidget, int row, int column);
 			int getNumRows() const;
 			int getNumColumns() const;
 			std::shared_ptr<Widget> getWidget(int row, int column);

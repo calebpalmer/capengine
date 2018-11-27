@@ -18,8 +18,6 @@ namespace {
    The widget.
 */
 std::shared_ptr<Widget> genericLabelAndTextWidget(Property& property){
-  assert(property.getType() == PropertyType::String);
-
   std::shared_ptr<LinearLayout> pLayout = LinearLayout::create(LinearLayout::Orientation::Horizontal);
 	assert(pLayout != nullptr);
 
@@ -98,6 +96,16 @@ void UIPropertyVisitor::visitList(Property &property){
 	}
 
 	m_pWidget = std::move(pLayout);
+}
+
+
+//! Get the widget.
+/** 
+ \return 
+   The widget.
+*/
+std::optional<std::shared_ptr<Widget>> UIPropertyVisitor::getWidget(){
+	return m_pWidget;
 }
 
 }}

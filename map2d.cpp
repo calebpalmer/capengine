@@ -8,6 +8,7 @@
 #include "filesystem.h"
 #include "logger.h"
 #include "locator.h"
+#include "listproperty.h"
 
 #include <filesystem>
 #include <boost/filesystem.hpp>
@@ -461,6 +462,24 @@ int Map2D::getTileIndex(int x, int y) const{
 */
 std::string Map2D::getTileSetPath() const{
 	return this->tileSetPath;
+}
+
+//! Get properties for a map.
+/** 
+
+ The returned Property is of type ListProperty.
+
+ \param pMap
+   The map.
+ \return 
+   The properties.
+*/
+std::vector<Property> getMapProperties(std::shared_ptr<Map2D> pMap){
+	assert(pMap != nullptr);
+
+	Property widthProperty = Property::create("width", pMap->getWidth());
+
+	return std::vector{ widthProperty };
 }
 
 } // namespace CapEngine

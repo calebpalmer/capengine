@@ -1,6 +1,8 @@
 #include "uiutils.h"
 
 #include "locator.h"
+#include "linearlayout.h"
+#include "uipropertyvisitor.h"
 
 namespace CapEngine { namespace UI {
 
@@ -35,8 +37,33 @@ boost::optional<std::shared_ptr<Control>> getCurrentControl(){
 		return boost::none;
 
 	return pWidgetState->peekControl();
+}
 
-	
+
+//! Creates a Property Grid widget.
+/** 
+ \param properties
+   The properties to create the grid from.
+ \return 
+   The Widget holding the properties.
+*/
+std::shared_ptr<Widget> createPropertyGrid(const std::vector<Property> &properties){
+	auto pGridLayout = LinearLayout::create(LinearLayout::Orientation::Vertical);
+	assert(pGridLayout != nullptr);
+
+	UIPropertyVisitor visitor;
+	for(size_t i = 0; i < properties.size(); i++){
+		Property prop = properties[i];
+		prop.accept(visitor);
+
+		std::optional<std::shared_ptr<Widget>> maybePropertyWidget = visitor.getWidget();
+		assert(maybePropertyWidget != std::nullopt);
+		assert(*maybePropertyWidget != nullptr);
+
+		pGridLayout->addWidget(std::move(*maybePropertyWidget));
+	}
+
+	return pGridLayout;
 }
 
 }}

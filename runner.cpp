@@ -106,7 +106,7 @@ void Runner::update(){
 	}
 }
 
-void Runner::render(double frameFactor){
+void Runner::render(double /*frameFactor*/){
   Locator::videoManager->clearAll();
 
 	for(auto && pGameState : m_gameStates)
@@ -115,7 +115,7 @@ void Runner::render(double frameFactor){
 	Locator::videoManager->drawAll();
 }
 
-void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* time){
+void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* /*time*/){
   if(event.type == SDL_WINDOWEVENT){
     if(event.window.event == SDL_WINDOWEVENT_CLOSE && m_defaultQuitEventsEnabled){
       m_quit = true;

@@ -13,20 +13,20 @@ public:
 	virtual SDL_Rect getPosition() const override { return {}; }
 	
 	//! \copydoc Widget::setPosition
-	virtual void setPosition(int x, int y) {};
+	virtual void setPosition(int, int) override{};
 
 	//! \copydoc Widget::setSize
-	virtual void setSize(int width, int height) {};
+	virtual void setSize(int, int) override {};
 
 	//! \copydoc Widget::render
-	virtual void render() {}
+	virtual void render() override {}
 
 	//! Sets if the control has been handled or not.
 	/** 
 			\param handled
 			  True if it is handled, false otherwise.
 	*/
-	virtual void setHandled(bool handled) {};
+	virtual void setHandled(bool /*handled*/) {};
 			
 	//! check to see if control has been handled or not.
 	/** 

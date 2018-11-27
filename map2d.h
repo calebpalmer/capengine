@@ -6,6 +6,7 @@
 #include "collision.h"
 #include "VideoManager.h"
 #include "CapEngineException.h"
+#include "property.h"
 
 #include <memory>
 #include <fstream>
@@ -59,6 +60,7 @@ namespace CapEngine{
     int getHeight() const;
     int getTileSize() const;
 		int getTileIndex(int x, int y) const;
+		
 		bool isDirty() const;
 
     void setWidth(int width);
@@ -88,6 +90,8 @@ namespace CapEngine{
 		//! flag indicating if data has been changed since last save.
 		mutable bool m_isDirty = false;
   };
+
+std::vector<Property> getMapProperties(std::shared_ptr<Map2D> pMap);
 }
 
 #endif //MAP2D_H

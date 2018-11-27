@@ -270,6 +270,42 @@ void GridLayout::addWidget(std::shared_ptr<Widget> pWidget, int row, int column,
 	this->updateChildren();
 }
 
+//! Removes a widget
+/** 
+ \param row
+   The row of the widget to remove.
+ \param column
+   The column of the widget to remove.
+ \return 
+*/
+void GridLayout::removeWidget(int row, int column){
+	if(row >= m_numRows || column >= m_numColumns)
+		CAP_THROW(CapEngineException("Index out of bound"));
+	
+	m_widgetGrid[row][column] = std::make_pair(SDL_Rect{}, std::shared_ptr<Widget>());
+
+	this->updateChildren();
+}
+
+//! Replaces a widget in the layout.
+/** 
+ \param pWidget
+   The widget to replace with.
+ \param row
+   The row of the widget to replace.
+ \param
+   The column of the widget to replace.
+ \return 
+*/
+void GridLayout::replaceWidget(std::shared_ptr<Widget> pWidget, int row, int column){
+	if(row >= m_numRows || column >= m_numColumns)
+		CAP_THROW(CapEngineException("Index out of bound"));
+
+	m_widgetGrid[row][column] = std::make_pair(SDL_Rect{}, std::move(pWidget));
+
+	this->updateChildren();
+}
+
 //! Updates the size and position of children widgets
 void GridLayout::updateChildren(){
 	this->updateCellBoxes();

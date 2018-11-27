@@ -20,11 +20,9 @@ public:
 	static std::unique_ptr<Property> createUP(std::string name, T val);
 
 	boost::any getValue() const;
-	template <typename T>
-	std::optional<T> getValueAs() const;
+	template <typename T> std::optional<T> getValueAs() const;
 
-	template <typename T>
-	void setValue(T value);
+	template <typename T> void setValue(T value);
 
 	std::string getName() const;
 	void setName(std::string name);
@@ -37,7 +35,7 @@ public:
 	void clearOnChangeCB();
 
 private:
-	explicit Property(std::string name, boost::any value, PropertyType type);
+	Property(std::string name, boost::any value, PropertyType type);
 		
 	std::string m_name; //<! The name of the property.
 	boost::any m_value; //<! The property value.

@@ -17,19 +17,19 @@ namespace CapEngine { namespace UI {
 		static std::shared_ptr<AbsoluteLayout> create();
 
 		// Widget overrides
-		virtual  SDL_Rect getPosition() const override;
-		virtual void render() override;
-		virtual void setPosition(int x, int y) override;
-		virtual void setSize(int x, int y) override;
-		virtual void setWindowId(Uint32 windowId) override;
-		virtual std::vector<std::shared_ptr<Widget>> getChildren() override;
+		SDL_Rect getPosition() const override;
+		void render() override;
+		void setPosition(int x, int y) override;
+		void setSize(int x, int y) override;
+		void setWindowId(Uint32 windowId) override;
+		std::vector<std::shared_ptr<Widget>> getChildren() override;
 		
-    virtual void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
-    virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
-    virtual void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
-    virtual void handleKeyboardEvent(SDL_KeyboardEvent event) override;
-    virtual void handleWindowEvent(SDL_WindowEvent event) override;
-		virtual void handleTextInputEvent(SDL_TextInputEvent event) override;
+    void handleMouseMotionEvent(SDL_MouseMotionEvent event) override;
+    void handleMouseButtonEvent(SDL_MouseButtonEvent event) override;
+    void handleMouseWheelEvent(SDL_MouseWheelEvent event) override;
+    void handleKeyboardEvent(SDL_KeyboardEvent event) override;
+    void handleWindowEvent(SDL_WindowEvent event) override;
+		void handleTextInputEvent(SDL_TextInputEvent event) override;
 		
 		void addWidget(std::shared_ptr<Widget>, int x, int y, int width, int height,
 									 Unit widthUnit = Unit::Pixels, Unit heightUnit = Unit::Pixels) ;

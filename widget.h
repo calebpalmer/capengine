@@ -21,14 +21,14 @@ namespace CapEngine { namespace UI {
 			virtual void setPosition(int x, int y) = 0;
 			virtual void setSize(int width, int height) = 0;
 			virtual void render() = 0;
-			virtual void update(double ms) {};
+			virtual void update(double /*ms*/) {};
 			virtual void setParent(Widget *pParent) { m_pParent = pParent; }
 			virtual Uint32 getWindowId() const { return m_windowId; }
 			virtual void setWindowId(Uint32 windowId) { m_windowId = windowId; }
 			virtual std::vector<std::shared_ptr<Widget>> getChildren() { return {}; }
 			virtual bool canFocus() const { return false; }
 			virtual bool doFocus(bool, int, int, int, int) { return false; }
-			virtual void setBorder(BorderStyle borderStyle, unsigned int borderWidth) {}
+			virtual void setBorder(BorderStyle /*borderStyle*/, unsigned int /*borderWidth*/) {}
 
 			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
 			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent /*event*/) {}

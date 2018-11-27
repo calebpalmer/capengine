@@ -15,7 +15,7 @@ EventSubscriber::EventSubscriber(EventDispatcher &eventDispatcher){
 }
 
 //! @copydoc IEventSubscriber::receiveEvent()
-void EventSubscriber::receiveEvent(SDL_Event event, Time *time){
+void EventSubscriber::receiveEvent(SDL_Event event, Time* /*time*/){
 	switch (event.type){
 	case SDL_WINDOWEVENT:
 		m_windowEventSignal(event.window);
