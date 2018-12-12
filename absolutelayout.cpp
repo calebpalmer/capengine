@@ -88,11 +88,6 @@ void AbsoluteLayout::setSize(int width, int height){
 	m_updateWidgets = true;
 }
 
-//! \copydoc Widget::getSize
-SDL_Rect AbsoluteLayout::getSize() const {
-	return SDL_Rect{m_x, m_y, m_width, m_height};
-}
-
 //! @copydoc Widget::handleMouseMotionEvent()
 void AbsoluteLayout::handleMouseMotionEvent(SDL_MouseMotionEvent event) {
 	for(auto && widgetLocation : m_widgets){
