@@ -12,6 +12,6 @@ const char* kLayers = "layers";
 const char* kLayerOrder = "order";
 const char* kLayerType = "type";
 
-}}}
+}}} // CapEngine::Schema::Scene2d
 
 #endif // CAPENGINE_SCENESCHEMA_H

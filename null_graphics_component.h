@@ -5,6 +5,9 @@
 
 namespace CapEngine {
 
+  // forward declaration
+  class Camera2d;
+
   class NullGraphicsComponent : public GraphicsComponent {
   public:
     virtual void render(GameObject* object) {}

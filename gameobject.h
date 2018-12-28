@@ -10,6 +10,8 @@
 
 namespace CapEngine {
 
+  // forward declaractions
+  class Camera2d;
   class GameObject;
 
   class CollisionEvent{
@@ -59,7 +61,7 @@ namespace CapEngine {
 
     static ObjectID generateID();
     static int generateMessageId();
-    void render();
+    void render(const Camera2d &in_camera);
     std::unique_ptr<GameObject> update(double ms) const;
     Rectangle boundingPolygon() const;
     bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,

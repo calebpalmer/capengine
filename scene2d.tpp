@@ -24,4 +24,5 @@ Scene2d<ObjectManager>::Scene2d(const jsoncons::json &in_json, ObjectManager in_
 	m_objectManager = std::move(in_objectManager);
 }
 
+
 }

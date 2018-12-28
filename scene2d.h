@@ -1,6 +1,9 @@
 #ifndef CAPENGINE_SCENE2D_H
 #define CAPENGINE_SCENE2D_H
 
+#include "collision.h"
+#include "camera2d.h"
+
 #include <jsoncons/json.hpp>
 
 namespace CapEngine {
@@ -17,6 +20,9 @@ public:
 	
 private:
 	ObjectManager m_objectManager; //<! Holds the objects and performs collision checking.
+	std::string m_sceneID; //<! The id of the scene.
+	Rectangle m_sceneSize;  //<! The size of the scene.
+	//Camera2d m_camera;  //<! The camera.
 };
 
 }

@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+#include "camera2d.h"
+
 #include <memory>
 
 namespace CapEngine {
@@ -22,10 +24,10 @@ namespace CapEngine {
     virtual bool handlesCollisions() {return false;}
   };
 
-  class GraphicsComponent : public Component {
+class GraphicsComponent : public Component {
   public:
     virtual ~GraphicsComponent() {}
-    virtual void render(GameObject* object) = 0;
+    virtual void render(GameObject* object, const Camera2d &in_camera) = 0;
     virtual void update(GameObject* pObject, double timestepMS) = 0;
   };
 

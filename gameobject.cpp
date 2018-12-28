@@ -21,8 +21,8 @@ namespace CapEngine {
 
   GameObject::~GameObject(){ }
 
-  void GameObject::render(){
-    graphicsComponent->render(this);
+  void GameObject::render(const Camera2d &in_camera){
+    graphicsComponent->render(this, in_camera);
   }
 
   unique_ptr<GameObject> GameObject::update(double ms) const{
