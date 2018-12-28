@@ -50,6 +50,8 @@ VideoManager::VideoManager(Logger* loggerIn) : up_fontManager(new FontManager())
   initialized = false;
 }
 
+
+
 /**
    Unitializes the system.
    Returns the id of the main window
@@ -268,6 +270,7 @@ void VideoManager::shutdown(){
   }
   
   SDL_Quit();
+	initialized = false;
   instantiated = false;
 }
 
@@ -446,6 +449,16 @@ Texture* VideoManager::createTexture(int width, int height){
   }
 
   return texture;
+}
+
+
+//! Sets the reshape function.
+/** 
+ \param func
+   The reshape function pointer
+*/
+void VideoManager::setReshapeFunc(void (*func)(int x, int y)){
+	reshapeFunc = func;
 }
 
  void VideoManager::callReshapeFunc(int w, int h){

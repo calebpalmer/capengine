@@ -10,6 +10,7 @@
 #include "rectangletest.h"
 #include "scanconvert_test.h"
 #include "quaterniontest.h"
+#include "camera2dtest.h"
 
 int main(){
 	// set current directory
@@ -22,9 +23,10 @@ int main(){
   runner.addTest(MatrixTest::suite());
   runner.addTest(RectangleTest::suite());
   runner.addTest(ScanconvertTest::suite());
+	runner.addTest(Camera2dTest::suite());
 	runner.addTest(CapEngine::QuaternionTest::suite());
   
-  if (runner.run() ){
+  if (runner.run()){
     return EXIT_SUCCESS;
   }
   else{

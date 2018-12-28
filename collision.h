@@ -21,6 +21,8 @@ namespace CapEngine{
     Rectangle(int xIn,int yIn, int widthIn, int heightIn);
     Rectangle(const Rect &rect);
 
+		friend bool operator==(const Rectangle &in_lhs, const Rectangle &in_rhs);
+
     Rect toRect() const;
 
     Rectangle raiseBottom(int in_amount) const;

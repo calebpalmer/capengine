@@ -479,10 +479,17 @@ std::ostream& operator<<(std::ostream& stream, const CollisionClass& collisionCl
 std::ostream& operator<<(std::ostream& stream, const Rectangle& rectangle){
 	using namespace CapEngine;
 
-	stream << "Rectangle (" << rectangle.x << ", " << rectangle.y << "@ " <<
+	stream << "Rectangle (" << rectangle.x << ", " << rectangle.y << ", " <<
 		rectangle.width << " x " << rectangle.height << ")";
 
 	return stream;
+}
+
+bool operator==(const Rectangle &in_lhs, const Rectangle &in_rhs){
+	return in_lhs.x == in_rhs.x &&
+		in_lhs.y == in_rhs.y &&
+		in_lhs.width == in_rhs.width &&
+		in_lhs.height == in_rhs.height;
 }
 
 }
