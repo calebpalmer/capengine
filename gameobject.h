@@ -77,6 +77,7 @@ namespace CapEngine {
     ObjectID getParentObjectID() const;
     void send(int messageId, std::string message);
     void setParentObjectID(ObjectID id);
+		void setComponent(std::shared_ptr<Component> pComponent);
     void setInputComponent(std::shared_ptr<InputComponent> pInputComponent);
     std::shared_ptr<InputComponent> getInputComponent();
     void setPhysicsComponent(std::shared_ptr<PhysicsComponent> pPhysicsComponent);

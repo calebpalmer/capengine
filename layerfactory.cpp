@@ -1,11 +1,9 @@
 #include "layerfactory.h"
 
-#include "CapEngineException.h"
 #include "layer.h"
 #include "scene2dschema.h"
 
 namespace CapEngine {
-
 
 //! Get the singleton instance
 /** 
@@ -17,7 +15,6 @@ LayerFactory& LayerFactory::getInstance(){
 	return layerFactory;
 }
 
-
 //! The factory method.
 /** 
  \param in_json
@@ -27,7 +24,7 @@ LayerFactory& LayerFactory::getInstance(){
 */
 std::unique_ptr<Layer> LayerFactory::makeLayer(const jsoncons::json &in_json){
 	if(!in_json.contains(Schema::Scene2d::kLayerType)){
-		throw LayerCreationException("N/A", in_json, std::string("The layer type could not be determined"));
+		throw LayerCreationException("Unknown", in_json, std::string("The layer type could not be determined"));
 	}
 
 	const std::string type = in_json[Schema::Scene2d::kLayerType].as<std::string>();
@@ -38,7 +35,6 @@ std::unique_ptr<Layer> LayerFactory::makeLayer(const jsoncons::json &in_json){
 	
 	throw LayerCreationException(type, in_json, std::string("No factory method registered for layer type"));
 }
-
 
 //! Register a new type of layer that can be created.
 /** 

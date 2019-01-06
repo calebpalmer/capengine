@@ -33,6 +33,8 @@ class LayerFactory final {
 public:
 	using factoryfunc_t = std::function<std::unique_ptr<Layer>(const jsoncons::json&)>;
 public:
+	LayerFactory(const LayerFactory&) = delete;
+	
 	static LayerFactory& getInstance();
 
 	std::unique_ptr<Layer> makeLayer(const jsoncons::json &in_json);
@@ -41,6 +43,7 @@ public:
 private:
 	LayerFactory() = default;
 
+	//! map of the factory functions
 	std::map<std::string, factoryfunc_t> m_factoryFunctions;
 };
 
