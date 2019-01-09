@@ -1,0 +1,44 @@
+{
+    "imagePath": "/home/caleb/pcloud/Projects/games/balloon/capengine/test_files/platformer_tileset.png",
+    "numTiles": 4,
+    "tileHeight": 32,
+    "tileWidth": 32,
+    "tiles": [
+        {
+            "position": {
+                "height": 32,
+                "width": 32,
+                "x": 0,
+                "y": 0
+            },
+            "type": "Unknown"
+        },
+        {
+            "position": {
+                "height": 32,
+                "width": 32,
+                "x": 0,
+                "y": 32
+            },
+            "type": "Unknown"
+        },
+        {
+            "position": {
+                "height": 32,
+                "width": 32,
+                "x": 0,
+                "y": 64
+            },
+            "type": "Unknown"
+        },
+        {
+            "position": {
+                "height": 32,
+                "width": 32,
+                "x": 32,
+                "y": 0
+            },
+            "type": "Unknown"
+        }
+    ]
+}
