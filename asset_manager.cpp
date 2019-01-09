@@ -10,7 +10,8 @@
 #include "xml_parser.h"
 
 using namespace std;
-using namespace CapEngine;
+
+namespace CapEngine {
 
 namespace {
 
@@ -156,9 +157,7 @@ Image* AssetManager::getImage(int id){
   // throw error if image has not been loaded
   auto iter = mImageMap.find(id);
   if(iter == mImageMap.end()){
-    ostringstream message;
-    message << "Image with id " << id << " does not exist";
-    throw CapEngineException(message.str());
+		throw AssetDoesNotExistError("image", id);
   }
 
   if(iter->second.texture == nullptr){
@@ -173,9 +172,7 @@ Image* AssetManager::getImage(int id){
 SoftwareImage AssetManager::getSoftwareImage(int id){
   auto iter = mImageMap.find(id);
   if(iter == mImageMap.end()){
-    ostringstream message;
-    message << "Image with id " << id << " does not exist";
-    throw CapEngineException(message.str());
+    throw AssetDoesNotExistError("image", id);
   }
 
   Surface* surface = mVideoManager.loadSurface(iter->second.path);
@@ -243,9 +240,7 @@ Sound* AssetManager::getSound(int id){
   // throw error if image has not been loaded
   auto iter = mSoundMap.find(id);
   if(iter == mSoundMap.end()){
-    ostringstream message;
-    message << "Sound with id " << id << " does not exist";
-    throw CapEngineException(message.str());
+    throw AssetDoesNotExistError("sound", id);
   }
 
   if(iter->second.pcm == nullptr){
@@ -344,3 +339,26 @@ void AssetManager::stopSound(int id){
   mSoundPlayer.deleteSound(id);
 }
 
+//! Checks to see if an image asset exists.
+/** 
+ \param id
+   The id to check.
+ \return 
+   true if it exists; false otherwise.
+*/
+bool AssetManager::imageExists(int id) const{
+	return mImageMap.find(id) != mImageMap.end();
+}
+
+//! Checks to see if an sound asset exists.
+/** 
+ \param id
+   The id to check.
+ \return 
+   true if it exists; false otherwise.
+*/
+bool AssetManager::soundExists(int id) const{
+	return mSoundMap.find(id) != mSoundMap.end();
+}
+
+} // namespace CapEngine
