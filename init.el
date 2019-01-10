@@ -20,7 +20,7 @@
 
 (defun cap/cmake ()
   (interactive)
-  (shell-command "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .")
+  (shell-command "cmake -H. -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=1")
   )
 
 (global-set-key (kbd "C-<f5>") 'my-launch-editor-nodebug)
