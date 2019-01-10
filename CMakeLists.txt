@@ -4,8 +4,8 @@ project(capengine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS "1" CACHE STRING "")
 
-LIST(APPEND CMAKE_MODULE_PATH "./sdl2-cmake-scripts")
-LIST(APPEND CMAKE_MODULE_PATH "./cmake-modules") 
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sdl2-cmake-scripts")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules") 
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
@@ -49,7 +49,6 @@ add_executable(widgettest widget_test.cpp)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
 add_executable(runtests test/test.cpp)
-
 
 target_link_libraries(capengine ${SDL2_LIBRARY}
                       ${SDL2_IMAGE_LIBRARIES}
