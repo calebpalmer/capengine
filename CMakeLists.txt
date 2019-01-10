@@ -20,7 +20,7 @@ include_directories(${SDL2_INCLUDE_DIR}
                     ${Boost_INCLUDE_DIRS}
                     ${LIBXML2_INCLUDE_DIR}
 		    ${CPPUNIT_INCLUDE_DIRS}
-		    "./jsoncons/include"
+		    "${CMAKE_CURRENT_SOURCE_DIR}/jsoncons/include"
                     )
 
 if (MSVC)
