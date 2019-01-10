@@ -2,27 +2,26 @@ cmake_minimum_required(VERSION 3.9)
 
 project(capengine)
 
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "./cmake/cmake-scripts")
-LIST(APPEND CMAKE_MODULE_PATH "./cmake/cmake-scripts") 
+set(CMAKE_EXPORT_COMPILE_COMMANDS "1" CACHE STRING "")
 
-#find_package(SDL2 REQUIRED)
-#find_package(SDL2_image REQUIRED)
+LIST(APPEND CMAKE_MODULE_PATH "./sdl2-cmake-scripts")
+LIST(APPEND CMAKE_MODULE_PATH "./cmake-modules") 
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(LibXml2 REQUIRED)
 find_package(cppunit REQUIRED)
 
-include_directories(  ${SDL2_TTF_INCLUDE_DIRS}
+include_directories(${SDL2_INCLUDE_DIR}
+                    ${SDL2_IMAGE_INCLUDE_DIR}  
+                    ${SDL2_TTF_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${LIBXML2_INCLUDE_DIR}
 		    ${CPPUNIT_INCLUDE_DIRS}
-		    "./thirdparty/jsoncons/include"
-		    "./thirdparthy/include"
+		    "./jsoncons/include"
                     )
-
-link_directories("./thirdparty/lib")
-
-#link_directories()
 
 if (MSVC)
   add_compile_options(/W4)
@@ -52,17 +51,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
 add_executable(runtests test/test.cpp)
 
 
-target_link_libraries(capengine SDL2
-                      SDL2_image
+target_link_libraries(capengine ${SDL2_LIBRARY}
+                      ${SDL2_IMAGE_LIBRARIES}
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
 		      libsndfile.so
 		      stdc++fs
                       )
+		    
 target_link_libraries(runtests capengine
-		      SDL2
-                      SDL2_image
+		      ${SDL2_LIBRARY}
+                      ${SDL2_IMAGE_LIBRARIES}
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
@@ -72,8 +72,8 @@ target_link_libraries(runtests capengine
                       )
 
 target_link_libraries(editor capengine
-		      SDL2
-                      SDL2_image
+		      ${SDL2_LIBRARY}
+                      ${SDL2_IMAGE_LIBRARIES}
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
@@ -82,8 +82,8 @@ target_link_libraries(editor capengine
                       )
 
 target_link_libraries(widgettest capengine
-		      SDL2
-                      SDL2_image
+		      ${SDL2_LIBRARY}
+                      ${SDL2_IMAGE_LIBRARIES}
                       ${SDL2_TTF_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${LIBXML2_LIBRARIES}
