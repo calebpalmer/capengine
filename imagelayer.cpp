@@ -3,6 +3,8 @@
 #include "locator.h"
 #include "asset_manager.h"
 #include "camera2d.h"
+#include "layerfactory.h"
+#include "scene2dschema.h"
 
 namespace CapEngine {
 
@@ -35,7 +37,22 @@ void ImageLayer::render(const Camera2d &in_camera, uint32_t in_windowId){
 		// let SDL crop what isn't visible
 		Locator::assetManager->draw(in_windowId, m_assetId, translatedPosition);
 	}
+}
 
+std::unique_ptr<ImageLayer> ImageLayer::createImageLayer(const jsoncons::json &in_json){
+	try{
+		const int assetId = in_json[Schema::Scene2d::kAssetId].as<int>();
+		
+		return nullptr;
+	}
+
+	catch(const jsoncons::parse_error &e){
+		throw LayerCreationError(Schema::Scene2d::kImageLayerType, boost::diagnostic_information(e));
+	}
+}
+	
+void ImageLayer::registerConstructor(LayerFactory &in_factory) {
+	LayerFactory& layerFactory = LayerFactory::getInstance();
 }
 
 } // namespace CapEngine

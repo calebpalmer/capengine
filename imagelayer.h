@@ -5,6 +5,7 @@
 #include "VideoManager.h"
 #include "captypes.h"
 #include "collision.h"
+#include "layerfactory.h"
 
 #include <string_view>
 
@@ -15,7 +16,8 @@ namespace CapEngine {
   public:
     ImageLayer(int in_assetId, Rectangle in_position);
 
-    static void registerConstructor();
+    static void registerConstructor(LayerFactory &in_factory);
+		static std::unique_ptr<ImageLayer> createImageLayer(const jsoncons::json &in_json);
     
     virtual void update(double in_ms) override {}
     virtual void render(const Camera2d &in_camera, uint32_t in_windowId) override;

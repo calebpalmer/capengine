@@ -95,8 +95,8 @@ void Scene2d<ObjectManager>::load(const jsoncons::json &in_json) {
 		using namespace Schema::Scene2d;
 	
 		// get the width and height of the scene
-		m_sceneSize.width = in_json[kSize][kSizeWidth].as<int>();
-		m_sceneSize.height = in_json[kSize][kSizeHeight].as<int>();
+		m_sceneSize.width = in_json[kSize][kWidth].as<int>();
+		m_sceneSize.height = in_json[kSize][kHeight].as<int>();
 
 		// get the layers
 		LayerFactory &layerFactory = LayerFactory::getInstance();

@@ -11,6 +11,7 @@
 #include "scanconvert_test.h"
 #include "quaterniontest.h"
 #include "camera2dtest.h"
+#include "scene2dutils_tests.h"
 
 int main(){
 	// set current directory
@@ -25,6 +26,7 @@ int main(){
   runner.addTest(ScanconvertTest::suite());
 	runner.addTest(Camera2dTest::suite());
 	runner.addTest(CapEngine::QuaternionTest::suite());
+	runner.addTest(CapEngine::Testing::Scene2dUtilsTest::suite());
   
   if (runner.run()){
     return EXIT_SUCCESS;
