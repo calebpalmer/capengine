@@ -19,8 +19,22 @@ public:
 
 };
 
+//! Tests reading a rectangle from json.
 void Scene2dUtilsTest::testReadRectangle(){
+	jsoncons::json rect = jsoncons::json::parse(R"(
+{
+  "position" : {
+    "x" : 1,
+    "y" : 2,
+    "width" : 10,
+    "height" : 10
+  }
+}
+)");
 
+	Rectangle expected(1, 2, 10, 10);
+	Rectangle actual = Utils::readRectangle(rect);
+	CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 }}
