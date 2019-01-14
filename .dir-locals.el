@@ -10,8 +10,6 @@
       (progn (load-file "./init.el") (setq cap/project-loaded "t"))))
  (c++-mode
   (tab-width . 2))
-  (c-basic-offset . 2) 
- (c-mode
-  (c-basic-offset . 2)
-  (tab-width . 2)))
+ ((c-mode . ((mode . c++)))) 
+ )
 

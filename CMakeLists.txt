@@ -40,15 +40,8 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp uiutils.cpp quaternion.cpp dialogstate.cpp pancontrol.cpp
 	    widgetdecorator.cpp simplecommand.cpp commandmanager.cpp aggregatecommand.cpp textbox.cpp font.cpp property.cpp listproperty.cpp
 	    uipropertyvisitor.cpp simpleobjectmanager.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
-	    imagelayer.cpp
+	    imagelayer.cpp scene2dutils.cpp
 	    )
-
-add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
-
-add_executable(widgettest widget_test.cpp)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
-add_executable(runtests test/test.cpp)
 
 target_link_libraries(capengine ${SDL2_LIBRARY}
                       ${SDL2_IMAGE_LIBRARIES}
@@ -58,17 +51,9 @@ target_link_libraries(capengine ${SDL2_LIBRARY}
 		      libsndfile.so
 		      stdc++fs
                       )
-		    
-target_link_libraries(runtests capengine
-		      ${SDL2_LIBRARY}
-                      ${SDL2_IMAGE_LIBRARIES}
-                      ${SDL2_TTF_LIBRARIES}
-                      ${Boost_LIBRARIES}
-                      ${LIBXML2_LIBRARIES}
-		      ${CPPUNIT_LIBRARIES}
-		      libsndfile.so
-		      stdc++fs
-                      )
+	  
+
+add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
 
 target_link_libraries(editor capengine
 		      ${SDL2_LIBRARY}
@@ -79,6 +64,9 @@ target_link_libraries(editor capengine
 		      libsndfile.so
 		      stdc++fs
                       )
+		    
+
+add_executable(widgettest widget_test.cpp)
 
 target_link_libraries(widgettest capengine
 		      ${SDL2_LIBRARY}
@@ -90,6 +78,7 @@ target_link_libraries(widgettest capengine
 		      stdc++fs
 		      )
 
+add_subdirectory(test)
 
 add_custom_target(
   doc

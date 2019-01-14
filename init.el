@@ -28,7 +28,7 @@
   (shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/source_root_dir  "build -DCMAKE_EXPORT_COMPILE_COMMANDS=1"))
   )
 
-(setq compile-command (concat "cmake --build " cap/source_root_dir "build -j2"))
+(setq compile-command (concat "cmake --build " cap/source_root_dir "buildb"))
 
 (global-set-key (kbd "C-<f5>") 'my-launch-editor-nodebug)
 (global-set-key (kbd "<f5>") 'my-launch-editor-debug)
