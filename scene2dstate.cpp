@@ -20,25 +20,25 @@ Scene2dState::Scene2dState(jsoncons::json in_sceneDescriptors, std::string in_sc
 {
 	using namespace Schema::Scene2d;
 	
-	for(auto && scene : in_sceneDescriptors[kScenes].array_range()){
+	for(auto && scene : m_sceneDescriptors[kScenes].array_range()){
 		if(scene[kSceneId] == m_sceneId){
 			m_pScene.reset(new Scene2d<SimpleObjectManager>(scene));
 		}
 	}
 
 	if(m_pScene == nullptr){
-		throw SceneDoesNotExistException(in_sceneId);
+		BOOST_THROW_EXCEPTION(SceneDoesNotExistException(in_sceneId));
 	}
 }
 
 //! \copydoc GameState::onLoad
 bool Scene2dState::onLoad(){
-	return false;
+	return true;
 }
 
 //! \copydoc GameState::onDestroy
 bool Scene2dState::onDestroy(){
-	return false;
+	return true;
 }
 
 //! \copydoc GameState::render

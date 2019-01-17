@@ -48,7 +48,9 @@ void LayerFactory::registerLayerType(const std::string &in_type, factoryfunc_t i
 		m_factoryFunctions.emplace(in_type, std::move(in_factoryFunction));
 	}
 
-	throw CapEngineException("The layer type \"" + in_type + "\" is already registered");
+	else{
+		throw CapEngineException("The layer type \"" + in_type + "\" is already registered");
+	}
 }
 
 } // CapEngine

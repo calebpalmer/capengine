@@ -12,10 +12,10 @@ Rectangle readRectangle(const jsoncons::json &in_json){
 		using namespace Schema::Scene2d;
 		
 		Rectangle rect;
-		rect.x = in_json[kPosition][kXCoord].as<int>();
-		rect.y = in_json[kPosition][kYCoord].as<int>();
-		rect.width = in_json[kPosition][kWidth].as<int>();
-		rect.height = in_json[kPosition][kHeight].as<int>();
+		rect.x = in_json[kXCoord].as<int>();
+		rect.y = in_json[kYCoord].as<int>();
+		rect.width = in_json[kWidth].as<int>();
+		rect.height = in_json[kHeight].as<int>();
 		return rect;
 	}
 	catch(std::exception &e){

@@ -23,12 +23,10 @@ public:
 void Scene2dUtilsTest::testReadRectangle(){
 	jsoncons::json rect = jsoncons::json::parse(R"(
 {
-  "position" : {
     "x" : 1,
     "y" : 2,
     "width" : 10,
     "height" : 10
-  }
 }
 )");
 

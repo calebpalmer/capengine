@@ -15,58 +15,59 @@ namespace CapEngine {
 
 namespace {
 
-  std::map<string, Frame> parseFrames(XmlParser& parser, XmlNode parentNode){
-    std::map<string, Frame>  frameMap;
-    vector<XmlNode> childNodes = parser.getNodeChildren(parentNode);
+std::map<string, Frame> parseFrames(XmlParser& parser, XmlNode parentNode){
+	std::map<string, Frame>  frameMap;
+	vector<XmlNode> childNodes = parser.getNodeChildren(parentNode);
     
-    for(auto && node : childNodes){
-      if(parser.nodeNameCompare(node, "row")){
-	// read the attributes of the frame
-	string frameName = parser.getAttribute(node ,"frameName");
-	string rowNumStr = parser.getAttribute(node, "rowNum");
-	string frameWidthStr = parser.getAttribute(node, "frameWidth");
-	string frameHeightStr = parser.getAttribute(node,"frameHeight");
-	string numFramesStr = parser.getAttribute(node,  "numFrames");
-	string animationTime = parser.getAttribute(node, "animationTime");
+	for(auto && node : childNodes){
+		if(parser.nodeNameCompare(node, "row")){
+			// read the attributes of the frame
+			string frameName = parser.getAttribute(node ,"frameName");
+			string rowNumStr = parser.getAttribute(node, "rowNum");
+			string frameWidthStr = parser.getAttribute(node, "frameWidth");
+			string frameHeightStr = parser.getAttribute(node,"frameHeight");
+			string numFramesStr = parser.getAttribute(node,  "numFrames");
+			string animationTime = parser.getAttribute(node, "animationTime");
 
-	int horizontalPadding = 0;
-	int verticalPadding = 0;
-	try{
-	  horizontalPadding = std::stoi(parser.getAttribute(node, "horizontalPadding"));
-	  verticalPadding = std::stoi(parser.getAttribute(node, "verticalPadding"));
+			int horizontalPadding = 0;
+			int verticalPadding = 0;
+			try{
+				horizontalPadding = std::stoi(parser.getAttribute(node, "horizontalPadding"));
+				verticalPadding = std::stoi(parser.getAttribute(node, "verticalPadding"));
+			}
+			catch(...){
+				// ignore any errors because these are optional
+			}
+
+			// make sure there is a frameName
+			if(frameName == ""){
+				throw CapEngineException("Frame name missing while reading Asset file");
+			}
+
+			Frame frame = {frameName, std::stoi(rowNumStr), std::stoi(frameWidthStr), std::stoi(frameHeightStr),
+										 std::stoi(numFramesStr), std::stod(animationTime), horizontalPadding, verticalPadding};
+
+			// does frame under this name aready exist?
+			if(frameMap.find(frameName) != frameMap.end()){
+				ostringstream msg;
+				msg << "Frame name \"" << frameName << "\" already exists";
+				throw CapEngineException(msg.str());
+			}
+			frameMap[frameName] = frame;
+		}
 	}
-	catch(...){
-	  // ignore any errors because these are optional
-	}
 
-	// make sure there is a frameName
-	if(frameName == ""){
-	  throw CapEngineException("Frame name missing while reading Asset file");
-	}
-
-	Frame frame = {frameName, std::stoi(rowNumStr), std::stoi(frameWidthStr), std::stoi(frameHeightStr),
-		       std::stoi(numFramesStr), std::stod(animationTime), horizontalPadding, verticalPadding};
-
-	// does frame under this name aready exist?
-	if(frameMap.find(frameName) != frameMap.end()){
-	  ostringstream msg;
-	  msg << "Frame name \"" << frameName << "\" already exists";
-	  throw CapEngineException(msg.str());
-	}
-	frameMap[frameName] = frame;
-      }
-    }
-
-    return frameMap;
-  }
+	return frameMap;
+}
   
 } // end anonymous namespace
 
-AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, string assetFile)
-  : mVideoManager(videoManager), mSoundPlayer(soundPlayer), mAssetFile(assetFile)
+AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, const string &assetFile)
+  : mVideoManager(videoManager), mSoundPlayer(soundPlayer)
 {
-XmlParser parser(assetFile);
- parseAssetFile(parser);
+	mAssetFile = std::filesystem::absolute(assetFile).string();
+	XmlParser parser(assetFile);
+	parseAssetFile(parser);
 }
   
 AssetManager::~AssetManager(){
@@ -108,11 +109,11 @@ void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeigh
 
 void AssetManager::parseAssetFile(XmlParser& parser){
   // get Images nodes at /assets/images/image
- vector<XmlNode> images = parser.getNodes("/assets/textures/texture");
+	vector<XmlNode> images = parser.getNodes("/assets/textures/texture");
   auto imageIter = images.begin();
   for( ; imageIter != images.end(); imageIter++){
     string id = parser.getAttribute(*imageIter, "id");
-    string path = parser.getStringValue(*imageIter);
+		std::filesystem::path path = parser.getStringValue(*imageIter);
     string frameWidth = parser.getAttribute(*imageIter, "frameWidth");
     string frameHeight = parser.getAttribute(*imageIter, "frameHeight");
     string hasFrames = parser.getAttribute(*imageIter, "hasFrames");
@@ -123,7 +124,13 @@ void AssetManager::parseAssetFile(XmlParser& parser){
     idStream >> tId;
 
     Image image;
-    image.path = path;
+
+		// convert path to absolute path.
+		if(path.is_relative()){
+			path = std::filesystem::path(mAssetFile).parent_path() /= path;
+		}
+    image.path = path.string();
+		
     image.texture = nullptr;
     if(hasFrames == "y"){
       image.frames = parseFrames(parser, *imageIter);
@@ -328,11 +335,11 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, i
 }
 
 long AssetManager::playSound(int id, bool repeat){
-    // TODO implement repeat functionality
-    Sound* sound = getSound(id); 
-    unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
-    long soundID = mSoundPlayer.addSound(upTempPCM.release(), repeat);
-    return soundID;
+	// TODO implement repeat functionality
+	Sound* sound = getSound(id); 
+	unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
+	long soundID = mSoundPlayer.addSound(upTempPCM.release(), repeat);
+	return soundID;
 }
 
 void AssetManager::stopSound(int id){
@@ -341,10 +348,10 @@ void AssetManager::stopSound(int id){
 
 //! Checks to see if an image asset exists.
 /** 
- \param id
-   The id to check.
- \return 
-   true if it exists; false otherwise.
+		\param id
+		The id to check.
+		\return 
+		true if it exists; false otherwise.
 */
 bool AssetManager::imageExists(int id) const{
 	return mImageMap.find(id) != mImageMap.end();
@@ -352,10 +359,10 @@ bool AssetManager::imageExists(int id) const{
 
 //! Checks to see if an sound asset exists.
 /** 
- \param id
-   The id to check.
- \return 
-   true if it exists; false otherwise.
+		\param id
+		The id to check.
+		\return 
+		true if it exists; false otherwise.
 */
 bool AssetManager::soundExists(int id) const{
 	return mSoundMap.find(id) != mSoundMap.end();

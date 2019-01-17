@@ -4,35 +4,35 @@
 namespace CapEngine { namespace Schema { namespace Scene2d {
 
 // general
-const char* kPosition = "position";
-const char* kOrientation = "orientation";
-const char* kXCoord = "x";
-const char* kYCoord = "y";
-const char* kZCoord = "z";
-const char* kSize = "size";
-const char* kWidth = "width";
-const char* kHeight = "height";
-const char* kType = "type";
-const char* kSubType = "subtype";
-const char* kAssetId = "asset_id";
+extern const char* kPosition;
+extern const char* kOrientation;
+extern const char* kXCoord;
+extern const char* kYCoord;
+extern const char* kZCoord;
+extern const char* kSize;
+extern const char* kWidth;
+extern const char* kHeight;
+extern const char* kType;
+extern const char* kSubType;
+extern const char* kAssetId;
 
 // scenes
-const char* kScenes = "scenes";
-const char* kSceneId = "id";
+extern const char* kScenes;
+extern const char* kSceneId;
 
 // layers
-const char* kLayers = "layers";
-const char* kLayerOrder = "order";
-const char* kLayerType = "type";
+extern const char* kLayers;
+extern const char* kLayerOrder;
+extern const char* kLayerType;
 
 // image layers
-const char* kImageLayerType = "imagelayer";
+extern const char* kImageLayerType;
 // kAssetId
 // kPosition
 
 // objects
-const char* kObjects = "objects";
-const char* kComponents = "components";
+extern const char* kObjects;
+extern const char* kComponents;
 
 }}} // CapEngine::Schema::Scene2d
 

@@ -5,6 +5,8 @@
 #include "runner.h"
 #include "controller.h"
 #include "windowwidget.h"
+#include "layerfactory.h"
+#include "imagelayer.h"
 
 #include <memory>
 #include <sstream>
@@ -49,6 +51,10 @@ Uint32 init(WindowParams screenConfig, bool noWindow){
     std::string exePath = getCurrentExecutablePath();
     setCurrentDir(stripPath(exePath));
     initted = true;
+
+		// initialise 2d layer types
+		LayerFactory& layerFactory = LayerFactory::getInstance();
+		ImageLayer::registerConstructor(layerFactory);
   }
 
   return windowID;

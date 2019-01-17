@@ -5,6 +5,7 @@
 #include "camera2d.h"
 #include "layerfactory.h"
 #include "scene2dschema.h"
+#include "scene2dutils.h"
 
 namespace CapEngine {
 
@@ -33,26 +34,39 @@ void ImageLayer::render(const Camera2d &in_camera, uint32_t in_windowId){
 	if(relation == INSIDE || relation == TOUCH){
 
 		// translate the position according to the position of the camera
-		const Rectangle translatedPosition = toScreenCoords(in_camera, m_position, in_windowId, true);
+		const Rectangle translatedPosition = toScreenCoords(in_camera, m_position, in_windowId, false);
 		// let SDL crop what isn't visible
 		Locator::assetManager->draw(in_windowId, m_assetId, translatedPosition);
 	}
 }
 
+//! Static function for creating image layers
+/** 
+ \param in_json
+   The json to creat the layer from.
+ \return 
+   The layer.
+*/
 std::unique_ptr<ImageLayer> ImageLayer::createImageLayer(const jsoncons::json &in_json){
 	try{
 		const int assetId = in_json[Schema::Scene2d::kAssetId].as<int>();
-		
-		return nullptr;
+		const Rectangle position = Utils::readRectangle(in_json[Schema::Scene2d::kPosition]);
+		return std::make_unique<ImageLayer>(assetId, std::move(position));
 	}
 
-	catch(const jsoncons::parse_error &e){
+	catch(const std::exception &e){
 		throw LayerCreationError(Schema::Scene2d::kImageLayerType, boost::diagnostic_information(e));
 	}
 }
 	
+//! Register the layer constructor with a factory.
+/** 
+ \param in_factory
+   The factory to register with.
+*/
 void ImageLayer::registerConstructor(LayerFactory &in_factory) {
 	LayerFactory& layerFactory = LayerFactory::getInstance();
+	layerFactory.registerLayerType(Schema::Scene2d::kImageLayerType, createImageLayer);
 }
 
 } // namespace CapEngine

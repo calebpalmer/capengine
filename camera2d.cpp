@@ -103,4 +103,42 @@ Rectangle toScreenCoords(const Camera2d &in_camera,
 	return rect;
 }
 
+
+//! Get the width of the camera.
+/** 
+ \return 
+   The width.
+*/
+int Camera2d::getWidth() const {
+	return m_viewRect.width;
+}
+
+
+//! Sets the width of the camera.
+/** 
+ \param in_width
+   The width of the camera.
+*/
+void Camera2d::setWidth(int in_width){
+	m_viewRect.width = in_width;
+}
+
+//! Get the height of the camera.
+/** 
+ \return 
+   The height.
+*/
+int Camera2d::getHeight() const {
+	return m_viewRect.height;
+}
+
+//! Sets the height of the camera.
+/** 
+ \param in_height
+   The height of the camera.
+*/
+void Camera2d::setHeight(int in_height){
+	m_viewRect.height = in_height;
+}
+
 } // CapEngine

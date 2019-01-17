@@ -64,5 +64,6 @@
 #include "animator.h"
 #include "widget.h"
 #include "eventsubscriber.h"
+#include "scene2dstate.h"
 
 #endif

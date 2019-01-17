@@ -1,9 +1,6 @@
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
-#include <string>
-#include <map>
-
 #include "captypes.h"
 #include "pcm.h"
 #include "VideoManager.h"
@@ -12,6 +9,10 @@
 #include "collision.h" // Rectangle definition
 #include "vector.h"
 #include "CapEngineException.h"
+
+#include <string>
+#include <map>
+#include <filesystem>
 
 namespace CapEngine{
 
@@ -55,7 +56,7 @@ struct AssetDoesNotExistError : public CapEngineException {
 class AssetManager{
     
 public:
-	AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::string assetFile);
+	AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, const std::string &assetFile);
 	~AssetManager();
 	void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect);
 	void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
