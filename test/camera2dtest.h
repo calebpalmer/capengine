@@ -88,25 +88,25 @@ void Camera2dTest::testCenter(){
 void Camera2dTest::testToScreenCoords(){
 	Camera2d camera(5, 5);
 
-	Rectangle rect(0, 0, 2, 2);
+	Rectangle rect(2, 0, 2, 2);
 	int windowHeight = Locator::videoManager->getWindowHeight(0);
 
 	// y flip only
-	Rectangle expected(0, windowHeight - 1, 2, 2);
+	Rectangle expected(2, 8, 2, 2);
 	Rectangle actual = toScreenCoords(camera, rect, 0, true);
 	CPPUNIT_ASSERT_EQUAL(expected, actual);
 
 	// no y flip
-	expected = Rectangle(0, 0, 2, 2);
+	expected = Rectangle(2, 0, 2, 2);
 	actual = toScreenCoords(camera, rect, 0, false);
 	CPPUNIT_ASSERT_EQUAL(expected, actual);
 
 	// translated with y flip
-	Rectangle object(3, 3, 2, 2);
+	Rectangle object(0, 3, 2, 2);
 	camera.center(object, std::nullopt);
 
 	actual = toScreenCoords(camera, object, 0, true);
-	expected = Rectangle(1, 8, 2, 2);
+	expected = Rectangle(1, 7, 2, 2);
 	CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

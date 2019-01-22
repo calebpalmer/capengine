@@ -97,7 +97,7 @@ Rectangle toScreenCoords(const Camera2d &in_camera,
 		}
 
 		int windowHeight = Locator::videoManager->getWindowHeight(in_windowId);
-		rect.y = windowHeight - rect.y - 1;
+		rect.y = (windowHeight - rect.y) - rect.height;
 	}
 
 	return rect;
