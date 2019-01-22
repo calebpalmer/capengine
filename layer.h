@@ -29,15 +29,15 @@ struct LayerCreationError : public CapEngineException {
   
 class Layer {
 public:
-	using CollidingShape = std::optional<boost::variant<Rectangle>>;
+	using CollisionType = std::optional<boost::variant<CapEngine::CollisionType>>;
       
 public:
 	virtual ~Layer() = default;
 
 	virtual void update(double in_ms) = 0;
 	virtual void render(const Camera2d &in_camera, uint32_t in_windowId) = 0;
-	virtual bool canCollide() { return false; }
-	virtual CollidingShape checkCollision(const GameObject& in_object) { return std::nullopt; }
+	virtual bool canCollide() const { return false; }
+	virtual CollisionType checkCollision(const GameObject& in_object) { return std::nullopt; }
 };
 
 /** 

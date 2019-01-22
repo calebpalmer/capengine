@@ -7,6 +7,7 @@
 #include "windowwidget.h"
 #include "layerfactory.h"
 #include "imagelayer.h"
+#include "bitmapcollisionlayer.h"
 
 #include <memory>
 #include <sstream>
@@ -55,6 +56,7 @@ Uint32 init(WindowParams screenConfig, bool noWindow){
 		// initialise 2d layer types
 		LayerFactory& layerFactory = LayerFactory::getInstance();
 		ImageLayer::registerConstructor(layerFactory);
+		BitmapCollisionLayer::registerConstructor(layerFactory);
   }
 
   return windowID;

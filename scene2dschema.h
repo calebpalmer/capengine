@@ -29,6 +29,7 @@ extern const char* kLayerType;
 extern const char* kImageLayerType;
 // kAssetId
 // kPosition
+extern const char* kBitmapCollisionLayer;
 
 // objects
 extern const char* kObjects;

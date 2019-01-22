@@ -4,8 +4,6 @@
 #include "asset_manager.h"
 #include "camera2d.h"
 #include "layerfactory.h"
-#include "scene2dschema.h"
-#include "scene2dutils.h"
 
 namespace CapEngine {
 
@@ -40,33 +38,14 @@ void ImageLayer::render(const Camera2d &in_camera, uint32_t in_windowId){
 	}
 }
 
-//! Static function for creating image layers
-/** 
- \param in_json
-   The json to creat the layer from.
- \return 
-   The layer.
-*/
-std::unique_ptr<ImageLayer> ImageLayer::createImageLayer(const jsoncons::json &in_json){
-	try{
-		const int assetId = in_json[Schema::Scene2d::kAssetId].as<int>();
-		const Rectangle position = Utils::readRectangle(in_json[Schema::Scene2d::kPosition]);
-		return std::make_unique<ImageLayer>(assetId, std::move(position));
-	}
-
-	catch(const std::exception &e){
-		throw LayerCreationError(Schema::Scene2d::kImageLayerType, boost::diagnostic_information(e));
-	}
-}
-	
 //! Register the layer constructor with a factory.
 /** 
  \param in_factory
    The factory to register with.
 */
 void ImageLayer::registerConstructor(LayerFactory &in_factory) {
-	LayerFactory& layerFactory = LayerFactory::getInstance();
-	layerFactory.registerLayerType(Schema::Scene2d::kImageLayerType, createImageLayer);
+	in_factory.registerLayerType(Schema::Scene2d::kImageLayerType,
+																 [](const jsoncons::json &in_json) { return detail::makeImageLayer<ImageLayer>(in_json); });
 }
 
 } // namespace CapEngine

@@ -6,6 +6,8 @@
 #include "captypes.h"
 #include "collision.h"
 #include "layerfactory.h"
+#include "scene2dschema.h"
+#include "scene2dutils.h"
 
 #include <string_view>
 
@@ -17,16 +19,37 @@ namespace CapEngine {
     ImageLayer(int in_assetId, Rectangle in_position);
 
     static void registerConstructor(LayerFactory &in_factory);
-		static std::unique_ptr<ImageLayer> createImageLayer(const jsoncons::json &in_json);
     
-    virtual void update(double in_ms) override {}
-    virtual void render(const Camera2d &in_camera, uint32_t in_windowId) override;
+    void update(double in_ms) override {}
+    void render(const Camera2d &in_camera, uint32_t in_windowId) override;
 
-  private:
+  protected:
     int m_assetId; //! The id of the image asset.
     Rectangle m_position; // The size and position of the image.
   };
 
-} // namespace CapEngine
+namespace detail {
+
+//! Creates an image layer from json.  
+/** 
+ \param in_json
+   The json to create the layer from.
+ \return 
+   The layer.
+*/
+template <class T>
+std::unique_ptr<T> makeImageLayer(const jsoncons::json &in_json) {
+	try{
+		const int assetId = in_json[Schema::Scene2d::kAssetId].as<int>();
+		const Rectangle position = Utils::readRectangle(in_json[Schema::Scene2d::kPosition]);
+		return std::make_unique<T>(assetId, std::move(position));
+	}
+
+	catch(const std::exception &e){
+		throw LayerCreationError(Schema::Scene2d::kImageLayerType, boost::diagnostic_information(e));
+	}
+}
+
+}} // namespace CapEngine::detail
 
 #endif // CAPENGINE_IMAGELAYER_H
