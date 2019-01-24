@@ -41,7 +41,7 @@ template <class T>
 std::unique_ptr<T> makeImageLayer(const jsoncons::json &in_json) {
 	try{
 		const int assetId = in_json[Schema::Scene2d::kAssetId].as<int>();
-		const Rectangle position = Utils::readRectangle(in_json[Schema::Scene2d::kPosition]);
+		const Rectangle position = JSONUtils::readRectangle(in_json[Schema::Scene2d::kPosition]);
 		return std::make_unique<T>(assetId, std::move(position));
 	}
 

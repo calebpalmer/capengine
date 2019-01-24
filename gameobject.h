@@ -54,10 +54,10 @@ namespace CapEngine {
 
     //constructors
     GameObject(bool newID = true);
-    ~GameObject();
-
-    GameObject(const GameObject&) = delete;
-    GameObject& operator=(const GameObject&) = delete;
+		
+    ~GameObject() = default;
+    GameObject(const GameObject&) = default;
+    GameObject& operator=(const GameObject&) = default;
 
     static ObjectID generateID();
     static int generateMessageId();
@@ -124,3 +124,4 @@ namespace CapEngine {
 }
 
 #endif // GAMEOBJECT_H
+ 

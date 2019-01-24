@@ -2,8 +2,8 @@
 
 #include "scene2dschema.h"
 #include "layerfactory.h"
-#include "componentfactory.h"
 #include "gameobject.h"
+#include "gameobjectutils.h"
 #include "vector.h"
 
 namespace CapEngine {
@@ -27,33 +27,6 @@ void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera){
 	Locator::videoManager->getWindowResolution(in_windowId, &width, &height);
 	io_camera.setWidth(width);
 	io_camera.setHeight(height);
-}
-
-
-//! Read a vector from json.
-/** 
- \param in_json
-   The json to read the vector from.
- \return 
-   The vector.  All dimensions are optional, defaulted to 0.0.
-*/
-Vector readVector(const jsoncons::json &in_json){
-	using namespace Schema::Scene2d;
-	Vector vector;
-
-	if(in_json.contains(kXCoord)){
-		vector.setX(in_json[kXCoord].as<double>());
-	}
-
-	if(in_json.contains(kYCoord)){
-		vector.setY(in_json[kYCoord].as<double>());
-	}
-
-	if(in_json.contains(kZCoord)){
-		vector.setZ(in_json[kZCoord].as<double>());
-	}
-
-	return vector;
 }
 
 }
@@ -109,28 +82,18 @@ void Scene2d<ObjectManager>::load(const jsoncons::json &in_json) {
 
 		// get the objects
 		for(auto && objectJson : in_json[std::string(kObjects)].array_range()){
-			auto pObject = std::make_unique<GameObject>();
-			
-			// position
-			if(objectJson.contains(kPosition)){
-				pObject->setPosition(readVector(objectJson[kPosition]));
+			try {
+				GameObject object = makeObject(objectJson);
+				auto pHeapObject = std::make_unique<GameObject>(object);
+				m_objectManager.addObject(std::move(pHeapObject));
 			}
-
-			// orientation
-			if(objectJson.contains(kOrientation)){
-				pObject->setOrientation(readVector(objectJson[kOrientation]));
+			catch(const ObjectCreationError &e){
+				// log and move on
+				CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CWARNING);
 			}
-
-			// get its components
-			ComponentFactory &componentFactory = ComponentFactory::getInstance();
-			for(auto && componentJson : objectJson[kComponents].array_range()){
-				std::unique_ptr<Component> pComponent = componentFactory.makeComponent(componentJson);
-				pObject->setComponent(std::move(pComponent));
-			}
-
 		}
-
 	}
+	
 	catch(const jsoncons::parse_error &e) {
 		throw SceneLoadException(in_json, e.what());
 	}
@@ -164,6 +127,5 @@ void Scene2d<ObjectManager>::render(uint32_t in_windowId) {
 		i->second->render(m_camera, in_windowId);
 	}
 }
-
 
 }

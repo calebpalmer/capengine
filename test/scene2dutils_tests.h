@@ -31,7 +31,7 @@ void Scene2dUtilsTest::testReadRectangle(){
 )");
 
 	Rectangle expected(1, 2, 10, 10);
-	Rectangle actual = Utils::readRectangle(rect);
+	Rectangle actual = JSONUtils::readRectangle(rect);
 	CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

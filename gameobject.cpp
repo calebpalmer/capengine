@@ -19,8 +19,6 @@ GameObject::GameObject(bool newID) {
 	m_parentObjectID = -1;
 }
 
-GameObject::~GameObject(){ }
-
 void GameObject::render(const Camera2d &in_camera){
 	graphicsComponent->render(this, in_camera);
 }

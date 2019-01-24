@@ -5,8 +5,15 @@
 
 #include <jsoncons/json.hpp>
 
-namespace CapEngine { namespace Utils {
+namespace CapEngine { namespace JSONUtils {
 
+//! Read a rectangle from json.
+/** 
+ \param in_json
+   The json to read the rectangle from.
+ \return 
+   The rectangle
+*/
 Rectangle readRectangle(const jsoncons::json &in_json){
 	try {
 		using namespace Schema::Scene2d;
@@ -25,6 +32,32 @@ Rectangle readRectangle(const jsoncons::json &in_json){
 				<< std::endl << boost::diagnostic_information(e) << std::endl;
 		BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
 	}
+}
+
+//! Read a vector from json.
+/** 
+ \param in_json
+   The json to read the vector from.
+ \return 
+   The vector.  All dimensions are optional, defaulted to 0.0.
+*/
+Vector readVector(const jsoncons::json &in_json){
+	using namespace Schema::Scene2d;
+	Vector vector;
+
+	if(in_json.contains(kXCoord)){
+		vector.setX(in_json[kXCoord].as<double>());
+	}
+
+	if(in_json.contains(kYCoord)){
+		vector.setY(in_json[kYCoord].as<double>());
+	}
+
+	if(in_json.contains(kZCoord)){
+		vector.setZ(in_json[kZCoord].as<double>());
+	}
+
+	return vector;
 }
 
 }}
