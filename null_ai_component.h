@@ -9,8 +9,8 @@ namespace CapEngine {
 
   class NullAIComponent :  public AIComponent {
   public:
-    virtual void update(GameObject* /*object*/) {}
-    virtual std::unique_ptr<AIComponent> clone() const {
+    void update(GameObject* /*object*/) override {}
+    std::unique_ptr<AIComponent> clone() const override {
       std::unique_ptr<AIComponent> newAIComponent(new NullAIComponent);
       return newAIComponent;
     }

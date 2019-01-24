@@ -9,8 +9,9 @@ namespace CapEngine {
 
   class NullCustomComponent :  public CustomComponent {
   public:
-    virtual void update(GameObject* object) {}
-    virtual std::unique_ptr<CustomComponent> clone() const {
+    void update(GameObject* object) override {}
+		
+    std::unique_ptr<CustomComponent> clone() const override {
       std::unique_ptr<CustomComponent> newCustomComponent(new NullCustomComponent);
       return std::move(newCustomComponent);
     }
