@@ -77,14 +77,11 @@ namespace CapEngine {
     ObjectID getParentObjectID() const;
     void send(int messageId, std::string message);
     void setParentObjectID(ObjectID id);
-		void setComponent(std::shared_ptr<Component> pComponent);
-    void setInputComponent(std::shared_ptr<InputComponent> pInputComponent);
-    std::shared_ptr<InputComponent> getInputComponent();
-    void setPhysicsComponent(std::shared_ptr<PhysicsComponent> pPhysicsComponent);
-    std::shared_ptr<PhysicsComponent> getPhysicsComponent() const;
-    void setGraphicsComponent(std::shared_ptr<GraphicsComponent> pGraphicsComponent);
-    void setCustomComponent(std::shared_ptr<CustomComponent> pCustomComponent);
-    void setAIComponent(std::shared_ptr<AIComponent> pAIComponent);
+
+		void addComponent(std::shared_ptr<Component> in_pComponent);
+		const std::vector<std::shared_ptr<Component>>& getComponents();
+		std::vector<std::shared_ptr<Component>> getComponents(ComponentType in_type);
+		
     Vector getPosition() const;
     void setPosition(Vector position);
     Vector getOrientation() const;
@@ -109,6 +106,9 @@ namespace CapEngine {
     ObjectID m_objectID = -1;
     ObjectID m_parentObjectID = -1;
     ObjectType m_objectType = ObjectType_AI;
+
+		//! The components
+		std::vector<std::shared_ptr<Component>> m_components;
 
     std::shared_ptr<InputComponent> inputComponent;
     std::shared_ptr<PhysicsComponent> physicsComponent;

@@ -161,70 +161,11 @@ void GameObject::setAcceleration(Vector accelerationIn){
 	acceleration = accelerationIn;
 }
 
-//!  Sets the Component on the GameObject
-/** 
- \param pComponent
-   The Component to set.
-*/
-void GameObject::setComponent(std::shared_ptr<Component> pComponent){
-	if(auto pInputComponent = std::dynamic_pointer_cast<InputComponent>(pComponent)){
-		this->setInputComponent(pInputComponent);
-	}
-
-	else if(auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent)){
-		this->setPhysicsComponent(pPhysicsComponent);
-	}
-
-	else if(auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent)){
-		this->setGraphicsComponent(pGraphicsComponent);
-	}
-
-	else if(auto pAIComponent = std::dynamic_pointer_cast<AIComponent>(pComponent)){
-		this->setAIComponent(pAIComponent);
-	}
-
-	else if(auto pCustomComponent = std::dynamic_pointer_cast<CustomComponent>(pComponent)){
-		this->setCustomComponent(pCustomComponent);
-	}
-
-}
-
-void GameObject::setInputComponent(shared_ptr<InputComponent> pInputComponent){
-	inputComponent = pInputComponent;
-}
-
-void GameObject::setPhysicsComponent(shared_ptr<PhysicsComponent> pPhysicsComponent){
-	physicsComponent = pPhysicsComponent;
-}
-
-/**
-	 Accessor method for objects PhysicsComponent
-*/
-std::shared_ptr<PhysicsComponent> GameObject::getPhysicsComponent() const {
-	return physicsComponent;
-}
-
-void GameObject::setGraphicsComponent(shared_ptr<GraphicsComponent> pGraphicsComponent){
-	graphicsComponent = pGraphicsComponent;
-}
-
-void GameObject::setCustomComponent(shared_ptr<CustomComponent> pCustomComponent){
-	customComponent = pCustomComponent;
-}
-
-void GameObject::setAIComponent(shared_ptr<AIComponent> pAIComponentIn){
-	mpAIComponent = pAIComponentIn;
-}
-
 int GameObject::generateMessageId(){
 	return nextMessageId++;
 }
 
 void GameObject::send(int id, string message){
-	// ostringstream messageStr;
-	// messageStr << *this << ": Message: " << message;
-	// Locator::logger->log(messageStr.str(), Logger::CDEBUG, __FILE__, __LINE__);
-    
 	if(inputComponent){
 		inputComponent->receive(this, id, message);
 	}
@@ -256,11 +197,6 @@ void GameObject::setPreviousPosition(Vector position){
 	previousPosition = position;
 }
 
-std::shared_ptr<InputComponent> GameObject::getInputComponent(){
-	return inputComponent;
-}
-
-
 std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEvent){
 	std::ostringstream repr;
 	repr << collisionEvent.type << " with " << collisionEvent.object1->getObjectID();
@@ -272,7 +208,6 @@ std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEve
 	stream << repr.str();
 	return stream;
 }
-
 
 std::ostream& operator<<(std::ostream& stream, GameObject const & gameObject){
 	std::ostringstream repr;
@@ -289,6 +224,47 @@ GameObject::ObjectType GameObject::getObjectType() const{
 void GameObject::setObjectType(GameObject::ObjectType in_objectType){
 	m_objectType = in_objectType;
 }
-  
+
+//! Adds a new component
+/** 
+ \param in_component
+   The component.
+*/
+void GameObject::addComponent(std::shared_ptr<Component> in_pComponent){
+	if(in_pComponent == nullptr){
+		BOOST_THROW_EXCEPTION(CapEngineException("Null component"));
+	}
+
+	m_components.emplace_back(std::move(in_pComponent));
+}
+
+//! Gets the components.
+/** 
+ \return 
+   The components
+*/
+const std::vector<std::shared_ptr<Component>>& GameObject::getComponents(){
+	return m_components;
+}
+
+//! Gets all the components of a given type.
+/** 
+ \param in_type
+   The type
+ \return 
+   The components.
+*/
+std::vector<std::shared_ptr<Component>> GameObject::getComponents(ComponentType in_type){
+	std::vector<std::shared_ptr<Component>> components;
+
+	std::copy_if(m_components.begin(), m_components.end(), std::back_inserter(components),
+							 [in_type](auto && in_component)
+							 {
+								 return in_component->getType() == in_type;
+							 });
+
+	return components;
+}
+
 }
 

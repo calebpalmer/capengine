@@ -50,7 +50,7 @@ GameObject makeObject(const jsoncons::json &in_json){
 	ComponentFactory &componentFactory = ComponentFactory::getInstance();
 	for(auto && componentJson : in_json[kComponents].array_range()){
 		std::unique_ptr<Component> pComponent = componentFactory.makeComponent(componentJson);
-		object.setComponent(std::move(pComponent));
+		object.addComponent(std::move(pComponent));
 	}
 
 	return object;
