@@ -7,14 +7,15 @@
 
 namespace CapEngine {
 
-  class NullAIComponent :  public AIComponent {
-  public:
-    void update(GameObject* /*object*/) override {}
-    std::unique_ptr<AIComponent> clone() const override {
-      std::unique_ptr<AIComponent> newAIComponent(new NullAIComponent);
-      return newAIComponent;
-    }
-  };
+//! An AI Component that does nothing.
+class NullAIComponent :  public AIComponent {
+public:
+	void update(GameObject* /*object*/, double ms) override {}
+
+	std::unique_ptr<Component> clone() const override {
+		return std::make_unique<NullAIComponent>();
+	}
+};
 
 }
 #endif

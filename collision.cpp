@@ -48,6 +48,42 @@ Rectangle Rectangle::narrowRight(int in_amount) const{
 	return newRect;
 }
 
+//! joins to rectangles together to make a single greater rectangle.
+/** 
+ \param left
+   The first rectangle
+ \param right
+   The second rectangle
+ \return 
+   The joined rectangles.
+*/
+Rectangle join(const Rectangle &in_left, const Rectangle &in_right){
+	// calculate x and y
+	Rectangle rect{
+								 in_left.x <= in_right.x ? in_left.x : in_right.x,
+								 in_left.y <= in_right.y ? in_left.y : in_right.y,
+								 0,0
+	};
+
+	// calculate width
+	if(in_left.x + in_left.width >= in_right.x + in_right.width){
+		rect.width = in_left.x + in_left.width - rect.x;
+	}
+	else{
+		rect.width = in_right.x + in_right.width - rect.x;
+	}
+
+	// calculate height
+	if(in_left.y + in_left.height >= in_right.y + in_right.height){
+		rect.height = in_left.y + in_left.height - rect.y;
+	}
+	else{
+		rect.height = in_right.y + in_right.height - rect.y;
+	}
+
+	return rect;
+}
+
 
 //! detects if point is within a rectangle.
 /** 

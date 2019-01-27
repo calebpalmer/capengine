@@ -7,15 +7,15 @@
 
 namespace CapEngine {
 
-  class NullCustomComponent :  public CustomComponent {
-  public:
-    void update(GameObject* object) override {}
+//! A Custom component that does nothing.
+class NullCustomComponent :  public CustomComponent {
+public:
+	void update(GameObject* object, double ms) override {}
 		
-    std::unique_ptr<CustomComponent> clone() const override {
-      std::unique_ptr<CustomComponent> newCustomComponent(new NullCustomComponent);
-      return std::move(newCustomComponent);
-    }
-  };
+	std::unique_ptr<Component> clone() const override {
+		return std::make_unique<NullCustomComponent>();
+	}
+};
 
 }
 #endif

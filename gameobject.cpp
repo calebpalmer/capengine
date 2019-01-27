@@ -20,46 +20,65 @@ GameObject::GameObject(bool newID) {
 }
 
 void GameObject::render(const Camera2d &in_camera){
-	graphicsComponent->render(this, in_camera);
+	std::vector<std::shared_ptr<Component>> graphicsComponents =
+		this->getComponents(ComponentType::Graphics);
+
+	for( auto && pComponent : graphicsComponents){
+		auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
+		assert(pGraphicsComponent != nullptr);
+		
+		pGraphicsComponent->render(this, in_camera);
+	}
 }
 
 unique_ptr<GameObject> GameObject::update(double ms) const{
 
 	// clone new game object and pas to updates
-	//  unique_ptr<GameObject> newObj(new GameObject(*this));
-	unique_ptr<GameObject> newObj = this->clone();
-	//  *newObj = *this;
-
-	if(newObj->inputComponent){
-		newObj->inputComponent->update(newObj.get());
-	}
-	if(newObj->physicsComponent){
-		newObj->physicsComponent->update(newObj.get(), ms);
-	}
-	if(newObj->customComponent){
-		newObj->customComponent->update(newObj.get());
-	}
-	if(newObj->mpAIComponent){
-		newObj->mpAIComponent->update(newObj.get());
-	}
-	if(newObj->graphicsComponent){
-		newObj->graphicsComponent->update(newObj.get(), ms);
+	unique_ptr<GameObject> newObject = this->clone();
+		
+	for(auto && pComponent : newObject->getComponents()){
+		pComponent->update(newObject.get(), ms);
 	}
 
-	return move(newObj);
+	return std::move(newObject);
 }
 
 Rectangle GameObject::boundingPolygon() const {
-	return physicsComponent->boundingPolygon(this);
+	Rectangle rectangle;
+	bool first = true;
+
+	for (auto && pComponent : m_components){
+		auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
+		if(pPhysicsComponent){
+			if(first){
+				rectangle = pPhysicsComponent->boundingPolygon(this);
+				first = false;
+			}
+
+			else{
+				rectangle = join(rectangle, pPhysicsComponent->boundingPolygon(this));
+			}
+		}
+	}
+	
+	return rectangle;
 }
 
-
 bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_, GameObject* otherObject,
-																 Vector collisionLocation){
-	return physicsComponent->handleCollision(this, type, class_, otherObject, collisionLocation);
+																 Vector collisionLocation)
+{
+	for (auto && pComponent : m_components){
+		auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
+		if(pPhysicsComponent && pPhysicsComponent->handlesCollisions()){
+			return pPhysicsComponent->handleCollision(this, type, class_, otherObject, collisionLocation);
+		}
+	}
+
+	return false;
 }
 
 unique_ptr<GameObject> GameObject::clone() const{
+
 	unique_ptr<GameObject> newObj(new GameObject(false));
 
 	newObj->position = position;
@@ -67,21 +86,14 @@ unique_ptr<GameObject> GameObject::clone() const{
 	newObj->orientation = orientation;
 	newObj->velocity = velocity;
 	newObj->acceleration = acceleration;
-	if(inputComponent){
-		newObj->inputComponent = inputComponent;
-	}
-	if(physicsComponent){
-		newObj->physicsComponent = physicsComponent;
-	}
-	if(graphicsComponent){
-		newObj->graphicsComponent = graphicsComponent;
-	}
-	if(customComponent){
-		newObj->customComponent.reset(customComponent->clone().release());
-	}
-	if(mpAIComponent){
-		newObj->mpAIComponent.reset(mpAIComponent->clone().release());
-	}
+
+	newObj->m_components.reserve(m_components.size());
+	std::transform(m_components.begin(), m_components.end(), std::back_inserter(newObj->m_components),
+								 [](auto && pComponent) -> std::unique_ptr<Component>
+								 {
+									 return pComponent->clone();
+								 });
+
 	newObj->m_pObjectData = m_pObjectData;
 	newObj->m_objectState = m_objectState;
 	newObj->m_objectID = m_objectID;
@@ -166,20 +178,9 @@ int GameObject::generateMessageId(){
 }
 
 void GameObject::send(int id, string message){
-	if(inputComponent){
-		inputComponent->receive(this, id, message);
-	}
-	if(physicsComponent){
-		physicsComponent->receive(this, id, message);
-	}
-	if(graphicsComponent){
-		graphicsComponent->receive(this, id, message);
-	}
-	if(customComponent){
-		customComponent->receive(this, id, message);
-	}
-	if(mpAIComponent){
-		mpAIComponent->receive(this, id, message);
+	for(auto && pComponent : m_components){
+		assert(pComponent != nullptr);
+		pComponent->receive(this, id, message);
 	}
 }
 

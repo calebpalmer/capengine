@@ -110,11 +110,6 @@ namespace CapEngine {
 		//! The components
 		std::vector<std::shared_ptr<Component>> m_components;
 
-    std::shared_ptr<InputComponent> inputComponent;
-    std::shared_ptr<PhysicsComponent> physicsComponent;
-    std::shared_ptr<GraphicsComponent> graphicsComponent;
-    std::shared_ptr<CustomComponent> customComponent;
-    std::shared_ptr<AIComponent> mpAIComponent;
     Vector position;
     Vector previousPosition;
     Vector orientation;
