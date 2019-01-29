@@ -1,12 +1,13 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include <memory>
-#include <string>
-
 #include "vector.h"
 #include "collision.h"
 #include "components.h"
+
+#include <memory>
+#include <string>
+#include <optional>
 
 namespace CapEngine {
 
@@ -63,7 +64,7 @@ namespace CapEngine {
     static int generateMessageId();
     void render(const Camera2d &in_camera);
     std::unique_ptr<GameObject> update(double ms) const;
-    Rectangle boundingPolygon() const;
+		Rectangle boundingPolygon() const;
     bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,
 			 Vector collisionLocation);
     std::unique_ptr<GameObject> clone() const;

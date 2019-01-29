@@ -4,6 +4,7 @@
 #include "camera2d.h"
 
 #include <memory>
+#include <optional>
 
 namespace CapEngine {
 class GameObject;
@@ -30,36 +31,34 @@ public:
   
 class PhysicsComponent : public Component {
 public:
-	virtual ~PhysicsComponent() {}
-	virtual Rectangle boundingPolygon(const GameObject* object) const = 0;
-	virtual bool handleCollision(GameObject* object, CollisionType, CollisionClass, GameObject* otherObject,
-															 Vector collisionVector) = 0;
-	virtual bool handlesCollisions() {return false;}
+	~PhysicsComponent() override = default;
+	virtual std::optional<Rectangle> boundingPolygon(const GameObject* object) const = 0;
+	
 	ComponentType getType() const override { return ComponentType::Physics; }
 };
 
 class GraphicsComponent : public Component {
 public:
-	virtual ~GraphicsComponent() {}
+	~GraphicsComponent() override = default;
 	virtual void render(GameObject* object, const Camera2d &in_camera) = 0;
 	ComponentType getType() const override { return ComponentType::Graphics; }
 };
 
 class InputComponent : public Component {
 public:
-	virtual ~InputComponent() {}
+	~InputComponent() override = default;
 	ComponentType getType() const override { return ComponentType::Input; }
 };
 
 class CustomComponent : public Component {
 public:
-	virtual ~CustomComponent() {}
+	~CustomComponent() override = default;
 	ComponentType getType() const override { return ComponentType::Custom; }
 };
 
 class AIComponent : public Component {
 public:
-	virtual ~AIComponent() {}
+	~AIComponent() override = default;
 	ComponentType getType() const override { return ComponentType::AI; }
 };
 

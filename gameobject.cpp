@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 namespace CapEngine {
 using namespace std;
@@ -50,15 +51,26 @@ Rectangle GameObject::boundingPolygon() const {
 	for (auto && pComponent : m_components){
 		auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
 		if(pPhysicsComponent){
+			std::optional<Rectangle> maybeRectangle = pPhysicsComponent->boundingPolygon(this);
+			if(!maybeRectangle){
+				continue;
+			}
+			
 			if(first){
-				rectangle = pPhysicsComponent->boundingPolygon(this);
+				rectangle = *maybeRectangle;
 				first = false;
 			}
 
 			else{
-				rectangle = join(rectangle, pPhysicsComponent->boundingPolygon(this));
+				rectangle = join(rectangle, *maybeRectangle);
 			}
 		}
+	}
+
+	if(first){
+		// no collider was found.  make a 1x1 rect based off position.
+		return Rectangle{static_cast<int>(std::round(position.getX())),
+											 static_cast<int>(std::round(position.getY())), 1, 1};
 	}
 	
 	return rectangle;
@@ -67,13 +79,6 @@ Rectangle GameObject::boundingPolygon() const {
 bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_, GameObject* otherObject,
 																 Vector collisionLocation)
 {
-	for (auto && pComponent : m_components){
-		auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
-		if(pPhysicsComponent && pPhysicsComponent->handlesCollisions()){
-			return pPhysicsComponent->handleCollision(this, type, class_, otherObject, collisionLocation);
-		}
-	}
-
 	return false;
 }
 
