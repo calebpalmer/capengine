@@ -62,7 +62,7 @@ namespace CapEngine {
 
     static ObjectID generateID();
     static int generateMessageId();
-    void render(const Camera2d &in_camera);
+    void render(const Camera2d &in_camera, uint32_t in_windowId);
     std::unique_ptr<GameObject> update(double ms) const;
 		Rectangle boundingPolygon() const;
     bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,

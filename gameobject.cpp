@@ -20,7 +20,7 @@ GameObject::GameObject(bool newID) {
 	m_parentObjectID = -1;
 }
 
-void GameObject::render(const Camera2d &in_camera){
+void GameObject::render(const Camera2d &in_camera, uint32_t in_windowId){
 	std::vector<std::shared_ptr<Component>> graphicsComponents =
 		this->getComponents(ComponentType::Graphics);
 
@@ -28,7 +28,7 @@ void GameObject::render(const Camera2d &in_camera){
 		auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
 		assert(pGraphicsComponent != nullptr);
 		
-		pGraphicsComponent->render(this, in_camera);
+		pGraphicsComponent->render(this, in_camera, in_windowId);
 	}
 }
 

@@ -39,7 +39,7 @@ public:
 class GraphicsComponent : public Component {
 public:
 	~GraphicsComponent() override = default;
-	virtual void render(GameObject* object, const Camera2d &in_camera) = 0;
+	virtual void render(GameObject* object, const Camera2d &in_camera, uint32_t in_windowId) = 0;
 	ComponentType getType() const override { return ComponentType::Graphics; }
 };
 

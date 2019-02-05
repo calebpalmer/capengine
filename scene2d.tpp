@@ -126,6 +126,8 @@ void Scene2d<ObjectManager>::render(uint32_t in_windowId) {
 		assert(i->second != nullptr);
 		i->second->render(m_camera, in_windowId);
 	}
+
+	// render objects
 }
 
 }
