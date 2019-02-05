@@ -40,7 +40,8 @@ add_library(capengine Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp 
 	    uiconfigmanager.cpp uibutton.cpp orientable.cpp tilecopycontrol.cpp uiutils.cpp quaternion.cpp dialogstate.cpp pancontrol.cpp
 	    widgetdecorator.cpp simplecommand.cpp commandmanager.cpp aggregatecommand.cpp textbox.cpp font.cpp property.cpp listproperty.cpp
 	    uipropertyvisitor.cpp simpleobjectmanager.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
-	    imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp
+	    imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
+	    boxcollider.cpp rigidbodycomponent.cpp
 	    )
 
 target_link_libraries(capengine ${SDL2_LIBRARY}

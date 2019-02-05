@@ -32,8 +32,7 @@ public:
 class PhysicsComponent : public Component {
 public:
 	~PhysicsComponent() override = default;
-	virtual std::optional<Rectangle> boundingPolygon(const GameObject* object) const = 0;
-	
+	virtual std::optional<Rectangle> boundingPolygon(const GameObject* object) const { return std::nullopt; }
 	ComponentType getType() const override { return ComponentType::Physics; }
 };
 

@@ -5,6 +5,8 @@
 #include "propertytraits.h"
 #include "propertyvisitor.h"
 
+#include <memory>
+#include <functional>
 #include <optional>
 #include <boost/any.hpp>
 

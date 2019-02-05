@@ -1,6 +1,8 @@
 #include "scene2dschema.h"
 
-namespace CapEngine { namespace Schema { namespace Scene2d {
+namespace CapEngine { namespace Schema {
+
+namespace Scene2d {
 
 // general
 const char* kPosition = "position";
@@ -34,4 +36,13 @@ const char* kBitmapCollisionLayer = "BitmapCollisionLayer";
 const char* kObjects = "objects";
 const char* kComponents = "components";
 
-}}} // CapEngine::Schema::Scene2d
+} // namespace Scened2d
+
+namespace Components {
+
+// box collider
+const char* kBox = "box";
+
+} // namespace Components
+
+}} // CapEngine::Schema::Scene2d

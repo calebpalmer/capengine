@@ -1,7 +1,9 @@
 #ifndef CAPENGINE_SCENESCHEMA_H
 #define CAPENGINE_SCENESCHEMA_H
 
-namespace CapEngine { namespace Schema { namespace Scene2d {
+namespace CapEngine { namespace Schema {
+
+namespace Scene2d {
 
 // general
 extern const char* kPosition;
@@ -35,6 +37,22 @@ extern const char* kBitmapCollisionLayer;
 extern const char* kObjects;
 extern const char* kComponents;
 
-}}} // CapEngine::Schema::Scene2d
+} // namespace Scened2d
+
+
+namespace Components {
+
+constexpr char kComponentType[] = "type";
+
+// boxcollider
+extern const char* kBox;
+
+// rigid body
+constexpr char kMass[] = "mass";
+
+} // namespace Components
+
+
+}} // CapEngine::Scheme
 
 #endif // CAPENGINE_SCENESCHEMA_H
