@@ -24,7 +24,7 @@ void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera){
 	int width = 0;
 	int height = 0;
 	// TODO maybe this should be the scene size prior to scaling to fit window
-	Locator::videoManager->getWindowResolution(in_windowId, &width, &height);
+	std::tie(width, height) = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 	io_camera.setWidth(width);
 	io_camera.setHeight(height);
 }
@@ -128,6 +128,10 @@ void Scene2d<ObjectManager>::render(uint32_t in_windowId) {
 	}
 
 	// render objects
+	for(auto && pObject : m_objectManager.getObjects(m_camera.getViewingRectangle())){
+		assert(pObject != nullptr);
+		pObject->render(m_camera, in_windowId);
+	}
 }
 
 }

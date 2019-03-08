@@ -28,8 +28,8 @@ std::unique_ptr<Component> ComponentFactory::makeComponent(const jsoncons::json 
 		throw ComponentCreationException("Unknown", "Unknown", in_json, std::string("The component type could not be determined"));
 	}
 
-	const std::string type = in_json[Schema::Scene2d::kType].as<std::string>();
-	const std::string subtype = in_json[Schema::Scene2d::kSubType].as<std::string>();
+	const std::string type = in_json[Schema::Components::kComponentType].as<std::string>();
+	const std::string subtype = in_json[Schema::Components::kComponentSubType].as<std::string>();
 	
 	auto&& f = m_factoryFunctions.find(std::make_pair(type, subtype));
 	if(f != m_factoryFunctions.end()){
@@ -51,8 +51,9 @@ void ComponentFactory::registerComponentType(const std::string &in_type, const s
 	if(m_factoryFunctions.find(key) == m_factoryFunctions.end()){
 		m_factoryFunctions.emplace(key, std::move(in_factoryFunction));
 	}
-
-	throw CapEngineException("The component type \"" + in_type + "\" is already registered");
+	else{
+		throw CapEngineException("The component type \"" + in_type + "\" is already registered");
+	}
 }
 
 } // CapEngine

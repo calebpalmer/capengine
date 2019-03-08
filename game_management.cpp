@@ -8,6 +8,8 @@
 #include "layerfactory.h"
 #include "imagelayer.h"
 #include "bitmapcollisionlayer.h"
+#include "componentfactory.h"
+#include "placeholdergraphics.h"
 
 #include <memory>
 #include <sstream>
@@ -57,6 +59,11 @@ Uint32 init(WindowParams screenConfig, bool noWindow){
 		LayerFactory& layerFactory = LayerFactory::getInstance();
 		ImageLayer::registerConstructor(layerFactory);
 		BitmapCollisionLayer::registerConstructor(layerFactory);
+
+		// initialize components
+		ComponentFactory &componentFactory = ComponentFactory::getInstance();
+		PlaceHolderGraphics::registerConstructor(componentFactory);
+		
   }
 
   return windowID;

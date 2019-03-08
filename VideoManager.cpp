@@ -289,7 +289,7 @@ void VideoManager::clearScreen(Uint32 windowID){
 void VideoManager::drawScreen(Uint32 windowID){
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
-  
+
   // Render FPS if turned on
   if(showFPS){
     string sFPS = to_string(fps);
@@ -317,14 +317,29 @@ void VideoManager::drawScreen(Uint32 windowID){
   double elapsedTime = currentTime.subtractTime(&lastRenderTime);
   lastRenderTime = currentTime;
   fps = 1 / (elapsedTime * 0.001);
-
-  // clear screen
-  //this->clearScreen(windowID);
 }
 
 void VideoManager::getWindowResolution(Uint32 windowID, int* width, int* height){
   const Window window = getWindow(windowID);
   SDL_GetWindowSize(window.m_window, width, height);
+}
+
+//! Gets the logical size of a window renderer.
+/** 
+ \param in_windowID
+   The id of the window.
+ \return 
+   A pair of ints containing the width and height respectively.
+*/
+std::pair<int, int> VideoManager::getWindowLogicalResolution(uint32_t in_windowID) {
+	const Window window = getWindow(in_windowID);
+	assert(window.m_renderer != nullptr);
+	
+	int width = 0;
+	int height = 0;
+	SDL_RenderGetLogicalSize(window.m_renderer, &width, &height);
+
+	return std::make_pair(width, height);
 }
 
 int VideoManager::getWindowWidth(Uint32 windowID){
@@ -673,8 +688,9 @@ void VideoManager::drawFillRect(Uint32 windowID, Rect rect, Colour fillColour){
 
   // only draw things that are in the window
   if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
+		// Draw the rect
     SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
-    if(SDL_RenderFillRect(pRenderer, &rect) != 0){
+    if(SDL_RenderFillRect(pRenderer, &newDstRect) != 0){
       string errorMessage(SDL_GetError());
       logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
     }
@@ -695,6 +711,7 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
 
   // only draw things that are in the window
   if(detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE){
+		// render the the rect
     SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
     if(SDL_RenderDrawRect(pRenderer, &rect) != 0){
       string errorMessage(SDL_GetError());
@@ -702,7 +719,6 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour){
     }
   }
 }
-
 
 int VideoManager::toScreenCoord(const Surface* surface, int y) const{
   CAP_THROW_NULL(surface, "surface is null");
@@ -777,9 +793,12 @@ SDL_Renderer* VideoManager::createRenderer(SDL_Window* pWindow, WindowParams win
     }
   }
 
-  SDL_SetRenderDrawColor(m_pRenderer, m_backgroundColour.m_r,
+  SDL_SetRenderDrawColor(pRenderer, m_backgroundColour.m_r,
 			 m_backgroundColour.m_g, m_backgroundColour.m_g,
 			 255);
+
+	// do alpha blending
+	SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
 
   return pRenderer;
 }

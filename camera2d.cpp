@@ -96,7 +96,9 @@ Rectangle toScreenCoords(const Camera2d &in_camera,
 			BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
 		}
 
-		int windowHeight = Locator::videoManager->getWindowHeight(in_windowId);
+		int windowHeight = 0;
+		int windowWidth = 0;
+		std::tie(windowWidth, windowHeight) = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 		rect.y = (windowHeight - rect.y) - rect.height;
 	}
 

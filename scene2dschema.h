@@ -39,19 +39,35 @@ extern const char* kComponents;
 
 } // namespace Scened2d
 
-
+// Components
 namespace Components {
 
-constexpr char kComponentType[] = "type";
+  constexpr char kComponentType[] = "type";
+  constexpr char kComponentSubType[] = "subtype";
 
-// boxcollider
-extern const char* kBox;
+  // boxcollider
+  extern const char* kBox;
 
-// rigid body
-constexpr char kMass[] = "mass";
+  // rigid body
+  constexpr char kMass[] = "mass";
 
+  namespace PlaceHolderGraphics {
+
+	  constexpr char kWidth[] = "width";
+    constexpr char kHeight[] = "height";
+    constexpr char kColour[] = "colour";
+
+  } // Components::PlaceHolderGraphics
 } // namespace Components
 
+namespace Colour {
+
+  constexpr char kRed[] = "r";
+  constexpr char kGreen[] = "g";
+  constexpr char kBlue[] = "b";
+  constexpr char kAlpha[] = "a";
+
+} // namespace Colour
 
 }} // CapEngine::Scheme
 

@@ -60,4 +60,34 @@ Vector readVector(const jsoncons::json &in_json){
 	return vector;
 }
 
+//! Reads a colour from json.
+/** 
+ \param in_json
+   The json to rea the colour from.
+ \return 
+   The colour.
+*/
+Colour readColour(const jsoncons::json &in_json){
+	using namespace Schema::Colour;
+	Colour colour;
+
+	if(in_json.contains(kRed)){
+		colour.m_r = in_json[kRed].as<uint8_t>();
+	}
+
+	if(in_json.contains(kGreen)){
+		colour.m_g = in_json[kGreen].as<uint8_t>();
+	}
+
+	if(in_json.contains(kBlue)){
+		colour.m_b = in_json[kBlue].as<uint8_t>();
+	}
+
+	if(in_json.contains(kAlpha)){
+		colour.m_a = in_json[kAlpha].as<uint8_t>();
+	}
+
+	return colour;
+}
+
 }}

@@ -3,8 +3,6 @@
 #include "componentfactory.h"
 #include "scene2dschema.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace CapEngine {
 
 //!  Constructor.
@@ -36,15 +34,12 @@ void RigidBodyComponent::update(GameObject* object, double timestep){
 */
 std::unique_ptr<RigidBodyComponent> RigidBodyComponent::makeComponent(const jsoncons::json &in_json){
 	try{
-		assert(in_json[Schema::Components::kComponentType] == kType);
-		double mass = boost::lexical_cast<double>(in_json[Schema::Components::kMass]);
+		assert(in_json[Schema::Components::kComponentSubType] == kType);
+		double mass = in_json[Schema::Components::kMass].as<double>();
 
 		return std::make_unique<RigidBodyComponent>(mass);
 	}
 	catch(const jsoncons::json_exception &e){
-		throw ComponentCreationException(ComponentType::Physics, kType, in_json, boost::diagnostic_information(e));
-	}
-	catch(const boost::bad_lexical_cast &e){
 		throw ComponentCreationException(ComponentType::Physics, kType, in_json, boost::diagnostic_information(e));
 	}
 }

@@ -76,6 +76,7 @@ static const WindowParams defaultScreen = {"CapEngine",1280,800,32,false, false,
 		virtual Uint32 getWindowId(const std::string& windowName) const;
 		virtual bool isValidWindowId(Uint32 windowId) const;
     virtual void getWindowResolution(Uint32 windowID, int* width, int* height);
+		virtual std::pair<int, int> getWindowLogicalResolution(uint32_t in_windowID);
     virtual int getWindowWidth(Uint32 windowID);
     virtual int getWindowHeight(Uint32 windowID);
 		virtual void setWindowPosition(Uint32 windowId, int x, int y);
