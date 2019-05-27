@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 
 project(capengine)
 
+include(GNUInstallDirs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "1" CACHE STRING "")
 
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sdl2-cmake-scripts")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sdl2-cmake-modules")
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules") 
 
 find_package(SDL2 REQUIRED)
