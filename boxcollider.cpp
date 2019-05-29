@@ -4,6 +4,7 @@
 #include "scene2dutils.h"
 #include "componentutils.h"
 #include "componentfactory.h"
+#include "gameobject.h"
 
 namespace CapEngine {
 
@@ -42,6 +43,14 @@ std::unique_ptr<BoxCollider> BoxCollider::makeComponent(const jsoncons::json &in
 */
 void BoxCollider::registerConstructor(ComponentFactory &in_factory){
 	in_factory.registerComponentType(ComponentUtils::componentTypeToString(ComponentType::Physics), kType, makeComponent);
+}
+
+void BoxCollider::update(GameObject* object, double timestep) {
+	assert(object != nullptr);
+	Vector const& position = object->getPosition();
+
+	m_box.x = position.getX();
+	m_box.y = position.getY();
 }
 
 } // namespace CapEngine

@@ -10,6 +10,7 @@
 #include "bitmapcollisionlayer.h"
 #include "componentfactory.h"
 #include "placeholdergraphics.h"
+#include "boxcollider.h"
 
 #include <memory>
 #include <sstream>
@@ -51,9 +52,8 @@ Uint32 init(WindowParams screenConfig, bool noWindow){
     ControllerManager::initialize();
 
     // set current directory to directory of executable
-    std::string exePath = getCurrentExecutablePath();
-    setCurrentDir(stripPath(exePath));
-    initted = true;
+    // std::string exePath = getCurrentExecutablePath();
+    // setCurrentDir(stripPath(exePath));
 
 		// initialise 2d layer types
 		LayerFactory& layerFactory = LayerFactory::getInstance();
@@ -63,7 +63,9 @@ Uint32 init(WindowParams screenConfig, bool noWindow){
 		// initialize components
 		ComponentFactory &componentFactory = ComponentFactory::getInstance();
 		PlaceHolderGraphics::registerConstructor(componentFactory);
-		
+    BoxCollider::registerConstructor(componentFactory);
+
+    initted = true;
   }
 
   return windowID;

@@ -146,7 +146,7 @@ void GameObject::setParentObjectID(ObjectID id){
 	m_parentObjectID = id;
 }
 
-Vector GameObject::getPosition() const{
+Vector const& GameObject::getPosition() const{
 	return position;
 }
 
@@ -154,7 +154,7 @@ void GameObject::setPosition(Vector positionIn){
 	position = positionIn;
 }
 
-Vector GameObject::getOrientation() const{
+Vector const& GameObject::getOrientation() const{
 	return orientation;
 }
 
@@ -162,7 +162,7 @@ void GameObject::setOrientation(Vector orientationIn){
 	orientation = orientationIn;
 }
 
-Vector GameObject::getVelocity() const{
+Vector const& GameObject::getVelocity() const{
 	return velocity;
 }
 
@@ -170,7 +170,7 @@ void GameObject::setVelocity(Vector velocityIn){
 	velocity = velocityIn;
 }
 
-Vector GameObject::getAcceleration() const{
+Vector const& GameObject::getAcceleration() const{
 	return acceleration;
 }
 
@@ -192,7 +192,7 @@ void GameObject::send(int id, string message){
 /**
 	 Return the previous position of the object
 */
-Vector GameObject::getPreviousPosition() const{
+Vector const& GameObject::getPreviousPosition() const{
 	return previousPosition;
 }
 

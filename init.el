@@ -3,6 +3,7 @@
     (not (boundp 'cap/source_root_dir))
     (setq cap/source_root_dir default-directory))
 
+;; stuff to do only once
 (if
     (not (boundp 'cap/capengine-functions))
     (progn

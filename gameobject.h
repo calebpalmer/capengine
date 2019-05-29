@@ -83,15 +83,15 @@ namespace CapEngine {
 		const std::vector<std::shared_ptr<Component>>& getComponents();
 		std::vector<std::shared_ptr<Component>> getComponents(ComponentType in_type);
 		
-    Vector getPosition() const;
+    Vector const& getPosition() const;
     void setPosition(Vector position);
-    Vector getOrientation() const;
+    Vector const& getOrientation() const;
     void setOrientation(Vector orientation);
-    Vector getVelocity() const;
+    Vector const& getVelocity() const;
     void setVelocity(Vector velocity);
-    Vector getAcceleration() const;
+    Vector const& getAcceleration() const;
     void setAcceleration(Vector velocity);
-    Vector getPreviousPosition() const;
+    Vector const& getPreviousPosition() const;
     void setPreviousPosition(Vector position);
     ObjectType getObjectType() const;
     void setObjectType(ObjectType in_objectType);

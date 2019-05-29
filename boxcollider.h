@@ -22,7 +22,7 @@ public:
 	static std::unique_ptr<BoxCollider> makeComponent(const jsoncons::json &in_json);
 	static void registerConstructor(ComponentFactory &in_factory);
 	
-	void update(GameObject* object, double timestep) override {}
+	void update(GameObject* object, double timestep) override;
 	std::optional<Rectangle> boundingPolygon(const GameObject* object) const override;
 
 public:
