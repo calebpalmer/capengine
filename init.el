@@ -7,12 +7,12 @@
 (if
     (not (boundp 'cap/capengine-functions))
     (progn
-      (defun my-launch-editor-nodebug ()
+      (defun my-launch-nodebug ()
 	(interactive)
 	(shell-command "./editor test_files/map1.json &")
 	)
 
-      (defun my-launch-editor-debug ()
+      (defun my-launch-debug ()
 	(interactive)
 	(gdb "gdb -i=mi --args editor test_files/map1.json")
 	)
@@ -29,15 +29,15 @@
 
       (defun cap/cmake ()
 	(interactive)
-	(shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/source_root_dir  "build -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug"))
+	(shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/build-dir  " -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug && cp " cap/build-dir "/compile_commands.json ."))
 	)
       (setq cap/capengine-functions t)
       ))
 
-(setq compile-command (concat "cmake --build " cap/source_root_dir "build -- -j4"))
+(setq compile-command (concat "cmake --build " cap/build-dir " -- -j4 && cp " cap/build-dir "/compile_commands.json ."))
 
-(local-set-key (kbd "C-<f5>") 'my-launch-editor-nodebug)
-(local-set-key (kbd "<f5>") 'my-launch-editor-debug)
+(local-set-key (kbd "C-<f5>") 'my-launch-nodebug)
+(local-set-key (kbd "<f5>") 'my-launch-debug)
 (local-set-key (kbd "C-<f6>") 'my-launch-tests-nodebug)
 (local-set-key (kbd "<f6>") 'my-launch-tests-debug)
 (local-set-key (kbd "<f12>") 'compile)
