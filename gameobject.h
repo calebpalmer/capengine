@@ -11,60 +11,62 @@
 
 namespace CapEngine {
 
-  // forward declaractions
-  class Camera2d;
-  class GameObject;
+// forward declaractions
+class Camera2d;
+class GameObject;
 
-  class CollisionEvent{
-  public:
+class CollisionEvent{
+public:
     GameObject* object1;
     GameObject* object2;
     CollisionType type;
     CollisionClass class_;
 
     friend std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEvent);
-  };
+};
 
-  class ObjectCreator{
-  public:
+class ObjectCreator{
+public:
     virtual std::unique_ptr<GameObject> createObject() = 0;
     virtual ~ObjectCreator() {}
-  };
+};
 
-  class ObjectData {
-  public:
+class ObjectData {
+public:
     virtual ~ObjectData() {};
-  };
+};
 
-  typedef long ObjectID;
+typedef long ObjectID;
 
-  class GameObject{
-  public:
+class GameObject{
+public:
     enum ObjectState {
-      Inactive,
-      Starting,
-      Active,
-      Dying,
-      Dead
+		      Inactive,
+		      Starting,
+		      Active,
+		      Dying,
+		      Dead
     };
 
     enum ObjectType {
-      ObjectType_AI,
-      ObjectType_Player
+		     ObjectType_AI,
+		     ObjectType_Player
     };
 
     //constructors
     GameObject(bool newID = true);
 		
     ~GameObject() = default;
-    GameObject(const GameObject&) = default;
-    GameObject& operator=(const GameObject&) = default;
+    GameObject(const GameObject&);
+    GameObject& operator=(const GameObject&);
+
+    void swap(GameObject &io_other) noexcept;
 
     static ObjectID generateID();
     static int generateMessageId();
     void render(const Camera2d &in_camera, uint32_t in_windowId);
     std::unique_ptr<GameObject> update(double ms) const;
-		Rectangle boundingPolygon() const;
+    Rectangle boundingPolygon() const;
     bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,
 			 Vector collisionLocation);
     std::unique_ptr<GameObject> clone() const;
@@ -79,9 +81,9 @@ namespace CapEngine {
     void send(int messageId, std::string message);
     void setParentObjectID(ObjectID id);
 
-		void addComponent(std::shared_ptr<Component> in_pComponent);
-		const std::vector<std::shared_ptr<Component>>& getComponents();
-		std::vector<std::shared_ptr<Component>> getComponents(ComponentType in_type);
+    void addComponent(std::shared_ptr<Component> in_pComponent);
+    const std::vector<std::shared_ptr<Component>>& getComponents();
+    std::vector<std::shared_ptr<Component>> getComponents(ComponentType in_type);
 		
     Vector const& getPosition() const;
     void setPosition(Vector position);
@@ -99,7 +101,7 @@ namespace CapEngine {
     friend std::ostream& operator<<(std::ostream& stream, GameObject const& object);
 
 
-   private:
+private:
     static ObjectID nextID;
     static int nextMessageId;
     std::shared_ptr<ObjectData> m_pObjectData;
@@ -108,15 +110,15 @@ namespace CapEngine {
     ObjectID m_parentObjectID = -1;
     ObjectType m_objectType = ObjectType_AI;
 
-		//! The components
-		std::vector<std::shared_ptr<Component>> m_components;
+    //! The components
+    std::vector<std::shared_ptr<Component>> m_components;
 
     Vector position;
     Vector previousPosition;
     Vector orientation;
     Vector velocity;
     Vector acceleration;
-  };
+};
 }
 
 #endif // GAMEOBJECT_H
