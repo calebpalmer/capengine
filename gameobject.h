@@ -59,6 +59,8 @@ public:
     ~GameObject() = default;
     GameObject(const GameObject&);
     GameObject& operator=(const GameObject&);
+    GameObject(GameObject&& in_other);
+    GameObject& operator=(GameObject&& in_other);
 
     void swap(GameObject &io_other) noexcept;
 
