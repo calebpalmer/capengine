@@ -135,7 +135,7 @@ void GameObject::render(const Camera2d &in_camera, uint32_t in_windowId)
         auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
         assert(pGraphicsComponent != nullptr);
 
-        pGraphicsComponent->render(this, in_camera, in_windowId);
+        pGraphicsComponent->render(*this, in_camera, in_windowId);
     }
 }
 
@@ -147,7 +147,7 @@ unique_ptr<GameObject> GameObject::update(double ms) const
 
     for (auto &&pComponent : newObject->getComponents())
     {
-        pComponent->update(newObject.get(), ms);
+        pComponent->update(*newObject, ms);
     }
 
     return newObject;
@@ -163,7 +163,7 @@ Rectangle GameObject::boundingPolygon() const
         auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
         if (pPhysicsComponent)
         {
-            std::optional<Rectangle> maybeRectangle = pPhysicsComponent->boundingPolygon(this);
+            std::optional<Rectangle> maybeRectangle = pPhysicsComponent->boundingPolygon(*this);
             if (!maybeRectangle)
             {
                 continue;
@@ -321,7 +321,7 @@ void GameObject::send(int id, string message)
     for (auto &&pComponent : m_components)
     {
         assert(pComponent != nullptr);
-        pComponent->receive(this, id, message);
+        pComponent->receive(*this, id, message);
     }
 }
 

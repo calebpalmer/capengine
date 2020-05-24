@@ -36,9 +36,8 @@ std::unique_ptr<Component> PlaceHolderGraphics::clone() const {
 }
 
 //! \copydoc GraphicsComponent::render
-void PlaceHolderGraphics::render(GameObject *in_object, const Camera2d &in_camera, uint32_t in_windowId){
-    assert(in_object != nullptr);
-    Vector position = in_object->getPosition();
+void PlaceHolderGraphics::render(GameObject &in_object, const Camera2d &in_camera, uint32_t in_windowId){
+    Vector position = in_object.getPosition();
     Rectangle objectRect( position.getX() - std::round((static_cast<double>(m_width) / 2.0)),
 			  position.getY() - std::round((static_cast<double>(m_height) / 2.0)),
 			  m_width,

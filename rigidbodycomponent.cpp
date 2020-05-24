@@ -21,7 +21,7 @@ std::unique_ptr<Component> RigidBodyComponent::clone() const{
 }
 
 //! \copydoc Component::update
-void RigidBodyComponent::update(GameObject* object, double timestep){
+void RigidBodyComponent::update(GameObject &object, double timestep){
 	// apply forces here.
 }
 

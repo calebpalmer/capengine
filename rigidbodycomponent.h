@@ -19,7 +19,7 @@ public:
 	static std::unique_ptr<RigidBodyComponent> makeComponent(const jsoncons::json &in_json);
 	static void registerConstructor(ComponentFactory &in_factory);
 	
-	void update(GameObject* object, double timestep) override;
+	void update(GameObject &object, double timestep) override;
 
 public:
 	//! The component type.

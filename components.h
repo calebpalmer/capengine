@@ -22,8 +22,8 @@ namespace CapEngine {
   public:
     virtual ~Component() = default;
 
-    virtual void update(GameObject* object, double timestep) = 0;
-    virtual void receive(GameObject* /*object*/, int /*messageId*/, std::string /*message*/) {}
+    virtual void update(GameObject &object, double timestep) = 0;
+    virtual void receive(GameObject& /*object*/, int /*messageId*/, std::string /*message*/) {}
     virtual ComponentType getType() const = 0;
 
     virtual std::unique_ptr<Component> clone() const = 0;
@@ -32,14 +32,14 @@ namespace CapEngine {
   class PhysicsComponent : public Component {
   public:
     ~PhysicsComponent() override = default;
-    virtual std::optional<Rectangle> boundingPolygon(const GameObject* /*object*/) const { return std::nullopt; }
+    virtual std::optional<Rectangle> boundingPolygon(const GameObject& /*object*/) const { return std::nullopt; }
     ComponentType getType() const override { return ComponentType::Physics; }
   };
 
   class GraphicsComponent : public Component {
   public:
     ~GraphicsComponent() override = default;
-    virtual void render(GameObject* object, const Camera2d &in_camera, uint32_t in_windowId) = 0;
+    virtual void render(GameObject& object, const Camera2d &in_camera, uint32_t in_windowId) = 0;
     ComponentType getType() const override { return ComponentType::Graphics; }
   };
 

@@ -21,8 +21,8 @@ public:
     static PlaceHolderGraphics makeComponent(const jsoncons::json &in_json);
     static void registerConstructor(ComponentFactory &in_factory);
 
-    void update(GameObject* object, double timestep) override {};
-    void render(GameObject* object, const Camera2d &in_camera, uint32_t in_windowId) override;
+    void update(GameObject &object, double timestep) override {};
+    void render(GameObject &object, const Camera2d &in_camera, uint32_t in_windowId) override;
 
 public:
     static constexpr inline char kType[] = "PlaceHolderGraphics";

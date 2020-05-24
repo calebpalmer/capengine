@@ -22,8 +22,8 @@ public:
 	static std::unique_ptr<BoxCollider> makeComponent(const jsoncons::json &in_json);
 	static void registerConstructor(ComponentFactory &in_factory);
 	
-	void update(GameObject* object, double timestep) override;
-	std::optional<Rectangle> boundingPolygon(const GameObject* object) const override;
+	void update(GameObject& object, double timestep) override;
+	std::optional<Rectangle> boundingPolygon(const GameObject& object) const override;
 
 public:
 	static inline constexpr char kType[] = "BoxCollider";
@@ -33,7 +33,7 @@ private:
 };
 
 //! \copydoc PhysicsComponent::boundingPolygon
-inline std::optional<Rectangle> BoxCollider::boundingPolygon(const GameObject *object) const {
+inline std::optional<Rectangle> BoxCollider::boundingPolygon(const GameObject &object) const {
 	return m_box;
 }
 

@@ -45,9 +45,8 @@ void BoxCollider::registerConstructor(ComponentFactory &in_factory){
 	in_factory.registerComponentType(ComponentUtils::componentTypeToString(ComponentType::Physics), kType, makeComponent);
 }
 
-void BoxCollider::update(GameObject* object, double timestep) {
-	assert(object != nullptr);
-	Vector const& position = object->getPosition();
+void BoxCollider::update(GameObject &object, double timestep) {
+	Vector const& position = object.getPosition();
 
 	m_box.x = position.getX();
 	m_box.y = position.getY();
