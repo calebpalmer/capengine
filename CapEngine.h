@@ -65,5 +65,6 @@
 #include "widget.h"
 #include "eventsubscriber.h"
 #include "scene2dstate.h"
+#include "componentfactory.h"
 
 #endif
