@@ -23,7 +23,7 @@ int main(){
   runner.addTest(XmlParserTest::suite());
   runner.addTest(MatrixTest::suite());
   runner.addTest(RectangleTest::suite());
-  runner.addTest(ScanconvertTest::suite());
+  //runner.addTest(ScanconvertTest::suite());
 	runner.addTest(Camera2dTest::suite());
 	runner.addTest(CapEngine::QuaternionTest::suite());
 	runner.addTest(CapEngine::Testing::Scene2dUtilsTest::suite());

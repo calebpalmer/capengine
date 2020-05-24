@@ -410,21 +410,21 @@ jsoncons::json TileSet::json() const{
 
 		const Tile &tile = m_tiles[i];
 		jsoncons::json jsonTile;
-		
+
 		jsoncons::json position;
 		position.insert_or_assign(kTilePositionXProperty, tile.xpos);
 		position.insert_or_assign(kTilePositionYProperty, tile.ypos);
 		position.insert_or_assign(kTilePositionWidthProperty, tile.width);
 		position.insert_or_assign(kTilePositionHeightProperty, tile.height);
 		jsonTile.insert_or_assign(kTilePositionProperty, std::move(position));
-	
+
 		jsonTile.insert_or_assign(kTileTypeProperty, tileTypeToString(tile.type));
 
 		tiles[i] = std::move(jsonTile);
 	}
 
 	json.insert_or_assign(kTileArrayProperty, std::move(tiles));
-	return std::move(json);
+	return json;
 }
 
 

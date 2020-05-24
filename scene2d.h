@@ -155,10 +155,24 @@ void Scene2d<ObjectManager>::load(const jsoncons::json &in_json) {
 */
 template <class ObjectManager>
 void Scene2d<ObjectManager>::update(double in_ms) {
-	for(auto && i : m_layers){
-		assert(i.second != nullptr);
-		i.second->update(in_ms);
+    // update layers
+    for(auto && i : m_layers){
+	assert(i.second != nullptr);
+	i.second->update(in_ms);
+    }
+
+    // update objects
+    for(auto&& i : m_objectManager.getObjects()){
+	auto pUpdateObject = i->update(in_ms);
+	if(!pUpdateObject){
+	    CAP_LOG(Locator::logger,  "GameObject::update returned nullptr", Logger::CWARNING);
+	    continue;
 	}
+
+	i.reset(pUpdateObject.release());
+    }
+
+    
 }
 
 //! render function for the scene.
