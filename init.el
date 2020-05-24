@@ -34,7 +34,7 @@
       (setq cap/capengine-functions t)
       ))
 
-(setq compile-command (concat "cmake --build " cap/build-dir " -- -j4"))
+(setq compile-command (concat "cmake --build " cap/build-dir " -- -j4 && cp " cap/build-dir "/compile_commands.json ."))
 
 (local-set-key (kbd "C-<f5>") 'my-launch-nodebug)
 (local-set-key (kbd "<f5>") 'my-launch-debug)
