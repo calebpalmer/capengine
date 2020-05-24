@@ -551,7 +551,7 @@ std::vector<std::tuple<int, int, bool, SDL_Rect>> MapPanel::getTileRects() const
 		}
 	}
 
-	return std::move(rects);
+	return rects;
 }
 
 
