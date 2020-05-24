@@ -100,6 +100,10 @@ void Runner::update(){
 	if(m_gameStates.size() > 0)
 		(m_gameStates.back())->update(m_msPerUpdate);
 
+	// update the keyboard state.
+	if(Locator::keyboard)
+	    Locator::keyboard->update();
+
 	// update any Widgets (usually WindowWidgets) if there are any
 	for(auto && pWidget : m_widgets){
 		pWidget->update(m_msPerUpdate);
@@ -130,50 +134,8 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* /*time*/){
 			return;
 		}
   }
-	
-  // update the keyboard
-  else if(event.type == SDL_KEYUP || event.type == SDL_KEYDOWN){
-    SDL_Keycode ksym = ((SDL_KeyboardEvent*)&event)->keysym.sym;
-    switch(ksym){
-    case SDLK_UP:
-      Locator::keyboard->keyMap[Keyboard::CAP_KEYUP].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_DOWN:
-      Locator::keyboard->keyMap[Keyboard::CAP_KEYDOWN].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);      
-      break;
-    case SDLK_LEFT:
-      Locator::keyboard->keyMap[Keyboard::CAP_KEYLEFT].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_RIGHT:
-      Locator::keyboard->keyMap[Keyboard::CAP_KEYRIGHT].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_SPACE:
-      Locator::keyboard->keyMap[Keyboard::CAP_SPACE].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_RETURN:
-      Locator::keyboard->keyMap[Keyboard::CAP_ENTER].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_BACKSPACE:
-      Locator::keyboard->keyMap[Keyboard::CAP_BACKSPACE].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_ESCAPE:
-      Locator::keyboard->keyMap[Keyboard::CAP_ESCAPE].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_z:
-      Locator::keyboard->keyMap[Keyboard::CAP_Z].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_y:
-      Locator::keyboard->keyMap[Keyboard::CAP_Y].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
-    case SDLK_LCTRL:
-      Locator::keyboard->keyMap[Keyboard::CAP_LCTRL].state = (event.type == SDL_KEYUP ? Keyboard::CAP_UNPRESSED : Keyboard::CAP_PRESSED);
-      break;
 
-    default:
-      break;
-    }
-  }
-  // update the mouse position 
+  // update the mouse position
   else if(event.type == SDL_MOUSEMOTION) {
     int x = ((SDL_MouseMotionEvent*)&event)->x;
     int y = ((SDL_MouseMotionEvent*)&event)->y;

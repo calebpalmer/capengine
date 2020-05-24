@@ -4,33 +4,41 @@
 #include <map>
 
 namespace CapEngine{
-  class Keyboard{
-  public:
-    enum Keys {
-      CAP_KEYUP,
-      CAP_KEYDOWN,
-      CAP_KEYLEFT,
-      CAP_KEYRIGHT,
-      CAP_SPACE,
-      CAP_ENTER,
-      CAP_BACKSPACE,
-      CAP_ESCAPE,
-			CAP_Z,
-			CAP_Y,
-			CAP_LCTRL
+class Keyboard{
+public:
+    enum Key
+    {
+     CAP_KEYUP,
+     CAP_KEYDOWN,
+     CAP_KEYLEFT,
+     CAP_KEYRIGHT,
+     CAP_SPACE,
+     CAP_ENTER,
+     CAP_BACKSPACE,
+     CAP_ESCAPE,
+     CAP_Z,
+     CAP_Y,
+     CAP_LCTRL
     };
 
-    enum KeyState {
-      CAP_UNPRESSED,
-      CAP_PRESSED
+    enum KeyState
+    {
+     CAP_UNPRESSED,
+     CAP_PRESSED
     };
-    
+
     struct KeyInfo{
-      KeyState state;
+	KeyState state;
     };
 
-    std::map<Keys, KeyInfo> keyMap;
-  };
+    Keyboard();
+    void update();
+    KeyInfo key(Key in_key) const;
+
+
+private:
+    std::map<Key, KeyInfo> m_keyMap;
+};
 }
 
 #endif

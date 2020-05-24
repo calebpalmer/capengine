@@ -119,8 +119,8 @@ bool Editor::onDestroy(){
 void Editor::handleKeyboardEvent(SDL_KeyboardEvent event){
 	WidgetState::handleKeyboardEvent(event);
 	assert(Locator::keyboard != nullptr);
-	bool lCtrlPressed = Locator::keyboard->keyMap[Keyboard::CAP_LCTRL].state == Keyboard::CAP_PRESSED;
-	
+	bool lCtrlPressed = Locator::keyboard->key(Keyboard::CAP_LCTRL).state == Keyboard::CAP_PRESSED;
+
 	if(event.type == SDL_KEYDOWN){
 		switch(event.keysym.sym){
 		case SDLK_s:
