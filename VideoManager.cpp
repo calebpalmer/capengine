@@ -541,7 +541,7 @@ namespace CapEngine
   {
     Surface *surface = loadSurface(in_filePath);
     SurfacePtr pSurface(surface, SDL_FreeSurface);
-    return std::move(pSurface);
+    return pSurface;
   }
 
   Surface *VideoManager::loadSurface(string filePath) const

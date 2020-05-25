@@ -201,7 +201,7 @@ std::unique_ptr<PlatformerMap> PlatformerMap::createPlatformerMapFromFile(
     pPlatformerMap->addSpawnPoint(spawnPoint);
   }
 
-  return std::move(pPlatformerMap);
+  return pPlatformerMap;
 }
 
 } // namespace CapEngine

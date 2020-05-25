@@ -11,13 +11,13 @@ namespace CapEngine {
 
 
 //! Create a Matrix
-/** 
-	 
+/**
+
  Each Vector passed represents a column in the matrix.  eg:
 
  Matrix({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {2, 3, 0, 1})
  actually looks like this:
- 
+
  [ 1 0 0 2 ]
  [ 0 1 0 3 ]
  [ 0 0 1 0 ]
@@ -27,7 +27,7 @@ namespace CapEngine {
  \param vec2
  \param vec3
  \parem vec4
- \return 
+ \return
 */
 Matrix::Matrix(CapEngine::Vector vec1, CapEngine::Vector vec2, CapEngine::Vector vec3, CapEngine::Vector vec4){
   vectors.push_back(vec1);
@@ -40,9 +40,9 @@ std::unique_ptr<float> Matrix::getGLMatrix() const{
   if(vectors.size() != 4){
     throw CapEngineException("Not a 4x4 matrix");
   }
-  
+
   unique_ptr<float> pMatrix(new float[16]);
-  
+
   pMatrix.get()[0] = vectors[0].x;
   pMatrix.get()[1] = vectors[0].y;
   pMatrix.get()[2] = vectors[0].z;
@@ -62,8 +62,8 @@ std::unique_ptr<float> Matrix::getGLMatrix() const{
   pMatrix.get()[13] = vectors[3].y;
   pMatrix.get()[14] = vectors[3].z;
   pMatrix.get()[15] = vectors[3].d;
-    
-  return std::move(pMatrix);
+
+  return pMatrix;
 
 }
 
