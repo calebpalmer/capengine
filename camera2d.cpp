@@ -79,9 +79,10 @@ const Rectangle& Camera2d::getViewingRectangle() const {
  \return 
 */
 Rectangle toScreenCoords(const Camera2d &in_camera,
-												 const Rectangle &in_rect,
-												 uint32_t in_windowId,
-												 bool doYFlip){
+			 const Rectangle &in_rect,
+			 uint32_t in_windowId,
+			 bool doYFlip)
+{
 	
 	const Rectangle& viewingRect = in_camera.getViewingRectangle();
 
