@@ -31,90 +31,96 @@ GameObject::GameObject(bool newID)
 */
 void GameObject::swap(GameObject &io_other) noexcept
 {
-    if (this != &io_other)
-    {
-        std::swap(position, io_other.position);
-        std::swap(previousPosition, io_other.previousPosition);
-        std::swap(orientation, io_other.orientation);
-        std::swap(velocity, io_other.velocity);
-        std::swap(acceleration, io_other.acceleration);
-        std::swap(m_pObjectData, io_other.m_pObjectData);
-        std::swap(m_objectState, io_other.m_objectState);
-        std::swap(m_objectID, io_other.m_objectID);
-        std::swap(m_parentObjectID, io_other.m_parentObjectID);
-        std::swap(m_objectType, io_other.m_objectType);
-        std::swap(m_components, io_other.m_components);
-    }
+  if (this != &io_other) {
+    std::swap(position, io_other.position);
+    std::swap(previousPosition, io_other.previousPosition);
+    std::swap(orientation, io_other.orientation);
+    std::swap(velocity, io_other.velocity);
+    std::swap(acceleration, io_other.acceleration);
+    std::swap(force, io_other.force);
+    std::swap(m_pObjectData, io_other.m_pObjectData);
+    std::swap(m_objectState, io_other.m_objectState);
+    std::swap(m_objectID, io_other.m_objectID);
+    std::swap(m_parentObjectID, io_other.m_parentObjectID);
+    std::swap(m_objectType, io_other.m_objectType);
+    std::swap(m_components, io_other.m_components);
+  }
 }
 
 //! Copy constructor.
 GameObject::GameObject(const GameObject &in_other)
 {
-    position = in_other.position;
-    previousPosition = in_other.previousPosition;
-    orientation = in_other.orientation;
-    velocity = in_other.velocity;
-    acceleration = in_other.acceleration;
+  position = in_other.position;
+  previousPosition = in_other.previousPosition;
+  orientation = in_other.orientation;
+  velocity = in_other.velocity;
+  acceleration = in_other.acceleration;
+  force = in_other.force;
 
-    // darn, I don't have a clone for this polymorphic type.
-    // pretty sure I'm not doing much with it though.
-    m_pObjectData = in_other.m_pObjectData;
+  // darn, I don't have a clone for this polymorphic type.
+  // pretty sure I'm not doing much with it though.
+  m_pObjectData = in_other.m_pObjectData;
 
-    m_objectState = in_other.m_objectState;
-    m_objectID = generateID();
-    m_parentObjectID = in_other.m_parentObjectID;
-    m_objectType = in_other.m_objectType;
+  m_objectState = in_other.m_objectState;
+  m_objectID = generateID();
+  m_parentObjectID = in_other.m_parentObjectID;
+  m_objectType = in_other.m_objectType;
 
-    // deep copy the componentsn
-    m_components.reserve(in_other.m_components.size());
-    std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
-                   [](std::shared_ptr<Component> in_pComponent) -> std::shared_ptr<Component> {
-                       return in_pComponent->clone();
-                   });
+  // deep copy the componentsn
+  m_components.reserve(in_other.m_components.size());
+  std::transform(
+      in_other.m_components.begin(), in_other.m_components.end(),
+      std::back_inserter(m_components),
+      [](std::shared_ptr<Component> in_pComponent)
+          -> std::shared_ptr<Component> { return in_pComponent->clone(); });
 }
 
-GameObject::GameObject(GameObject&& in_other){
-    position = in_other.position;
-    previousPosition = in_other.previousPosition;
-    orientation = in_other.orientation;
-    velocity = in_other.velocity;
-    acceleration = in_other.acceleration;
+GameObject::GameObject(GameObject &&in_other)
+{
+  position = in_other.position;
+  previousPosition = in_other.previousPosition;
+  orientation = in_other.orientation;
+  velocity = in_other.velocity;
+  acceleration = in_other.acceleration;
+  force = in_other.force;
+
+  // darn, I don't have a clone for this polymorphic type.
+  // pretty sure I'm not doing much with it though.
+  m_pObjectData = std::move(in_other.m_pObjectData);
+
+  m_objectState = in_other.m_objectState;
+  m_objectID = generateID();
+  m_parentObjectID = in_other.m_parentObjectID;
+  m_objectType = in_other.m_objectType;
+
+  // deep copy the components
+  m_components = std::move(in_other.m_components);
+}
+
+GameObject &GameObject::operator=(GameObject &&in_other)
+{
+  if (this != &in_other) {
+    this->position = in_other.position;
+    this->previousPosition = in_other.previousPosition;
+    this->orientation = in_other.orientation;
+    this->velocity = in_other.velocity;
+    this->acceleration = in_other.acceleration;
+    this->force = in_other.force;
 
     // darn, I don't have a clone for this polymorphic type.
     // pretty sure I'm not doing much with it though.
-    m_pObjectData = std::move(in_other.m_pObjectData);
+    this->m_pObjectData = std::move(in_other.m_pObjectData);
 
-    m_objectState = in_other.m_objectState;
-    m_objectID = generateID();
-    m_parentObjectID = in_other.m_parentObjectID;
-    m_objectType = in_other.m_objectType;
+    this->m_objectState = in_other.m_objectState;
+    this->m_objectID = generateID();
+    this->m_parentObjectID = in_other.m_parentObjectID;
+    this->m_objectType = in_other.m_objectType;
 
     // deep copy the components
-    m_components = std::move(in_other.m_components);
-}
+    this->m_components = std::move(in_other.m_components);
+  }
 
-GameObject& GameObject::operator=(GameObject&& in_other){
-    if(this != &in_other){
-	this->position = in_other.position;
-	this->previousPosition = in_other.previousPosition;
-	this->orientation = in_other.orientation;
-	this->velocity = in_other.velocity;
-	this->acceleration = in_other.acceleration;
-
-	// darn, I don't have a clone for this polymorphic type.
-	// pretty sure I'm not doing much with it though.
-	this->m_pObjectData = std::move(in_other.m_pObjectData);
-
-	this->m_objectState = in_other.m_objectState;
-	this->m_objectID = generateID();
-	this->m_parentObjectID = in_other.m_parentObjectID;
-	this->m_objectType = in_other.m_objectType;
-
-	// deep copy the components
-	this->m_components = std::move(in_other.m_components);
-    }
-
-    return *this;
+  return *this;
 }
 
 //! Copy assignment operator.
@@ -201,26 +207,28 @@ bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::Colli
 unique_ptr<GameObject> GameObject::clone() const
 {
 
-    unique_ptr<GameObject> newObj(new GameObject(false));
+  unique_ptr<GameObject> newObj(new GameObject(false));
 
-    newObj->position = position;
-    newObj->previousPosition = previousPosition;
-    newObj->orientation = orientation;
-    newObj->velocity = velocity;
-    newObj->acceleration = acceleration;
+  newObj->position = position;
+  newObj->previousPosition = previousPosition;
+  newObj->orientation = orientation;
+  newObj->velocity = velocity;
+  newObj->acceleration = acceleration;
+  newObj->force = force;
 
-    newObj->m_components.reserve(m_components.size());
-    std::transform(m_components.begin(), m_components.end(), std::back_inserter(newObj->m_components),
-                   [](auto &&pComponent) -> std::unique_ptr<Component> {
-                       return pComponent->clone();
-                   });
+  newObj->m_components.reserve(m_components.size());
+  std::transform(m_components.begin(), m_components.end(),
+                 std::back_inserter(newObj->m_components),
+                 [](auto &&pComponent) -> std::unique_ptr<Component> {
+                   return pComponent->clone();
+                 });
 
-    newObj->m_pObjectData = m_pObjectData;
-    newObj->m_objectState = m_objectState;
-    newObj->m_objectID = m_objectID;
-    newObj->m_parentObjectID = m_parentObjectID;
+  newObj->m_pObjectData = m_pObjectData;
+  newObj->m_objectState = m_objectState;
+  newObj->m_objectID = m_objectID;
+  newObj->m_parentObjectID = m_parentObjectID;
 
-    return newObj;
+  return newObj;
 }
 
 ObjectID GameObject::generateID()
@@ -308,13 +316,14 @@ Vector const &GameObject::getAcceleration() const
 
 void GameObject::setAcceleration(Vector accelerationIn)
 {
-    acceleration = accelerationIn;
+  acceleration = accelerationIn;
 }
 
-int GameObject::generateMessageId()
-{
-    return nextMessageId++;
-}
+Vector const &GameObject::getForce() const { return force; }
+
+void GameObject::setForce(Vector in_force) { this->force = in_force; }
+
+int GameObject::generateMessageId() { return nextMessageId++; }
 
 void GameObject::send(int id, string message)
 {

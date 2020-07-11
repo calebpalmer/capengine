@@ -15,43 +15,39 @@ namespace CapEngine {
 class Camera2d;
 class GameObject;
 
-class CollisionEvent{
+class CollisionEvent
+{
 public:
-    GameObject* object1;
-    GameObject* object2;
-    CollisionType type;
-    CollisionClass class_;
+  GameObject *object1;
+  GameObject *object2;
+  CollisionType type;
+  CollisionClass class_;
 
-    friend std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEvent);
+  friend std::ostream &operator<<(std::ostream &stream,
+                                  const CollisionEvent collisionEvent);
 };
 
-class ObjectCreator{
+class ObjectCreator
+{
 public:
-    virtual std::unique_ptr<GameObject> createObject() = 0;
-    virtual ~ObjectCreator() {}
+  virtual std::unique_ptr<GameObject> createObject() = 0;
+  virtual ~ObjectCreator() {}
 };
 
-class ObjectData {
+class ObjectData
+{
 public:
-    virtual ~ObjectData() {};
+  virtual ~ObjectData(){};
 };
 
-typedef long ObjectID;
+  typedef long ObjectID;
 
-class GameObject{
-public:
-    enum ObjectState {
-		      Inactive,
-		      Starting,
-		      Active,
-		      Dying,
-		      Dead
-    };
+  class GameObject
+  {
+  public:
+    enum ObjectState { Inactive, Starting, Active, Dying, Dead };
 
-    enum ObjectType {
-		     ObjectType_AI,
-		     ObjectType_Player
-    };
+    enum ObjectType { ObjectType_AI, ObjectType_Player };
 
     //constructors
     GameObject(bool newID = true);
@@ -69,8 +65,8 @@ public:
     void render(const Camera2d &in_camera, uint32_t in_windowId);
     std::unique_ptr<GameObject> update(double ms) const;
     Rectangle boundingPolygon() const;
-    bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject,
-			 Vector collisionLocation);
+    bool handleCollision(CollisionType, CollisionClass, GameObject *otherObject,
+                         Vector collisionLocation);
     std::unique_ptr<GameObject> clone() const;
     // getters and setters
     std::shared_ptr<ObjectData> getObjectData() const;
@@ -97,13 +93,15 @@ public:
     void setAcceleration(Vector velocity);
     Vector const& getPreviousPosition() const;
     void setPreviousPosition(Vector position);
+    Vector const &getForce() const;
+    void setForce(Vector in_force);
+
     ObjectType getObjectType() const;
     void setObjectType(ObjectType in_objectType);
 
     friend std::ostream& operator<<(std::ostream& stream, GameObject const& object);
 
-
-private:
+  private:
     static ObjectID nextID;
     static int nextMessageId;
     std::shared_ptr<ObjectData> m_pObjectData;
@@ -120,7 +118,8 @@ private:
     Vector orientation;
     Vector velocity;
     Vector acceleration;
-};
+    Vector force;
+  };
 }
 
 #endif // GAMEOBJECT_H
