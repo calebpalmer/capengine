@@ -1,48 +1,54 @@
 #include "scene2dschema.h"
 
-namespace CapEngine { namespace Schema {
+namespace CapEngine
+{
+namespace Schema
+{
 
-namespace Scene2d {
+namespace Scene2d
+{
 
 // general
-const char* kPosition = "position";
-const char* kOrientation = "orientation";
-const char* kXCoord = "x";
-const char* kYCoord = "y";
-const char* kZCoord = "z";
-const char* kSize = "size";
-const char* kWidth = "width";
-const char* kHeight = "height";
-const char* kType = "type";
-const char* kSubType = "subtype";
-const char* kAssetId = "asset_id";
+const char *kPosition = "position";
+const char *kOrientation = "orientation";
+const char *kXCoord = "x";
+const char *kYCoord = "y";
+const char *kZCoord = "z";
+const char *kSize = "size";
+const char *kWidth = "width";
+const char *kHeight = "height";
+const char *kType = "type";
+const char *kSubType = "subtype";
+const char *kAssetId = "asset_id";
 
 // scenes
-const char* kScenes = "scenes";
-const char* kSceneId = "id";
+const char *kScenes = "scenes";
+const char *kSceneId = "id";
 
 // layers
-const char* kLayers = "layers";
-const char* kLayerOrder = "order";
-const char* kLayerType = "type";
+const char *kLayers = "layers";
+const char *kLayerOrder = "order";
+const char *kLayerType = "type";
 
 // image layers
-const char* kImageLayerType = "ImageLayer";
+const char *kImageLayerType = "ImageLayer";
 // kAssetId
 // kPosition
-const char* kBitmapCollisionLayer = "BitmapCollisionLayer";
+const char *kBitmapCollisionLayer = "BitmapCollisionLayer";
 
 // objects
-const char* kObjects = "objects";
-const char* kComponents = "components";
+const char *kObjects = "objects";
+const char *kComponents = "components";
 
-} // namespace Scened2d
+} // namespace Scene2d
 
-namespace Components {
+namespace Components
+{
 
 // box collider
-const char* kBox = "box";
+const char *kBox = "box";
 
 } // namespace Components
 
-}} // CapEngine::Schema::Scene2d
+} // namespace Schema
+} // namespace CapEngine

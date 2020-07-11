@@ -1,59 +1,65 @@
 #ifndef CAPENGINE_TILESETPANEL_H
 #define CAPENGINE_TILESETPANEL_H
 
-#include "widget.h"
 #include "tileset.h"
+#include "widget.h"
 
 #include <memory>
 
-namespace CapEngine { namespace UI {
+namespace CapEngine
+{
+namespace UI
+{
 
-		class TileSetPanel : public Widget {
-		public:
-			//! Used for caching draw location of a Tile
-			struct TileLocation{
-				//! The index into the TileSet off the tile to draw
-				unsigned int index;
-				//! The src rectangle from the tileset to draw
-				SDL_Rect srcRect;
-				//! The dst rectangle to draw to in the window
-				SDL_Rect dstRect;
-			};
-			
-		public:
-			static std::shared_ptr<TileSetPanel> create(std::shared_ptr<TileSet> pTileSet);
+class TileSetPanel : public Widget
+{
+public:
+  //! Used for caching draw location of a Tile
+  struct TileLocation {
+    //! The index into the TileSet off the tile to draw
+    unsigned int index;
+    //! The src rectangle from the tileset to draw
+    SDL_Rect srcRect;
+    //! The dst rectangle to draw to in the window
+    SDL_Rect dstRect;
+  };
 
-			TileSetPanel(const TileSetPanel&) = delete;
-			TileSetPanel& operator=(const TileSetPanel&) = delete;
+public:
+  static std::shared_ptr<TileSetPanel>
+      create(std::shared_ptr<TileSet> pTileSet);
 
-			virtual SDL_Rect getPosition() const override;
-			virtual void setPosition(int x, int y);
-			virtual void setSize(int width, int height);
-			virtual void render();
+  TileSetPanel(const TileSetPanel &) = delete;
+  TileSetPanel &operator=(const TileSetPanel &) = delete;
 
-			virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
-			virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event);
-			virtual void handleMouseWheelEvent(SDL_MouseWheelEvent /*event*/) {}
-			virtual void handleKeyboardEvent(SDL_KeyboardEvent /*event*/) {}
-			virtual void handleWindowEvent(SDL_WindowEvent /*event*/) {}
+  virtual SDL_Rect getPosition() const override;
+  virtual void setPosition(int x, int y);
+  virtual void setSize(int width, int height);
+  virtual void render();
 
-		private:
-			TileSetPanel(std::shared_ptr<TileSet> pTileSet);
+  virtual void handleMouseMotionEvent(SDL_MouseMotionEvent /*event*/) {}
+  virtual void handleMouseButtonEvent(SDL_MouseButtonEvent event);
+  virtual void handleMouseWheelEvent(SDL_MouseWheelEvent /*event*/) {}
+  virtual void handleKeyboardEvent(SDL_KeyboardEvent /*event*/) {}
+  virtual void handleWindowEvent(SDL_WindowEvent /*event*/) {}
 
-			void updateDrawLocations();
+private:
+  TileSetPanel(std::shared_ptr<TileSet> pTileSet);
 
-			//! The owned TileSet
-			std::shared_ptr<TileSet> m_pTileSet;
-			//! The rendering rectangle
-			SDL_Rect m_rect = {0, 0, 0, 0};
-			//! The texture of the tiles from the tileset.
-			TexturePtr m_pTileSetTexture;
-			//! Stores cache of Tile draw locations
-			std::vector<TileLocation> m_tiles;
-			//! flag indicating if 
-			bool m_updateDrawLocations = true;
-		};
-		
-}}
+  void updateDrawLocations();
 
-#endif //CAPENGINE_TILESETPANEL_H
+  //! The owned TileSet
+  std::shared_ptr<TileSet> m_pTileSet;
+  //! The rendering rectangle
+  SDL_Rect m_rect = {0, 0, 0, 0};
+  //! The texture of the tiles from the tileset.
+  TexturePtr m_pTileSetTexture;
+  //! Stores cache of Tile draw locations
+  std::vector<TileLocation> m_tiles;
+  //! flag indicating if
+  bool m_updateDrawLocations = true;
+};
+
+} // namespace UI
+} // namespace CapEngine
+
+#endif // CAPENGINE_TILESETPANEL_H

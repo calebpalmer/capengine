@@ -5,8 +5,9 @@
 
 #include <string>
 
-namespace CapEngine {
-  std::string surfaceToASCII(Surface* surface);
+namespace CapEngine
+{
+std::string surfaceToASCII(Surface *surface);
 }
 
 #endif // TOOLS_J

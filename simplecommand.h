@@ -5,21 +5,24 @@
 
 #include <functional>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
-	class SimpleCommand : public Command {
-	public:
-		SimpleCommand(std::function<void()> executeCommand,
-									std::function<void()> unExecuteCommand=[]() {});
+class SimpleCommand : public Command
+{
+public:
+  SimpleCommand(
+      std::function<void()> executeCommand,
+      std::function<void()> unExecuteCommand = []() {});
 
-		void execute() override;
-		void unExecute() override;
+  void execute() override;
+  void unExecute() override;
 
-	private:
-		std::function<void()> m_executeFunction;
-		std::function<void()> m_unExecuteFunction;
-	};
-	
-}
+private:
+  std::function<void()> m_executeFunction;
+  std::function<void()> m_unExecuteFunction;
+};
+
+} // namespace CapEngine
 
 #endif // CAPENGINE_SIMEPLECOMMAND_H

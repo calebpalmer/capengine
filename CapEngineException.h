@@ -7,21 +7,27 @@
 
 #include <boost/exception/all.hpp>
 
-namespace CapEngine{
-  //class for time exceptions.  It is a runtime error
-  class CapEngineException : public std::runtime_error {
-  public:
-    explicit CapEngineException(const std::string& msg) : std::runtime_error(msg){}
-  };
+namespace CapEngine
+{
+// class for time exceptions.  It is a runtime error
+class CapEngineException : public std::runtime_error
+{
+public:
+  explicit CapEngineException(const std::string &msg) : std::runtime_error(msg)
+  {
+  }
+};
 
-}
+} // namespace CapEngine
 
 #define CAP_THROW(e) BOOST_THROW_EXCEPTION(e);
 
-#define CAP_THROW_NULL(expr, msg) if((expr) == nullptr)		\
+#define CAP_THROW_NULL(expr, msg)                                              \
+  if ((expr) == nullptr)                                                       \
     BOOST_THROW_EXCEPTION(CapEngine::CapEngineException(msg));
 
-#define CAP_THROW_ASSERT(expr, msg) if((expr) == false)		\
+#define CAP_THROW_ASSERT(expr, msg)                                            \
+  if ((expr) == false)                                                         \
     BOOST_THROW_EXCEPTION(CapEngine::CapEngineException(msg));
 
 #endif

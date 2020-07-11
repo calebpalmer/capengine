@@ -1,16 +1,17 @@
 #include "soundplayer.h"
+#include "CapEngineException.h"
 #include "locator.h"
+#include <assert.h>
 #include <iostream>
 #include <sstream>
-#include <assert.h>
-#include "CapEngineException.h"
 
 using namespace CapEngine;
 using namespace std;
 
-CapEngine::SoundPlayer* CapEngine::SoundPlayer::instance;
+CapEngine::SoundPlayer *CapEngine::SoundPlayer::instance;
 
-SoundPlayer::SoundPlayer(): idCounter(0) {
+SoundPlayer::SoundPlayer() : idCounter(0)
+{
   SDL_AudioSpec targetFormat;
   memset(&targetFormat, 0, sizeof(SDL_AudioSpec));
   memset(&audioFormat, 0, sizeof(SDL_AudioSpec));
@@ -18,9 +19,10 @@ SoundPlayer::SoundPlayer(): idCounter(0) {
   targetFormat.format = FORMAT;
   targetFormat.samples = SAMPLES;
   targetFormat.channels = CHANNELS;
-  targetFormat.callback = (void (*)(void*, unsigned char*, int))&audioCallback;
+  targetFormat.callback =
+      (void (*)(void *, unsigned char *, int)) & audioCallback;
 
-  if ( SDL_OpenAudio(&targetFormat, &this->audioFormat ) < 0 ){
+  if (SDL_OpenAudio(&targetFormat, &this->audioFormat) < 0) {
     ostringstream errorMsg;
     errorMsg << "Couldn't open audio: " << SDL_GetError();
     throw CapEngineException(errorMsg.str());
@@ -28,60 +30,59 @@ SoundPlayer::SoundPlayer(): idCounter(0) {
 
   ostringstream logMsg;
   logMsg << "audio device format opened" << endl
-	 << "\tfrequency: " << audioFormat.freq << endl
-	 << "\tchannels: " << audioFormat.channels << endl
-	 << "\tformat: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
+         << "\tfrequency: " << audioFormat.freq << endl
+         << "\tchannels: " << audioFormat.channels << endl
+         << "\tformat: "
+         << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
   Locator::logger->log(logMsg.str(), Logger::CDEBUG, __FILE__, __LINE__);
-
 }
 
-SoundPlayer::~SoundPlayer(){
-  SDL_CloseAudio();
-}
+SoundPlayer::~SoundPlayer() { SDL_CloseAudio(); }
 
 //! The singleton method
 /*!
 
  */
-SoundPlayer& SoundPlayer::getSoundPlayer(){
-  if(instance == nullptr){
+SoundPlayer &SoundPlayer::getSoundPlayer()
+{
+  if (instance == nullptr) {
     instance = new SoundPlayer;
   }
 
-    return *instance;
+  return *instance;
 }
 
 //! the audio callback for SDL to fill audio buffer
 /*!
 
  */
-void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len){
+void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len)
+{
   memset(stream, SoundPlayer::getSoundPlayer().getSilence(), len);
 
-  SoundCollection& sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
-  if(sounds.size() <= 0)
+  SoundCollection &sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
+  if (sounds.size() <= 0)
     return;
   // SoundCollectionIter iter;
   Uint32 amount, position;
 
-  for(auto& i: sounds){
-    if( (i->pcm->currentPosition() + len) > i->pcm->getLength() ){
+  for (auto &i : sounds) {
+    if ((i->pcm->currentPosition() + len) > i->pcm->getLength()) {
       amount = i->pcm->getLength() - i->pcm->currentPosition();
-    }
-    else{
+    } else {
       amount = len;
     }
 
     position = i->pcm->currentPosition();
-    Uint8* bufStart = &(i->pcm->getBuf())[position];
+    Uint8 *bufStart = &(i->pcm->getBuf())[position];
     SDL_MixAudio(stream, bufStart, amount, SDL_MIX_MAXVOLUME);
-    
+
     i->pcm->incrementPosition(amount);
   }
-  
 }
 
-long SoundPlayer::addSound(PCM* sound, bool repeat){
+long SoundPlayer::addSound(PCM *sound, bool repeat)
+{
   long id = idCounter++;
   unique_ptr<PCMType> pSound(new PCMType());
   pSound->id = id;
@@ -101,11 +102,11 @@ long SoundPlayer::addSound(PCM* sound, bool repeat){
 /*!
 
  */
-void SoundPlayer::setState(SoundState state){
-  if(state == SoundState::PAUSE){
+void SoundPlayer::setState(SoundState state)
+{
+  if (state == SoundState::PAUSE) {
     SDL_PauseAudio(1);
-  }
-  else if(state == SoundState::PLAY){
+  } else if (state == SoundState::PLAY) {
     SDL_PauseAudio(0);
   }
 }
@@ -114,60 +115,55 @@ void SoundPlayer::setState(SoundState state){
 /*!
 
  */
-void SoundPlayer::cleanSounds(){
+void SoundPlayer::cleanSounds()
+{
   SoundCollectionIter iter;
-   iter = sounds.begin();
+  iter = sounds.begin();
 
-   // I don't think this iteration is safe because deletes are occurring.
-   while(iter != sounds.end()){
-    if(*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())){
-      if(*iter != nullptr && (*iter)->repeat == false){
-  	delete ((*iter)->pcm);
-  	delete *iter;
-  	iter = sounds.erase(iter);
+  // I don't think this iteration is safe because deletes are occurring.
+  while (iter != sounds.end()) {
+    if (*iter == nullptr ||
+        ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())) {
+      if (*iter != nullptr && (*iter)->repeat == false) {
+        delete ((*iter)->pcm);
+        delete *iter;
+        iter = sounds.erase(iter);
+      } else {
+        // if not null, set position back to beginning
+        if (*iter != nullptr) {
+          (*iter)->pcm->resetPosition();
+        }
       }
-      else{
-  	// if not null, set position back to beginning
-  	if(*iter != nullptr){
-  	  (*iter)->pcm->resetPosition();
-  	}
-      }
-    }
-    else{
+    } else {
       ++iter;
     }
   }
-
 }
 
 //!  return the soundCollection
 /*!
 
  */
-SoundCollection& SoundPlayer::getSoundCollection(){
-  return sounds;
-}
+SoundCollection &SoundPlayer::getSoundCollection() { return sounds; }
 
 //! return silence value
 /*!
 
  */
-uint8_t SoundPlayer::getSilence() const{
-  return audioFormat.silence;
-}
+uint8_t SoundPlayer::getSilence() const { return audioFormat.silence; }
 
-void SoundPlayer::deleteSound(long id){
+void SoundPlayer::deleteSound(long id)
+{
   SoundCollectionIter iter;
   iter = sounds.begin();
-  while(iter != sounds.end()){
-    if(((*iter)->id) == id){
+  while (iter != sounds.end()) {
+    if (((*iter)->id) == id) {
 
       delete ((*iter)->pcm);
       delete *iter;
       iter = sounds.erase(iter);
       return;
-    }
-    else{
+    } else {
       ++iter;
     }
   }

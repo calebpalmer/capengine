@@ -3,7 +3,8 @@
 
 #include <map>
 
-namespace CapEngine{
+namespace CapEngine
+{
 class Keyboard
 {
 public:
@@ -34,6 +35,6 @@ public:
 private:
   std::map<Key, KeyInfo> m_keyMap;
 };
-}
+} // namespace CapEngine
 
 #endif

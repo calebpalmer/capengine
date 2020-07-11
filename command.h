@@ -1,26 +1,27 @@
 #ifndef CAPENGINE_COMMAND_H
 #define CAPENGINE_COMMAND_H
 
-namespace CapEngine {
+namespace CapEngine
+{
 
-	//! Abstract class for command pattern.
-	class Command {
-	public:
-		virtual ~Command() = default;
-		
-		virtual void execute() = 0;
-		virtual void unExecute() {};
-	};
-}
+//! Abstract class for command pattern.
+class Command
+{
+public:
+  virtual ~Command() = default;
 
-/** 
+  virtual void execute() = 0;
+  virtual void unExecute(){};
+};
+} // namespace CapEngine
+
+/**
  \fn Command::execute()
- \brief 
+ \brief
    Executes a command.
 */
 
-		
-/** 
+/**
  \fn Command::unExecute()
  \brief
    Unexecutes a command.

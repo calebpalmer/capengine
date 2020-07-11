@@ -1,38 +1,41 @@
 #ifndef CAPENGINE_PLACEHOLDERGRAPHICS_H
 #define CAPENGINE_PLACEHOLDERGRAPHICS_H
 
-#include "components.h"
 #include "collision.h"
 #include "colour.h"
+#include "components.h"
 
 #include <jsoncons/json.hpp>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
 class ComponentFactory; // forward declaration
 
-class PlaceHolderGraphics : public GraphicsComponent {
+class PlaceHolderGraphics : public GraphicsComponent
+{
 public:
-    PlaceHolderGraphics(int in_width, int in_height, Colour in_colour);
-    ~PlaceHolderGraphics() override = default;
-    
-    std::unique_ptr<Component> clone() const override;
+  PlaceHolderGraphics(int in_width, int in_height, Colour in_colour);
+  ~PlaceHolderGraphics() override = default;
 
-    static PlaceHolderGraphics makeComponent(const jsoncons::json &in_json);
-    static void registerConstructor(ComponentFactory &in_factory);
+  std::unique_ptr<Component> clone() const override;
 
-    void update(GameObject &object, double timestep) override {};
-    void render(GameObject &object, const Camera2d &in_camera, uint32_t in_windowId) override;
+  static PlaceHolderGraphics makeComponent(const jsoncons::json &in_json);
+  static void registerConstructor(ComponentFactory &in_factory);
+
+  void update(GameObject &object, double timestep) override{};
+  void render(GameObject &object, const Camera2d &in_camera,
+              uint32_t in_windowId) override;
 
 public:
-    static constexpr inline char kType[] = "PlaceHolderGraphics";
+  static constexpr inline char kType[] = "PlaceHolderGraphics";
 
 private:
-    int m_width;  //<! The width.
-    int m_height; //<! The height.
-    Colour m_colour; //<! The colour of the placeholder.
+  int m_width;     //<! The width.
+  int m_height;    //<! The height.
+  Colour m_colour; //<! The colour of the placeholder.
 };
 
-}
+} // namespace CapEngine
 
 #endif // CAPENGINE_PLACEHOLDERGRAPHICS_H

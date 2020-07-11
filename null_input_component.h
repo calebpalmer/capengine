@@ -3,13 +3,14 @@
 
 #include "gameobject.h"
 
-namespace CapEngine{
-  
-  class NullInputComponent : public InputComponent {
+namespace CapEngine
+{
 
-    virtual void update(GameObject* object) {}
+class NullInputComponent : public InputComponent
+{
 
-  };
+  virtual void update(GameObject *object) {}
+};
 
-}
+} // namespace CapEngine
 #endif // NULL_INPUT_COMPONENT_H

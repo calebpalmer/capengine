@@ -5,30 +5,33 @@
 
 #include <jsoncons/json.hpp>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
 class ComponentFactory; // forward declaration
 
-class RigidBodyComponent : public PhysicsComponent {
+class RigidBodyComponent : public PhysicsComponent
+{
 public:
-	RigidBodyComponent(double in_mass);
-	~RigidBodyComponent() override = default;
+  RigidBodyComponent(double in_mass);
+  ~RigidBodyComponent() override = default;
 
-	std::unique_ptr<Component> clone() const override;
+  std::unique_ptr<Component> clone() const override;
 
-	static std::unique_ptr<RigidBodyComponent> makeComponent(const jsoncons::json &in_json);
-	static void registerConstructor(ComponentFactory &in_factory);
-	
-	void update(GameObject &object, double timestep) override;
+  static std::unique_ptr<RigidBodyComponent>
+      makeComponent(const jsoncons::json &in_json);
+  static void registerConstructor(ComponentFactory &in_factory);
+
+  void update(GameObject &object, double timestep) override;
 
 public:
-	//! The component type.
-	static constexpr inline char kType[] = "RigidBodyComponent";
+  //! The component type.
+  static constexpr inline char kType[] = "RigidBodyComponent";
 
 private:
-	double m_mass; //<! The mass of the object.
+  double m_mass; //<! The mass of the object.
 };
 
-}
+} // namespace CapEngine
 
 #endif // CAPENGINE_RIGIDBODYCOMPONENT_H

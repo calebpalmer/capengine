@@ -1,7 +1,7 @@
 #include "circle.h"
 #include "CapEngineException.h"
-#include "geometry.h"
 #include "Vector2d.h"
+#include "geometry.h"
 
 using namespace CapEngine;
 
@@ -14,31 +14,19 @@ using namespace CapEngine;
   \param r
   \li The radius of the circle
  */
-Circle::Circle(real x, real y, real r) : x(x), y(x), radius(r) {};
+Circle::Circle(real x, real y, real r) : x(x), y(x), radius(r){};
 
-real Circle::getX() const{
-  return x;
-}
+real Circle::getX() const { return x; }
 
-void Circle::setX(real xIn){
-  x = xIn;
-}
+void Circle::setX(real xIn) { x = xIn; }
 
-real Circle::getY() const{
-  return y;
-}
+real Circle::getY() const { return y; }
 
-void Circle::setY(real yIn){
-  y = yIn;
-}
+void Circle::setY(real yIn) { y = yIn; }
 
-real Circle::getRadius() const{
-  return radius;
-}
+real Circle::getRadius() const { return radius; }
 
-void Circle::setRadius(real radiusIn){
-  radius = radiusIn;
-}
+void Circle::setRadius(real radiusIn) { radius = radiusIn; }
 
 /*
   \brief detects whether this circle collides with another
@@ -47,13 +35,14 @@ void Circle::setRadius(real radiusIn){
   \return
   \li true if they collide, false otherwise
 */
-bool Circle::collides(const Circle* circle){
+bool Circle::collides(const Circle *circle)
+{
   CAP_THROW_NULL(circle, "circle passed in was null");
 
   Vector2d vector1(this->x, this->y);
   Vector2d vector2(circle->getX(), circle->getY());
   real centerDistance = getDistance(&vector1, &vector2);
-  if(centerDistance < 0)
+  if (centerDistance < 0)
     centerDistance *= -1.0;
   return centerDistance <= (this->radius + circle->getRadius());
 }

@@ -5,17 +5,20 @@
 
 #include <memory>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
 //! An AI Component that does nothing.
-class NullAIComponent :  public AIComponent {
+class NullAIComponent : public AIComponent
+{
 public:
-	void update(GameObject& /*object*/, double ms) override {}
+  void update(GameObject & /*object*/, double ms) override {}
 
-	std::unique_ptr<Component> clone() const override {
-		return std::make_unique<NullAIComponent>();
-	}
+  std::unique_ptr<Component> clone() const override
+  {
+    return std::make_unique<NullAIComponent>();
+  }
 };
 
-}
+} // namespace CapEngine
 #endif

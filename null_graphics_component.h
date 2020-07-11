@@ -3,15 +3,17 @@
 
 #include "gameobject.h"
 
-namespace CapEngine {
+namespace CapEngine
+{
 
-  // forward declaration
-  class Camera2d;
+// forward declaration
+class Camera2d;
 
-  class NullGraphicsComponent : public GraphicsComponent {
-  public:
-    virtual void render(GameObject* object) {}
-  };
+class NullGraphicsComponent : public GraphicsComponent
+{
+public:
+  virtual void render(GameObject *object) {}
+};
 
-}
+} // namespace CapEngine
 #endif // NULL_GRAPHICS_COMPONENT_H

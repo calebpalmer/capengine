@@ -8,12 +8,14 @@
 
 #include "CapEngine.h"
 
-namespace CapEngine{
+namespace CapEngine
+{
 /*
   \brief Class representing a circle
 */
-class Circle{
- public:
+class Circle
+{
+public:
   Circle(real x, real y, real r);
   real getX() const;
   void setX(real xIn);
@@ -21,17 +23,16 @@ class Circle{
   void setY(real yIn);
   real getRadius() const;
   void setRadius(real rIn);
-  bool collides(const Circle* circle);
-  
- private:
-  // hidden functions
-  Circle(const Circle&){}
-  Circle& operator=(const Circle&){return *this;}
+  bool collides(const Circle *circle);
 
- private:
+private:
+  // hidden functions
+  Circle(const Circle &) {}
+  Circle &operator=(const Circle &) { return *this; }
+
+private:
   real x, y;
   real radius;
-  
 };
-}
+} // namespace CapEngine
 #endif

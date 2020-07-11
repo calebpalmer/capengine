@@ -1,11 +1,11 @@
 #include "gameobject.h"
 
-#include "logger.h"
 #include "locator.h"
+#include "logger.h"
 
+#include <cmath>
 #include <iostream>
 #include <sstream>
-#include <cmath>
 
 namespace CapEngine
 {
@@ -16,11 +16,10 @@ int GameObject::nextMessageId = 0;
 
 GameObject::GameObject(bool newID)
 {
-    if (newID)
-    {
-        m_objectID = generateID();
-    }
-    m_parentObjectID = -1;
+  if (newID) {
+    m_objectID = generateID();
+  }
+  m_parentObjectID = -1;
 }
 
 /**
@@ -126,82 +125,79 @@ GameObject &GameObject::operator=(GameObject &&in_other)
 //! Copy assignment operator.
 GameObject &GameObject::operator=(const GameObject &in_other)
 {
-    GameObject tmp(in_other);
-    swap(tmp);
-    return *this;
+  GameObject tmp(in_other);
+  swap(tmp);
+  return *this;
 }
 
 void GameObject::render(const Camera2d &in_camera, uint32_t in_windowId)
 {
-    std::vector<std::shared_ptr<Component>> graphicsComponents =
-        this->getComponents(ComponentType::Graphics);
+  std::vector<std::shared_ptr<Component>> graphicsComponents =
+      this->getComponents(ComponentType::Graphics);
 
-    for (auto &&pComponent : graphicsComponents)
-    {
-        auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
-        assert(pGraphicsComponent != nullptr);
+  for (auto &&pComponent : graphicsComponents) {
+    auto pGraphicsComponent =
+        std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
+    assert(pGraphicsComponent != nullptr);
 
-        pGraphicsComponent->render(*this, in_camera, in_windowId);
-    }
+    pGraphicsComponent->render(*this, in_camera, in_windowId);
+  }
 }
 
 unique_ptr<GameObject> GameObject::update(double ms) const
 {
 
-    // clone new game object and pas to updates
-    unique_ptr<GameObject> newObject = this->clone();
+  // clone new game object and pas to updates
+  unique_ptr<GameObject> newObject = this->clone();
 
-    for (auto &&pComponent : newObject->getComponents())
-    {
-        pComponent->update(*newObject, ms);
-    }
+  for (auto &&pComponent : newObject->getComponents()) {
+    pComponent->update(*newObject, ms);
+  }
 
-    return newObject;
+  return newObject;
 }
 
 Rectangle GameObject::boundingPolygon() const
 {
-    Rectangle rectangle;
-    bool first = true;
+  Rectangle rectangle;
+  bool first = true;
 
-    for (auto &&pComponent : m_components)
-    {
-        auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
-        if (pPhysicsComponent)
-        {
-            std::optional<Rectangle> maybeRectangle = pPhysicsComponent->boundingPolygon(*this);
-            if (!maybeRectangle)
-            {
-                continue;
-            }
+  for (auto &&pComponent : m_components) {
+    auto pPhysicsComponent =
+        std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
+    if (pPhysicsComponent) {
+      std::optional<Rectangle> maybeRectangle =
+          pPhysicsComponent->boundingPolygon(*this);
+      if (!maybeRectangle) {
+        continue;
+      }
 
-            if (first)
-            {
-                rectangle = *maybeRectangle;
-                first = false;
-            }
+      if (first) {
+        rectangle = *maybeRectangle;
+        first = false;
+      }
 
-            else
-            {
-                rectangle = join(rectangle, *maybeRectangle);
-            }
-        }
+      else {
+        rectangle = join(rectangle, *maybeRectangle);
+      }
     }
+  }
 
-    if (first)
-    {
-        // no collider was found.  make a 1x1 rect based off position.
-        return Rectangle{static_cast<int>(std::round(position.getX())),
-                         static_cast<int>(std::round(position.getY())), 1, 1};
-    }
+  if (first) {
+    // no collider was found.  make a 1x1 rect based off position.
+    return Rectangle{static_cast<int>(std::round(position.getX())),
+                     static_cast<int>(std::round(position.getY())), 1, 1};
+  }
 
-    return rectangle;
+  return rectangle;
 }
 
-bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_, GameObject *otherObject,
+bool GameObject::handleCollision(CapEngine::CollisionType type,
+                                 CapEngine::CollisionClass class_,
+                                 GameObject *otherObject,
                                  Vector collisionLocation)
 {
-    return false;
+  return false;
 }
 
 unique_ptr<GameObject> GameObject::clone() const
@@ -233,86 +229,56 @@ unique_ptr<GameObject> GameObject::clone() const
 
 ObjectID GameObject::generateID()
 {
-    ostringstream msg;
-    msg << "ID " << (nextID) << " generated";
-    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
-    return nextID++;
+  ostringstream msg;
+  msg << "ID " << (nextID) << " generated";
+  Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+  return nextID++;
 }
 
 std::shared_ptr<ObjectData> GameObject::getObjectData() const
 {
-    return m_pObjectData;
+  return m_pObjectData;
 }
 
 void GameObject::setObjectData(std::shared_ptr<ObjectData> pObjectData)
 {
-    m_pObjectData = pObjectData;
+  m_pObjectData = pObjectData;
 }
 
 GameObject::ObjectState GameObject::getObjectState() const
 {
-    return m_objectState;
+  return m_objectState;
 }
 
 void GameObject::setObjectState(GameObject::ObjectState objectState)
 {
-    m_objectState = objectState;
+  m_objectState = objectState;
 }
 
-ObjectID GameObject::getObjectID() const
-{
-    return m_objectID;
-}
+ObjectID GameObject::getObjectID() const { return m_objectID; }
 
-void GameObject::setObjectID(ObjectID id)
-{
-    m_objectID = id;
-}
+void GameObject::setObjectID(ObjectID id) { m_objectID = id; }
 
-ObjectID GameObject::getParentObjectID() const
-{
-    return m_parentObjectID;
-}
+ObjectID GameObject::getParentObjectID() const { return m_parentObjectID; }
 
-void GameObject::setParentObjectID(ObjectID id)
-{
-    m_parentObjectID = id;
-}
+void GameObject::setParentObjectID(ObjectID id) { m_parentObjectID = id; }
 
-Vector const &GameObject::getPosition() const
-{
-    return position;
-}
+Vector const &GameObject::getPosition() const { return position; }
 
-void GameObject::setPosition(Vector positionIn)
-{
-    position = positionIn;
-}
+void GameObject::setPosition(Vector positionIn) { position = positionIn; }
 
-Vector const &GameObject::getOrientation() const
-{
-    return orientation;
-}
+Vector const &GameObject::getOrientation() const { return orientation; }
 
 void GameObject::setOrientation(Vector orientationIn)
 {
-    orientation = orientationIn;
+  orientation = orientationIn;
 }
 
-Vector const &GameObject::getVelocity() const
-{
-    return velocity;
-}
+Vector const &GameObject::getVelocity() const { return velocity; }
 
-void GameObject::setVelocity(Vector velocityIn)
-{
-    velocity = velocityIn;
-}
+void GameObject::setVelocity(Vector velocityIn) { velocity = velocityIn; }
 
-Vector const &GameObject::getAcceleration() const
-{
-    return acceleration;
-}
+Vector const &GameObject::getAcceleration() const { return acceleration; }
 
 void GameObject::setAcceleration(Vector accelerationIn)
 {
@@ -327,11 +293,10 @@ int GameObject::generateMessageId() { return nextMessageId++; }
 
 void GameObject::send(int id, string message)
 {
-    for (auto &&pComponent : m_components)
-    {
-        assert(pComponent != nullptr);
-        pComponent->receive(*this, id, message);
-    }
+  for (auto &&pComponent : m_components) {
+    assert(pComponent != nullptr);
+    pComponent->receive(*this, id, message);
+  }
 }
 
 /**
@@ -339,7 +304,7 @@ void GameObject::send(int id, string message)
 */
 Vector const &GameObject::getPreviousPosition() const
 {
-    return previousPosition;
+  return previousPosition;
 }
 
 /**
@@ -347,84 +312,87 @@ Vector const &GameObject::getPreviousPosition() const
 */
 void GameObject::setPreviousPosition(Vector position)
 {
-    previousPosition = position;
+  previousPosition = position;
 }
 
-std::ostream &operator<<(std::ostream &stream, const CollisionEvent collisionEvent)
+std::ostream &operator<<(std::ostream &stream,
+                         const CollisionEvent collisionEvent)
 {
-    std::ostringstream repr;
-    repr << collisionEvent.type << " with " << collisionEvent.object1->getObjectID();
-    if (collisionEvent.object2 != nullptr)
-        repr << " and " << collisionEvent.object2->getObjectID();
+  std::ostringstream repr;
+  repr << collisionEvent.type << " with "
+       << collisionEvent.object1->getObjectID();
+  if (collisionEvent.object2 != nullptr)
+    repr << " and " << collisionEvent.object2->getObjectID();
 
-    repr << " class: " << collisionEvent.class_;
+  repr << " class: " << collisionEvent.class_;
 
-    stream << repr.str();
-    return stream;
+  stream << repr.str();
+  return stream;
 }
 
 std::ostream &operator<<(std::ostream &stream, GameObject const &gameObject)
 {
-    std::ostringstream repr;
-    repr << "GameObject[" << gameObject.m_objectID << "]@" << gameObject.boundingPolygon();
-    ;
+  std::ostringstream repr;
+  repr << "GameObject[" << gameObject.m_objectID << "]@"
+       << gameObject.boundingPolygon();
+  ;
 
-    stream << repr.str();
-    return stream;
+  stream << repr.str();
+  return stream;
 }
 
 GameObject::ObjectType GameObject::getObjectType() const
 {
-    return m_objectType;
+  return m_objectType;
 }
 
 void GameObject::setObjectType(GameObject::ObjectType in_objectType)
 {
-    m_objectType = in_objectType;
+  m_objectType = in_objectType;
 }
 
 //! Adds a new component
-/** 
+/**
     \param in_component
     The component.
 */
 void GameObject::addComponent(std::shared_ptr<Component> in_pComponent)
 {
-    if (in_pComponent == nullptr)
-    {
-        BOOST_THROW_EXCEPTION(CapEngineException("Null component"));
-    }
+  if (in_pComponent == nullptr) {
+    BOOST_THROW_EXCEPTION(CapEngineException("Null component"));
+  }
 
-    m_components.emplace_back(std::move(in_pComponent));
+  m_components.emplace_back(std::move(in_pComponent));
 }
 
 //! Gets the components.
-/** 
-    \return 
+/**
+    \return
     The components
 */
 const std::vector<std::shared_ptr<Component>> &GameObject::getComponents()
 {
-    return m_components;
+  return m_components;
 }
 
 //! Gets all the components of a given type.
-/** 
+/**
     \param in_type
     The type
-    \return 
+    \return
     The components.
 */
-std::vector<std::shared_ptr<Component>> GameObject::getComponents(ComponentType in_type)
+std::vector<std::shared_ptr<Component>>
+    GameObject::getComponents(ComponentType in_type)
 {
-    std::vector<std::shared_ptr<Component>> components;
+  std::vector<std::shared_ptr<Component>> components;
 
-    std::copy_if(m_components.begin(), m_components.end(), std::back_inserter(components),
-                 [in_type](auto &&in_component) {
-                     return in_component->getType() == in_type;
-                 });
+  std::copy_if(m_components.begin(), m_components.end(),
+               std::back_inserter(components), [in_type](auto &&in_component) {
+                 return in_component->getType() == in_type;
+               });
 
-    return components;
+  return components;
 }
 
 } // namespace CapEngine

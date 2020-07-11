@@ -3,10 +3,14 @@
 
 #include "components.h"
 
-namespace CapEngine { namespace ComponentUtils {
+namespace CapEngine
+{
+namespace ComponentUtils
+{
 
 std::string componentTypeToString(ComponentType in_componentType);
 
-}}
+}
+} // namespace CapEngine
 
 #endif // CAPENGINE_COMPONENTUTILS_H

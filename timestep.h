@@ -6,22 +6,24 @@
 
 // timestep ms = current time - lastupdatetime - lastrendertime
 
-namespace CapEngine{
-  class TimeStep{
-    Time lastUpdateTime;
-    Time lastRenderTime;
-    
-    TimeStep(const TimeStep&);
-    TimeStep& operator=(const TimeStep&);
+namespace CapEngine
+{
+class TimeStep
+{
+  Time lastUpdateTime;
+  Time lastRenderTime;
 
-  public:
-    real lastTimeStep;
+  TimeStep(const TimeStep &);
+  TimeStep &operator=(const TimeStep &);
 
-    TimeStep();
-    real updateStep();
-    void renderStep();
-  };
+public:
+  real lastTimeStep;
 
-}
+  TimeStep();
+  real updateStep();
+  void renderStep();
+};
+
+} // namespace CapEngine
 
 #endif

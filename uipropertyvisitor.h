@@ -6,29 +6,33 @@
 
 #include <optional>
 
-namespace CapEngine { namespace UI {
+namespace CapEngine
+{
+namespace UI
+{
 
-		// Property visitor for building UI widgets
-		class UIPropertyVisitor final : public PropertyVisitor{
-		public:
-			~UIPropertyVisitor() override = default;
-		
-			void visitString(Property& property) override;
-			void visitInt64(Property& property) override;
-			void visitUInt64(Property& property) override;
-			void visitInt32(Property& property) override;
-			void visitUInt32(Property& property) override;
-			void visitFloat32(Property& property) override;
-			void visitFloat64(Property& property) override;
-			void visitList(Property& property) override;
+// Property visitor for building UI widgets
+class UIPropertyVisitor final : public PropertyVisitor
+{
+public:
+  ~UIPropertyVisitor() override = default;
 
-			std::optional<std::shared_ptr<Widget>> getWidget();
+  void visitString(Property &property) override;
+  void visitInt64(Property &property) override;
+  void visitUInt64(Property &property) override;
+  void visitInt32(Property &property) override;
+  void visitUInt32(Property &property) override;
+  void visitFloat32(Property &property) override;
+  void visitFloat64(Property &property) override;
+  void visitList(Property &property) override;
 
-		private:
-			//! The widget
-			std::shared_ptr<Widget> m_pWidget;
-		};
-}}
+  std::optional<std::shared_ptr<Widget>> getWidget();
+
+private:
+  //! The widget
+  std::shared_ptr<Widget> m_pWidget;
+};
+} // namespace UI
+} // namespace CapEngine
 
 #endif // CAPENGINE_UIPROPERTYVISITOR_H
-

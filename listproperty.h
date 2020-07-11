@@ -7,42 +7,42 @@
 #include <optional>
 #include <string_view>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
 //! A class for list properties
-class ListProperty final {
+class ListProperty final
+{
 public:
-	using ListPropertyIterator = std::vector<Property>::iterator;
-	using ConstListPropertyIterator = std::vector<Property>::const_iterator;
-public:
-	ListProperty() = default;
-	ListProperty(std::vector<Property> properties);
+  using ListPropertyIterator = std::vector<Property>::iterator;
+  using ConstListPropertyIterator = std::vector<Property>::const_iterator;
 
-	std::optional<Property> getProperty(std::string_view name) const;
-	bool addProperty(Property property);
-	std::optional<Property> removeProperty(std::string_view propertyName);
+public:
+  ListProperty() = default;
+  ListProperty(std::vector<Property> properties);
+
+  std::optional<Property> getProperty(std::string_view name) const;
+  bool addProperty(Property property);
+  std::optional<Property> removeProperty(std::string_view propertyName);
 
   ListPropertyIterator begin();
-	ListPropertyIterator end();
+  ListPropertyIterator end();
   ConstListPropertyIterator cbegin() const;
-	ConstListPropertyIterator cend() const;
+  ConstListPropertyIterator cend() const;
 
-	
 private:
-	std::vector<Property> m_properties;
-		
+  std::vector<Property> m_properties;
 };
 
-namespace TypeTraits {
-
-template <>
-struct PropertyTraits<ListProperty>
+namespace TypeTraits
 {
-	static const PropertyType propertyType = PropertyType::List;
+
+template <> struct PropertyTraits<ListProperty> {
+  static const PropertyType propertyType = PropertyType::List;
 };
 
-}
+} // namespace TypeTraits
 
-}
+} // namespace CapEngine
 
 #endif // CAPENGINE_LISTPROPERTY_H

@@ -9,4 +9,4 @@
 //#define RADTODEG(x) x * 180/M_PI
 #define RADTODEG(x) x * 57.295780
 
-#endif //TRIGONOMETRY_H
+#endif // TRIGONOMETRY_H

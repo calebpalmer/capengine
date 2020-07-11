@@ -5,17 +5,20 @@
 
 #include <memory>
 
-namespace CapEngine {
+namespace CapEngine
+{
 
 //! A Custom component that does nothing.
-class NullCustomComponent :  public CustomComponent {
+class NullCustomComponent : public CustomComponent
+{
 public:
-	void update(GameObject &object, double ms) override {}
-		
-	std::unique_ptr<Component> clone() const override {
-		return std::make_unique<NullCustomComponent>();
-	}
+  void update(GameObject &object, double ms) override {}
+
+  std::unique_ptr<Component> clone() const override
+  {
+    return std::make_unique<NullCustomComponent>();
+  }
 };
 
-}
+} // namespace CapEngine
 #endif

@@ -5,96 +5,107 @@
 #include <cppunit/TestSuite.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "../capcommon.h"
 #include "../CapEngineException.h"
+#include "../capcommon.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 
 using namespace CapEngine;
 using namespace std;
 
-class CapCommonTest : public CppUnit::TestFixture {
- public:
-  void setup() {
-  }
+class CapCommonTest : public CppUnit::TestFixture
+{
+public:
+  void setup() {}
 
-  void teardown() {
-  }
+  void teardown() {}
 
-  void testStripString(){
+  void testStripString()
+  {
     string str = "  test  ";
     string stripped = strip(str);
     CPPUNIT_ASSERT(stripped == "test");
   }
 
-  void testStripStringNoFront(){
+  void testStripStringNoFront()
+  {
     string str = "test  ";
     string stripped = strip(str);
     CPPUNIT_ASSERT(stripped == "test");
   }
 
-  void testStripStringNoBack(){
+  void testStripStringNoBack()
+  {
     string str = "  test";
     string stripped = strip(str);
     CPPUNIT_ASSERT(stripped == "test");
   }
 
-  void testStripStringNothing(){
+  void testStripStringNothing()
+  {
     string str = "test";
     string stripped = strip(str);
     CPPUNIT_ASSERT(stripped == "test");
   }
 
-  void testReplace(){
+  void testReplace()
+  {
     string str = "test";
     string replaced = replace(str, "t", "r");
     CPPUNIT_ASSERT(replaced == "resr");
   }
 
-  void testReplaceMultiple(){
+  void testReplaceMultiple()
+  {
     string str = "test";
     string replaced = replace(str, "st", "am");
     CPPUNIT_ASSERT(replaced == "team");
   }
 
-  void testReplaceNonSymmetric(){
+  void testReplaceNonSymmetric()
+  {
     string str = "test";
     string replaced = replace(str, "st", "ase");
     CPPUNIT_ASSERT(replaced == "tease");
   }
 
-  void testReplaceNonSymmetric2(){
+  void testReplaceNonSymmetric2()
+  {
     string str = "test";
     string replaced = replace(str, "test", "yo");
     CPPUNIT_ASSERT(replaced == "yo");
   }
 
-  void testReplaceNewLine(){
+  void testReplaceNewLine()
+  {
     string str = "test\n";
     string replaced = replace(str, "\n", " ");
     CPPUNIT_ASSERT(replaced == "test ");
   }
 
-  void testReplaceWindowsNewLine(){
+  void testReplaceWindowsNewLine()
+  {
     string str = "test\r\n";
     string replaced = replace(str, "\r\n", " ");
     CPPUNIT_ASSERT(replaced == "test ");
   }
 
-  void testReplaceMacNewLine(){
+  void testReplaceMacNewLine()
+  {
     string str = "test\r";
     string replaced = replace(str, "\r", " ");
     CPPUNIT_ASSERT(replaced == "test ");
   }
 
-  void testReplaceOSNewLine(){
+  void testReplaceOSNewLine()
+  {
     string str = "test" LINESEP;
     string replaced = replace(str, LINESEP, " ");
     CPPUNIT_ASSERT(replaced == "test ");
   }
-  
+
   CPPUNIT_TEST_SUITE(CapCommonTest);
   CPPUNIT_TEST(testStripString);
   CPPUNIT_TEST(testStripStringNoFront);
@@ -109,8 +120,6 @@ class CapCommonTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testReplaceMacNewLine);
   CPPUNIT_TEST(testReplaceOSNewLine);
   CPPUNIT_TEST_SUITE_END();
-
-
 };
 
 #endif // CAPCOMMONTEST_H

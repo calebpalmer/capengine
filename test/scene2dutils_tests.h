@@ -7,21 +7,25 @@
 
 #include "../scene2dutils.h"
 
-namespace CapEngine { namespace Testing {
+namespace CapEngine
+{
+namespace Testing
+{
 
-class Scene2dUtilsTest : public CppUnit::TestFixture {
+class Scene2dUtilsTest : public CppUnit::TestFixture
+{
 public:
-	void testReadRectangle();
-	
-	CPPUNIT_TEST_SUITE(Scene2dUtilsTest);
-	CPPUNIT_TEST(testReadRectangle);
-	CPPUNIT_TEST_SUITE_END();
+  void testReadRectangle();
 
+  CPPUNIT_TEST_SUITE(Scene2dUtilsTest);
+  CPPUNIT_TEST(testReadRectangle);
+  CPPUNIT_TEST_SUITE_END();
 };
 
 //! Tests reading a rectangle from json.
-void Scene2dUtilsTest::testReadRectangle(){
-	jsoncons::json rect = jsoncons::json::parse(R"(
+void Scene2dUtilsTest::testReadRectangle()
+{
+  jsoncons::json rect = jsoncons::json::parse(R"(
 {
     "x" : 1,
     "y" : 2,
@@ -30,11 +34,12 @@ void Scene2dUtilsTest::testReadRectangle(){
 }
 )");
 
-	Rectangle expected(1, 2, 10, 10);
-	Rectangle actual = JSONUtils::readRectangle(rect);
-	CPPUNIT_ASSERT_EQUAL(expected, actual);
+  Rectangle expected(1, 2, 10, 10);
+  Rectangle actual = JSONUtils::readRectangle(rect);
+  CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
-}}
+} // namespace Testing
+} // namespace CapEngine
 
-#endif// CAPENGINE_SCENE2DUTILSTESTS_H
+#endif // CAPENGINE_SCENE2DUTILSTESTS_H
