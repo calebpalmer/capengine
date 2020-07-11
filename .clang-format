@@ -42,7 +42,7 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Linux
 BreakBeforeInheritanceComma: false
 BreakInheritanceList: BeforeColon
 BreakBeforeTernaryOperators: true
@@ -82,8 +82,8 @@ IncludeIsMainSourceRegex: ''
 IndentCaseLabels: false
 IndentGotoLabels: true
 IndentPPDirectives: None
-IndentWidth:     2
-IndentWrappedFunctionNames: false
+IndentWidth: 2
+IndentWrappedFunctionNames: true
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: true
