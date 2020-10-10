@@ -19,9 +19,11 @@ class ImageLayer : public Layer
 {
 public:
   ImageLayer(int in_assetId, Rectangle in_position);
+  virtual ~ImageLayer() = default;
 
   static void registerConstructor(LayerFactory &in_factory);
 
+  const std::string type() const override;
   void update(double in_ms) override {}
   void render(const Camera2d &in_camera, uint32_t in_windowId) override;
 
@@ -29,6 +31,12 @@ protected:
   int m_assetId;        //! The id of the image asset.
   Rectangle m_position; // The size and position of the image.
 };
+
+//! \copydoc Layer::type()
+inline const std::string ImageLayer::type() const
+{
+  return Schema::Scene2d::kImageLayerType;
+}
 
 namespace detail
 {

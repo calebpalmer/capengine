@@ -3,6 +3,7 @@
 
 #include "collision.h"
 #include "components.h"
+#include "gameobject.h"
 
 #include <jsoncons/json.hpp>
 #include <string>
@@ -40,7 +41,11 @@ private:
 inline std::optional<Rectangle>
     BoxCollider::boundingPolygon(const GameObject &object) const
 {
-  return m_box;
+  // return m_box;
+  const auto position = object.getPosition();
+  return Rectangle{static_cast<int>(position.getX() - (m_box.width / 2.0)),
+                   static_cast<int>(position.getY() - (m_box.height / 2.0)),
+                   m_box.width, m_box.height};
 }
 
 // \copydoc Component::clone

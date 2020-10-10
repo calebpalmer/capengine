@@ -15,6 +15,7 @@
 #include <jsoncons/json.hpp>
 #include <map>
 #include <memory>
+#include <optional>
 
 namespace CapEngine
 {
@@ -86,7 +87,6 @@ void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera)
   io_camera.setWidth(width);
   io_camera.setHeight(height);
 }
-
 } // namespace
 
 //! Constructor
@@ -136,6 +136,7 @@ void Scene2d<ObjectManager>::load(const jsoncons::json &in_json)
       std::unique_ptr<Layer> pLayer = layerFactory.makeLayer(layer);
       const int layerOrder = layer[kLayerOrder].as<int>();
 
+      std::cout << "Adding layer " << pLayer->type() << std::endl;
       m_layers.emplace(layerOrder, std::move(pLayer));
     }
 
@@ -179,18 +180,42 @@ template <class ObjectManager> void Scene2d<ObjectManager>::update(double in_ms)
       continue;
     }
 
+    // collision detection
+    // collision with layers?
+    for (auto &&layer : m_layers) {
+
+      // is layer collidable
+      if (layer.second->canCollide()) {
+        const auto maybeCollisions =
+            layer.second->checkCollisions(*pUpdateObject);
+
+        // is there a collision
+        if (maybeCollisions.size() > 0) {
+          std::optional<GameObject> maybeGameObject =
+              layer.second->resolveCollisions(*pUpdateObject);
+          CAP_THROW_ASSERT(maybeGameObject != std::nullopt,
+                           "Collision could not be resolved.");
+
+          pUpdateObject = maybeGameObject->clone();
+        }
+      }
+    }
+
+    // check collisions with other objects
+
+    // continue with updated object if there were no collisions.
     i.reset(pUpdateObject.release());
   }
 }
 
 //! render function for the scene.
 /**
- \param  in_windowId
-   The id of the window to render to.
+ \param  in_windowId The id of the window to render to.
 */
 template <class ObjectManager>
 void Scene2d<ObjectManager>::render(uint32_t in_windowId)
 {
+  // updateRenderLogicalSize(in_windowId);
   updateCameraSize(in_windowId, m_camera);
 
   // iterate in reverse order to draw layers in the proper order.

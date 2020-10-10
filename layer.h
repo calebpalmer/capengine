@@ -3,6 +3,7 @@
 
 #include "CapEngineException.h"
 #include "collision.h"
+#include "gameobject.h"
 
 #include <boost/variant.hpp>
 #include <optional>
@@ -31,15 +32,23 @@ struct LayerCreationError : public CapEngineException {
 class Layer
 {
 public:
-  using CollisionType = std::optional<boost::variant<CapEngine::CollisionType>>;
+  using CollisionType_t =
+      std::vector<std::pair<CapEngine::CollisionType, Vector>>;
 
 public:
   virtual ~Layer() = default;
 
   virtual void update(double in_ms) = 0;
   virtual void render(const Camera2d &in_camera, uint32_t in_windowId) = 0;
+  virtual const std::string type() const = 0;
   virtual bool canCollide() const { return false; }
-  virtual CollisionType checkCollision(const GameObject &in_object)
+  virtual CollisionType_t
+      checkCollisions(const GameObject & /*in_object*/) const
+  {
+    return {};
+  }
+  virtual std::optional<GameObject>
+      resolveCollisions(const GameObject & /*in_object*/) const
   {
     return std::nullopt;
   }

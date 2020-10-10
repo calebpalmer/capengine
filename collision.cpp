@@ -61,12 +61,12 @@ Rectangle Rectangle::narrowRight(int in_amount) const
 
 //! joins to rectangles together to make a single greater rectangle.
 /**
-    \param left
-    The first rectangle
-    \param right
-    The second rectangle
-    \return
-    The joined rectangles.
+                                \param left
+                                The first rectangle
+                                \param right
+                                The second rectangle
+                                \return
+                                The joined rectangles.
 */
 Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
 {
@@ -93,9 +93,10 @@ Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
 
 //! detects if point is within a rectangle.
 /**
-    \param point - The point.
-    \param rect - the rect.
-    \return True if point is in rect. False otherwise.
+                                \param point - The point.
+                                \param rect - the rect.
+                                \return True if point is in rect. False
+   otherwise.
 */
 bool pointInRect(const Point &point, const Rectangle &rect)
 {
@@ -183,8 +184,8 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle &rect,
   // start from halfway down rectangle to find lowest rectangle that
   // "top" collides
   int y = rect.y + (rect.height / 2);
-  for (; y > rect.y; y--) {
-    for (int x = rect.x; x < rect.x + rect.width - 1; x++) {
+  for (; y >= rect.y; y--) {
+    for (int x = rect.x; x < rect.x + rect.width; x++) {
       getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
       if (r == 0x00 && g == 0x00 && b == 0x00) {
         collisionPoint.setX(x);
@@ -208,8 +209,8 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle &rect,
 
   // start from halfway up to find the first part the collides
   int y = rect.y + (rect.height / 2);
-  for (; y < rect.y + rect.height; y++) {
-    for (int x = rect.x; x < rect.x + rect.width - 1; x++) {
+  for (; y <= rect.y + rect.height; y++) {
+    for (int x = rect.x; x < rect.x + rect.width; x++) {
       getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
       if (r == 0x00 && g == 0x00 && b == 0x00) {
         collisionPoint.setX(x);
@@ -233,7 +234,7 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle &rect,
 
   int x = rect.x + (rect.width / 2);
   for (; x < rect.x + rect.width; x++) {
-    for (int y = rect.y; y < rect.y + rect.height - 1; y++) {
+    for (int y = rect.y; y < rect.y + rect.height; y++) {
       getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
       if (r == 0x00 && g == 0x00 && b == 0x00) {
         collisionPoint.setX(x);
@@ -256,8 +257,8 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle &rect,
   Uint8 a;
 
   int x = rect.x + (rect.width / 2);
-  for (; x > rect.x; x--) {
-    for (int y = rect.y; y < rect.y + rect.height - 1; y++) {
+  for (; x >= rect.x; x--) {
+    for (int y = rect.y; y < rect.y + rect.height; y++) {
       getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
       if (r == 0x00 && g == 0x00 && b == 0x00) {
         collisionPoint.setX(x);
@@ -273,32 +274,35 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle &rect,
 } // namespace
 
 // assumes 32bpp surface
-CollisionType detectBitmapCollision(const CapEngine::Rectangle &rect,
-                                    const Surface *bitmapSurface,
-                                    Vector &collisionPoint)
+std::vector<std::pair<CollisionType, Vector>>
+    detectBitmapCollision(const CapEngine::Rectangle &rect,
+                          const Surface *bitmapSurface)
 {
+
+  std::vector<std::pair<CollisionType, Vector>> collisionTypes;
+  Vector collisionPoint;
 
   // check top collision
   if (detectTopBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-    return COLLISION_TOP;
+    collisionTypes.push_back(std::make_pair(COLLISION_TOP, collisionPoint));
   }
 
   // check bottom collision
   if (detectBottomBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-    return COLLISION_BOTTOM;
+    collisionTypes.push_back(std::make_pair(COLLISION_BOTTOM, collisionPoint));
   }
 
   // check left side collition
   if (detectLeftBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-    return COLLISION_LEFT;
+    collisionTypes.push_back(std::make_pair(COLLISION_LEFT, collisionPoint));
   }
 
   // check left side collition
   if (detectRightBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-    return COLLISION_RIGHT;
+    collisionTypes.push_back(std::make_pair(COLLISION_RIGHT, collisionPoint));
   }
 
-  return COLLISION_NONE;
+  return collisionTypes;
 }
 
 vector<PixelCollision> detectBitmapCollisions(const Rectangle &rect,

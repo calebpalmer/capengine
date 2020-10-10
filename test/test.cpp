@@ -5,6 +5,7 @@
 #include "../filesystem.h"
 #include "camera2dtest.h"
 #include "capcommontest.h"
+#include "collisionstest.h"
 #include "matrixtest.h"
 #include "quaterniontest.h"
 #include "rectangletest.h"
@@ -25,10 +26,11 @@ int main()
   runner.addTest(XmlParserTest::suite());
   runner.addTest(MatrixTest::suite());
   runner.addTest(RectangleTest::suite());
-  // runner.addTest(ScanconvertTest::suite());
+  runner.addTest(ScanconvertTest::suite());
   runner.addTest(Camera2dTest::suite());
   runner.addTest(CapEngine::QuaternionTest::suite());
   runner.addTest(CapEngine::Testing::Scene2dUtilsTest::suite());
+  runner.addTest(CapEngine::Testing::CollisionsTests::suite());
 
   if (runner.run()) {
     return EXIT_SUCCESS;

@@ -103,7 +103,7 @@ Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
     int windowWidth = 0;
     std::tie(windowWidth, windowHeight) =
         Locator::videoManager->getWindowLogicalResolution(in_windowId);
-    rect.y = (windowHeight - rect.y) - rect.height;
+    rect.y = (windowHeight - rect.y - 1) - rect.height;
   }
 
   return rect;

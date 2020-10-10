@@ -83,9 +83,8 @@ CollisionType detectMBRCollisionInterior(const Rectangle &r1,
                                          const Rectangle &r2);
 Relation MBRRelate(const Rectangle &r1, const Rectangle &r2);
 Relation MBRRelate(int x, int y, const Rectangle &r);
-CollisionType detectBitmapCollision(const Rectangle &rect,
-                                    const Surface *bitmapSurface,
-                                    Vector &out_collisionPoint);
+std::vector<std::pair<CollisionType, Vector>>
+    detectBitmapCollision(const Rectangle &rect, const Surface *bitmapSurface);
 std::vector<PixelCollision>
     detectBitmapCollisions(const Rectangle &rect, const Surface *bitmapSurface);
 std::vector<PixelCollision> detectBitmapCollisions(

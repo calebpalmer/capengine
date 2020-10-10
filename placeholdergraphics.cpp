@@ -42,13 +42,12 @@ void PlaceHolderGraphics::render(GameObject &in_object,
                                  const Camera2d &in_camera,
                                  uint32_t in_windowId)
 {
-  Vector position = in_object.getPosition();
-  Rectangle objectRect(
-      position.getX() - std::round((static_cast<double>(m_width) / 2.0)),
-      position.getY() - std::round((static_cast<double>(m_height) / 2.0)),
-      m_width, m_height);
+  const auto objectRect = in_object.boundingPolygon();
+  const bool doYFlip =
+      in_object.getYAxisOrientation() == YAxisOrientation::BottomZero;
 
-  Rectangle drawRect = toScreenCoords(in_camera, objectRect, in_windowId, true);
+  Rectangle drawRect =
+      toScreenCoords(in_camera, objectRect, in_windowId, doYFlip);
 
   assert(Locator::videoManager != nullptr);
   Locator::videoManager->drawFillRect(in_windowId, drawRect.toRect(), m_colour);

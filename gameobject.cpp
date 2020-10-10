@@ -163,11 +163,14 @@ Rectangle GameObject::boundingPolygon() const
   bool first = true;
 
   for (auto &&pComponent : m_components) {
+
     auto pPhysicsComponent =
         std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
+
     if (pPhysicsComponent) {
       std::optional<Rectangle> maybeRectangle =
           pPhysicsComponent->boundingPolygon(*this);
+
       if (!maybeRectangle) {
         continue;
       }
@@ -393,6 +396,24 @@ std::vector<std::shared_ptr<Component>>
                });
 
   return components;
+}
+
+/**
+ * @brief returns the y axis orientation of the object.
+ * @return The y axis orientation.
+ */
+YAxisOrientation GameObject::getYAxisOrientation() const
+{
+  return m_yAxisOrientation;
+}
+
+/**
+ * @brief Sets the y axis orientation of the object.
+ * @param[in] in_orientation The orientation.
+ */
+void GameObject::setYAxisOrientation(YAxisOrientation in_orientation)
+{
+  m_yAxisOrientation = in_orientation;
 }
 
 } // namespace CapEngine

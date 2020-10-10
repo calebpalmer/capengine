@@ -101,9 +101,10 @@ Surface *createSurfaceFromPixelBuffer(Uint32 *pixels, unsigned int width,
   return surface;
 }
 
-void drawLineBasicIncremental(int x0, int y0, int x1, int y1,
-                              CapEngine::Surface *surface,
-                              EdgePattern pattern = EdgePattern::SolidEdge)
+void drawLineBasicIncremental(
+    int x0, int y0, int x1, int y1, CapEngine::Surface *surface,
+    EdgePattern pattern = EdgePattern::SolidEdge,
+    CoordinateSystem coordinateSystem = CoordinateSystem::YDOWN)
 {
   // lock the surface for writing
   // TODO need to clip the coordinates to fit the screen
@@ -146,7 +147,7 @@ void drawLineBasicIncremental(int x0, int y0, int x1, int y1,
       }
 
       if (drawPixel) {
-        writePixel(surface, x, y);
+        writePixel(surface, x, y, coordinateSystem);
       }
     }
   }
@@ -168,7 +169,7 @@ void drawLineBasicIncremental(int x0, int y0, int x1, int y1,
         y = lasty;
       }
       if (drawPixel) {
-        writePixel(surface, x, y);
+        writePixel(surface, x, y, coordinateSystem);
       }
     }
   }
@@ -177,7 +178,8 @@ void drawLineBasicIncremental(int x0, int y0, int x1, int y1,
   SDL_UnlockSurface(surface);
 }
 
-void fillRectangleBruteForce(Surface *surface, Rect rectangle, Colour colour)
+void fillRectangleBruteForce(Surface *surface, Rect rectangle, Colour colour,
+                             CoordinateSystem coordinateSystem)
 {
   CAP_THROW_NULL(surface, "surface is null");
   CAP_THROW_NULL(Locator::videoManager, "VideoManager is null");
@@ -191,7 +193,7 @@ void fillRectangleBruteForce(Surface *surface, Rect rectangle, Colour colour)
     for (int j = rectangle.y; j < rectangle.h; j++) {
       if (i >= 0 && i < surfaceWidth && j >= 0 && j < surfaceHeight) {
         // int screenJ = vMan.toScreenCoord(surface, j);
-        writePixel(surface, i, j, colour);
+        writePixel(surface, i, j, colour, coordinateSystem);
       }
     }
   }
@@ -201,24 +203,27 @@ void fillRectangleBruteForce(Surface *surface, Rect rectangle, Colour colour)
 } // namespace
 
 void CapEngine::drawLine(int x0, int y0, int x1, int y1,
-                         CapEngine::Surface *surface, EdgePattern pattern)
+                         CapEngine::Surface *surface, EdgePattern pattern,
+                         CoordinateSystem coordinateSystem)
 {
   // need to calculate intersection points if line needs to be clipped to fit
   // surface
   if (surface == nullptr) {
     throw CapEngineException("surface is null");
   }
-  drawLineBasicIncremental(x0, y0, x1, y1, surface, pattern);
+  drawLineBasicIncremental(x0, y0, x1, y1, surface, pattern, coordinateSystem);
 }
 
-void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y)
+void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y,
+                           CoordinateSystem coordinateSystem)
 {
   // convert to screen coordinates
-  int yNew = (surface->h - 1) - y;
+  if (coordinateSystem == CoordinateSystem::YUP)
+    y = (surface->h - 1) - y;
 
   // calculate offset into pixel buffer of (x, y)
   // pitch is the length of a row in pixels
-  int offset = (surface->pitch / surface->format->BytesPerPixel) * yNew + x;
+  int offset = (surface->pitch / surface->format->BytesPerPixel) * y + x;
 
   void *pixel;
   if (surface->format->BytesPerPixel == 2) {
@@ -248,18 +253,20 @@ void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y)
  \param colour - The pixel to write.
 */
 void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y,
-                           CapEngine::Colour colour)
+                           CapEngine::Colour colour,
+                           CoordinateSystem coordinateSystem)
 {
   // convert to screen coordinates
-  int yNew = (surface->h - 1) - y;
+  if (coordinateSystem == CoordinateSystem::YUP)
+    y = (surface->h - 1) - y;
 
   // calculate offset into pixel buffer of (x, y)
   // pitch is the length of a row in pixels
   int offset =
       (surface->pitch /
-       surface->format->BytesPerPixel)              // how many pixels in a row
-          * (yNew * surface->format->BytesPerPixel) // select the row
-      + (x * surface->format->BytesPerPixel);       // add the offset in the row
+       surface->format->BytesPerPixel)           // how many pixels in a row
+          * (y * surface->format->BytesPerPixel) // select the row
+      + (x * surface->format->BytesPerPixel);    // add the offset in the row
 
   assert(offset >= 0 && offset <= surface->pitch * surface->h);
 
@@ -294,22 +301,25 @@ void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y,
  \param pixel - The pixel to write.
 */
 void CapEngine::writePixel(CapEngine::Surface *surface, int x, int y,
-                           const Pixel &pixel)
+                           const Pixel &pixel,
+                           CoordinateSystem coordinateSystem)
 {
-  writePixel(surface, x, y, Colour({pixel.r, pixel.g, pixel.b, pixel.a}));
+  writePixel(surface, x, y, Colour({pixel.r, pixel.g, pixel.b, pixel.a}),
+             coordinateSystem);
 }
 
 void CapEngine::writePixel(Uint32 *buffer, int x, int y,
                            CapEngine::Colour colour, int bufWidth,
-                           int bufHeight)
+                           int bufHeight, CoordinateSystem coordinateSystem)
 {
   // convert to screen coordinates
-  int yNew = (bufHeight - 1) - y;
+  if (coordinateSystem == CoordinateSystem::YUP)
+    y = (bufHeight - 1) - y;
 
   // calculate offset into pixel buffer of (x, y)
   // bufWidth is the length of a row in pixels
   int bytesPerPixel = 4;
-  int offset = (bufWidth) * (yNew) + (x);
+  int offset = (bufWidth) * (y) + (x);
 
   assert(offset >= 0 && offset <= bufWidth * bufHeight * 4);
 
@@ -353,11 +363,11 @@ Surface *CapEngine::createRectangle(int width, int height, Colour colour)
   //   int y = (i / pixelSize) / (surface->pitch / pixelSize);
   //   std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y <<
   //   ") = " << value
-  // 	      << " r: " << (value & surface->format->Rmask) << ", "
-  // 	      << " g: " << (value & surface->format->Gmask) << ","
-  // 	      << " b: " << (value & surface->format->Bmask) << ","
-  // 	      << " a: " << (value & surface->format->Amask)
-  // 	      << std::endl;
+  //		  << " r: " << (value & surface->format->Rmask) << ", "
+  //		  << " g: " << (value & surface->format->Gmask) << ","
+  //		  << " b: " << (value & surface->format->Bmask) << ","
+  //		  << " a: " << (value & surface->format->Amask)
+  //		  << std::endl;
 
   // }
 
@@ -408,11 +418,11 @@ Surface *CapEngine::createRectangle2(int width, int height, Colour colour)
   // #endif
   //       std::cout << "Pixel at " << i << " at coordinate (" << x << "," << y
   //       <<  ") = " << value
-  // 		<< " r: " << (value & rmask) << ", "
-  // 		<< " g: " << (value & gmask) << ","
-  // 		<< " b: " << (value & bmask) << ","
-  // 		<< " a: " << (value & amask)
-  // 		<< std::endl;
+  //		<< " r: " << (value & rmask) << ", "
+  //		<< " g: " << (value & gmask) << ","
+  //		<< " b: " << (value & bmask) << ","
+  //		<< " a: " << (value & amask)
+  //		<< std::endl;
   //     }
   //  }
 
@@ -423,8 +433,11 @@ Surface *CapEngine::createRectangle2(int width, int height, Colour colour)
   return surface;
 }
 
-Uint32 CapEngine::getPixel(const CapEngine::Surface *surface, int x, int y)
+Uint32 CapEngine::getPixel(const CapEngine::Surface *surface, int x, int y,
+                           CoordinateSystem coordinateSystem)
 {
+  if (coordinateSystem == CoordinateSystem::YUP)
+    y = (surface->h - 1) - y;
 
   // This was taken from http://sdl.beuc.net/sdl.wiki/Pixel_Accessblack
   int bpp = surface->format->BytesPerPixel;
@@ -458,9 +471,9 @@ Uint32 CapEngine::getPixel(const CapEngine::Surface *surface, int x, int y)
 
 void CapEngine::getPixelComponents(const CapEngine::Surface *surface, int x,
                                    int y, Uint8 *r, Uint8 *g, Uint8 *b,
-                                   Uint8 *a)
+                                   Uint8 *a, CoordinateSystem coordinateSystem)
 {
-  Uint32 pixel = getPixel(surface, x, y);
+  Uint32 pixel = getPixel(surface, x, y, coordinateSystem);
   Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
   rmask = 0xff000000;
@@ -483,21 +496,24 @@ void CapEngine::getPixelComponents(const CapEngine::Surface *surface, int x,
 #endif
 }
 
-Pixel CapEngine::getPixelComponents(const CapEngine::Surface *surface, int x,
-                                    int y)
+CapEngine::Pixel
+    CapEngine::getPixelComponents(const CapEngine::Surface *surface, int x,
+                                  int y,
+                                  CapEngine::CoordinateSystem coordinateSystem)
 {
   Uint8 r = 0x00;
   Uint8 g = 0x00;
   Uint8 b = 0x00;
   Uint8 a = 0x00;
-  getPixelComponents(surface, x, y, &r, &g, &b, &a);
+  getPixelComponents(surface, x, y, &r, &g, &b, &a, coordinateSystem);
 
   return {r, g, b, a};
 }
 
 boost::optional<real>
     CapEngine::getSlopeAtPixel(const CapEngine::Surface *surface, int x, int y,
-                               Pixel solidPixel, int numNeighbours, bool above)
+                               Pixel solidPixel, int numNeighbours, bool above,
+                               CoordinateSystem coordinateSystem)
 {
   // This is broken and unfinished.  Don't use.
   auto pixelsEqual = [](const Pixel &lhs, const Pixel &rhs) -> bool {
@@ -505,14 +521,14 @@ boost::optional<real>
   };
 
   // if pixel at x,y is not a solid pixel then return nothing
-  Pixel mainPixel = getPixelComponents(surface, x, y);
+  Pixel mainPixel = getPixelComponents(surface, x, y, coordinateSystem);
   if (mainPixel.r != solidPixel.r || mainPixel.g != solidPixel.g ||
       mainPixel.b != solidPixel.b || mainPixel.a != solidPixel.a) {
     return boost::optional<real>();
   }
 
   if (above) {
-    Pixel pixel = getPixelComponents(surface, x, y - 1);
+    Pixel pixel = getPixelComponents(surface, x, y - 1, coordinateSystem);
     if (pixelsEqual(pixel, solidPixel)) {
       return boost::optional<real>();
     }
@@ -531,7 +547,7 @@ boost::optional<real>
         break;
 
       int j = y;
-      pixel = getPixelComponents(surface, i, y);
+      pixel = getPixelComponents(surface, i, y, coordinateSystem);
       //   if the pixel is solid, look up for the first non solid pixel until
       //   end of surface
       if (pixelsEqual(pixel, solidPixel)) {
@@ -562,8 +578,9 @@ boost::optional<real>
         // pixel was not found to right either, so it must be one above this and
         // to the right
         else {
-          if (!pixelsEqual(getPixelComponents(surface, i + i, j - i),
-                           solidPixel)) {
+          if (!pixelsEqual(
+                  getPixelComponents(surface, i + i, j - i, coordinateSystem),
+                  solidPixel)) {
             std::stringstream error;
             error << "Expecting solid pixel at (" << (i - 1) << ", " << (j - 1)
                   << ")";
@@ -580,7 +597,7 @@ boost::optional<real>
         break;
 
       int j = y;
-      pixel = getPixelComponents(surface, i, y);
+      pixel = getPixelComponents(surface, i, y, coordinateSystem);
       //   if the pixel is solid, look up for the first non solid pixel until
       //   end of surface
       if (pixelsEqual(pixel, solidPixel)) {
@@ -654,7 +671,8 @@ boost::optional<real>
   }
 }
 
-void CapEngine::fillRectangle(Surface *surface, Rect rectangle, Colour colour)
+void CapEngine::fillRectangle(Surface *surface, Rect rectangle, Colour colour,
+                              CoordinateSystem coordinateSystem)
 {
-  fillRectangleBruteForce(surface, rectangle, colour);
+  fillRectangleBruteForce(surface, rectangle, colour, coordinateSystem);
 }
