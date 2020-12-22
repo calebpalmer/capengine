@@ -33,14 +33,12 @@ public:
   bool onDestroy() override;
 
 private:
-  using ObjectManagerType = SimpleObjectManager;
-
   //! Descriptors of all the available scenes.
   jsoncons::json m_sceneDescriptors;
   //! The id of the scene to load.
   std::string m_sceneId;
   //! The scene.
-  std::unique_ptr<Scene2d<ObjectManagerType>> m_pScene;
+  std::unique_ptr<Scene2d<SimpleObjectManager>> m_pScene;
   //! The id of the window to render to.
   uint32_t m_windowId;
 };

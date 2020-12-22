@@ -1,4 +1,5 @@
 #include "componentutils.h"
+#include "CapEngineException.h"
 
 namespace CapEngine
 {
@@ -27,6 +28,21 @@ std::string componentTypeToString(ComponentType in_componentType)
     return "AI";
   default:
     return "Unknown";
+  }
+}
+
+/**
+ * @brief Throw an exception if property is missing.
+ * @param[in] in_json The json to check.
+ * @param[in] in_propertyName The property name to check.
+ */
+void assertPropertyExists(const jsoncons::json &in_json,
+                          const std::string &in_propertyName)
+{
+  if (!in_json.has_key(in_propertyName)) {
+    std::ostringstream msg;
+    msg << in_propertyName << " property is required.";
+    CAP_THROW(CapEngineException(msg.str()));
   }
 }
 

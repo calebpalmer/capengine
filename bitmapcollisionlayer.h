@@ -36,7 +36,7 @@ private:
 //! \override Layer::type()
 inline const std::string BitmapCollisionLayer::type() const
 {
-  return Schema::Scene2d::kBitmapCollisionLayer;
+  return Schema::Scene2d::kVectorCollisionLayerType;
 }
 
 //! \copydoc Layer::canCollide

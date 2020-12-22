@@ -37,6 +37,8 @@ extern const char *kImageLayerType;
 // kPosition
 extern const char *kBitmapCollisionLayer;
 
+extern const char *kVectorCollisionLayerType;
+
 // objects
 extern const char *kObjects;
 extern const char *kComponents;

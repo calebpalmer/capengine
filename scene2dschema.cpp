@@ -36,6 +36,9 @@ const char *kImageLayerType = "ImageLayer";
 // kPosition
 const char *kBitmapCollisionLayer = "BitmapCollisionLayer";
 
+// vector layer
+const char *kVectorCollisionLayerType = "VectorCollisionLayer";
+
 // objects
 const char *kObjects = "objects";
 const char *kComponents = "components";

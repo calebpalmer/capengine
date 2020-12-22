@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+#include "SDL_keycode.h"
 #include "captypes.h"
 #include "vector.h"
 
