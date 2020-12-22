@@ -19,6 +19,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include <optional>
+
 namespace CapEngine
 {
 
@@ -39,7 +41,7 @@ struct WindowParams {
 struct Window {
   Window();
   Window(SDL_Window *pWindow, SDL_Renderer *pRenderer, Viewport viewport,
-		 WindowParams windowParams);
+         WindowParams windowParams);
 
   SDL_Window *m_window;
   SDL_Renderer *m_renderer;
@@ -50,7 +52,7 @@ struct Window {
 class FontManager;
 
 static const WindowParams defaultScreen = {
-	"CapEngine", 1280, 800, 32, false, false, true, false, "main"};
+    "CapEngine", 1280, 800, 32, false, false, true, false, "main"};
 
 // free functions
 TexturePtr textureToTexturePtr(Texture *texture);
@@ -77,7 +79,8 @@ public:
   virtual bool isValidWindowId(Uint32 windowId) const;
   virtual void getWindowResolution(Uint32 windowID, int *width, int *height);
   virtual std::pair<int, int> getWindowLogicalResolution(uint32_t in_windowID);
-  virtual void setWindowLogicalResolution(uint32_t in_windowID, int in_width, int in_height);
+  virtual void setWindowLogicalResolution(uint32_t in_windowID, int in_width,
+                                          int in_height);
   virtual int getWindowWidth(Uint32 windowID);
   virtual int getWindowHeight(Uint32 windowID);
   virtual void setWindowPosition(Uint32 windowId, int x, int y);
@@ -99,8 +102,8 @@ public:
   virtual void saveSurface(Surface *surface, const std::string &filePath);
   virtual void closeSurface(Surface *surface) const;
   virtual void blitSurface(Surface *sourceSurface, int srcX, int srcY,
-						   int sourceWidth, int sourceHeight,
-						   Surface *destSurface, int x, int y);
+                           int sourceWidth, int sourceHeight,
+                           Surface *destSurface, int x, int y);
   virtual real getSurfaceWidth(const Surface *surface) const;
   virtual real getSurfaceHeight(const Surface *surface) const;
   // Textures
@@ -108,36 +111,38 @@ public:
   virtual TexturePtr loadImagePtr(std::string const &in_filePath) const;
   virtual void closeTexture(Texture *texture) const;
   virtual void drawTexture(Uint32 windowID, int x, int y, Texture *texture,
-						   Rect *srcRect = nullptr, bool applyTransform = true);
+                           Rect *srcRect = nullptr, bool applyTransform = true);
   virtual void drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
-						   Rect *dstRect, bool applyTransform = true);
+                           Rect *dstRect,
+                           std::optional<double> rotationDegrees = std::nullopt,
+                           bool applyTransform = true);
   virtual real getTextureWidth(Texture *texture) const;
   virtual real getTextureHeight(Texture *texture) const;
   virtual void getTextureDims(Texture *texture, int *x, int *y) const;
   virtual Texture *createTexture(int width, int height);
   virtual TexturePtr createTexturePtr(int width, int height);
   virtual Texture *createTextureFromSurface(Surface *surface,
-											bool freeSurface = false);
+                                            bool freeSurface = false);
   virtual Texture *createTextureFromSurface(Uint32 windowID, Surface *surface,
-											bool freeSurface = false);
+                                            bool freeSurface = false);
   virtual TexturePtr createTextureFromSurfacePtr(Surface *surface,
-												 bool freeSurface = false);
+                                                 bool freeSurface = false);
   virtual TexturePtr createTextureFromSurfacePtr(Uint32 windowId,
-												 Surface *surface,
-												 bool freeSurface = false);
+                                                 Surface *surface,
+                                                 bool freeSurface = false);
   virtual void setClipRect(Uint32 windowId, SDL_Rect const *clipRect);
 
   // opengl support
   virtual void setReshapeFunc(void (*func)(int x, int y));
   virtual void callReshapeFunc(int w, int h);
   virtual void displayFPS(bool on, const std::string &ttfFontPath = "",
-						  Uint8 r = 0, Uint8 g = 0, Uint8 b = 0);
+                          Uint8 r = 0, Uint8 g = 0, Uint8 b = 0);
 
   // input
   virtual void loadControllerMapFromFile(std::string filePath);
   // Drawing
   virtual void drawLine(Uint32 windowID, int x1, int y1, int x2, int y2,
-						const Colour &strokeColour);
+                        const Colour &strokeColour);
   virtual void drawFillRect(Uint32 windowID, Rect rect, Colour fillColour);
   virtual void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
 

@@ -63,7 +63,8 @@ public:
   AssetManager(VideoManager &videoManager, SoundPlayer &soundPlayer,
                const std::string &assetFile);
   ~AssetManager();
-  void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect);
+  void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect,
+            std::optional<double> rotationDegrees = std::nullopt);
   void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
   void draw(Uint32 windowID, int id, Vector position);
   void draw(Uint32 windowID, int id, Rectangle dstRect);

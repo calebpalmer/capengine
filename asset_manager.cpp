@@ -297,7 +297,8 @@ void AssetManager::loadSound(int id, string path)
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle _srcRect,
-                        Rectangle _destRect)
+                        Rectangle _destRect,
+                        std::optional<double> rotationDegrees)
 {
   Image *image = this->getImage(id);
 
@@ -313,7 +314,8 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _srcRect,
   destRect.w = _destRect.width;
   destRect.h = _destRect.height;
 
-  mVideoManager.drawTexture(windowID, image->texture, &srcRect, &destRect);
+  mVideoManager.drawTexture(windowID, image->texture, &srcRect, &destRect,
+                            rotationDegrees);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Vector position)
@@ -371,10 +373,10 @@ void AssetManager::stopSound(int id) { mSoundPlayer.deleteSound(id); }
 
 //! Checks to see if an image asset exists.
 /**
-    \param id
-    The id to check.
-    \return
-    true if it exists; false otherwise.
+                \param id
+                The id to check.
+                \return
+                true if it exists; false otherwise.
 */
 bool AssetManager::imageExists(int id) const
 {
@@ -383,10 +385,10 @@ bool AssetManager::imageExists(int id) const
 
 //! Checks to see if an sound asset exists.
 /**
-    \param id
-    The id to check.
-    \return
-    true if it exists; false otherwise.
+                \param id
+                The id to check.
+                \return
+                true if it exists; false otherwise.
 */
 bool AssetManager::soundExists(int id) const
 {

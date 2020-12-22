@@ -5,6 +5,7 @@
 
 #include "CapEngineException.h"
 #include "EventDispatcher.h"
+#include "SDL_render.h"
 #include "SDL_video.h"
 #include "collision.h"
 #include "logger.h"
@@ -26,18 +27,18 @@ namespace CapEngine
 Window::Window() : m_window(nullptr), m_renderer(nullptr) {}
 
 Window::Window(SDL_Window *pWindow, SDL_Renderer *pRenderer, Viewport viewport,
-			   WindowParams windowParams)
-	: m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport),
-	  m_windowParams(windowParams)
+               WindowParams windowParams)
+    : m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport),
+      m_windowParams(windowParams)
 {
 }
 
 bool VideoManager::instantiated = false;
 
 VideoManager::VideoManager()
-	: up_fontManager(new FontManager()), logger(nullptr), m_pWindow(nullptr),
-	  m_pRenderer(nullptr), initialized(false),
-	  m_transformationMatrix(Matrix::createIdentityMatrix())
+    : up_fontManager(new FontManager()), logger(nullptr), m_pWindow(nullptr),
+      m_pRenderer(nullptr), initialized(false),
+      m_transformationMatrix(Matrix::createIdentityMatrix())
 {
   assert(instantiated == false);
   instantiated = true;
@@ -45,9 +46,9 @@ VideoManager::VideoManager()
 }
 
 VideoManager::VideoManager(Logger *loggerIn)
-	: up_fontManager(new FontManager()), m_pWindow(nullptr),
-	  m_pRenderer(nullptr), logger(loggerIn), initialized(false),
-	  m_transformationMatrix(Matrix::createIdentityMatrix())
+    : up_fontManager(new FontManager()), m_pWindow(nullptr),
+      m_pRenderer(nullptr), logger(loggerIn), initialized(false),
+      m_transformationMatrix(Matrix::createIdentityMatrix())
 {
   assert(instantiated == false);
   instantiated = true;
@@ -64,30 +65,30 @@ Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow)
   currentWindowParams = windowParams;
 
   if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to initialize SDL. Shutting down." << endl;
-	logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
-	shutdown();
+    ostringstream errorMsg;
+    errorMsg << "Unable to initialize SDL. Shutting down." << endl;
+    logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
+    shutdown();
   }
 
   if (!noWindow) {
-	if (windowParams.opengl) {
-	  throw CapEngineException("OpenGL not implemented");
-	}
+    if (windowParams.opengl) {
+      throw CapEngineException("OpenGL not implemented");
+    }
 
-	else {
-	  m_pWindow = createWindow(windowParams);
-	  m_pRenderer = createRenderer(m_pWindow, windowParams);
+    else {
+      m_pWindow = createWindow(windowParams);
+      m_pRenderer = createRenderer(m_pWindow, windowParams);
 
-	  windowID = SDL_GetWindowID(m_pWindow);
+      windowID = SDL_GetWindowID(m_pWindow);
 
-	  // Create viewpor
-	  Viewport viewport = {0, 0, windowParams.width, windowParams.height};
-	  Window window = {m_pWindow, m_pRenderer, viewport, windowParams};
+      // Create viewpor
+      Viewport viewport = {0, 0, windowParams.width, windowParams.height};
+      Window window = {m_pWindow, m_pRenderer, viewport, windowParams};
 
-	  m_windows[windowID] = window;
-	  m_windowNamesToIds[mainWindowName] = windowID;
-	}
+      m_windows[windowID] = window;
+      m_windowNamesToIds[mainWindowName] = windowID;
+    }
   }
 
   // load controller maps
@@ -98,30 +99,30 @@ Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow)
 }
 
 TexturePtr VideoManager::createTextureFromSurfacePtr(Surface *surface,
-													 bool freeSurface)
+                                                     bool freeSurface)
 {
   auto windowId = getWindowId(mainWindowName);
   return createTextureFromSurfacePtr(windowId, surface, freeSurface);
 }
 
 TexturePtr VideoManager::createTextureFromSurfacePtr(Uint32 windowId,
-													 Surface *surface,
-													 bool freeSurface)
+                                                     Surface *surface,
+                                                     bool freeSurface)
 {
   Texture *texture = createTextureFromSurface(windowId, surface, freeSurface);
   return std::move(TexturePtr(texture, SDL_DestroyTexture));
 }
 
 Texture *VideoManager::createTextureFromSurface(Surface *surface,
-												bool freeSurface)
+                                                bool freeSurface)
 {
   auto windowId = getWindowId(mainWindowName);
   return createTextureFromSurface(windowId, surface, freeSurface);
 }
 
 Texture *VideoManager::createTextureFromSurface(Uint32 windowId,
-												Surface *surface,
-												bool freeSurface)
+                                                Surface *surface,
+                                                bool freeSurface)
 {
   // Create Texture from Surface
   auto window = getWindow(windowId);
@@ -129,14 +130,14 @@ Texture *VideoManager::createTextureFromSurface(Uint32 windowId,
 
   SDL_Texture *texture = SDL_CreateTextureFromSurface(pRenderer, surface);
   if (texture == nullptr) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to load texture from surface "
-			 << " - " << SDL_GetError();
-	throw CapEngineException(errorMsg.str());
+    ostringstream errorMsg;
+    errorMsg << "Unable to load texture from surface "
+             << " - " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
 
   if (freeSurface) {
-	this->closeSurface(surface);
+    this->closeSurface(surface);
   }
   return texture;
 }
@@ -153,20 +154,20 @@ Texture *VideoManager::loadImage(string filePath) const
   int flags = IMG_INIT_JPG | IMG_INIT_PNG;
   int initted = IMG_Init(flags);
   if ((initted & flags) != flags) {
-	ostringstream error_message;
-	error_message << "could not init SDL_Image" << endl;
-	error_message << "Reason: " << IMG_GetError() << endl;
-	throw CapEngineException(error_message.str());
+    ostringstream error_message;
+    error_message << "could not init SDL_Image" << endl;
+    error_message << "Reason: " << IMG_GetError() << endl;
+    throw CapEngineException(error_message.str());
   }
 
   // Load Surface
   SDL_Surface *tempSurface = NULL;
   tempSurface = IMG_Load(filePath.c_str());
   if (tempSurface == nullptr) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to load surface " << filePath << " - "
-			 << SDL_GetError();
-	throw CapEngineException(errorMsg.str());
+    ostringstream errorMsg;
+    errorMsg << "Unable to load surface " << filePath << " - "
+             << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
   ostringstream logString;
   logString << "Loaded surface from file " << filePath;
@@ -177,10 +178,10 @@ Texture *VideoManager::loadImage(string filePath) const
   // Create Texture from Surface
   SDL_Texture *texture = SDL_CreateTextureFromSurface(m_pRenderer, tempSurface);
   if (texture == nullptr) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to load texture from file " << filePath << " - "
-			 << SDL_GetError();
-	throw CapEngineException(errorMsg.str());
+    ostringstream errorMsg;
+    errorMsg << "Unable to load texture from file " << filePath << " - "
+             << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
 
   SDL_FreeSurface(tempSurface);
@@ -188,7 +189,7 @@ Texture *VideoManager::loadImage(string filePath) const
 }
 
 void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture *texture,
-							   Rect *srcRect, bool applyTransform)
+                               Rect *srcRect, bool applyTransform)
 {
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
@@ -199,23 +200,23 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture *texture,
   dstRect.x = x;
   dstRect.y = y;
   if (srcRect != nullptr) {
-	dstRect.w = srcRect->w;
-	dstRect.h = srcRect->h;
+    dstRect.w = srcRect->w;
+    dstRect.h = srcRect->h;
   }
 
   else {
-	int result =
-		SDL_QueryTexture(texture, nullptr, nullptr, &(dstRect.w), &(dstRect.h));
-	if (result != 0) {
-	  ostringstream errorMsg;
-	  errorMsg << "Unable to draw texture:  " << SDL_GetError();
-	  logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
-	}
+    int result =
+        SDL_QueryTexture(texture, nullptr, nullptr, &(dstRect.w), &(dstRect.h));
+    if (result != 0) {
+      ostringstream errorMsg;
+      errorMsg << "Unable to draw texture:  " << SDL_GetError();
+      logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
+    }
   }
 
   // Transform the dstRect
   if (applyTransform)
-	dstRect = viewport.transformRect(dstRect);
+    dstRect = viewport.transformRect(dstRect);
 
   int w, h;
   getWindowResolution(windowID, &w, &h);
@@ -223,16 +224,18 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture *texture,
 
   // only draw things that are in the window
   if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE) {
-	int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
-	if (result != 0) {
-	  logger->log("Unable to render texture", Logger::CERROR, __FILE__,
-				  __LINE__);
-	}
+    int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
+    if (result != 0) {
+      logger->log("Unable to render texture", Logger::CERROR, __FILE__,
+                  __LINE__);
+    }
   }
 }
 
 void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
-							   Rect *dstRect, bool applyTransform)
+                               Rect *dstRect,
+                               std::optional<double> rotationDegrees,
+                               bool applyTransform)
 {
   assert(texture != nullptr);
 
@@ -243,10 +246,10 @@ void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 
   // Transform the dstRect
   if (dstRect) {
-	Rect newDstRect = *dstRect;
-	if (applyTransform)
-	  newDstRect = viewport.transformRect(*dstRect);
-	*dstRect = newDstRect;
+    Rect newDstRect = *dstRect;
+    if (applyTransform)
+      newDstRect = viewport.transformRect(*dstRect);
+    *dstRect = newDstRect;
   }
 
   int w, h;
@@ -255,15 +258,20 @@ void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 
   // only draw things that are in the window
   if (!dstRect || detectMBRCollision(*dstRect, windowRect) != COLLISION_NONE) {
-	SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
+    if (rotationDegrees) {
+      const SDL_Point *center = nullptr;
+      SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, *rotationDegrees,
+                       center, SDL_FLIP_NONE);
+    } else
+      SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
   }
 }
 
 //! Sets the clip rect for a window
 /**
 \param windowID - The window to set the clip rect on.
-		  \param - The retanble to use for clipping.  Unsets clip rect if
-nullptr;
+                  \param - The retanble to use for clipping.  Unsets clip rect
+if nullptr;
 */
 void VideoManager::setClipRect(Uint32 windowId, SDL_Rect const *clipRect)
 {
@@ -272,19 +280,19 @@ void VideoManager::setClipRect(Uint32 windowId, SDL_Rect const *clipRect)
 
   int rcode = SDL_RenderSetClipRect(window.m_renderer, clipRect);
   if (rcode != 0) {
-	assert(logger != nullptr);
-	CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
+    assert(logger != nullptr);
+    CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
   }
 }
 
 void VideoManager::shutdown()
 {
   for (auto &i : m_windows) {
-	auto pWindow = i.second.m_window;
-	auto pRenderer = i.second.m_renderer;
+    auto pWindow = i.second.m_window;
+    auto pRenderer = i.second.m_renderer;
 
-	SDL_DestroyRenderer(pRenderer);
-	SDL_DestroyWindow(pWindow);
+    SDL_DestroyRenderer(pRenderer);
+    SDL_DestroyWindow(pWindow);
   }
 
   SDL_Quit();
@@ -298,8 +306,8 @@ void VideoManager::clearScreen(Uint32 windowID)
   auto pRenderer = window.m_renderer;
 
   SDL_SetRenderDrawColor(pRenderer, m_backgroundColour.m_r,
-						 m_backgroundColour.m_g, m_backgroundColour.m_g,
-						 m_backgroundColour.m_b);
+                         m_backgroundColour.m_g, m_backgroundColour.m_g,
+                         m_backgroundColour.m_b);
 
   // Clear Screen
   SDL_RenderClear(pRenderer);
@@ -312,24 +320,24 @@ void VideoManager::drawScreen(Uint32 windowID)
 
   // Render FPS if turned on
   if (showFPS) {
-	string sFPS = to_string(fps);
-	int fontSize = 14;
-	Surface *fpsSurface = up_fontManager->getTextSurface(
-		ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
-	Texture *fpsTexture = SDL_CreateTextureFromSurface(pRenderer, fpsSurface);
-	SDL_FreeSurface(fpsSurface);
+    string sFPS = to_string(fps);
+    int fontSize = 14;
+    Surface *fpsSurface = up_fontManager->getTextSurface(
+        ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
+    Texture *fpsTexture = SDL_CreateTextureFromSurface(pRenderer, fpsSurface);
+    SDL_FreeSurface(fpsSurface);
 
-	int x = 15;
-	int y = 15;
-	drawTexture(windowID, x, y, fpsTexture, nullptr, false);
-	this->closeTexture(fpsTexture);
+    int x = 15;
+    int y = 15;
+    drawTexture(windowID, x, y, fpsTexture, nullptr, false);
+    this->closeTexture(fpsTexture);
   }
 
   // draw the screen
   if (window.m_windowParams.opengl) {
-	SDL_GL_SwapWindow(m_pWindow);
+    SDL_GL_SwapWindow(m_pWindow);
   } else {
-	SDL_RenderPresent(pRenderer);
+    SDL_RenderPresent(pRenderer);
   }
 
   // Update fps variables
@@ -353,7 +361,7 @@ void VideoManager::getWindowResolution(Uint32 windowID, int *width, int *height)
  A pair of ints containing the width and height respectively.
 */
 std::pair<int, int>
-	VideoManager::getWindowLogicalResolution(uint32_t in_windowID)
+    VideoManager::getWindowLogicalResolution(uint32_t in_windowID)
 {
   const Window window = getWindow(in_windowID);
   assert(window.m_renderer != nullptr);
@@ -365,16 +373,17 @@ std::pair<int, int>
   return std::make_pair(width, height);
 }
 
-void VideoManager::setWindowLogicalResolution(uint32_t in_windowID, int in_width, int in_height)
+void VideoManager::setWindowLogicalResolution(uint32_t in_windowID,
+                                              int in_width, int in_height)
 {
   const Window window = getWindow(in_windowID);
   assert(window.m_renderer != nullptr);
 
   int result = SDL_RenderSetLogicalSize(window.m_renderer, in_width, in_height);
-  if(result){
-	std::stringstream error;
-	error << "SDL_RenderSetLogicalSize() failed: " << SDL_GetError();
-	CAP_THROW(CapEngineException(error.str()));
+  if (result) {
+    std::stringstream error;
+    error << "SDL_RenderSetLogicalSize() failed: " << SDL_GetError();
+    CAP_THROW(CapEngineException(error.str()));
   }
 }
 
@@ -430,10 +439,10 @@ real VideoManager::getTextureWidth(Texture *texture) const
   int w;
   int result = SDL_QueryTexture(texture, nullptr, nullptr, &w, nullptr);
   if (result < 0) {
-	ostringstream error;
-	error << "Unable to get texture width" << endl << SDL_GetError();
-	logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
-	throw CapEngineException(error.str());
+    ostringstream error;
+    error << "Unable to get texture width" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
+    throw CapEngineException(error.str());
   }
   return w;
 }
@@ -448,10 +457,10 @@ real VideoManager::getTextureHeight(Texture *texture) const
   int h;
   int result = SDL_QueryTexture(texture, nullptr, nullptr, nullptr, &h);
   if (result < 0) {
-	ostringstream error;
-	error << "Unable to get texture height" << endl << SDL_GetError();
-	logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
-	throw CapEngineException(error.str());
+    ostringstream error;
+    error << "Unable to get texture height" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
+    throw CapEngineException(error.str());
   }
   return h;
 }
@@ -461,10 +470,10 @@ void VideoManager::getTextureDims(Texture *texture, int *x, int *y) const
   CAP_THROW_NULL(texture, "texture is null");
   int result = SDL_QueryTexture(texture, nullptr, nullptr, x, y);
   if (result < 0) {
-	ostringstream error;
-	error << "Unable to get texture height" << endl << SDL_GetError();
-	logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
-	throw CapEngineException(error.str());
+    ostringstream error;
+    error << "Unable to get texture height" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
+    throw CapEngineException(error.str());
   }
 }
 
@@ -486,8 +495,8 @@ void VideoManager::setColorKey(Surface *surface) const
   CAP_THROW_NULL(surface, "Cannot set color key on a null surface");
 
   if (SDL_SetColorKey(surface, SDL_TRUE | SDL_RLEACCEL,
-					  SDL_MapRGB(surface->format, 0, 0xFF, 0xFF)) == -1) {
-	throw CapEngineException("Error setting the color key of the surface");
+                      SDL_MapRGB(surface->format, 0, 0xFF, 0xFF)) == -1) {
+    throw CapEngineException("Error setting the color key of the surface");
   }
 }
 
@@ -500,13 +509,13 @@ TexturePtr VideoManager::createTexturePtr(int width, int height)
 Texture *VideoManager::createTexture(int width, int height)
 {
   SDL_Texture *texture =
-	  SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888,
-						SDL_TEXTUREACCESS_STREAMING, width, height);
+      SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888,
+                        SDL_TEXTUREACCESS_STREAMING, width, height);
   if (texture == nullptr) {
-	ostringstream error;
-	error << "Error creating texture" << endl << SDL_GetError();
-	logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
-	throw CapEngineException(error.str());
+    ostringstream error;
+    error << "Error creating texture" << endl << SDL_GetError();
+    logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
+    throw CapEngineException(error.str());
   }
 
   return texture;
@@ -525,15 +534,15 @@ void VideoManager::setReshapeFunc(void (*func)(int x, int y))
 void VideoManager::callReshapeFunc(int w, int h)
 {
   if (reshapeFunc == nullptr) {
-	throw CapEngineException("No reshape function set");
+    throw CapEngineException("No reshape function set");
   }
   if (currentWindowParams.opengl) {
-	reshapeFunc(w, h);
+    reshapeFunc(w, h);
   }
 }
 
 void VideoManager::displayFPS(bool on, const string &ttfFontPath, Uint8 r,
-							  Uint8 g, Uint8 b)
+                              Uint8 g, Uint8 b)
 {
   showFPS = on;
   this->ttfFontPath = ttfFontPath;
@@ -555,10 +564,10 @@ Surface *VideoManager::loadSurface(string filePath) const
   int initted = IMG_Init(flags);
 
   if ((initted & flags) != flags) {
-	ostringstream error_message;
-	error_message << "could not init SDL_Image" << endl;
-	error_message << "Reason: " << IMG_GetError() << endl;
-	throw CapEngineException(error_message.str());
+    ostringstream error_message;
+    error_message << "could not init SDL_Image" << endl;
+    error_message << "Reason: " << IMG_GetError() << endl;
+    throw CapEngineException(error_message.str());
   }
 
   SDL_Surface *tempSurface = NULL;
@@ -569,9 +578,9 @@ Surface *VideoManager::loadSurface(string filePath) const
   logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
   if (tempSurface == NULL) {
-	cerr << "Unable to load surface" << endl;
-	cerr << "SDL Error: " << SDL_GetError() << endl;
-	return tempSurface;
+    cerr << "Unable to load surface" << endl;
+    cerr << "SDL Error: " << SDL_GetError() << endl;
+    return tempSurface;
   }
 
   setColorKey(tempSurface);
@@ -608,10 +617,10 @@ Surface *VideoManager::createSurface(int width, int height)
 #endif
 
   surface =
-	  SDL_CreateRGBSurface(0, width, height, 32, rmask, gmask, bmask, amask);
+      SDL_CreateRGBSurface(0, width, height, 32, rmask, gmask, bmask, amask);
   if (surface == NULL) {
-	fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
-	exit(1);
+    fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
+    exit(1);
   }
 
   // setColorKey(surface);
@@ -631,18 +640,18 @@ void VideoManager::closeSurface(Surface *surface) const
 }
 
 void VideoManager::saveSurface(SDL_Surface *surface,
-							   const std::string &filePath)
+                               const std::string &filePath)
 {
   if (SDL_SaveBMP(surface, filePath.c_str()) != 0) {
-	std::stringstream msg;
-	msg << SDL_GetError();
-	BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
+    std::stringstream msg;
+    msg << SDL_GetError();
+    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
   }
 }
 
 void VideoManager::blitSurface(Surface *sourceSurface, int srcX, int srcY,
-							   int sourceWidth, int sourceHeight,
-							   Surface *destSurface, int x, int y)
+                               int sourceWidth, int sourceHeight,
+                               Surface *destSurface, int x, int y)
 {
   SDL_Rect srcLocation;
   srcLocation.x = srcX;
@@ -673,16 +682,16 @@ void VideoManager::loadControllerMaps()
 {
   // generated for wii u pro controller using antimicro
   const char mapping[] =
-	  "050000007e0500003003000001000000,Nintendo Wii Remote Pro "
-	  "Controller,platform:Linux,a:b0,b:b0,x:b2,y:b3,back:b8,start:b9,guide:"
-	  "b10,leftshoulder:b4,rightshoulder:b5,leftstick:b11,rightstick:b12,leftx:"
-	  "a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,dpup:b13,"
-	  "dpleft:b15,dpdown:b14,dpright:b16,";
+      "050000007e0500003003000001000000,Nintendo Wii Remote Pro "
+      "Controller,platform:Linux,a:b0,b:b0,x:b2,y:b3,back:b8,start:b9,guide:"
+      "b10,leftshoulder:b4,rightshoulder:b5,leftstick:b11,rightstick:b12,leftx:"
+      "a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,dpup:b13,"
+      "dpleft:b15,dpdown:b14,dpright:b16,";
   int result = SDL_GameControllerAddMapping(mapping);
   if (result != 0) {
-	ostringstream error;
-	error << "Unable to add controller mapping: " << SDL_GetError();
-	logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
+    ostringstream error;
+    error << "Unable to add controller mapping: " << SDL_GetError();
+    logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
@@ -690,10 +699,10 @@ void VideoManager::loadControllerMapFromFile(std::string path)
 {
   int result = SDL_GameControllerAddMappingsFromFile(path.c_str());
   if (result != 0) {
-	ostringstream error;
-	error << "Error adding controller mappings from file " << path << ": "
-		  << SDL_GetError();
-	logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
+    ostringstream error;
+    error << "Error adding controller mappings from file " << path << ": "
+          << SDL_GetError();
+    logger->log(error.str(), Logger::CWARNING, __FILE__, __LINE__);
   }
 }
 
@@ -711,7 +720,7 @@ void VideoManager::loadControllerMapFromFile(std::string path)
  \li The colour of the line.
 */
 void VideoManager::drawLine(Uint32 windowID, int x1, int y1, int x2, int y2,
-							const Colour &strokeColour)
+                            const Colour &strokeColour)
 {
   auto window = getWindow(windowID);
   auto pRenderer = window.m_renderer;
@@ -728,15 +737,15 @@ void VideoManager::drawLine(Uint32 windowID, int x1, int y1, int x2, int y2,
   Uint8 r, g, b, a;
   int rcode = SDL_GetRenderDrawColor(pRenderer, &r, &g, &b, &a);
   if (rcode != 0) {
-	CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
-	return;
+    CAP_LOG_SDL_ERROR(logger, Logger::CWARNING);
+    return;
   }
 
   ScopeGuard resetColour(
-	  [&]() { SDL_SetRenderDrawColor(pRenderer, r, g, b, a); });
+      [&]() { SDL_SetRenderDrawColor(pRenderer, r, g, b, a); });
 
   SDL_SetRenderDrawColor(pRenderer, strokeColour.m_r, strokeColour.m_g,
-						 strokeColour.m_b, strokeColour.m_a);
+                         strokeColour.m_b, strokeColour.m_a);
   SDL_RenderDrawLine(pRenderer, point1.x, point1.y, point2.x, point2.y);
 }
 
@@ -757,13 +766,13 @@ void VideoManager::drawFillRect(Uint32 windowID, Rect rect, Colour fillColour)
 
   // only draw things that are in the window
   if (detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE) {
-	// Draw the rect
-	SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g,
-						   fillColour.m_g, fillColour.m_a);
-	if (SDL_RenderFillRect(pRenderer, &newDstRect) != 0) {
-	  string errorMessage(SDL_GetError());
-	  logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
-	}
+    // Draw the rect
+    SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g,
+                           fillColour.m_g, fillColour.m_a);
+    if (SDL_RenderFillRect(pRenderer, &newDstRect) != 0) {
+      string errorMessage(SDL_GetError());
+      logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
+    }
   }
 }
 
@@ -782,13 +791,13 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour)
 
   // only draw things that are in the window
   if (detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE) {
-	// render the the rect
-	SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g,
-						   fillColour.m_g, fillColour.m_a);
-	if (SDL_RenderDrawRect(pRenderer, &rect) != 0) {
-	  string errorMessage(SDL_GetError());
-	  logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
-	}
+    // render the the rect
+    SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g,
+                           fillColour.m_g, fillColour.m_a);
+    if (SDL_RenderDrawRect(pRenderer, &rect) != 0) {
+      string errorMessage(SDL_GetError());
+      logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
+    }
   }
 }
 
@@ -815,68 +824,68 @@ SDL_Window *VideoManager::createWindow(WindowParams windowParams)
   SDL_Window *pWindow = nullptr;
 
   if (windowParams.fullScreen) {
-	// full screen
-	flags = flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
-	pWindow = SDL_CreateWindow(windowParams.windowName.c_str(),
-							   SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-							   0, 0, flags);
+    // full screen
+    flags = flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
+    pWindow = SDL_CreateWindow(windowParams.windowName.c_str(),
+                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                               0, 0, flags);
   } else {
-	// windowed
-	flags |= SDL_WINDOW_BORDERLESS;
+    // windowed
+    flags |= SDL_WINDOW_BORDERLESS;
 
-	if (windowParams.resizable)
-	  flags = flags | SDL_WINDOW_RESIZABLE;
+    if (windowParams.resizable)
+      flags = flags | SDL_WINDOW_RESIZABLE;
 
-	if (windowParams.maximized)
-	  flags = flags | SDL_WINDOW_MAXIMIZED;
+    if (windowParams.maximized)
+      flags = flags | SDL_WINDOW_MAXIMIZED;
 
-	pWindow = SDL_CreateWindow(windowParams.windowName.c_str(),
-							   SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-							   windowParams.width, windowParams.height, flags);
+    pWindow = SDL_CreateWindow(windowParams.windowName.c_str(),
+                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                               windowParams.width, windowParams.height, flags);
   }
 
   // check for error
   if (pWindow == nullptr) {
-	ostringstream errorStream;
-	errorStream << "Error creating window: " << SDL_GetError();
-	throw CapEngineException(errorStream.str());
+    ostringstream errorStream;
+    errorStream << "Error creating window: " << SDL_GetError();
+    throw CapEngineException(errorStream.str());
   }
 
   return pWindow;
 }
 
 SDL_Renderer *VideoManager::createRenderer(SDL_Window *pWindow,
-										   WindowParams windowParams)
+                                           WindowParams windowParams)
 {
   SDL_Renderer *pRenderer = nullptr;
   // Now create the 2d Renderer if OpenGL is not being used
   pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
   if (pRenderer == nullptr) {
-	ostringstream errorStream;
-	errorStream << "Error creating renderer:  " << SDL_GetError();
-	std::cerr << errorStream.str() << std::endl;
+    ostringstream errorStream;
+    errorStream << "Error creating renderer:  " << SDL_GetError();
+    std::cerr << errorStream.str() << std::endl;
 
-	throw CapEngineException(errorStream.str());
+    throw CapEngineException(errorStream.str());
   }
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,
-			  "linear"); // make the scaled rendering look smoother.
+              "linear"); // make the scaled rendering look smoother.
 
   // if full, set scaling
   // if(windowParams.fullScreen){
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,
-			  "linear"); // make the scaled rendering look smoother.
+              "linear"); // make the scaled rendering look smoother.
   int result = SDL_RenderSetLogicalSize(pRenderer, windowParams.width,
-										windowParams.height);
+                                        windowParams.height);
   if (result != 0) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to set logical render size: " << SDL_GetError();
-	logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
-	//  }
+    ostringstream errorMsg;
+    errorMsg << "Unable to set logical render size: " << SDL_GetError();
+    logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
+    //  }
   }
 
   SDL_SetRenderDrawColor(pRenderer, m_backgroundColour.m_r,
-						 m_backgroundColour.m_g, m_backgroundColour.m_g, 255);
+                         m_backgroundColour.m_g, m_backgroundColour.m_g, 255);
 
   // do alpha blending
   SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
@@ -907,11 +916,11 @@ unsigned int VideoManager::createNewWindow(WindowParams windowParams)
 void VideoManager::closeWindow(Uint32 windowID)
 {
   try {
-	auto window = m_windows.find(windowID);
-	if (window != m_windows.end()) {
-	  SDL_DestroyRenderer(window->second.m_renderer);
-	  SDL_DestroyWindow(window->second.m_window);
-	}
+    auto window = m_windows.find(windowID);
+    if (window != m_windows.end()) {
+      SDL_DestroyRenderer(window->second.m_renderer);
+      SDL_DestroyWindow(window->second.m_window);
+    }
   } catch (...) {
   }
 }
@@ -942,10 +951,10 @@ void VideoManager::setWindowFullScreen(Uint32 windowId, bool fullScreen)
 
   assert(window.m_window != nullptr);
   if (fullScreen)
-	SDL_SetWindowFullscreen(window.m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_SetWindowFullscreen(window.m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
   else
-	SDL_SetWindowFullscreen(window.m_window, 0);
+    SDL_SetWindowFullscreen(window.m_window, 0);
 }
 
 /**
@@ -955,9 +964,9 @@ Window VideoManager::getWindow(Uint32 windowID)
 {
   auto window = m_windows.find(windowID);
   if (window == m_windows.end()) {
-	ostringstream exceptionDetails;
-	exceptionDetails << "Window " << windowID << " not found.";
-	throw CapEngineException(exceptionDetails.str());
+    ostringstream exceptionDetails;
+    exceptionDetails << "Window " << windowID << " not found.";
+    throw CapEngineException(exceptionDetails.str());
   }
 
   return window->second;
@@ -967,9 +976,9 @@ Uint32 VideoManager::getWindowId(const std::string &windowName) const
 {
   auto window = m_windowNamesToIds.find(windowName);
   if (window == m_windowNamesToIds.end()) {
-	std::ostringstream msg;
-	msg << "Window \"" << windowName << "\" does not exist";
-	BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
+    std::ostringstream msg;
+    msg << "Window \"" << windowName << "\" does not exist";
+    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
   }
 
   return window->second;
@@ -983,10 +992,10 @@ Uint32 VideoManager::getWindowId(const std::string &windowName) const
 bool VideoManager::isValidWindowId(Uint32 windowId) const
 {
   try {
-	const_cast<VideoManager *>(this)->getWindow(windowId);
-	return true;
+    const_cast<VideoManager *>(this)->getWindow(windowId);
+    return true;
   } catch (...) {
-	return false;
+    return false;
   }
 }
 
@@ -996,8 +1005,8 @@ bool VideoManager::isValidWindowId(Uint32 windowId) const
 void VideoManager::clearAll()
 {
   for (auto &i : m_windows) {
-	auto id = i.first;
-	clearScreen(id);
+    auto id = i.first;
+    clearScreen(id);
   }
 }
 
@@ -1007,8 +1016,8 @@ void VideoManager::clearAll()
 void VideoManager::drawAll()
 {
   for (auto &i : m_windows) {
-	auto id = i.first;
-	drawScreen(id);
+    auto id = i.first;
+    drawScreen(id);
   }
 }
 
@@ -1019,7 +1028,7 @@ std::vector<Uint32> VideoManager::getWindows() const
 {
   std::vector<Uint32> ids;
   for (auto &i : m_windows) {
-	ids.push_back(i.first);
+    ids.push_back(i.first);
   }
   return ids;
 }
@@ -1036,15 +1045,15 @@ void VideoManager::setFullscreen(Uint32 windowID, ScreenMode screenMode)
 {
   SDL_Window *window = SDL_GetWindowFromID(windowID);
   if (window == nullptr) {
-	ostringstream errorMsg;
-	errorMsg << SDL_GetError();
-	throw CapEngineException(errorMsg.str());
+    ostringstream errorMsg;
+    errorMsg << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
   int result = SDL_SetWindowFullscreen(window, screenMode);
   if (result != 0) {
-	ostringstream errorMsg;
-	errorMsg << "Unable to set window fullscreen: " << SDL_GetError();
-	throw CapEngineException(errorMsg.str());
+    ostringstream errorMsg;
+    errorMsg << "Unable to set window fullscreen: " << SDL_GetError();
+    throw CapEngineException(errorMsg.str());
   }
 }
 
@@ -1053,9 +1062,9 @@ void VideoManager::setViewport(Uint32 windowId, Viewport viewport)
   // does window exist
   auto windowTuple = m_windows.find(windowId);
   if (windowTuple == m_windows.end()) {
-	std::ostringstream errorStream;
-	errorStream << "WindowID " << windowId << " does not exist";
-	throw CapEngineException(errorStream.str());
+    std::ostringstream errorStream;
+    errorStream << "WindowID " << windowId << " does not exist";
+    throw CapEngineException(errorStream.str());
   }
 
   // update window
@@ -1069,9 +1078,9 @@ Viewport VideoManager::getViewport(Uint32 windowId) const
   // does window exist
   auto windowTuple = m_windows.find(windowId);
   if (windowTuple == m_windows.end()) {
-	std::ostringstream errorStream;
-	errorStream << "WindowID " << windowId << " does not exist";
-	throw CapEngineException(errorStream.str());
+    std::ostringstream errorStream;
+    errorStream << "WindowID " << windowId << " does not exist";
+    throw CapEngineException(errorStream.str());
   }
 
   return windowTuple->second.m_viewport;
