@@ -24,7 +24,7 @@ Scene2dState::Scene2dState(jsoncons::json in_sceneDescriptors,
 
   for (auto &&scene : m_sceneDescriptors[kScenes].array_range()) {
     if (scene[kSceneId] == m_sceneId) {
-      m_pScene.reset(new Scene2d<SimpleObjectManager>(scene));
+      m_pScene.reset(new Scene2d(scene));
     }
   }
 

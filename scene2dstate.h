@@ -38,7 +38,7 @@ private:
   //! The id of the scene to load.
   std::string m_sceneId;
   //! The scene.
-  std::unique_ptr<Scene2d<SimpleObjectManager>> m_pScene;
+  std::unique_ptr<Scene2d> m_pScene;
   //! The id of the window to render to.
   uint32_t m_windowId;
 };
