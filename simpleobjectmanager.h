@@ -3,21 +3,22 @@
 
 #include "collision.h"
 #include "gameobject.h"
+#include "objectmanager.h"
 
 namespace CapEngine
 {
 
 //! Simple manager for game objects
-class SimpleObjectManager final
+class SimpleObjectManager final : public ObjectManager
 {
 public:
-  std::vector<std::shared_ptr<GameObject>> &getObjects();
+  std::vector<std::shared_ptr<GameObject>> &getObjects() override;
   std::vector<std::shared_ptr<GameObject>>
-      getObjects(const Rectangle &in_rectangle);
+      getObjects(const Rectangle &in_rectangle) override;
 
-  std::vector<CollisionEvent> getCollisions() const;
+  std::vector<CollisionEvent> getCollisions() const override;
 
-  void addObject(std::shared_ptr<GameObject> in_pObject);
+  void addObject(std::shared_ptr<GameObject> in_pObject) override;
 
 private:
   //! Holds the objects
