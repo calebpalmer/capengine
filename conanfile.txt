@@ -1,52 +1,21 @@
 [requires]
-libpng/1.6.37
-zlib/1.2.11
-bzip2/1.0.6
-pcre/8.41
-pcre2/10.33
-libiconv/1.15
+libpng/1.6.37@bincrafters/stable
+zlib/1.2.11@conan/stable
+bzip2/1.0.8@conan/stable
+libiconv/1.16
 
-libxml2/2.9.8@bincrafters/stable
-boost_base/1.68.0@bincrafters/stable
-boost_exception/1.68.0@bincrafters/stable
-boost_filesystem/1.68.0@bincrafters/stable
-boost_signals2/1.68.0@bincrafters/stable
-boost_function/1.68.0@bincrafters/stable
-boost_type_index/1.68.0@bincrafters/stable
-boost_bind/1.68.0@bincrafters/stable
-boost_multi_index/1.68.0@bincrafters/stable
-boost_variant/1.68.0@bincrafters/stable
-boost_parameter/1.68.0@bincrafters/stable
-boost_any/1.68.0@bincrafters/stable
-boost_conversion/1.68.0@bincrafters/stable
-boost_lexical_cast/1.68.0@bincrafters/stable
-boost_iterator/1.68.0@bincrafters/stable
-boost_range/1.68.0@bincrafters/stable
-boost_numeric_conversion/1.68.0@bincrafters/stable
-boost_array/1.68.0@bincrafters/stable
-boost_container/1.68.0@bincrafters/stable
-boost_math/1.68.0@bincrafters/stable
-boost_algorithm/1.68.0@bincrafters/stable
-boost_format/1.68.0@bincrafters/stable
-boost_config/1.68.0@bincrafters/stable
-sdl2/2.0.10@bincrafters/stable
-libsndfile/1.0.28@bincrafters/stable
+sdl2/2.0.9@bincrafters/stable
 sdl2_image/2.0.5@bincrafters/stable
 sdl2_ttf/2.0.15@bincrafters/stable
+libxml2/2.9.9@bincrafters/stable
+cppunit/1.15.1
+libsndfile/1.0.28@bincrafters/stable
+boost/1.75.0
 
 [generators]
 cmake
 
 [options]
-libpng:shared=True
-sdl2:shared=True
-lbsndfile:shared=True
-sdl2_image:shared=True
-sdl2_ttf:shared=True
-libxml2:shared=True
-boost_filesystem:shared=True
-boost_exception:shared=True
-boost_signals:shared=True
+cppunit:shared=True
 
 [imports]
-lib, * -> ./bin # Copies all dylib files from packages lib folder to my local "bin" folder

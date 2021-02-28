@@ -1,17 +1,15 @@
 cmake_minimum_required(VERSION 3.9)
 project(capengine_tests)
 
+#set( CMAKE_VERBOSE_MAKEFILE on )
+
 add_executable(runtests test.cpp)
 
-target_link_libraries(runtests capengine
-		      ${SDL2_LIBRARY}
-                      ${SDL2_IMAGE_LIBRARIES}
-                      ${SDL2_TTF_LIBRARIES}
-                      ${Boost_LIBRARIES}
-                      ${LIBXML2_LIBRARIES}
-		      ${CPPUNIT_LIBRARIES}
-		      libsndfile.so
-		      stdc++fs
-                      )
+target_link_libraries(runtests
+	    capengine
+	    ${CONAN_LIBS}
+	    stdc++fs)
 
-configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/test.xml COPYONLY)
+#configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/test.xml COPYONLY)
+#file(COPY test.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/../bin/)

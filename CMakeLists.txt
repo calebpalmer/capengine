@@ -5,24 +5,15 @@ project(capengine)
 include(GNUInstallDirs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "1" CACHE STRING "")
 
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/sdl2-cmake-modules")
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(Boost REQUIRED COMPONENTS filesystem system)
-find_package(LibXml2 REQUIRED)
-find_package(cppunit REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-include_directories(${SDL2_INCLUDE_DIR}
-  ${SDL2_IMAGE_INCLUDE_DIR}
-  ${SDL2_TTF_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${LIBXML2_INCLUDE_DIR}
-  ${CPPUNIT_INCLUDE_DIRS}
+
+include_directories(
   "${CMAKE_CURRENT_SOURCE_DIR}/jsoncons/include"
   )
+
 
 if (MSVC)
   add_compile_options(/W4)
@@ -32,6 +23,7 @@ endif()
 
 add_definitions(-DUNIX -DDEBUG)
 
+# capengine
 add_library(capengine
   Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp
   capcommon.cpp numbergenerator.cpp pcm.cpp soundplayer.cpp filesystem.cpp tileset.cpp map2d.cpp logger.cpp timestep.cpp
@@ -43,31 +35,21 @@ add_library(capengine
   widgetdecorator.cpp simplecommand.cpp commandmanager.cpp aggregatecommand.cpp textbox.cpp font.cpp property.cpp listproperty.cpp
   uipropertyvisitor.cpp simpleobjectmanager.cpp scene2d.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
-  boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h
+  boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
   )
 
-target_link_libraries(capengine ${SDL2_LIBRARY}
-  ${SDL2_IMAGE_LIBRARIES}
-  ${SDL2_TTF_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${LIBXML2_LIBRARIES}
-  libsndfile.so
+target_link_libraries(capengine
+  ${CONAN_LIBS}
   stdc++fs
   )
 
-
+# editor
 add_executable(editor editor.cpp map_panel.cpp tilesetpanel.cpp)
 
-target_link_libraries(editor capengine
-  ${SDL2_LIBRARY}
-  ${SDL2_IMAGE_LIBRARIES}
-  ${SDL2_TTF_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${LIBXML2_LIBRARIES}
-  libsndfile.so
-  stdc++fs
-  )
-
+target_link_libraries(editor
+  capengine
+  ${CONAN_LIBS}
+  stdc++fs)
 
 add_executable(widgettest widget_test.cpp)
 
@@ -88,21 +70,20 @@ add_custom_target(
   COMMAND doxygen doxygenfile
   )
 
-
-# installs
-INSTALL(TARGETS capengine widgettest editor
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION bin
-  ARCHIVE DESTINATION bin
-  )
-
-# installing dependencies
-# set(MY_BINARY_LOCATION $<TARGET_FILE:capengine> CACHE STRING "")
-# FILE(
-#   GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-#   INPUT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+# # installs
+# INSTALL(TARGETS capengine widgettest editor
+#   RUNTIME DESTINATION bin
+#   LIBRARY DESTINATION bin
+#   ARCHIVE DESTINATION bin
 #   )
-# INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
 
-install(DIRECTORY res
-  DESTINATION ./)
+# # installing dependencies
+# # set(MY_BINARY_LOCATION $<TARGET_FILE:capengine> CACHE STRING "")
+# # FILE(
+# #   GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
+# #   INPUT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+# #   )
+# # INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+
+# install(DIRECTORY res
+#   DESTINATION ./)
