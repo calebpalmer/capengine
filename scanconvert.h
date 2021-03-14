@@ -19,10 +19,10 @@ const Uint8 scanB = 0x00;
 enum class EdgePattern { SolidEdge, StripedEdge };
 
 struct Pixel {
-  Uint8 r;
-  Uint8 g;
-  Uint8 b;
-  Uint8 a;
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    Uint8 a;
 };
 
 void drawLine(int x0, int y0, int x1, int y1, Surface *surface,

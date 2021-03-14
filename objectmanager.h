@@ -8,18 +8,19 @@ namespace CapEngine
 
 class ObjectManager
 {
-public:
-  virtual ~ObjectManager() = default;
+  public:
+    virtual ~ObjectManager() = default;
 
-  virtual std::vector<std::shared_ptr<GameObject>> &getObjects() = 0;
-  virtual std::vector<std::shared_ptr<GameObject>>
-      getObjects(const Rectangle &in_rectangle) = 0;
+    virtual std::vector<std::shared_ptr<GameObject>> &getObjects() = 0;
+    virtual std::vector<std::shared_ptr<GameObject>>
+        getObjects(const Rectangle &in_rectangle) = 0;
 
-  virtual std::vector<CollisionEvent> getCollisions() const = 0;
+    virtual std::vector<CollisionEvent> getCollisions() const = 0;
 
-  virtual void addObject(std::shared_ptr<GameObject> in_pObject) = 0;
+    virtual void addObject(std::shared_ptr<GameObject> in_pObject) = 0;
+    virtual void removeDeadObjects() = 0;
 
-  static constexpr char kObjectManagerLocatorId[] = "ObjectManager";
+    static constexpr char kObjectManagerLocatorId[] = "ObjectManager";
 };
 
 /**

@@ -40,6 +40,11 @@
   (shell-command (concat "cmake --build " cap/build-dir " --target install"))
   )
 
+(defun cap/conan-install ()
+  (interactive)
+  (let ((default-directory cap/build-dir))
+    (shell-command (concat "conan install " cap/source_root_dir " --build missing"))))
+
 (setq cap/capengine-functions t)
 
 

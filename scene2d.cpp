@@ -1,5 +1,6 @@
 #include "scene2d.h"
 #include "CapEngineException.h"
+#include "logger.h"
 #include "objectmanager.h"
 #include "simpleobjectmanager.h"
 #include <memory>
@@ -20,16 +21,16 @@ namespace
 */
 void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera)
 {
-  assert(Locator::videoManager != nullptr);
-  assert(Locator::videoManager->isValidWindowId(in_windowId));
+    assert(Locator::videoManager != nullptr);
+    assert(Locator::videoManager->isValidWindowId(in_windowId));
 
-  int width = 0;
-  int height = 0;
-  // TODO maybe this should be the scene size prior to scaling to fit window
-  std::tie(width, height) =
-      Locator::videoManager->getWindowLogicalResolution(in_windowId);
-  io_camera.setWidth(width);
-  io_camera.setHeight(height);
+    int width = 0;
+    int height = 0;
+    // TODO maybe this should be the scene size prior to scaling to fit window
+    std::tie(width, height) =
+        Locator::videoManager->getWindowLogicalResolution(in_windowId);
+    io_camera.setWidth(width);
+    io_camera.setHeight(height);
 }
 } // namespace
 
@@ -41,8 +42,9 @@ void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera)
 Scene2d::Scene2d(const jsoncons::json &in_json)
     : m_camera(0, 0), m_pObjectManager(std::make_shared<SimpleObjectManager>())
 {
-  this->load(in_json);
-  Locator::insert(ObjectManager::kObjectManagerLocatorId, m_pObjectManager);
+    this->load(in_json);
+    assert(Locator::insert(ObjectManager::kObjectManagerLocatorId,
+                           m_pObjectManager));
 }
 
 //! load the scene from json.
@@ -52,41 +54,41 @@ Scene2d::Scene2d(const jsoncons::json &in_json)
 */
 void Scene2d::load(const jsoncons::json &in_json)
 {
-  try {
-    using namespace Schema::Scene2d;
+    try {
+        using namespace Schema::Scene2d;
 
-    // get the width and height of the scene
-    m_sceneSize.width = in_json[kWidth].as<int>();
-    m_sceneSize.height = in_json[kHeight].as<int>();
+        // get the width and height of the scene
+        m_sceneSize.width = in_json[kWidth].as<int>();
+        m_sceneSize.height = in_json[kHeight].as<int>();
 
-    // get the layers
-    LayerFactory &layerFactory = LayerFactory::getInstance();
-    for (auto &&layer : in_json[kLayers].array_range()) {
-      std::unique_ptr<Layer> pLayer = layerFactory.makeLayer(layer);
-      const int layerOrder = layer[kLayerOrder].as<int>();
+        // get the layers
+        LayerFactory &layerFactory = LayerFactory::getInstance();
+        for (auto &&layer : in_json[kLayers].array_range()) {
+            std::unique_ptr<Layer> pLayer = layerFactory.makeLayer(layer);
+            const int layerOrder = layer[kLayerOrder].as<int>();
 
-      std::cout << "Adding layer " << pLayer->type() << std::endl;
-      m_layers.emplace(layerOrder, std::move(pLayer));
+            std::cout << "Adding layer " << pLayer->type() << std::endl;
+            m_layers.emplace(layerOrder, std::move(pLayer));
+        }
+
+        // get the objects
+        for (auto &&objectJson : in_json[std::string(kObjects)].array_range()) {
+            try {
+                GameObject object = makeObject(objectJson);
+                auto pHeapObject = std::make_unique<GameObject>(object);
+
+                CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
+                m_pObjectManager->addObject(std::move(pHeapObject));
+            } catch (const ObjectCreationError &e) {
+                // log and move on
+                CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CWARNING);
+            }
+        }
     }
 
-    // get the objects
-    for (auto &&objectJson : in_json[std::string(kObjects)].array_range()) {
-      try {
-        GameObject object = makeObject(objectJson);
-        auto pHeapObject = std::make_unique<GameObject>(object);
-
-        CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
-        m_pObjectManager->addObject(std::move(pHeapObject));
-      } catch (const ObjectCreationError &e) {
-        // log and move on
-        CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CWARNING);
-      }
+    catch (const jsoncons::parse_error &e) {
+        throw SceneLoadException(in_json, e.what());
     }
-  }
-
-  catch (const jsoncons::parse_error &e) {
-    throw SceneLoadException(in_json, e.what());
-  }
 }
 
 //! update function for the scene.
@@ -96,48 +98,56 @@ void Scene2d::load(const jsoncons::json &in_json)
 */
 void Scene2d::update(double in_ms)
 {
-  // update layers
-  for (auto &&i : m_layers) {
-    assert(i.second != nullptr);
-    i.second->update(in_ms);
-  }
+    // remove dead objects
+    m_pObjectManager->removeDeadObjects();
 
-  // update objects
-  CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
-  for (auto &&i : m_pObjectManager->getObjects()) {
-    auto pUpdateObject = i->update(in_ms);
-    if (!pUpdateObject) {
-      CAP_LOG(Locator::logger, "GameObject::update returned nullptr",
-              Logger::CWARNING);
-      continue;
+    // update layers
+    for (auto &&i : m_layers) {
+        assert(i.second != nullptr);
+        i.second->update(in_ms);
     }
 
-    // collision detection
-    // collision with layers?
-    for (auto &&layer : m_layers) {
+    // update objects
+    CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
 
-      // is layer collidable
-      if (layer.second->canCollide()) {
-        const auto maybeCollisions =
-            layer.second->checkCollisions(*pUpdateObject);
+    auto &objects = m_pObjectManager->getObjects();
+    for (size_t i = 0; i < objects.size(); i++) {
 
-        // is there a collision
-        if (maybeCollisions.size() > 0) {
-          std::optional<GameObject> maybeGameObject =
-              layer.second->resolveCollisions(*pUpdateObject);
-          CAP_THROW_ASSERT(maybeGameObject != std::nullopt,
-                           "Collision could not be resolved.");
-
-          pUpdateObject = maybeGameObject->clone();
+        CAP_THROW_NULL(objects[i], "Object in objectmanager is null");
+        auto pUpdateObject = objects[i]->update(in_ms);
+        if (!pUpdateObject) {
+            CAP_LOG(Locator::logger, "GameObject::update returned nullptr",
+                    Logger::CWARNING);
+            continue;
         }
-      }
+
+        // collision detection
+        // check collisions with other objects
+
+        // collision with layers
+        for (auto &&layer : m_layers) {
+
+            // is layer collidable
+            if (layer.second->canCollide()) {
+                const auto maybeCollisions =
+                    layer.second->checkCollisions(*pUpdateObject);
+
+                // is there a collision
+                if (maybeCollisions.size() > 0) {
+                    const auto succeeded =
+                        layer.second->resolveCollisions(*pUpdateObject);
+
+                    if (!succeeded)
+                        CAP_LOG(Locator::logger,
+                                "Collisions could not be resolved",
+                                Logger::CWARNING);
+                }
+            }
+        }
+
+        // keep updated object
+        objects[i] = std::move(pUpdateObject);
     }
-
-    // check collisions with other objects
-
-    // continue with updated object if there were no collisions.
-    i.reset(pUpdateObject.release());
-  }
 }
 
 //! render function for the scene.
@@ -146,21 +156,21 @@ void Scene2d::update(double in_ms)
 */
 void Scene2d::render(uint32_t in_windowId)
 {
-  // updateRenderLogicalSize(in_windowId);
-  updateCameraSize(in_windowId, m_camera);
+    // updateRenderLogicalSize(in_windowId);
+    updateCameraSize(in_windowId, m_camera);
 
-  // iterate in reverse order to draw layers in the proper order.
-  for (auto i = m_layers.rbegin(); i != m_layers.rend(); ++i) {
-    assert(i->second != nullptr);
-    i->second->render(m_camera, in_windowId);
-  }
+    // iterate in reverse order to draw layers in the proper order.
+    for (auto i = m_layers.rbegin(); i != m_layers.rend(); ++i) {
+        assert(i->second != nullptr);
+        i->second->render(m_camera, in_windowId);
+    }
 
-  CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
-  // render objects
-  for (auto &&pObject :
-       m_pObjectManager->getObjects(m_camera.getViewingRectangle())) {
-    assert(pObject != nullptr);
-    pObject->render(m_camera, in_windowId);
-  }
+    CAP_THROW_NULL(m_pObjectManager, "ObjectManager is null");
+    // render objects
+    for (auto &&pObject :
+         m_pObjectManager->getObjects(m_camera.getViewingRectangle())) {
+        assert(pObject != nullptr);
+        pObject->render(m_camera, in_windowId);
+    }
 }
 } // namespace CapEngine

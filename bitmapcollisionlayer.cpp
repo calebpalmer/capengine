@@ -72,68 +72,73 @@ void BitmapCollisionLayer::registerConstructor(LayerFactory &in_factory)
 	  });
 }
 
-std::optional<GameObject>
-	BitmapCollisionLayer::resolveCollisions(const GameObject &in_object) const
+bool BitmapCollisionLayer::resolveCollisions(GameObject &in_object) const
 {
-  const int maxAttempts = 10;
+    const int maxAttempts = 10;
 
-  int numAttempts = 0;
-  GameObject resolved = in_object;
+    int numAttempts = 0;
+    GameObject resolved = in_object;
 
-  auto collisions = this->checkCollisions(resolved);
-  while (numAttempts < maxAttempts) {
-	if (collisions.size() == 0)
-	  return resolved;
+    auto collisions = this->checkCollisions(in_object);
+    while (numAttempts < maxAttempts) {
+        if (collisions.size() == 0)
+            return true;
 
-	for (auto &&collision : collisions) {
+        for (auto &&collision : collisions) {
+            // tell the object about the collision and see if it can handle it
+            if (in_object.handleCollision(collision.first, COLLISION_BITMAP,
+                                          nullptr, collision.second))
+                return true;
 
-	  const auto collisionType = collision.first;
+            const auto collisionType = collision.first;
 
-	  auto position = resolved.getPosition();
+            auto position = in_object.getPosition();
 
-	  if (collisionType == COLLISION_NONE)
-		continue;
+            if (collisionType == COLLISION_NONE)
+                continue;
 
-	  else if (collisionType == COLLISION_LEFT) {
-		position.setX(position.getX() + 1);
-		std::cout
-			<< "collision resolver:  (COLLISION_LEFT) moving right one pixel"
-			<< std::endl;
-	  }
+            else if (collisionType == COLLISION_LEFT) {
+                position.setX(position.getX() + 1);
+                // std::cout << "collision resolver:  (COLLISION_LEFT) moving "
+                //              "right one pixel"
+                //           << std::endl;
+            }
 
-	  else if (collisionType == COLLISION_RIGHT) {
-		position.setX(position.getX() - 1);
-		std::cout
-			<< "collision resolver:  (COLLISION_RIGHT) moving left one pixel"
-			<< std::endl;
-	  }
+            else if (collisionType == COLLISION_RIGHT) {
+                position.setX(position.getX() - 1);
+                // std::cout << "collision resolver:  (COLLISION_RIGHT) moving "
+                //              "left one pixel"
+                //           << std::endl;
+            }
 
-	  else if (collisionType == COLLISION_TOP) {
-		std::cout
-			<< "collision resolver:  (COLLISION_TOP) moving down one pixel"
-			<< std::endl;
-		position.setY(position.getY() - 1);
-	  }
+            else if (collisionType == COLLISION_TOP) {
+                // std::cout << "collision resolver:  (COLLISION_TOP) moving
+                // down "
+                //              "one pixel"
+                //           << std::endl;
+                position.setY(position.getY() - 1);
+            }
 
-	  else if (collisionType == COLLISION_BOTTOM) {
-		std::cout
-			<< "collision resolver:  (COLLISION_BOTTOM) moving up one pixel"
-			<< std::endl;
-		position.setY(position.getY() + 1);
-	  }
+            else if (collisionType == COLLISION_BOTTOM) {
+                // std::cout << "collision resolver:  (COLLISION_BOTTOM) moving
+                // "
+                //              "up one pixel"
+                //           << std::endl;
+                position.setY(position.getY() + 1);
+            }
 
-	  resolved.setPosition(position);
-	}
+            in_object.setPosition(position);
+        }
 
-	numAttempts++;
-	collisions = this->checkCollisions(resolved);
-	std::cout << "******************" << std::endl;
-  }
+        numAttempts++;
+        collisions = this->checkCollisions(in_object);
+        // std::cout << "******************" << std::endl;
+    }
 
-  CAP_LOG(Locator::logger,
-		  "max attempts reached attempting to resolve collision",
-		  Logger::CERROR);
-  return std::nullopt;
+    CAP_LOG(Locator::logger,
+            "max attempts reached attempting to resolve collision",
+            Logger::CERROR);
+    return false;
 }
 
 } // namespace CapEngine

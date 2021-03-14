@@ -12,4 +12,4 @@ target_link_libraries(runtests
 
 #configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/test.xml COPYONLY)
 #file(COPY test.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
-configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/../bin/)
+#configure_file(test.xml ${CMAKE_CURRENT_BINARY_DIR}/../bin/test.xml)

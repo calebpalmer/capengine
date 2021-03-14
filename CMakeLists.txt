@@ -18,13 +18,14 @@ include_directories(
 if (MSVC)
   add_compile_options(/W4)
 else()
-  add_compile_options(-g -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused -std=c++17)
+  add_compile_options(-ggdb3 -Wall -Wextra -Wpedantic -Wno-reorder -Wno-unused -std=c++17 -fsanitize=address -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address)
 endif()
 
 add_definitions(-DUNIX -DDEBUG)
 
 # capengine
-add_library(capengine
+add_library(capengine SHARED
   Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp
   capcommon.cpp numbergenerator.cpp pcm.cpp soundplayer.cpp filesystem.cpp tileset.cpp map2d.cpp logger.cpp timestep.cpp
   scanconvert.cpp xml_parser.cpp asset_manager.cpp mouse.cpp locator.cpp textbutton.cpp gameobject.cpp game_management.cpp
@@ -63,7 +64,7 @@ target_link_libraries(widgettest capengine
   stdc++fs
   )
 
-add_subdirectory(test)
+#add_subdirectory(test)
 
 add_custom_target(
   doc

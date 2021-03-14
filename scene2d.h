@@ -48,7 +48,7 @@ public:
 private:
   void load(const jsoncons::json &in_json);
 
-  std::shared_ptr<SimpleObjectManager>
+  std::shared_ptr<ObjectManager>
       m_pObjectManager; //<! Holds the objects and performs collision checking.
   std::multimap<int, std::unique_ptr<Layer>>
       m_layers; //<! Map of layers ordered by their drawing order.  0 = front.

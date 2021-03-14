@@ -12,31 +12,30 @@ namespace CapEngine
 //! layer class for providing bitmap collisions.
 class BitmapCollisionLayer final : public ImageLayer
 {
-public:
-  BitmapCollisionLayer(int in_assetId, Rectangle in_position);
-  ~BitmapCollisionLayer() override = default;
+  public:
+    BitmapCollisionLayer(int in_assetId, Rectangle in_position);
+    ~BitmapCollisionLayer() override = default;
 
-  static void registerConstructor(LayerFactory &in_factory);
+    static void registerConstructor(LayerFactory &in_factory);
 
-  const std::string type() const override;
-  void update(double in_ms) override {}
-  void render(const Camera2d &in_camera, uint32_t in_windowId) override{};
-  bool canCollide() const override;
-  CollisionType_t checkCollisions(const GameObject &in_object) const override;
-  std::optional<GameObject>
-      resolveCollisions(const GameObject &in_object) const override;
+    const std::string type() const override;
+    void update(double in_ms) override {}
+    void render(const Camera2d &in_camera, uint32_t in_windowId) override{};
+    bool canCollide() const override;
+    CollisionType_t checkCollisions(const GameObject &in_object) const override;
+    bool resolveCollisions(GameObject &in_object) const override;
 
-private:
-  std::vector<std::pair<CollisionType, Vector>>
-      getCollisions(const GameObject &in_object) const;
+  private:
+    std::vector<std::pair<CollisionType, Vector>>
+        getCollisions(const GameObject &in_object) const;
 
-  mutable std::optional<SoftwareImage> m_softwareImage;
+    mutable std::optional<SoftwareImage> m_softwareImage;
 };
 
 //! \override Layer::type()
 inline const std::string BitmapCollisionLayer::type() const
 {
-  return Schema::Scene2d::kVectorCollisionLayerType;
+    return Schema::Scene2d::kVectorCollisionLayerType;
 }
 
 //! \copydoc Layer::canCollide

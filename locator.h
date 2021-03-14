@@ -10,7 +10,9 @@
 #include "mouse.h"
 #include "soundplayer.h"
 
+#include <any>
 #include <boost/any.hpp>
+#include <optional>
 
 namespace CapEngine
 {
@@ -19,9 +21,9 @@ class Locator
 {
 
 public:
-  static bool insert(const std::string &id, boost::any item);
-  static void insertOrReplace(const std::string &id, boost::any item);
-  static boost::any locate(const std::string &id);
+  static bool insert(const std::string &id, std::any item);
+  static void insertOrReplace(const std::string &id, std::any item);
+  static std::any locate(const std::string &id);
 
   static CapEngine::VideoManager *videoManager;
   static CapEngine::Logger *logger;

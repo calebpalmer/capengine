@@ -10,20 +10,21 @@ namespace
 {
 
 //! The map containing the registered items
-std::map<std::string, boost::any> itemMap;
+static std::map<std::string, std::any> itemMap;
 
 } // namespace
 
 //! Insert an item with the Locator
 /**
 
-                Throws if the item already exists.
+Throws if the
+ item already exists.
 
  \param id - The id of the  item to register.
  \param item - The item to register.
  \returns - true if successful, false otherwise.
 */
-bool Locator::insert(const std::string &id, boost::any item)
+bool Locator::insert(const std::string &id, std::any item)
 {
   if (itemMap.find(id) == itemMap.end()) {
     itemMap.emplace(id, item);
@@ -38,7 +39,7 @@ bool Locator::insert(const std::string &id, boost::any item)
  \param id - The id of the  item to register.
  \param item - The item to register.
 */
-void Locator::insertOrReplace(const std::string &id, boost::any item)
+void Locator::insertOrReplace(const std::string &id, std::any item)
 {
   if (itemMap.find(id) == itemMap.end())
     itemMap.emplace(id, item);
@@ -52,14 +53,14 @@ void Locator::insertOrReplace(const std::string &id, boost::any item)
  \param id - The id of the item to locate.
  \return - The item if it's found, boost::none if not.
 */
-boost::any Locator::locate(const std::string &id)
+std::any Locator::locate(const std::string &id)
 {
   auto itemItr = itemMap.find(id);
   if (itemItr != itemMap.end())
     return itemItr->second;
 
   else
-    return boost::none;
+    return std::any{};
 }
 
 VideoManager *Locator::videoManager = nullptr;
