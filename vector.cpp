@@ -17,7 +17,7 @@ namespace CapEngine
 using namespace std;
 
 // default constructor for a Vector.  Sets everything to zeros.
-Vector::Vector() : x(0.0), y(0.0), z(0.0), d(0.0) {}
+Vector::Vector() : x(0.0), y(0.0), z(0.0), d(1.0) {}
 
 /* constructor for Vector
    \param x_in the x component of the vector
@@ -51,42 +51,50 @@ Vector::Vector(const PolarVector &pVecIn)
 Vector::~Vector() {}
 
 /** returns x component of vector
-    \returns the x component of the vector
+  \return
+        \li the x component of the vector
 */
 real Vector::getX() const { return x; }
 
 /** returns y component of vector
-    \returns the y component of the vector
+  \return
+        \li the y component of the vector
 */
 real Vector::getY() const { return y; }
 
 /** returns z component of vector
-    \returns the z component of the vector
+  \return
+        \li the z component of the vector
 */
 real Vector::getZ() const { return z; }
 
 /** returns d component of vector
-    \returns the d component of the vector
+  \return
+        \li the d component of the vector
 */
 real Vector::getD() const { return d; }
 
 /** set the x componnet
-    \param the x component
+  \param
+         \li the x component
 */
 void Vector::setX(real xIn) { x = xIn; }
 
 /** set the y componnet
-    \param the y component
+  \param
+        \li the y component
 */
 void Vector::setY(real yIn) { y = yIn; }
 
 /** set the y componnet
-    \param the y component
+  \param
+        \li the y component
 */
 void Vector::setZ(real zIn) { z = zIn; }
 
 /** set the d componnet
-    \param the d component
+  \param
+        \li the d component
 */
 void Vector::setD(real dIn) { d = dIn; }
 
@@ -98,8 +106,8 @@ void Vector::setD(real dIn) { d = dIn; }
 */
 Vector Vector::operator+(const Vector &vec2) const
 {
-  return Vector(x + vec2.getX(), y + vec2.getY(), z + vec2.getZ(),
-                d + vec2.getD());
+    return Vector(x + vec2.getX(), y + vec2.getY(), z + vec2.getZ(),
+                  d + vec2.getD());
 }
 
 Vector &Vector::operator+=(const Vector &vec)
@@ -154,8 +162,8 @@ Vector &Vector::operator=(const Vector &vec)
 bool Vector::operator==(const Vector &vec) const
 {
 
-  return doubles_equal(this->x, vec.x) && doubles_equal(this->y, vec.y) &&
-         doubles_equal(this->z, vec.z) && doubles_equal(this->d, vec.d);
+    return doubles_equal(this->x, vec.x) && doubles_equal(this->y, vec.y) &&
+           doubles_equal(this->z, vec.z) && doubles_equal(this->d, vec.d);
 }
 
 //! operator!=
@@ -220,8 +228,8 @@ Vector Vector::normalize() const
 */
 real dotProduct(const Vector &vec1, const Vector &vec2)
 {
-  return ((vec1.getX() * vec2.getX()) + (vec1.getY() * vec2.getY()) +
-          (vec1.getZ() * vec2.getZ()) + (vec1.getD() * vec2.getD()));
+    return ((vec1.getX() * vec2.getX()) + (vec1.getY() * vec2.getY()) +
+            (vec1.getZ() * vec2.getZ()) + (vec1.getD() * vec2.getD()));
 }
 
 /*
@@ -309,23 +317,31 @@ std::string Vector::toString() const
 
 std::ostream &operator<<(std::ostream &stream, const CapEngine::Vector &vector)
 {
-  stream << "Vector(" << vector.x << ", " << vector.y << ", " << vector.z
-         << ", " << vector.d << ")";
-  return stream;
+    stream << "Vector(" << vector.x << ", " << vector.y << ", " << vector.z
+           << ", " << vector.d << ")";
+    return stream;
 }
 
 real Vector::slope() const
 {
-  if (z != 0.0) {
-    BOOST_THROW_EXCEPTION(CapEngineException("slope only supports 2D vectors"));
-  }
+    if (z != 0.0) {
+        BOOST_THROW_EXCEPTION(
+            CapEngineException("slope only supports 2D vectors"));
+    }
 
-  return y / x;
+    return y / x;
 }
+
+//! return the angle in radians of the vector in 2d.
+/*
+  \return
+   \li The angle.
+ */
+real Vector::angle2d() const { return atan2(this->y, this->x); }
 
 Vector Vector::absolute() const
 {
-  return {std::abs(x), std::abs(y), std::abs(z), std::abs(d)};
+    return {std::abs(x), std::abs(y), std::abs(z), std::abs(d)};
 }
 
 } // namespace CapEngine

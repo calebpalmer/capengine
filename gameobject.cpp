@@ -318,12 +318,12 @@ void GameObject::setForce(Vector in_force) { this->force = in_force; }
 
 int GameObject::generateMessageId() { return nextMessageId++; }
 
-void GameObject::send(int id, string message)
+void GameObject::send(int id, const string &message)
 {
-	for (auto &&pComponent : m_components) {
-		assert(pComponent != nullptr);
-		pComponent->receive(*this, id, message);
-	}
+    for (auto &&pComponent : m_components) {
+        assert(pComponent != nullptr);
+        pComponent->receive(*this, id, message);
+    }
 }
 
 /**

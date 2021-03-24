@@ -62,9 +62,12 @@ Rectangle Rectangle::narrowRight(int in_amount) const
 
 //! joins to rectangles together to make a single greater rectangle.
 /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \param left
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                The first
-   rectangle \param right The second rectangle \return The joined rectangles.
+\param left
+  \li The first rectangle
+\param right
+  \li The second rectangle
+\return
+  \li The joined rectangles.
 */
 Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
 {
@@ -91,9 +94,12 @@ Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
 
 //! detects if point is within a rectangle.
 /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                \param point -
-   The point. \param rect - the rect. \return True if point is in rect. False
-   otherwise.
+ \param point
+   \li The point.
+ \param rect
+        \li the rect.
+ \return
+   \li True if point is in rect. False otherwise.
 */
 bool pointInRect(const Point &point, const Rectangle &rect)
 {

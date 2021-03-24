@@ -80,7 +80,7 @@ class GameObject
     ObjectID getObjectID() const;
     void setObjectID(ObjectID id);
     ObjectID getParentObjectID() const;
-    void send(int messageId, std::string message);
+    void send(int messageId, const std::string &message);
     void setParentObjectID(ObjectID id);
 
     void addComponent(std::shared_ptr<Component> in_pComponent);

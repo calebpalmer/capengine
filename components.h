@@ -21,7 +21,7 @@ class Component
 
     virtual void update(GameObject &object, double timestep) = 0;
     virtual void receive(GameObject & /*object*/, int /*messageId*/,
-                         std::string /*message*/)
+                         const std::string & /*message*/)
     {
     }
     virtual ComponentType getType() const = 0;

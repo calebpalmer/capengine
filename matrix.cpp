@@ -32,51 +32,52 @@ namespace CapEngine
 Matrix::Matrix(CapEngine::Vector vec1, CapEngine::Vector vec2,
                CapEngine::Vector vec3, CapEngine::Vector vec4)
 {
-  vectors.push_back(vec1);
-  vectors.push_back(vec2);
-  vectors.push_back(vec3);
-  vectors.push_back(vec4);
+    vectors.push_back(vec1);
+    vectors.push_back(vec2);
+    vectors.push_back(vec3);
+    vectors.push_back(vec4);
 }
 
 std::unique_ptr<float> Matrix::getGLMatrix() const
 {
-  if (vectors.size() != 4) {
-    throw CapEngineException("Not a 4x4 matrix");
-  }
+    if (vectors.size() != 4) {
+        throw CapEngineException("Not a 4x4 matrix");
+    }
 
-  unique_ptr<float> pMatrix(new float[16]);
+    unique_ptr<float> pMatrix(new float[16]);
 
-  pMatrix.get()[0] = vectors[0].x;
-  pMatrix.get()[1] = vectors[0].y;
-  pMatrix.get()[2] = vectors[0].z;
-  pMatrix.get()[3] = vectors[0].d;
+    pMatrix.get()[0] = vectors[0].x;
+    pMatrix.get()[1] = vectors[0].y;
+    pMatrix.get()[2] = vectors[0].z;
+    pMatrix.get()[3] = vectors[0].d;
 
-  pMatrix.get()[4] = vectors[1].x;
-  pMatrix.get()[5] = vectors[1].y;
-  pMatrix.get()[6] = vectors[1].z;
-  pMatrix.get()[7] = vectors[1].d;
+    pMatrix.get()[4] = vectors[1].x;
+    pMatrix.get()[5] = vectors[1].y;
+    pMatrix.get()[6] = vectors[1].z;
+    pMatrix.get()[7] = vectors[1].d;
 
-  pMatrix.get()[8] = vectors[2].x;
-  pMatrix.get()[9] = vectors[2].y;
-  pMatrix.get()[10] = vectors[2].z;
-  pMatrix.get()[11] = vectors[2].d;
+    pMatrix.get()[8] = vectors[2].x;
+    pMatrix.get()[9] = vectors[2].y;
+    pMatrix.get()[10] = vectors[2].z;
+    pMatrix.get()[11] = vectors[2].d;
 
-  pMatrix.get()[12] = vectors[3].x;
-  pMatrix.get()[13] = vectors[3].y;
-  pMatrix.get()[14] = vectors[3].z;
-  pMatrix.get()[15] = vectors[3].d;
+    pMatrix.get()[12] = vectors[3].x;
+    pMatrix.get()[13] = vectors[3].y;
+    pMatrix.get()[14] = vectors[3].z;
+    pMatrix.get()[15] = vectors[3].d;
 
-  return pMatrix;
+    return pMatrix;
 }
 
 void Matrix::setRowVector(int index, CapEngine::Vector vector)
 {
-  if (index > 3 || index < 0) {
-    throw CapEngineException("Matrix indexes must be less than or equal to 3 "
-                             "and greater than or equal to 0");
-  }
+    if (index > 3 || index < 0) {
+        throw CapEngineException(
+            "Matrix indexes must be less than or equal to 3 "
+            "and greater than or equal to 0");
+    }
 
-  vectors[index] = vector;
+    vectors[index] = vector;
 }
 
 Matrix Matrix::createZeroMatrix()
@@ -149,16 +150,17 @@ Matrix Matrix::createYRotationMatrix(real degrees)
 
 Matrix Matrix::createZRotationMatrix(real degrees)
 {
-  real radAngle = DEGTORAD(degrees);
-  real cosAngle = cos(radAngle);
-  real sinAngle = sin(radAngle);
+    real radAngle = DEGTORAD(degrees);
+    real cosAngle = cos(radAngle);
+    real sinAngle = sin(radAngle);
 
-  Vector vec1(cosAngle, sinAngle, sinAngle, 0.0);
-  Vector vec2(-sinAngle, cosAngle, 0.0, 0.0);
-  Vector vec3(0.0, 0.0, 1.0, 0.0);
-  Vector vec4(0.0, 0.0, 0.0, 1.0);
-  Matrix matrix(vec1, vec2, vec3, vec4);
-  return matrix;
+    // Vector vec1(cosAngle, sinAngle, sinAngle, 0.0);
+    Vector vec1(cosAngle, sinAngle, 0.0, 0.0);
+    Vector vec2(-sinAngle, cosAngle, 0.0, 0.0);
+    Vector vec3(0.0, 0.0, 1.0, 0.0);
+    Vector vec4(0.0, 0.0, 0.0, 1.0);
+    Matrix matrix(vec1, vec2, vec3, vec4);
+    return matrix;
 }
 
 const MatrixContainer &Matrix::getVectors() const { return vectors; }
@@ -170,34 +172,34 @@ const MatrixContainer &Matrix::getVectors() const { return vectors; }
 */
 Matrix Matrix::operator*(const Matrix &other) const
 {
-  assert(this->vectors.size() == 4);
-  assert(other.vectors.size() == 4);
+    assert(this->vectors.size() == 4);
+    assert(other.vectors.size() == 4);
 
-  // column vector 1
-  Vector v1(dotProduct(this->getRowVector(0), other.getColumnVector(0)),
-            dotProduct(this->getRowVector(1), other.getColumnVector(0)),
-            dotProduct(this->getRowVector(2), other.getColumnVector(0)),
-            dotProduct(this->getRowVector(3), other.getColumnVector(0)));
+    // column vector 1
+    Vector v1(dotProduct(this->getRowVector(0), other.getColumnVector(0)),
+              dotProduct(this->getRowVector(1), other.getColumnVector(0)),
+              dotProduct(this->getRowVector(2), other.getColumnVector(0)),
+              dotProduct(this->getRowVector(3), other.getColumnVector(0)));
 
-  // column vector 2
-  Vector v2(dotProduct(this->getRowVector(0), other.getColumnVector(1)),
-            dotProduct(this->getRowVector(1), other.getColumnVector(1)),
-            dotProduct(this->getRowVector(2), other.getColumnVector(1)),
-            dotProduct(this->getRowVector(3), other.getColumnVector(1)));
+    // column vector 2
+    Vector v2(dotProduct(this->getRowVector(0), other.getColumnVector(1)),
+              dotProduct(this->getRowVector(1), other.getColumnVector(1)),
+              dotProduct(this->getRowVector(2), other.getColumnVector(1)),
+              dotProduct(this->getRowVector(3), other.getColumnVector(1)));
 
-  // column vector 3
-  Vector v3(dotProduct(this->getRowVector(0), other.getColumnVector(2)),
-            dotProduct(this->getRowVector(1), other.getColumnVector(2)),
-            dotProduct(this->getRowVector(2), other.getColumnVector(2)),
-            dotProduct(this->getRowVector(3), other.getColumnVector(2)));
+    // column vector 3
+    Vector v3(dotProduct(this->getRowVector(0), other.getColumnVector(2)),
+              dotProduct(this->getRowVector(1), other.getColumnVector(2)),
+              dotProduct(this->getRowVector(2), other.getColumnVector(2)),
+              dotProduct(this->getRowVector(3), other.getColumnVector(2)));
 
-  // column vector 4
-  Vector v4(dotProduct(this->getRowVector(0), other.getColumnVector(3)),
-            dotProduct(this->getRowVector(1), other.getColumnVector(3)),
-            dotProduct(this->getRowVector(2), other.getColumnVector(3)),
-            dotProduct(this->getRowVector(3), other.getColumnVector(3)));
+    // column vector 4
+    Vector v4(dotProduct(this->getRowVector(0), other.getColumnVector(3)),
+              dotProduct(this->getRowVector(1), other.getColumnVector(3)),
+              dotProduct(this->getRowVector(2), other.getColumnVector(3)),
+              dotProduct(this->getRowVector(3), other.getColumnVector(3)));
 
-  return Matrix(v1, v2, v3, v4);
+    return Matrix(v1, v2, v3, v4);
 }
 
 //! Multiply a vector by a matrix
@@ -212,117 +214,120 @@ Matrix Matrix::operator*(const Matrix &other) const
 Vector Matrix::operator*(const Vector &v) const
 {
 
-  return Vector(dotProduct(this->getRowVector(0), v),
-                dotProduct(this->getRowVector(1), v),
-                dotProduct(this->getRowVector(2), v),
-                dotProduct(this->getRowVector(3), v));
+    return Vector(dotProduct(this->getRowVector(0), v),
+                  dotProduct(this->getRowVector(1), v),
+                  dotProduct(this->getRowVector(2), v),
+                  dotProduct(this->getRowVector(3), v));
 }
 
 Matrix Matrix::operator+(const Matrix &right) const
 {
-  auto leftVec1 = this->getRowVector(0);
-  auto leftVec2 = this->getRowVector(1);
-  auto leftVec3 = this->getRowVector(2);
-  auto leftVec4 = this->getRowVector(3);
+    auto leftVec1 = this->getRowVector(0);
+    auto leftVec2 = this->getRowVector(1);
+    auto leftVec3 = this->getRowVector(2);
+    auto leftVec4 = this->getRowVector(3);
 
-  auto rightVec1 = right.getRowVector(0);
-  auto rightVec2 = right.getRowVector(1);
-  auto rightVec3 = right.getRowVector(2);
-  auto rightVec4 = right.getRowVector(3);
+    auto rightVec1 = right.getRowVector(0);
+    auto rightVec2 = right.getRowVector(1);
+    auto rightVec3 = right.getRowVector(2);
+    auto rightVec4 = right.getRowVector(3);
 
-  return Matrix(leftVec1 + rightVec1, leftVec2 + rightVec2,
-                leftVec3 + rightVec3, leftVec4 + rightVec4);
+    return Matrix(leftVec1 + rightVec1, leftVec2 + rightVec2,
+                  leftVec3 + rightVec3, leftVec4 + rightVec4);
 }
 
 Matrix Matrix::operator-(const Matrix &right) const
 {
-  auto leftVec1 = this->getRowVector(0);
-  auto leftVec2 = this->getRowVector(1);
-  auto leftVec3 = this->getRowVector(2);
-  auto leftVec4 = this->getRowVector(3);
+    auto leftVec1 = this->getRowVector(0);
+    auto leftVec2 = this->getRowVector(1);
+    auto leftVec3 = this->getRowVector(2);
+    auto leftVec4 = this->getRowVector(3);
 
-  auto rightVec1 = right.getRowVector(0);
-  auto rightVec2 = right.getRowVector(1);
-  auto rightVec3 = right.getRowVector(2);
-  auto rightVec4 = right.getRowVector(3);
+    auto rightVec1 = right.getRowVector(0);
+    auto rightVec2 = right.getRowVector(1);
+    auto rightVec3 = right.getRowVector(2);
+    auto rightVec4 = right.getRowVector(3);
 
-  return Matrix(leftVec1 - rightVec1, leftVec2 - rightVec2,
-                leftVec3 - rightVec3, leftVec4 - rightVec4);
+    return Matrix(leftVec1 - rightVec1, leftVec2 - rightVec2,
+                  leftVec3 - rightVec3, leftVec4 - rightVec4);
 }
 
 Vector Matrix::getRowVector(int index) const
 {
-  if (index > 3 || index < 0) {
-    throw CapEngineException("Matrix indexes must be less than or equal to 3 "
-                             "and greater than or equal to 0");
-  }
+    if (index > 3 || index < 0) {
+        throw CapEngineException(
+            "Matrix indexes must be less than or equal to 3 "
+            "and greater than or equal to 0");
+    }
 
-  real x, y, z, d = 0.0;
-  switch (index) {
-  case 0:
-    x = vectors[0].x;
-    y = vectors[1].x;
-    z = vectors[2].x;
-    d = vectors[3].x;
-    break;
-  case 1:
-    x = vectors[0].y;
-    y = vectors[1].y;
-    z = vectors[2].y;
-    d = vectors[3].y;
-    break;
-  case 2:
-    x = vectors[0].z;
-    y = vectors[1].z;
-    z = vectors[2].z;
-    d = vectors[3].z;
-    break;
-  case 3:
-    x = vectors[0].d;
-    y = vectors[1].d;
-    z = vectors[2].d;
-    d = vectors[3].d;
-    break;
-  default:
-    throw CapEngineException("Invalid index");
-    break;
-  }
-  Vector retVector(x, y, z, d);
-  return retVector;
+    real x, y, z, d = 0.0;
+    switch (index) {
+    case 0:
+        x = vectors[0].x;
+        y = vectors[1].x;
+        z = vectors[2].x;
+        d = vectors[3].x;
+        break;
+    case 1:
+        x = vectors[0].y;
+        y = vectors[1].y;
+        z = vectors[2].y;
+        d = vectors[3].y;
+        break;
+    case 2:
+        x = vectors[0].z;
+        y = vectors[1].z;
+        z = vectors[2].z;
+        d = vectors[3].z;
+        break;
+    case 3:
+        x = vectors[0].d;
+        y = vectors[1].d;
+        z = vectors[2].d;
+        d = vectors[3].d;
+        break;
+    default:
+        throw CapEngineException("Invalid index");
+        break;
+    }
+    Vector retVector(x, y, z, d);
+    return retVector;
 }
 
 Vector Matrix::getColumnVector(int index) const
 {
-  if (index > 3 || index < 0) {
-    throw CapEngineException("Matrix indexes must be less than or equal to 3 "
-                             "and greater than or equal to 0");
-  }
+    if (index > 3 || index < 0) {
+        throw CapEngineException(
+            "Matrix indexes must be less than or equal to 3 "
+            "and greater than or equal to 0");
+    }
 
-  Vector retVector(vectors[index]);
-  return retVector;
+    Vector retVector(vectors[index]);
+    return retVector;
 }
 
 Vector &Matrix::getColumnVectorRef(int index)
 {
-  if (index > 3 || index < 0) {
-    throw CapEngineException("Matrix indexes must be less than or equal to 3 "
-                             "and greater than or equal to 0");
-  }
+    if (index > 3 || index < 0) {
+        throw CapEngineException(
+            "Matrix indexes must be less than or equal to 3 "
+            "and greater than or equal to 0");
+    }
 
-  return vectors[index];
+    return vectors[index];
 }
 
 std::ostream &operator<<(std::ostream &stream, const CapEngine::Matrix &matrix)
 {
 
-  stream << "Matrix(";
-  for (size_t i = 0; i < 4; i++) {
-    auto &&vector = matrix.getRowVector(i);
-    stream << "(" << vector.getX() << ", " << vector.getY() << ", "
-           << vector.getZ() << ", " << vector.getD() << ")";
-  }
-  stream << ")";
-  return stream;
+    stream << "Matrix(";
+    for (size_t i = 0; i < 4; i++) {
+        auto &&vector = matrix.getRowVector(i);
+        stream << "(" << vector.getX() << ", " << vector.getY() << ", "
+               << vector.getZ() << ", " << vector.getD() << ")";
+    }
+    stream << ")";
+    return stream;
 }
 
 //! Returns a string representation
@@ -331,32 +336,32 @@ std::ostream &operator<<(std::ostream &stream, const CapEngine::Matrix &matrix)
 */
 std::string Matrix::toString(bool pretty) const
 {
-  std::stringstream stream;
-  for (size_t i = 0; i < 4; i++) {
-    auto &&vector = this->getRowVector(i);
-    stream << "(" << vector.getX() << ", " << vector.getY() << ", "
-           << vector.getZ() << ", " << vector.getD() << ")";
-    if (pretty) {
-      stream << std::endl;
+    std::stringstream stream;
+    for (size_t i = 0; i < 4; i++) {
+        auto &&vector = this->getRowVector(i);
+        stream << "(" << vector.getX() << ", " << vector.getY() << ", "
+               << vector.getZ() << ", " << vector.getD() << ")";
+        if (pretty) {
+            stream << std::endl;
+        }
     }
-  }
-  stream << ")";
-  return stream.str();
+    stream << ")";
+    return stream.str();
 }
 
 //! operator==
 bool Matrix::operator==(const Matrix &other) const
 {
-  bool equal = true;
-  if (this->vectors.size() != other.vectors.size())
-    return false;
+    bool equal = true;
+    if (this->vectors.size() != other.vectors.size())
+        return false;
 
-  for (size_t i = 0; i < vectors.size(); i++) {
-    if (this->vectors[i] != other.vectors[i])
-      return false;
-  }
+    for (size_t i = 0; i < vectors.size(); i++) {
+        if (this->vectors[i] != other.vectors[i])
+            return false;
+    }
 
-  return true;
+    return true;
 }
 
 } // namespace CapEngine
