@@ -20,17 +20,17 @@ Scene2dState::Scene2dState(jsoncons::json in_sceneDescriptors,
     : m_sceneDescriptors(std::move(in_sceneDescriptors)),
       m_sceneId(std::move(in_sceneId)), m_windowId(in_windowId)
 {
-  using namespace Schema::Scene2d;
+    using namespace Schema::Scene2d;
 
-  for (auto &&scene : m_sceneDescriptors[kScenes].array_range()) {
-    if (scene[kSceneId] == m_sceneId) {
-      m_pScene.reset(new Scene2d(scene));
+    for (auto &&scene : m_sceneDescriptors[kScenes].array_range()) {
+        if (scene[kSceneId] == m_sceneId) {
+            m_pScene.reset(new Scene2d(scene));
+        }
     }
-  }
 
-  if (m_pScene == nullptr) {
-    BOOST_THROW_EXCEPTION(SceneDoesNotExistException(in_sceneId));
-  }
+    if (m_pScene == nullptr) {
+        BOOST_THROW_EXCEPTION(SceneDoesNotExistException(in_sceneId));
+    }
 }
 
 //! \copydoc GameState::onLoad
@@ -49,8 +49,18 @@ void Scene2dState::render()
 //! \copydoc Gamestate::update
 void Scene2dState::update(double ms)
 {
-  assert(m_pScene != nullptr);
-  m_pScene->update(ms);
+    assert(m_pScene != nullptr);
+    m_pScene->update(ms);
+}
+
+//! Set end scene callback function.
+/*
+ * \param in_endSceneDB
+ *   The callback.
+ */
+void Scene2dState::setEndSceneCB(std::function<void()> in_endSceneCB)
+{
+    m_pScene->setEndSceneCB(in_endSceneCB);
 }
 
 } // namespace CapEngine

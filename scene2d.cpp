@@ -40,11 +40,12 @@ void updateCameraSize(uint32_t in_windowId, Camera2d &io_camera)
    The json describing the scene.
 */
 Scene2d::Scene2d(const jsoncons::json &in_json)
-    : m_camera(0, 0), m_pObjectManager(std::make_shared<SimpleObjectManager>())
+    : m_camera(0, 0), m_pObjectManager(std::make_shared<SimpleObjectManager>()),
+      m_endSceneCB(std::nullopt)
 {
     this->load(in_json);
-    assert(Locator::insert(ObjectManager::kObjectManagerLocatorId,
-                           m_pObjectManager));
+    Locator::insertOrReplace(ObjectManager::kObjectManagerLocatorId,
+                             m_pObjectManager);
 }
 
 //! load the scene from json.
@@ -173,4 +174,10 @@ void Scene2d::render(uint32_t in_windowId)
         pObject->render(m_camera, in_windowId);
     }
 }
+
+void Scene2d::setEndSceneCB(std::function<void()> in_endSceneCB)
+{
+    m_endSceneCB = in_endSceneCB;
+}
+
 } // namespace CapEngine
