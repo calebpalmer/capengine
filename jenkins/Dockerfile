@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     clang-11 \
     cmake \
     git \
+    libaudio-dev \
     libgl1-mesa-dev \
     libjack-dev \
     libasound2-dev \
