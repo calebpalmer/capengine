@@ -1,0 +1,43 @@
+pipeline {
+    agent {
+	dockerfile {
+	    dir 'jenkins'
+	    args '-v /tmp:/data'
+	}
+    }
+
+    environment {
+       CONAN_USER_HOME = '/data/.conan'
+    }
+
+
+    stages {
+	stage('3rd Party Libs') {
+	    steps {
+		script {
+		    sh """
+			mkdir -p build
+			cd build
+			conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan || true
+			conan install .. --build missing
+			"""
+		}
+	    }
+	}
+
+	stage('Build') {
+	    steps {
+		script {
+		    sh """
+		       pwd
+		       ls -la
+		       ls -la build
+		       ./configure.sh build RelWithDebInfo
+		       cmake --build build
+		       cmake --build build --target install
+		    """
+		}
+	    }
+	}
+    }
+}
