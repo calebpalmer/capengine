@@ -29,6 +29,7 @@ pipeline {
 	    steps {
 		script {
 		    sh """
+		       git submodule update --init --recursive
 		       pwd
 		       ls -la
 		       ls -la build
