@@ -64,6 +64,16 @@ target_link_libraries(widgettest capengine
   stdc++fs
   )
 
+install(
+  TARGETS capengine
+  DESTINATION ./
+  )
+
+install(
+  FILES *.h
+  DESTINATION ./include/
+  )
+
 #add_subdirectory(test)
 
 add_custom_target(
