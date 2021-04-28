@@ -69,10 +69,10 @@ install(
   DESTINATION ./
   )
 
-install(
-  FILES *.h
-  DESTINATION ./include/
-  )
+# install(
+#   FILES *.h
+#   DESTINATION ./include/
+#   )
 
 #add_subdirectory(test)
 
