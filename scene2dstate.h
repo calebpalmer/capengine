@@ -33,6 +33,7 @@ class Scene2dState final : public GameState
     bool onLoad() override;
     bool onDestroy() override;
     void setEndSceneCB(std::function<void()> in_endSceneCB);
+    void addUpdateCB(std::function<void(double ms)> in_updateCB);
 
   private:
     //! Descriptors of all the available scenes.
@@ -43,6 +44,8 @@ class Scene2dState final : public GameState
     std::unique_ptr<Scene2d> m_pScene;
     //! The id of the window to render to.
     uint32_t m_windowId;
+    //! Update hooks
+    std::vector<std::function<void(double ms)>> m_updateHooks;
 };
 } // namespace CapEngine
 

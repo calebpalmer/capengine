@@ -51,6 +51,9 @@ void Scene2dState::update(double ms)
 {
     assert(m_pScene != nullptr);
     m_pScene->update(ms);
+    for (auto &&i : m_updateHooks) {
+        i(ms);
+    }
 }
 
 //! Set end scene callback function.
@@ -61,6 +64,16 @@ void Scene2dState::update(double ms)
 void Scene2dState::setEndSceneCB(std::function<void()> in_endSceneCB)
 {
     m_pScene->setEndSceneCB(in_endSceneCB);
+}
+
+//! Add an update hook to the scene state.
+/*
+ * \param in_updateCB
+ *   The update hook.
+ */
+void Scene2dState::addUpdateCB(std::function<void(double ms)> in_updateCB)
+{
+    m_updateHooks.push_back(std::move(in_updateCB));
 }
 
 } // namespace CapEngine
