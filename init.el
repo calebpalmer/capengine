@@ -22,18 +22,24 @@
 
 (defun capengine/launch-tests ()
   (interactive)
-  (async-shell-command (concat cap/build-dir  "/capengine/bin/runtests"))
-  )
+  (let ((default-directory (concat cap/build-dir  "/capengine/bin")))
+    (async-shell-command "./runtests")))
 
 (defun capengine/launch-tests-debug ()
   (interactive)
   (gdb (concat "gdb -i=mi " cap/build-dir "/capengine/test/runtests"))
   )
 
+
 (defun cap/cmake ()
   (interactive)
   (shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/build-dir  " -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=" cap/build-dir "/install && cp " cap/build-dir "/compile_commands.json ."))
   )
+
+;; (defun cap/cmake ()
+;;   (interactive)
+;;   (shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/build-dir  " -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=" cap/build-dir "/install -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ && cp " cap/build-dir "/compile_commands.json ."))
+;;   )
 
 (defun cap/cmake-install ()
   (interactive)

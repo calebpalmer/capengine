@@ -37,11 +37,13 @@ add_library(capengine SHARED
   uipropertyvisitor.cpp simpleobjectmanager.cpp scene2d.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
   boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
+  components.cpp
   )
 
 target_link_libraries(capengine
   ${CONAN_LIBS}
   stdc++fs
+  sndio
   )
 
 # editor
@@ -69,32 +71,9 @@ install(
   DESTINATION ./
   )
 
-# install(
-#   FILES *.h
-#   DESTINATION ./include/
-#   )
-
-#add_subdirectory(test)
+add_subdirectory(test)
 
 add_custom_target(
   doc
   COMMAND doxygen doxygenfile
   )
-
-# # installs
-# INSTALL(TARGETS capengine widgettest editor
-#   RUNTIME DESTINATION bin
-#   LIBRARY DESTINATION bin
-#   ARCHIVE DESTINATION bin
-#   )
-
-# # installing dependencies
-# # set(MY_BINARY_LOCATION $<TARGET_FILE:capengine> CACHE STRING "")
-# # FILE(
-# #   GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-# #   INPUT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
-# #   )
-# # INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
-
-# install(DIRECTORY res
-#   DESTINATION ./)
