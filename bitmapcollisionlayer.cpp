@@ -99,31 +99,17 @@ bool BitmapCollisionLayer::resolveCollisions(GameObject &in_object) const
 
             else if (collisionType == COLLISION_LEFT) {
                 position.setX(position.getX() + 1);
-                // std::cout << "collision resolver:  (COLLISION_LEFT) moving "
-                //              "right one pixel"
-                //           << std::endl;
             }
 
             else if (collisionType == COLLISION_RIGHT) {
                 position.setX(position.getX() - 1);
-                // std::cout << "collision resolver:  (COLLISION_RIGHT) moving "
-                //              "left one pixel"
-                //           << std::endl;
             }
 
             else if (collisionType == COLLISION_TOP) {
-                // std::cout << "collision resolver:  (COLLISION_TOP) moving
-                // down "
-                //              "one pixel"
-                //           << std::endl;
                 position.setY(position.getY() - 1);
             }
 
             else if (collisionType == COLLISION_BOTTOM) {
-                // std::cout << "collision resolver:  (COLLISION_BOTTOM) moving
-                // "
-                //              "up one pixel"
-                //           << std::endl;
                 position.setY(position.getY() + 1);
             }
 
@@ -132,7 +118,6 @@ bool BitmapCollisionLayer::resolveCollisions(GameObject &in_object) const
 
         numAttempts++;
         collisions = this->checkCollisions(in_object);
-        // std::cout << "******************" << std::endl;
     }
 
     CAP_LOG(Locator::logger,
