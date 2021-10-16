@@ -20,9 +20,6 @@ class ButtonGroup : public UIObject, public IEventSubscriber
     // UIObject inherited members
     void update() override;
     void render() override;
-    // These following few don't do anything
-    void setEnabled(bool enabled) override {}
-    bool isEnabled() const override { return true; }
     int getWidth() const override { return -1; }
     int getHeight() const override { return -1; }
     void setWidth(int width) override {}

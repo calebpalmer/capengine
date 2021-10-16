@@ -134,10 +134,6 @@ void TextButton::render()
     }
 }
 
-void TextButton::setEnabled(bool enabled) { m_enabled = enabled; }
-
-bool TextButton::isEnabled() const { return m_enabled; }
-
 int TextButton::getWidth() const { return m_width; }
 
 int TextButton::getHeight() const { return m_height; }

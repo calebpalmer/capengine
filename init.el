@@ -54,7 +54,7 @@
 (setq cap/capengine-functions t)
 
 
-(setq compile-command (concat "cmake --build " cap/build-dir " -- -j4 && cp " cap/build-dir "/compile_commands.json ."))
+(setq compile-command (concat "cmake --build " cap/build-dir))
 
 (global-set-key (kbd "<f12>") 'compile)
 (global-set-key (kbd "C-<f12>") 'cap/cmake-install)

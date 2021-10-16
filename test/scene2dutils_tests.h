@@ -6,6 +6,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <variant>
 
+#include "../captypes.h"
 #include "../scene2dutils.h"
 #include "cppunit/TestAssert.h"
 
@@ -46,10 +47,23 @@ void Scene2dUtilsTest::testReadRectangle()
 //! Test reading component metadata
 void Scene2dUtilsTest::testReadComponentMetadata()
 {
+    // int metadata
     jsoncons::json intData(1);
-    const Component::MetadataType value = JSONUtils::readMetadata(intData);
-    CPPUNIT_ASSERT_NO_THROW(std::get<int>(value));
-    CPPUNIT_ASSERT_EQUAL(1, std::get<int>(value));
+    const MetadataType intValue = JSONUtils::readMetadata(intData);
+    CPPUNIT_ASSERT_NO_THROW(std::get<int>(intValue));
+    CPPUNIT_ASSERT_EQUAL(1, std::get<int>(intValue));
+
+    // double metadata
+    jsoncons::json doubleData(9.99);
+    const MetadataType doubleValue = JSONUtils::readMetadata(doubleData);
+    CPPUNIT_ASSERT_NO_THROW(std::get<double>(doubleValue));
+    CPPUNIT_ASSERT_EQUAL(9.99, std::get<double>(doubleValue));
+
+    // double metadata
+    jsoncons::json stringData("yo");
+    const MetadataType stringValue = JSONUtils::readMetadata(stringData);
+    CPPUNIT_ASSERT_NO_THROW(std::get<std::string>(stringValue));
+    CPPUNIT_ASSERT("yo" == std::get<std::string>(stringValue));
 }
 
 } // namespace Testing

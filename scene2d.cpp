@@ -68,7 +68,6 @@ void Scene2d::load(const jsoncons::json &in_json)
             std::unique_ptr<Layer> pLayer = layerFactory.makeLayer(layer);
             const int layerOrder = layer[kLayerOrder].as<int>();
 
-            std::cout << "Adding layer " << pLayer->type() << std::endl;
             m_layers.emplace(layerOrder, std::move(pLayer));
         }
 
@@ -123,7 +122,6 @@ void Scene2d::update(double in_ms)
         }
 
         // collision detection
-        // check collisions with other objects
 
         // collision with layers
         for (auto &&layer : m_layers) {
@@ -145,6 +143,8 @@ void Scene2d::update(double in_ms)
                 }
             }
         }
+
+        // check collisions with other objects
 
         // keep updated object
         objects[i] = std::move(pUpdateObject);

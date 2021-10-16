@@ -15,8 +15,8 @@ public:
   virtual ~UIObject() {}
   virtual void update() = 0;
   virtual void render() = 0;
-  virtual void setEnabled(bool enabled) = 0;
-  virtual bool isEnabled() const = 0;
+  virtual void setEnabled(bool in_enabled) { m_enabled = in_enabled; };
+  virtual bool isEnabled() { return m_enabled; };
   virtual int getWidth() const = 0;
   virtual int getHeight() const = 0;
   virtual void setWidth(int width) = 0;
@@ -25,6 +25,9 @@ public:
   virtual Vector getPosition() const = 0;
   virtual void setSelected(bool selected) = 0;
   virtual bool isSelected() const = 0;
+
+protected:
+  bool m_enabled = true;
 };
 
 } // namespace CapEngine

@@ -21,6 +21,7 @@ extern const char *kHeight;
 extern const char *kType;
 extern const char *kSubType;
 extern const char *kAssetId;
+extern const char *kMetadata;
 
 // scenes
 extern const char *kScenes;

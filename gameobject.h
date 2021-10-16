@@ -1,6 +1,7 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
+#include "captypes.h"
 #include "collision.h"
 #include "components.h"
 #include "vector.h"
@@ -110,6 +111,10 @@ class GameObject
     friend std::ostream &operator<<(std::ostream &stream,
                                     GameObject const &object);
 
+    using Metadata = std::map<std::string, MetadataType>;
+    Metadata const &metadata() const;
+    void setMetadata(std::string const &in_key, MetadataType const &in_value);
+
   private:
     static ObjectID nextID;
     static int nextMessageId;
@@ -119,6 +124,9 @@ class GameObject
     ObjectID m_parentObjectID = -1;
     ObjectType m_objectType = ObjectType_AI;
     YAxisOrientation m_yAxisOrientation = YAxisOrientation::BottomZero;
+
+    //! metadata
+    Metadata m_metadata;
 
     //! The components
     std::vector<std::shared_ptr<Component>> m_components;

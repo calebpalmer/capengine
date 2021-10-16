@@ -2,9 +2,12 @@
 #define COMPONENTS_H
 
 #include "camera2d.h"
+#include "captypes.h"
 
+#include <map>
 #include <memory>
 #include <optional>
+#include <variant>
 
 namespace CapEngine
 {
@@ -27,6 +30,15 @@ class Component
     virtual ComponentType getType() const = 0;
 
     virtual std::unique_ptr<Component> clone() const = 0;
+
+    //! Metadata collection type
+    using Metadata = std::map<std::string, MetadataType>;
+
+    Metadata const &metadata() const;
+    void setMetadata(const std::string &in_key, const MetadataType &in_value);
+
+  protected:
+    Metadata m_metadata; //!< Holds metadata about the component.
 };
 
 //! Interface class for physics components
@@ -63,25 +75,25 @@ class GraphicsComponent : public Component
 //! interface class for input components
 class InputComponent : public Component
 {
-public:
-  ~InputComponent() override = default;
-  ComponentType getType() const override { return ComponentType::Input; }
+  public:
+    ~InputComponent() override = default;
+    ComponentType getType() const override { return ComponentType::Input; }
 };
 
 //! interface class for custom components
 class CustomComponent : public Component
 {
-public:
-  ~CustomComponent() override = default;
-  ComponentType getType() const override { return ComponentType::Custom; }
+  public:
+    ~CustomComponent() override = default;
+    ComponentType getType() const override { return ComponentType::Custom; }
 };
 
 //! interface class for ai components
 class AIComponent : public Component
 {
-public:
-  ~AIComponent() override = default;
-  ComponentType getType() const override { return ComponentType::AI; }
+  public:
+    ~AIComponent() override = default;
+    ComponentType getType() const override { return ComponentType::AI; }
 };
 
 } // namespace CapEngine

@@ -30,8 +30,6 @@ class TextButton : public Button, public IEventSubscriber
     void executeCallback();
     void update() override;
     void render() override;
-    void setEnabled(bool enabled = true) override;
-    bool isEnabled() const override;
     int getWidth() const override;
     int getHeight() const override;
     void setWidth(int width) override;

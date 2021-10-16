@@ -32,6 +32,8 @@ class Scene2dState final : public GameState
     void update(double ms) override;
     bool onLoad() override;
     bool onDestroy() override;
+    bool onPause() override { return true; };
+    bool onResume() override { return true; };
     void setEndSceneCB(std::function<void()> in_endSceneCB);
     void addUpdateCB(std::function<void(double ms)> in_updateCB);
 

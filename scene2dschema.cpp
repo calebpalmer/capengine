@@ -20,6 +20,7 @@ const char *kHeight = "height";
 const char *kType = "type";
 const char *kSubType = "subtype";
 const char *kAssetId = "asset_id";
+const char *kMetadata = "metadata";
 
 // scenes
 const char *kScenes = "scenes";

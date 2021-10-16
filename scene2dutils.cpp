@@ -95,5 +95,17 @@ Colour readColour(const jsoncons::json &in_json)
     return colour;
 }
 
+MetadataType readMetadata(const jsoncons::json &in_json)
+{
+    if (in_json.is_integer())
+        return in_json.as_int();
+    else if (in_json.is_double())
+        return in_json.as_double();
+    else if (in_json.is_string())
+        return in_json.as_string();
+    else
+        CAP_THROW(CapEngine::CapEngineException("Unsupported Metadata Type"));
+}
+
 } // namespace JSONUtils
 } // namespace CapEngine
