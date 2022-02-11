@@ -33,7 +33,7 @@
 
 (defun cap/cmake ()
   (interactive)
-  (shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/build-dir  " -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=" cap/build-dir "/install && cp " cap/build-dir "/compile_commands.json ."))
+  (shell-command (concat "cmake -H" cap/source_root_dir " -B" cap/build-dir  " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=" cap/build-dir "/install && cp " cap/build-dir "/compile_commands.json ."))
   )
 
 ;; (defun cap/cmake ()

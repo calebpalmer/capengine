@@ -88,6 +88,7 @@ class GameObject
     const std::vector<std::shared_ptr<Component>> &getComponents();
     std::vector<std::shared_ptr<Component>>
         getComponents(ComponentType in_type);
+    template <typename T> std::vector<std::shared_ptr<T>> getComponents();
 
     Vector const &getPosition() const;
     void setPosition(Vector position);
@@ -138,6 +139,18 @@ class GameObject
     Vector acceleration;
     Vector force;
 };
+
+template <typename T>
+std::vector<std::shared_ptr<T>> GameObject::getComponents()
+{
+    std::vector<std::shared_ptr<T>> components;
+    for (auto &&component : m_components) {
+        auto castedObject = std::dynamic_pointer_cast<T>(component);
+        if (castedObject != nullptr)
+            components.push_back(castedObject);
+    }
+}
+
 } // namespace CapEngine
 
 #endif // GAMEOBJECT_H

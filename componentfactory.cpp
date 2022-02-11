@@ -43,7 +43,7 @@ std::unique_ptr<Component>
     if (f == m_factoryFunctions.end()) {
         throw ComponentCreationException(
             type, subtype, in_json,
-            std::string("No factory method registered for layer type"));
+            std::string("No factory method registered for component type"));
     }
 
     std::unique_ptr<Component> pComponent = f->second(in_json);
