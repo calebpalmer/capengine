@@ -20,8 +20,8 @@ class GameObject;
 class CollisionEvent
 {
   public:
-    GameObject *object1;
-    GameObject *object2;
+    std::shared_ptr<GameObject> object1;
+    std::shared_ptr<GameObject> object2;
     CollisionType type;
     CollisionClass class_;
 

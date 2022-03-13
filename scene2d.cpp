@@ -121,8 +121,6 @@ void Scene2d::update(double in_ms)
             continue;
         }
 
-        // collision detection
-
         // collision with layers
         for (auto &&layer : m_layers) {
 
@@ -144,7 +142,25 @@ void Scene2d::update(double in_ms)
             }
         }
 
-        // check collisions with other objects
+        for (size_t j = i + 1; j < objects.size(); j++) {
+            auto pOtherObject = objects[j];
+            CAP_THROW_NULL(objects[j], "Object in objectmanager is null");
+
+            CollisionType collisionType =
+                detectMBRCollision(pUpdateObject->boundingPolygon(),
+                                   pOtherObject->boundingPolygon());
+
+            if (collisionType != CollisionType::COLLISION_NONE) {
+                std::cout << "Object collision detected" << std::endl;
+
+                pUpdateObject->handleCollision(
+                    collisionType, CollisionClass::COLLISION_UNKNOWN,
+                    pOtherObject.get(), {});
+                pOtherObject->handleCollision(collisionType,
+                                              CollisionClass::COLLISION_UNKNOWN,
+                                              pUpdateObject.get(), {});
+            }
+        }
 
         // keep updated object
         objects[i] = std::move(pUpdateObject);

@@ -1,5 +1,6 @@
 #include "simpleobjectmanager.h"
 #include "CapEngineException.h"
+#include "collision.h"
 
 #include <iostream>
 
@@ -8,8 +9,8 @@ namespace CapEngine
 
 //! Gets the game objects held by this object manager.
 /**
-  \return
-                                  The objects.
+   \return
+  The objects.
 */
 std::vector<std::shared_ptr<GameObject>> &SimpleObjectManager::getObjects()
 {
@@ -46,7 +47,34 @@ std::vector<std::shared_ptr<GameObject>>
 */
 std::vector<CollisionEvent> SimpleObjectManager::getCollisions() const
 {
-    return std::vector<CollisionEvent>{};
+    std::vector<CollisionEvent> collisions;
+    auto currentObject = this->m_objects.begin();
+
+    if (currentObject != m_objects.end()) {
+        CAP_THROW_ASSERT(*currentObject != nullptr, "currentObject is null.");
+        while (currentObject != this->m_objects.end()) {
+            // compare this object with the rest of the objects
+            auto otherObject = currentObject++;
+            while (otherObject != this->m_objects.end()) {
+                CAP_THROW_ASSERT(*otherObject != nullptr,
+                                 "otherObject is null.");
+
+                CollisionType collisionType =
+                    detectMBRCollision((*currentObject)->boundingPolygon(),
+                                       (*otherObject)->boundingPolygon());
+
+                if (collisionType != CollisionType::COLLISION_NONE) {
+                    collisions.push_back(CollisionEvent{
+                        *currentObject, *otherObject, collisionType,
+                        CollisionClass::COLLISION_ENTITY});
+                }
+
+                otherObject++;
+            }
+        }
+    }
+
+    return collisions;
 }
 
 //! Adds an object to the object manager.
