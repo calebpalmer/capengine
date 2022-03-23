@@ -4,6 +4,7 @@
 #include "captypes.h"
 #include "collision.h"
 #include "components.h"
+#include "gameevent.h"
 #include "vector.h"
 
 #include <memory>
@@ -77,7 +78,7 @@ class GameObject
     std::shared_ptr<ObjectData> getObjectData() const;
     void setObjectData(std::shared_ptr<ObjectData> pObjectData);
     ObjectState getObjectState() const;
-    void setObjectState(ObjectState objectState);
+    void setObjectgaState(ObjectState objectState);
     ObjectID getObjectID() const;
     void setObjectID(ObjectID id);
     ObjectID getParentObjectID() const;
@@ -150,6 +151,22 @@ std::vector<std::shared_ptr<T>> GameObject::getComponents()
             components.push_back(castedObject);
     }
 }
+
+// events
+class GameObjectStateChanged : public GameEvent
+{
+  public:
+    GameObjectStateChanged(std::shared_ptr<GameObject> object,
+                           GameObject::ObjectState stateBefore,
+                           GameObject::ObjectState stateAfter);
+    ~GameObjectStateChanged() override = default;
+    std::string type() const override { return std::string(kType); };
+
+    static constexpr char kType[] = "GameObjectSateChanged";
+    std::shared_ptr<GameObject> m_object;
+    GameObject::ObjectState m_stateBefore;
+    GameObject::ObjectState m_stateAfter;
+};
 
 } // namespace CapEngine
 

@@ -22,78 +22,78 @@ bool initted = false;
 
 Uint32 init(WindowParams screenConfig, bool noWindow)
 {
-  Uint32 windowID = -1;
-  if (!initted) {
-    std::unique_ptr<VideoManager> pVideoManager(new VideoManager());
-    Locator::videoManager = pVideoManager.release();
-    windowID = Locator::videoManager->initSystem(screenConfig, noWindow);
+    Uint32 windowID = -1;
+    if (!initted) {
+        std::unique_ptr<VideoManager> pVideoManager(new VideoManager());
+        Locator::videoManager = pVideoManager.release();
+        windowID = Locator::videoManager->initSystem(screenConfig, noWindow);
 
-    std::unique_ptr<Logger> pLogger(new Logger);
-    Locator::logger = pLogger.release();
+        std::unique_ptr<Logger> pLogger(new Logger);
+        Locator::logger = pLogger.release();
 
-    Locator::soundPlayer = &(SoundPlayer::getSoundPlayer());
-    Locator::soundPlayer->setState(
-        SoundState::PLAY); // should change this to be an enum
+        Locator::soundPlayer = &(SoundPlayer::getSoundPlayer());
+        Locator::soundPlayer->setState(
+            SoundState::PLAY); // should change this to be an enum
 
-    std::unique_ptr<Keyboard> pKeyboard(new Keyboard);
-    Locator::keyboard = pKeyboard.release();
+        std::unique_ptr<Keyboard> pKeyboard(new Keyboard);
+        Locator::keyboard = pKeyboard.release();
 
-    const int NUMMOUSEBUTTONS = 3;
-    std::unique_ptr<Mouse> pMouse(new Mouse(NUMMOUSEBUTTONS));
-    Locator::mouse = pMouse.release();
+        const int NUMMOUSEBUTTONS = 3;
+        std::unique_ptr<Mouse> pMouse(new Mouse(NUMMOUSEBUTTONS));
+        Locator::mouse = pMouse.release();
 
-    std::unique_ptr<EventDispatcher> pEventDispatcher(
-        new EventDispatcher(Locator::videoManager));
-    Locator::eventDispatcher = pEventDispatcher.release();
+        std::unique_ptr<EventDispatcher> pEventDispatcher(
+            new EventDispatcher(Locator::videoManager));
+        Locator::eventDispatcher = pEventDispatcher.release();
 
-    std::unique_ptr<EventSubscriber> pEventSubscriber(
-        new EventSubscriber(*(Locator::eventDispatcher)));
-    Locator::eventSubscriber = pEventSubscriber.release();
+        std::unique_ptr<EventSubscriber> pEventSubscriber(
+            new EventSubscriber(Locator::eventDispatcher));
+        Locator::eventSubscriber = pEventSubscriber.release();
 
-    Locator::assetManager = nullptr;
+        Locator::assetManager = nullptr;
 
-    // initialize ControllerManager
-    ControllerManager::initialize();
+        // initialize ControllerManager
+        ControllerManager::initialize();
 
-    // set current directory to directory of executable
-    // std::string exePath = getCurrentExecutablePath();
-    // setCurrentDir(stripPath(exePath));
+        // set current directory to directory of executable
+        // std::string exePath = getCurrentExecutablePath();
+        // setCurrentDir(stripPath(exePath));
 
-    // initialise 2d layer types
-    LayerFactory &layerFactory = LayerFactory::getInstance();
-    ImageLayer::registerConstructor(layerFactory);
-    BitmapCollisionLayer::registerConstructor(layerFactory);
+        // initialise 2d layer types
+        LayerFactory &layerFactory = LayerFactory::getInstance();
+        ImageLayer::registerConstructor(layerFactory);
+        BitmapCollisionLayer::registerConstructor(layerFactory);
 
-    // initialize components
-    ComponentFactory &componentFactory = ComponentFactory::getInstance();
-    PlaceHolderGraphics::registerConstructor(componentFactory);
-    BoxCollider::registerConstructor(componentFactory);
+        // initialize components
+        ComponentFactory &componentFactory = ComponentFactory::getInstance();
+        PlaceHolderGraphics::registerConstructor(componentFactory);
+        BoxCollider::registerConstructor(componentFactory);
 
-    initted = true;
-  }
+        initted = true;
+    }
 
-  return windowID;
+    return windowID;
 }
 
 void destroy()
 {
-  if (initted) {
-    delete Locator::mouse;
-    delete Locator::keyboard;
-    if (Locator::assetManager != nullptr) {
-      delete Locator::assetManager;
+    if (initted) {
+        delete Locator::mouse;
+        delete Locator::keyboard;
+        if (Locator::assetManager != nullptr) {
+            delete Locator::assetManager;
+        }
+        delete Locator::eventDispatcher;
+        delete Locator::soundPlayer;
+        delete Locator::videoManager;
     }
-    delete Locator::eventDispatcher;
-    delete Locator::soundPlayer;
-    delete Locator::videoManager;
-  }
 }
 
 void loadAssetFile(std::string assetsFile)
 {
-  std::unique_ptr<AssetManager> pAssetManager(new AssetManager(
-      *(Locator::videoManager), *(Locator::soundPlayer), assetsFile));
-  Locator::assetManager = pAssetManager.release();
+    std::unique_ptr<AssetManager> pAssetManager(new AssetManager(
+        *(Locator::videoManager), *(Locator::soundPlayer), assetsFile));
+    Locator::assetManager = pAssetManager.release();
 }
 
 void startLoop(std::shared_ptr<GameState> pGameState)
@@ -118,8 +118,8 @@ void pushState(std::shared_ptr<GameState> pGameState)
 
 //! get the state at the top of the stack
 /**
-    \return
-    The GameState
+        \return
+        The GameState
 */
 std::shared_ptr<GameState> peekState()
 {
@@ -141,20 +141,20 @@ std::shared_ptr<GameState> peekState()
 std::shared_ptr<UI::WindowWidget>
     createWindow(const std::string &name, int width, int height, bool resizable)
 {
-  std::shared_ptr<UI::WindowWidget> pWindowWidget =
-      UI::WindowWidget::create(name, width, height, resizable);
+    std::shared_ptr<UI::WindowWidget> pWindowWidget =
+        UI::WindowWidget::create(name, width, height, resizable);
 
-  CAP_THROW_ASSERT(Locator::eventSubscriber != nullptr,
-                   "Locator::eventSubscriber is null");
-  pWindowWidget->registerSignals(*Locator::eventSubscriber);
+    CAP_THROW_ASSERT(Locator::eventSubscriber != nullptr,
+                     "Locator::eventSubscriber is null");
+    pWindowWidget->registerSignals(*Locator::eventSubscriber);
 
-  return pWindowWidget;
+    return pWindowWidget;
 }
 
 //! Enables/Disables default quit events (window close and q key)
 /**
-    \param enabled
-    if true then enabled, false then disabled.
+        \param enabled
+        if true then enabled, false then disabled.
 */
 void setDefaultQuitEvents(bool enabled)
 {

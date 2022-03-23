@@ -5,6 +5,7 @@
 #include "gamestate.h"
 #include "windowwidget.h"
 
+#include <boost/signals2.hpp>
 #include <memory>
 
 namespace CapEngine

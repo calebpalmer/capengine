@@ -13,14 +13,14 @@ class EventDispatcher; // forward declaration
 
 class IEventSubscriber
 {
-public:
-  virtual void receiveEvent(SDL_Event event, CapEngine::Time *time) = 0;
-  virtual void subscribe(EventDispatcher *eventDispatcher,
-                         int subscriptionMask);
-  virtual ~IEventSubscriber();
+  public:
+    virtual void receiveEvent(SDL_Event event, CapEngine::Time *time) = 0;
+    virtual void subscribe(EventDispatcher *eventDispatcher,
+                           int subscriptionMask);
+    virtual ~IEventSubscriber();
 
-private:
-  EventDispatcher *m_pEventDispatcher;
+  private:
+    EventDispatcher *m_pEventDispatcher = nullptr;
 };
 } // namespace CapEngine
 

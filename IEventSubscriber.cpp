@@ -7,8 +7,12 @@ using namespace CapEngine;
 void IEventSubscriber::subscribe(EventDispatcher *eventDispatcher,
                                  int subscriptionMask)
 {
-  m_pEventDispatcher = eventDispatcher;
-  m_pEventDispatcher->subscribe(this, subscriptionMask);
+    m_pEventDispatcher = eventDispatcher;
+    m_pEventDispatcher->subscribe(this, subscriptionMask);
 }
 
-IEventSubscriber::~IEventSubscriber() { m_pEventDispatcher->unsubscribe(this); }
+IEventSubscriber::~IEventSubscriber()
+{
+    if (m_pEventDispatcher)
+        m_pEventDispatcher->unsubscribe(this);
+}
