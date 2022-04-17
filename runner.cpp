@@ -31,6 +31,8 @@ void Runner::popState()
             Locator::logger->log("Failed to destroy popped state",
                                  Logger::CWARNING, __FILE__, __LINE__);
         }
+        // toss it in the trash to be removed i the next update
+        m_stateTrash.push_back(std::move(pPoppedState));
 
         if (m_gameStates.size() == 0)
             m_quit = true;
@@ -112,6 +114,9 @@ void Runner::exit() { m_quit = true; }
 
 void Runner::update()
 {
+    // clean up the trash
+    m_stateTrash.clear();
+
     if (m_gameStates.size() > 0)
         (m_gameStates.back())->update(m_msPerUpdate);
 

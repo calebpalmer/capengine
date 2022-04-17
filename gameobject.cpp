@@ -317,7 +317,7 @@ GameObject::ObjectState GameObject::getObjectState() const
 void GameObject::setObjectState(GameObject::ObjectState objectState)
 {
     if (Locator::eventSubscriber) {
-        GameObjectStateChanged event(this, m_objectState, objectState);
+        GameObjectStateChangedEvent event(this, m_objectState, objectState);
         Locator::eventSubscriber->m_gameEventSignal(event);
     }
 
@@ -490,7 +490,7 @@ void GameObject::setMetadata(std::string const &in_key,
     m_metadata[in_key] = in_value;
 }
 
-GameObjectStateChanged::GameObjectStateChanged(
+GameObjectStateChangedEvent::GameObjectStateChangedEvent(
     GameObject *object, GameObject::ObjectState stateBefore,
     GameObject::ObjectState stateAfter)
     : m_object(object), m_stateBefore(stateBefore), m_stateAfter(stateAfter)

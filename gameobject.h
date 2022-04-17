@@ -153,13 +153,13 @@ std::vector<std::shared_ptr<T>> GameObject::getComponents()
 }
 
 // events
-class GameObjectStateChanged : public GameEvent
+class GameObjectStateChangedEvent : public GameEvent
 {
   public:
-    GameObjectStateChanged(GameObject *object,
-                           GameObject::ObjectState stateBefore,
-                           GameObject::ObjectState stateAfter);
-    ~GameObjectStateChanged() override = default;
+    GameObjectStateChangedEvent(GameObject *object,
+                                GameObject::ObjectState stateBefore,
+                                GameObject::ObjectState stateAfter);
+    ~GameObjectStateChangedEvent() override = default;
     std::string type() const override { return std::string(kType); };
 
     static constexpr char kType[] = "GameObjectSateChanged";
