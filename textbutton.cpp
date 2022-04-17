@@ -3,6 +3,8 @@
 #include "locator.h"
 #include "scanconvert.h"
 
+#include <SDL2/SDL_events.h>
+#include <functional>
 #include <sstream>
 
 using namespace std;
@@ -46,7 +48,10 @@ TextButton::TextButton(Uint32 windowID, std::string text, std::string font,
     m_height = Locator::videoManager->getTextureHeight(m_pTextTextureInactive);
 
     // Locator::eventDispatcher->subscribe(this, mouseEvent);
-    IEventSubscriber::subscribe(Locator::eventDispatcher, mouseEvent);
+    // IEventSubscriber::subscribe(Locator::eventDispatcher, mouseEvent);
+    assert(Locator::eventSubscriber != nullptr);
+    Locator::eventSubscriber->m_mouseButtonEventSignal.connect(
+        std::bind(&TextButton::receiveEvent, this, std::placeholders::_1));
 }
 
 TextButton::~TextButton()
@@ -60,22 +65,19 @@ TextButton::~TextButton()
     // Locator::eventDispatcher->unsubscribe(this);
 }
 
-void TextButton::receiveEvent(const SDL_Event event, CapEngine::Time *time)
+void TextButton::receiveEvent(const SDL_MouseButtonEvent event)
 {
-    if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP) {
-        if (mouseInButton(
-                Vector(Locator::mouse->getx(), Locator::mouse->gety()))) {
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
-                m_activated = true;
-            } else { // MOUSEBUTTONUP
-                if (m_callback != nullptr) {
-                    this->executeCallback();
-                }
-                m_activated = false;
+    if (mouseInButton(Vector(Locator::mouse->getx(), Locator::mouse->gety()))) {
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            m_activated = true;
+        } else { // MOUSEBUTTONUP
+            if (m_callback != nullptr) {
+                this->executeCallback();
             }
-        } else {
             m_activated = false;
         }
+    } else {
+        m_activated = false;
     }
 }
 

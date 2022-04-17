@@ -288,7 +288,6 @@ bool GameObject::handleCollision(CapEngine::CollisionType type,
 
 unique_ptr<GameObject> GameObject::clone() const
 {
-    CAP_THROW_ASSERT(this != nullptr, "this is null? wtf.");
     return std::make_unique<GameObject>(*this);
 }
 
@@ -317,9 +316,10 @@ GameObject::ObjectState GameObject::getObjectState() const
 
 void GameObject::setObjectState(GameObject::ObjectState objectState)
 {
-    if (Locator::eventSubscriber)
-        Locator::eventSubscriber->m_gameEventSignal(
-            GameObjectStateChanged(this, m_objectState, objectState));
+    if (Locator::eventSubscriber) {
+        GameObjectStateChanged event(this, m_objectState, objectState);
+        Locator::eventSubscriber->m_gameEventSignal(event);
+    }
 
     m_objectState = objectState;
 }
@@ -491,7 +491,7 @@ void GameObject::setMetadata(std::string const &in_key,
 }
 
 GameObjectStateChanged::GameObjectStateChanged(
-    std::shared_ptr<GameObject> object, GameObject::ObjectState stateBefore,
+    GameObject *object, GameObject::ObjectState stateBefore,
     GameObject::ObjectState stateAfter)
     : m_object(object), m_stateBefore(stateBefore), m_stateAfter(stateAfter)
 {

@@ -33,12 +33,6 @@ Scene2dState::Scene2dState(jsoncons::json in_sceneDescriptors,
     }
 }
 
-//! \copydoc GameState::onLoad
-bool Scene2dState::onLoad() { return true; }
-
-//! \copydoc GameState::onDestroy
-bool Scene2dState::onDestroy() { return true; }
-
 //! \copydoc GameState::render
 void Scene2dState::render()
 {

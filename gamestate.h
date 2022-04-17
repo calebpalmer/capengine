@@ -10,12 +10,15 @@ public:
   virtual ~GameState(){};
   virtual void render() = 0;
   virtual void update(double ms) = 0;
-  virtual bool onLoad() = 0;
-  virtual bool onDestroy() = 0;
-  virtual bool onPause() = 0;
-  virtual bool onResume() = 0;
+  virtual bool onLoad() { return true; }
+  virtual bool onDestroy() { return true; }
+  virtual bool onPause();
+  virtual bool onResume();
+  virtual bool enabled() const;
+  virtual void setEnabled(bool in_enabled);
 
-private:
+protected:
+  bool m_enabled = true;
 };
 
 } // namespace CapEngine

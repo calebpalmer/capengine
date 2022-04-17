@@ -1,16 +1,18 @@
 #ifndef TEXTBUTTON_H
 #define TEXTBUTTON_H
 
-#include <string>
-
 #include "IEventSubscriber.h"
 #include "button.h"
 #include "colour.h"
 
+#include <boost/signals2.hpp>
+#include <boost/signals2/connection.hpp>
+#include <string>
+
 namespace CapEngine
 {
 
-class TextButton : public Button, public IEventSubscriber
+class TextButton : public Button
 {
 
   private:
@@ -42,7 +44,7 @@ class TextButton : public Button, public IEventSubscriber
     bool isSelected() const override;
     void setIndicator(const std::string imagePath) override;
     // IEventSubscriber virtual
-    void receiveEvent(const SDL_Event event, CapEngine::Time *time) override;
+    void receiveEvent(const SDL_MouseButtonEvent event);
 
   protected:
     std::string m_text;
@@ -62,6 +64,7 @@ class TextButton : public Button, public IEventSubscriber
     // void (*m_callback)(void *);
     std::function<void()> m_callback;
     void *m_context;
+    boost::signals2::scoped_connection m_mouseButtonEventConnection;
 
   protected:
     bool mouseInButton(CapEngine::Vector position);

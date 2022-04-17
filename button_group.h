@@ -1,6 +1,8 @@
 #ifndef BUTTON_GROUP_H
 #define BUTTON_GROUP_H
 
+#include <SDL2/SDL_events.h>
+#include <boost/signals2/connection.hpp>
 #include <memory>
 #include <vector>
 
@@ -11,7 +13,7 @@
 
 namespace CapEngine
 {
-class ButtonGroup : public UIObject, public IEventSubscriber
+class ButtonGroup : public UIObject
 {
   public:
     ButtonGroup();
@@ -30,9 +32,6 @@ class ButtonGroup : public UIObject, public IEventSubscriber
     void setSelected(bool selected) override {}
     bool isSelected() const override { return false; }
 
-    // IEventSubscriber inherited members
-    void receiveEvent(const SDL_Event event, CapEngine::Time *time) override;
-
     virtual void addButton(std::unique_ptr<Button>);
     virtual void removeButton(int index);
     virtual void listenController(std::shared_ptr<Controller> pController);
@@ -42,9 +41,14 @@ class ButtonGroup : public UIObject, public IEventSubscriber
     ButtonGroup(const ButtonGroup &);
     Button &operator=(const ButtonGroup &);
 
+    void handleKeyboardEvent(SDL_KeyboardEvent in_event);
+    void handleControllerEvent(SDL_KeyboardEvent in_event);
+
     std::vector<std::unique_ptr<Button>> m_buttons;
     unsigned int m_activeButtonIndex;
     std::vector<std::shared_ptr<Controller>> m_controllers;
+    boost::signals2::scoped_connection m_keyboardEventConnection;
+    boost::signals2::scoped_connection m_controllerEventConnection;
 };
 } // namespace CapEngine
 

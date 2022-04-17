@@ -41,7 +41,7 @@ class EventSubscriber : public IEventSubscriber
     //! a text edit event
     boost::signals2::signal<void(SDL_TextInputEvent)> m_textInputEventSignal;
     //! A game event signal
-    boost::signals2::signal<void(GameEvent &)> m_gameEventSignal;
+    boost::signals2::signal<void(const GameEvent &)> m_gameEventSignal;
 };
 } // namespace CapEngine
 

@@ -21,7 +21,7 @@ struct SceneDoesNotExistException : public CapEngineException {
 };
 
 //! Game State for 2d scenes.
-class Scene2dState final : public GameState
+class Scene2dState : public GameState
 {
   public:
     Scene2dState(jsoncons::json in_sceneDescriptors, std::string in_sceneId,
@@ -30,10 +30,6 @@ class Scene2dState final : public GameState
     ~Scene2dState() override = default;
     void render() override;
     void update(double ms) override;
-    bool onLoad() override;
-    bool onDestroy() override;
-    bool onPause() override { return true; };
-    bool onResume() override { return true; };
     void setEndSceneCB(std::function<void()> in_endSceneCB);
     void addUpdateCB(std::function<void(double ms)> in_updateCB);
 

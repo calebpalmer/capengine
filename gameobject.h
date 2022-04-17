@@ -78,7 +78,7 @@ class GameObject
     std::shared_ptr<ObjectData> getObjectData() const;
     void setObjectData(std::shared_ptr<ObjectData> pObjectData);
     ObjectState getObjectState() const;
-    void setObjectgaState(ObjectState objectState);
+    void setObjectState(ObjectState objectState);
     ObjectID getObjectID() const;
     void setObjectID(ObjectID id);
     ObjectID getParentObjectID() const;
@@ -156,14 +156,14 @@ std::vector<std::shared_ptr<T>> GameObject::getComponents()
 class GameObjectStateChanged : public GameEvent
 {
   public:
-    GameObjectStateChanged(std::shared_ptr<GameObject> object,
+    GameObjectStateChanged(GameObject *object,
                            GameObject::ObjectState stateBefore,
                            GameObject::ObjectState stateAfter);
     ~GameObjectStateChanged() override = default;
     std::string type() const override { return std::string(kType); };
 
     static constexpr char kType[] = "GameObjectSateChanged";
-    std::shared_ptr<GameObject> m_object;
+    GameObject *m_object;
     GameObject::ObjectState m_stateBefore;
     GameObject::ObjectState m_stateAfter;
 };

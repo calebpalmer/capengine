@@ -39,8 +39,8 @@ void EventSubscriberTest::testSubscribeGameEvent()
 
     bool called = false;
 
-    auto connection =
-        eventSubscriber.m_gameEventSignal.connect([&called](GameEvent &event) {
+    auto connection = eventSubscriber.m_gameEventSignal.connect(
+        [&called](const GameEvent &event) {
             CPPUNIT_ASSERT("TestGameEvent" == event.type());
             called = true;
         });
