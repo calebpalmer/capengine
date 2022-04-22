@@ -22,7 +22,7 @@ Runner &Runner::getInstance()
     return *s_pRunner;
 }
 
-void Runner::popState()
+void Runner::popState(bool resumePrevious)
 {
     if (m_gameStates.size() > 0) {
         auto pPoppedState = std::move(m_gameStates.back());
@@ -34,11 +34,13 @@ void Runner::popState()
         // toss it in the trash to be removed i the next update
         m_stateTrash.push_back(std::move(pPoppedState));
 
-        if (m_gameStates.size() == 0)
-            m_quit = true;
-        else {
-            CAP_THROW_ASSERT(m_gameStates.back()->onResume(),
-                             "Unable to resume state.");
+        if (resumePrevious) {
+            if (m_gameStates.size() == 0)
+                m_quit = true;
+            else {
+                CAP_THROW_ASSERT(m_gameStates.back()->onResume(),
+                                 "Unable to resume state.");
+            }
         }
     }
 }
@@ -72,7 +74,7 @@ std::shared_ptr<GameState> Runner::peekState()
 void Runner::switchState(std::shared_ptr<GameState> pGameState)
 {
     while (!m_gameStates.empty()) {
-        this->popState();
+        this->popState(false);
     }
     this->pushState(std::move(pGameState));
 }

@@ -23,7 +23,7 @@ class Runner : public IEventSubscriber
   public:
     static Runner &getInstance();
     void switchState(std::shared_ptr<GameState> pGameState);
-    void popState();
+    void popState(bool resumePrevious = true);
     void pushState(std::shared_ptr<GameState> pGameState);
     std::shared_ptr<GameState> peekState();
     void receiveEvent(const SDL_Event event,

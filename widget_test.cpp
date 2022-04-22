@@ -30,52 +30,52 @@ void onButtonClicked(std::shared_ptr<UI::Label> pLabel)
 
 bool onLoad(CapEngine::UI::WidgetState &widgetState)
 {
-  std::string name = "Widget Test";
-  int width = 640;
-  int height = 480;
-  auto pWindow = widgetState.createWindow(name, width, height);
-  pWindow->show();
+    std::string name = "Widget Test";
+    int width = 640;
+    int height = 480;
+    auto pWindow = widgetState.createWindow(name, width, height);
+    pWindow->show();
 
-  std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
-  pWindow->setLayout(pGridLayout);
+    std::shared_ptr<UI::GridLayout> pGridLayout = UI::GridLayout::create(2, 2);
+    pWindow->setLayout(pGridLayout);
 
-  auto pLabel = UI::Label::create("test");
-  pGridLayout->addWidget(pLabel, 1, 0);
+    auto pLabel = UI::Label::create("test");
+    pGridLayout->addWidget(pLabel, 1, 0);
 
-  std::shared_ptr<UI::LinearLayout> pLinearLayout = UI::LinearLayout::create(
-      CapEngine::UI::LinearLayout::Orientation::Horizontal);
+    std::shared_ptr<UI::LinearLayout> pLinearLayout = UI::LinearLayout::create(
+        CapEngine::UI::LinearLayout::Orientation::Horizontal);
 
-  std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
-  pLabelLeft->setHorizontalAlignment(
-      UI::Orientable::HorizontalAlignment::Right);
+    std::shared_ptr<UI::Label> pLabelLeft = UI::Label::create("Label");
+    pLabelLeft->setHorizontalAlignment(
+        UI::Orientable::HorizontalAlignment::Right);
 
-  std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
-  static boost::signals2::scoped_connection connection =
-      pButton->addOnButtonClickedHandler(
-          std::bind(onButtonClicked, pLabelLeft));
+    std::shared_ptr<UI::Button> pButton = UI::Button::create("Press Me");
+    static boost::signals2::scoped_connection connection =
+        pButton->addOnButtonClickedHandler(
+            std::bind(onButtonClicked, pLabelLeft));
 
-  pLinearLayout->addWidget(pLabelLeft);
-  pLinearLayout->addWidget(pButton);
+    pLinearLayout->addWidget(pLabelLeft);
+    pLinearLayout->addWidget(pButton);
 
-  pGridLayout->addWidget(pLinearLayout, 0, 1);
+    pGridLayout->addWidget(pLinearLayout, 0, 1);
 
-  auto pTextBox = UI::TextBox::create("This is a textbox");
-  pGridLayout->addWidget(pTextBox, 1, 1);
+    auto pTextBox = UI::TextBox::create("This is a textbox");
+    pGridLayout->addWidget(pTextBox, 1, 1);
 
-  pWindow->setLayout(pGridLayout);
+    pWindow->setLayout(pGridLayout);
 
-  // auto pAbsLayout = UI::AbsoluteLayout::create();
-  // pWindow->setLayout(pAbsLayout);
+    // auto pAbsLayout = UI::AbsoluteLayout::create();
+    // pWindow->setLayout(pAbsLayout);
 
-  // // layout for the top
-  // auto pLinearLayout = UI::LinearLayout::create();
-  // pAbsLayout->addWidget(pLinearLayout, 0, 0, 100, 30, UI::Unit::Percentage,
-  // UI::Unit::Pixels);
+    // // layout for the top
+    // auto pLinearLayout = UI::LinearLayout::create();
+    // pAbsLayout->addWidget(pLinearLayout, 0, 0, 100, 30, UI::Unit::Percentage,
+    // UI::Unit::Pixels);
 
-  // auto pLabel = UI::Label::create("I'm at the top");
-  // pLinearLayout->addWidget(pLabel);
+    // auto pLabel = UI::Label::create("I'm at the top");
+    // pLinearLayout->addWidget(pLabel);
 
-  return true;
+    return true;
 }
 
 bool onDestroy(CapEngine::UI::WidgetState & /*widgetState*/) { return true; }
@@ -84,16 +84,16 @@ bool onDestroy(CapEngine::UI::WidgetState & /*widgetState*/) { return true; }
 
 int main()
 {
-  using namespace CapEngine;
+    using namespace CapEngine;
 
-  try {
-    WindowParams params;
-    CapEngine::init(params, true);
+    try {
+        WindowParams params;
+        CapEngine::init(params, true);
 
-    std::shared_ptr<UI::WidgetState> pWidgetTestState =
-        UI::WidgetState::create(onLoad, onDestroy);
-    CapEngine::startLoop(std::move(pWidgetTestState));
-  } catch (const boost::exception &e) {
-    std::cerr << boost::diagnostic_information(e);
-  }
+        std::shared_ptr<UI::WidgetState> pWidgetTestState =
+            UI::WidgetState::create(onLoad, onDestroy);
+        CapEngine::startLoop(std::move(pWidgetTestState));
+    } catch (const boost::exception &e) {
+        std::cerr << boost::diagnostic_information(e);
+    }
 }

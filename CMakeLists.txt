@@ -77,3 +77,9 @@ add_custom_target(
   doc
   COMMAND doxygen doxygenfile
   )
+
+# add target for support files
+add_custom_target(capengine-supportfiles)
+add_custom_command(TARGET capengine-supportfiles POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/supportfiles/res ${CMAKE_CURRENT_BINARY_DIR}/bin/res)
+add_dependencies(capengine capengine-supportfiles)
