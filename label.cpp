@@ -115,14 +115,18 @@ void Label::render()
     auto [textureWidth, textureHeight] = this->getTextureSize();
 
     SDL_Rect srcRect = {0, 0, textureWidth, textureHeight};
-    SDL_Rect dstRect = {
-        textureWidth < m_width ? m_x + ((m_width - textureWidth) / 2)
-                               : m_x, // x
-        textureHeight < m_height ? m_y + ((m_height - textureHeight) / 2)
-                                 : m_y,                     // y
-        textureWidth < m_width ? textureWidth : m_width,    // width
-        textureHeight < m_height ? textureHeight : m_height // height
-    };
+    // TODO I don't know why it was done like this but the below fixed
+    // rendering issues I was having. Leaving this here in case.
+    // SDL_Rect dstRect = {
+    //     textureWidth < m_width ? m_x + ((m_width - textureWidth) / 2)
+    //                            : m_x, // x
+    //     textureHeight < m_height ? m_y + ((m_height - textureHeight) / 2)
+    //                              : m_y,                     // y
+    //     textureWidth < m_width ? textureWidth : m_width,    // width
+    //     textureHeight < m_height ? textureHeight : m_height // height
+    // };
+
+    SDL_Rect dstRect = {m_x, m_y, m_width, m_height};
 
     // left alignment
     if (m_horizontalAlignment == HorizontalAlignment::Right &&
