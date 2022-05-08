@@ -2,8 +2,12 @@
 #include "CapEngineException.h"
 #include "locator.h"
 #include "soundplayer.h"
+#include <algorithm>
+#include <array>
 #include <assert.h>
 #include <iostream>
+#include <iterator>
+#include <memory>
 #include <sstream>
 #include <stdlib.h>
 
@@ -12,44 +16,48 @@ using namespace CapEngine;
 
 PCM::PCM(const string filePath) : position(0)
 {
-  // set it up for reading a sound file
-  SNDFILE *sndFile;
-  SF_INFO sndInfo;
-  memset(&sndInfo, 0, sizeof(sndInfo));
-  sndInfo.format = 0;
+    // set it up for reading a sound file
+    SNDFILE *sndFile;
+    SF_INFO sndInfo;
+    memset(&sndInfo, 0, sizeof(sndInfo));
+    sndInfo.format = 0;
 
-  sndFile = sf_open(filePath.c_str(), SFM_READ, &sndInfo);
-  if (sndFile == nullptr) {
+    sndFile = sf_open(filePath.c_str(), SFM_READ, &sndInfo);
+    if (sndFile == nullptr) {
+        ostringstream msg;
+        msg << "Unable to open sound file" << endl << sf_strerror(sndFile);
+        throw CapEngineException(msg.str());
+    }
+
+    if ((sndInfo.format & SF_FORMAT_PCM_U8) == 0 &&
+        (sndInfo.format * SF_FORMAT_PCM_16 == 0)) {
+        throw CapEngineException("Sound file is not U8 or S16 PCM format");
+    }
+
+    copySndFileToBuffer(sndFile, sndInfo);
+    SDL_AudioSpec sndSpec = sndFileToSDLAudioSpec(sndInfo);
+
+    convertToDeviceFormat(sndSpec);
+
+    sf_close(sndFile);
     ostringstream msg;
-    msg << "Unable to open sound file" << endl << sf_strerror(sndFile);
-    throw CapEngineException(msg.str());
-  }
-
-  if ((sndInfo.format & SF_FORMAT_PCM_U8) == 0 &&
-      (sndInfo.format * SF_FORMAT_PCM_16 == 0)) {
-    throw CapEngineException("Sound file is not U8 or S16 PCM format");
-  }
-
-  copySndFileToBuffer(sndFile, sndInfo);
-  SDL_AudioSpec sndSpec = sndFileToSDLAudioSpec(sndInfo);
-
-  convertToDeviceFormat(sndSpec);
-
-  sf_close(sndFile);
-  ostringstream msg;
-  msg << "Successfully loaded sound from " << filePath;
-  Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    msg << "Successfully loaded sound from " << filePath;
+    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
 }
 
 PCM::~PCM() {}
 
 PCM::PCM(const PCM &old)
 {
-  position = old.position;
-  length = old.length;
-  // filePath = string(old.filePath.c_str());
-  buf.reset(reinterpret_cast<short *>(malloc(length * sizeof(Uint8))));
-  memcpy(buf.get(), old.buf.get(), length);
+    position = old.position;
+    length = old.length;
+    // filePath = string(old.filePath.c_str());
+    // buf.reset(reinterpret_cast<short *>(malloc(length * sizeof(Uint8))));
+    // memcpy(buf.data(), old.buf.data(), length);
+
+    buf.clear();
+    buf.reserve(length * sizeof(Uint8));
+    std::copy(old.buf.begin(), old.buf.end(), std::back_inserter(buf));
 }
 
 //! copy the data from the sndfile to member buffer
@@ -58,24 +66,32 @@ PCM::PCM(const PCM &old)
  */
 void PCM::copySndFileToBuffer(SNDFILE *sndFile, SF_INFO sndInfo)
 {
-  size_t bufSize = sndInfo.frames * sndInfo.channels * sizeof(short);
-  this->length = bufSize;
+    size_t bufSize = sndInfo.frames * sndInfo.channels * sizeof(short);
+    this->length = bufSize;
 
-  unique_ptr<short> tempBuf(static_cast<short *>(malloc(bufSize)));
-  buf.reset((short *)malloc(bufSize));
-  size_t items_read =
-      sf_read_short(sndFile, tempBuf.get(), bufSize / sizeof(short));
-  if (items_read != bufSize / sizeof(short)) {
-    throw CapEngineException("Error reading items from sound file");
-  }
+    // unique_ptr<short> tempBuf(static_cast<short *>(malloc(bufSize)));
+    // auto tempBuf = std::make_unique<short[]>(bufSize);
+    // std::vector<short> tempBuf(bufSize);
+    buf.clear();
+    buf.resize(bufSize);
+    // buf.reset(static_cast<short *>(malloc(bufSize)));
 
-  if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
-    for (size_t i = 0; i < bufSize; i++) {
-      buf.get()[i] = tempBuf.get()[i] + 128;
+    std::vector<short> tempBuf;
+    tempBuf.reserve(bufSize);
+
+    size_t items_read =
+        sf_read_short(sndFile, tempBuf.data(), bufSize / sizeof(short));
+    if (items_read != bufSize / sizeof(short)) {
+        throw CapEngineException("Error reading items from sound file");
     }
-  } else {
-    memcpy(buf.get(), tempBuf.get(), bufSize);
-  }
+
+    if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
+        for (size_t i = 0; i < bufSize; i++) {
+            buf.data()[i] = tempBuf.data()[i] + 128;
+        }
+    } else {
+        memcpy(buf.data(), tempBuf.data(), bufSize);
+    }
 }
 
 //! created SDL_AudioSpec from libsndfile SF_INFO structure
@@ -91,9 +107,9 @@ SDL_AudioSpec PCM::sndFileToSDLAudioSpec(SF_INFO sndInfo)
   // channels << sndInfo.channels;
 
   if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
-    spec.format = AUDIO_U8;
+	spec.format = AUDIO_U8;
   } else {
-    spec.format = AUDIO_S16;
+	spec.format = AUDIO_S16;
   }
   spec.freq = sndInfo.samplerate;
   spec.channels = sndInfo.channels;
@@ -108,30 +124,32 @@ SDL_AudioSpec PCM::sndFileToSDLAudioSpec(SF_INFO sndInfo)
  */
 void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec)
 {
-  SDL_AudioCVT cvt;
-  memset(&cvt, 0, sizeof(cvt));
+    SDL_AudioCVT cvt;
+    memset(&cvt, 0, sizeof(cvt));
 
-  SDL_AudioSpec obtainedSpec = SoundPlayer::getSoundPlayer().audioFormat;
+    SDL_AudioSpec obtainedSpec = SoundPlayer::getSoundPlayer().audioFormat;
 
-  int ret = SDL_BuildAudioCVT(&cvt, sndSpec.format, sndSpec.channels,
-                              sndSpec.freq, obtainedSpec.format,
-                              obtainedSpec.channels, obtainedSpec.freq);
-  if (ret < 0) {
-    throw CapEngineException("Unable to build audio converter");
-  }
+    int ret = SDL_BuildAudioCVT(&cvt, sndSpec.format, sndSpec.channels,
+                                sndSpec.freq, obtainedSpec.format,
+                                obtainedSpec.channels, obtainedSpec.freq);
+    if (ret < 0) {
+        throw CapEngineException("Unable to build audio converter");
+    }
 
-  cvt.len = this->length;
-  cvt.buf = (Uint8 *)malloc(cvt.len * cvt.len_mult);
+    cvt.len = this->length;
+    cvt.buf = (Uint8 *)malloc(cvt.len * cvt.len_mult);
 
-  memset(cvt.buf, obtainedSpec.silence, cvt.len * cvt.len_mult);
-  memcpy(cvt.buf, buf.get(), cvt.len);
+    memset(cvt.buf, obtainedSpec.silence, cvt.len * cvt.len_mult);
+    memcpy(cvt.buf, buf.data(), cvt.len);
 
-  if (SDL_ConvertAudio(&cvt) < 0) {
-    throw CapEngineException("Unable to convert to device format");
-  }
+    if (SDL_ConvertAudio(&cvt) < 0) {
+        throw CapEngineException("Unable to convert to device format");
+    }
 
-  buf.reset((short *)cvt.buf);
-  length = cvt.len * cvt.len_mult;
+    // buf.reset((short *)cvt.buf);
+    buf.clear();
+    length = cvt.len * cvt.len_mult;
+    buf.reserve(length);
 }
 
 //! increment the current position in the sound buffer
@@ -161,7 +179,7 @@ Uint32 PCM::getLength() { return length; }
 /*!
 
  */
-Uint8 *PCM::getBuf() { return reinterpret_cast<Uint8 *>(buf.get()); }
+Uint8 *PCM::getBuf() { return reinterpret_cast<Uint8 *>(buf.data()); }
 
 //! reset the position back to the beginning
 /*!
