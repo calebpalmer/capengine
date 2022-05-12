@@ -23,10 +23,8 @@ class PCM
 
   private:
     const std::string filePath;
-    // std::unique_ptr<short> buf;
     std::vector<short> buf;
     Uint32 position;
-    Uint32 length;
 
     SDL_AudioSpec sndFileToSDLAudioSpec(SF_INFO sndInfo);
     void copySndFileToBuffer(SNDFILE *sndFile, SF_INFO sndInfo);

@@ -37,7 +37,8 @@ PCM::PCM(const string filePath) : position(0)
     copySndFileToBuffer(sndFile, sndInfo);
     SDL_AudioSpec sndSpec = sndFileToSDLAudioSpec(sndInfo);
 
-    convertToDeviceFormat(sndSpec);
+    // TODO Audio conversion seems to be messing with the sound
+    // convertToDeviceFormat(sndSpec);
 
     sf_close(sndFile);
     ostringstream msg;
@@ -50,13 +51,9 @@ PCM::~PCM() {}
 PCM::PCM(const PCM &old)
 {
     position = old.position;
-    length = old.length;
-    // filePath = string(old.filePath.c_str());
-    // buf.reset(reinterpret_cast<short *>(malloc(length * sizeof(Uint8))));
-    // memcpy(buf.data(), old.buf.data(), length);
 
     buf.clear();
-    buf.reserve(length * sizeof(Uint8));
+    buf.reserve(old.buf.size());
     std::copy(old.buf.begin(), old.buf.end(), std::back_inserter(buf));
 }
 
@@ -67,30 +64,20 @@ PCM::PCM(const PCM &old)
 void PCM::copySndFileToBuffer(SNDFILE *sndFile, SF_INFO sndInfo)
 {
     size_t bufSize = sndInfo.frames * sndInfo.channels * sizeof(short);
-    this->length = bufSize;
 
-    // unique_ptr<short> tempBuf(static_cast<short *>(malloc(bufSize)));
-    // auto tempBuf = std::make_unique<short[]>(bufSize);
-    // std::vector<short> tempBuf(bufSize);
     buf.clear();
     buf.resize(bufSize);
-    // buf.reset(static_cast<short *>(malloc(bufSize)));
-
-    std::vector<short> tempBuf;
-    tempBuf.reserve(bufSize);
 
     size_t items_read =
-        sf_read_short(sndFile, tempBuf.data(), bufSize / sizeof(short));
+        sf_read_short(sndFile, buf.data(), bufSize / sizeof(short));
+
     if (items_read != bufSize / sizeof(short)) {
         throw CapEngineException("Error reading items from sound file");
     }
 
     if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
-        for (size_t i = 0; i < bufSize; i++) {
-            buf.data()[i] = tempBuf.data()[i] + 128;
-        }
-    } else {
-        memcpy(buf.data(), tempBuf.data(), bufSize);
+        std::transform(buf.begin(), buf.end(), buf.begin(),
+                       [](const short &value) { return value + 128; });
     }
 }
 
@@ -100,22 +87,18 @@ void PCM::copySndFileToBuffer(SNDFILE *sndFile, SF_INFO sndInfo)
  */
 SDL_AudioSpec PCM::sndFileToSDLAudioSpec(SF_INFO sndInfo)
 {
-  SDL_AudioSpec spec;
-  // stringstream samples;
-  // samples << sndInfo.frames;
-  // stringstream channels;
-  // channels << sndInfo.channels;
+    SDL_AudioSpec spec;
 
-  if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
-	spec.format = AUDIO_U8;
-  } else {
-	spec.format = AUDIO_S16;
-  }
-  spec.freq = sndInfo.samplerate;
-  spec.channels = sndInfo.channels;
-  // spec.samples *= spec.channels;
+    if ((sndInfo.format & SF_FORMAT_PCM_U8) == SF_FORMAT_PCM_U8) {
+        spec.format = AUDIO_U8;
+    } else {
+        spec.format = AUDIO_S16;
+    }
+    spec.freq = sndInfo.samplerate;
+    spec.channels = sndInfo.channels;
+    spec.size = buf.size() * sizeof(short);
 
-  return spec;
+    return spec;
 }
 
 //! Convert the PCM to format of opened sound device
@@ -136,8 +119,11 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec)
         throw CapEngineException("Unable to build audio converter");
     }
 
-    cvt.len = this->length;
-    cvt.buf = (Uint8 *)malloc(cvt.len * cvt.len_mult);
+    // create a buffer for the converted sound data
+    cvt.len = buf.size();
+    std::vector<Uint8> cvtBuf;
+    cvtBuf.reserve(cvt.len * cvt.len_mult);
+    cvt.buf = cvtBuf.data();
 
     memset(cvt.buf, obtainedSpec.silence, cvt.len * cvt.len_mult);
     memcpy(cvt.buf, buf.data(), cvt.len);
@@ -146,10 +132,11 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec)
         throw CapEngineException("Unable to convert to device format");
     }
 
-    // buf.reset((short *)cvt.buf);
+    // copy it back into our buffer
+    const auto length = cvt.len * cvt.len_mult;
     buf.clear();
-    length = cvt.len * cvt.len_mult;
     buf.reserve(length);
+    std::copy(cvt.buf, cvt.buf + length, std::back_inserter(buf));
 }
 
 //! increment the current position in the sound buffer
@@ -158,9 +145,9 @@ void PCM::convertToDeviceFormat(SDL_AudioSpec sndSpec)
  */
 void PCM::incrementPosition(Uint32 addition)
 {
-  assert(position + addition <= length);
+    assert(position + addition <= this->getLength());
 
-  position += addition;
+    position += addition;
 }
 
 //! return the current position in the sound buffer
@@ -173,7 +160,7 @@ Uint32 PCM::currentPosition() { return position; }
 /*!
 
  */
-Uint32 PCM::getLength() { return length; }
+Uint32 PCM::getLength() { return buf.size(); }
 
 //! Return a pointer to the buffer as a Uint8 pointer
 /*!
