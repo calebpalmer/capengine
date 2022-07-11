@@ -18,7 +18,7 @@ include_directories(
 if (MSVC)
   add_compile_options(/W4)
 else()
-  add_compile_options(-ggdb3 -Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Wshadow -Wno-reorder -Wno-unused -std=c++17 -fsanitize=address -fno-omit-frame-pointer)
+  add_compile_options(-ggdb3 -Wall -Wextra -Wpedantic -Wnon-virtual-dtor -Wshadow -Wno-reorder -Wno-unused -std=c++17 -fsanitize=address -fno-omit-frame-pointer -isystem "${CMAKE_CURRENT_SOURCE_DIR}/jsoncons/include")
   add_link_options(-fsanitize=address)
 endif()
 
