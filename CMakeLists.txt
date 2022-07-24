@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "1" CACHE STRING "")
 
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+set(CONAN_SYSTEM_INCLUDES ON)
 conan_basic_setup()
 
 
