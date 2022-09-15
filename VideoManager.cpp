@@ -123,10 +123,14 @@ Texture *VideoManager::createTextureFromSurface(Uint32 windowId, Surface *surfac
   return texture;
 }
 
-TexturePtr VideoManager::loadImagePtr(std::string const &in_filePath) const
-{
+TexturePtr VideoManager::loadImagePtr(std::string const &in_filePath) const {
   Texture *texture = loadImage(in_filePath);
-  return std::move(TexturePtr(texture, SDL_DestroyTexture));
+  return TexturePtr(texture, SDL_DestroyTexture);
+}
+
+std::shared_ptr<Texture> VideoManager::loadSharedImage(std::string const &in_filePath) const {
+  Texture *texture = loadImage(in_filePath);
+  return std::shared_ptr<Texture>(texture, SDL_DestroyTexture);
 }
 
 Texture *VideoManager::loadImage(string filePath) const {
@@ -240,7 +244,7 @@ void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 //! Sets the clip rect for a window
 /**
 \param windowID - The window to set the clip rect on.
-                                                                  \param - The retanble to use for clipping.
+                                                                                                                                                                                                                                                                  \param - The retanble to use for clipping.
 Unsets clip rect if nullptr;
 */
 void VideoManager::setClipRect(Uint32 windowId, SDL_Rect const *clipRect) {

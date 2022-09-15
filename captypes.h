@@ -6,8 +6,7 @@
 #include <memory>
 #include <variant>
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 typedef float real;
 

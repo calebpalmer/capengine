@@ -34,6 +34,13 @@ struct Image {
   std::map<std::string, Frame> frames;
 };
 
+struct AnimatedImage {
+  std::string path;
+  std::shared_ptr<Texture> texture;
+  int numFrames;
+  int animationTimeMs;
+};
+
 struct SoftwareImage {
   std::string path;
   Surface *surface;
@@ -48,29 +55,24 @@ struct AssetDoesNotExistError : public CapEngineException {
   AssetDoesNotExistError(std::string_view in_type, int in_assetId)
       : CapEngineException([&]() {
           std::stringstream stream;
-          stream << "The " << in_type << " with id " << in_assetId
-                 << " does not exist.";
+          stream << "The " << in_type << " with id " << in_assetId << " does not exist.";
           return stream.str();
-        }())
-  {
-  }
+        }()) {}
 };
 
-class AssetManager
-{
+class AssetManager {
 
 public:
-  AssetManager(VideoManager &videoManager, SoundPlayer &soundPlayer,
-               const std::string &assetFile);
+  AssetManager(VideoManager &videoManager, SoundPlayer &soundPlayer, const std::string &assetFile);
   ~AssetManager();
   void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect,
             std::optional<double> rotationDegrees = std::nullopt);
   void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
   void draw(Uint32 windowID, int id, Vector position);
   void draw(Uint32 windowID, int id, Rectangle dstRect);
-  void loadImage(int id, std::string path, int frameWidth = 0,
-                 int frameHeight = 0);
+  void loadImage(int id, std::string path, int frameWidth = 0, int frameHeight = 0);
   Image *getImage(int id);
+  std::optional<AnimatedImage> getAnimatedImage(int in_id);
   SoftwareImage getSoftwareImage(int id);
   bool imageExists(int id) const;
   int getImageWidth(int id);
@@ -86,6 +88,7 @@ public:
 
 private:
   std::map<int, Image> mImageMap;
+  std::map<int, AnimatedImage> mAnimationMap;
   std::map<int, Sound> mSoundMap;
   VideoManager &mVideoManager;
   SoundPlayer &mSoundPlayer;

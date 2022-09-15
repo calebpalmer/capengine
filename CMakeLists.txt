@@ -38,7 +38,7 @@ add_library(capengine SHARED
   uipropertyvisitor.cpp simpleobjectmanager.cpp scene2d.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
   boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
-  components.cpp gamestate.cpp
+  components.cpp gamestate.cpp animatorv2.cpp
   )
 
 target_link_libraries(capengine
