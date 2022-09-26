@@ -27,8 +27,6 @@ void AnimatorV2::render(uint32_t in_windowId, Rect destRect, std::optional<doubl
     // get the frame number: animation_time / elapsed time % num frames
     const int frameNumber = m_elapsedTime / m_msPerFrame;
 
-    std::cout << frameNumber << "\n";
-
     // calculate the render box based on frame number and vertical texture size / number of frames
     assert(Locator::videoManager != nullptr);
     assert(m_animatedImage.texture != nullptr);
