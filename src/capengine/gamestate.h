@@ -1,11 +1,9 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-namespace CapEngine
-{
+namespace CapEngine {
 
-class GameState
-{
+class GameState {
 public:
   virtual ~GameState(){};
   virtual void render() = 0;

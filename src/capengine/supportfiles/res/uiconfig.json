@@ -1,0 +1,13 @@
+{
+    "font": {
+	"path": "res/fonts/tahoma.ttf",
+	"size": 22
+    },
+    "button": {
+	"neutral": {
+	    "font": {
+		"colour": {"r": 0, "g": 255, "b": 0, "a": 255 }
+	    }
+	}
+    }
+}

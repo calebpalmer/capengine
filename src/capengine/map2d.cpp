@@ -16,15 +16,13 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <filesystem>
-#include <jsoncons/json_serializing_options.hpp>
+//#include <jsoncons/json_serializing_options.hpp>
 
 using namespace std;
 
-namespace CapEngine
-{
+namespace CapEngine {
 
-namespace
-{
+namespace {
 
 const char kWidthParameterName[] = "width";
 const char kHeightParameterName[] = "height";
@@ -41,8 +39,7 @@ const char kIndexParameterName[] = "index";
  \return
    \li the tiletup
 */
-Map2D::TileTup lookupTile(const TileSet &tileset, int index)
-{
+Map2D::TileTup lookupTile(const TileSet &tileset, int index) {
   Map2D::TileTup tileTup;
 
   if (!tileset.tileExists(index)) {
@@ -62,31 +59,23 @@ Map2D::TileTup lookupTile(const TileSet &tileset, int index)
 //! Constructor.
 /**
   \param x
-    \li The x index into the map.
+        \li The x index into the map.
   \param y
-    \li The y index into the map.
+        \li The y index into the map.
 */
 MapIndexException::MapIndexException(int x, int y)
-    : CapEngineException(
-          (boost::format("Invalid Tile index %1%, %2%") % x % y).str()),
-      m_x(x), m_y(y)
-{
-}
+    : CapEngineException((boost::format("Invalid Tile index %1%, %2%") % x % y).str()), m_x(x), m_y(y) {}
 
 //! Returns the exception message.
 /**
   \return
-    \li The exception message.
+        \li The exception message.
 */
-const char *MapIndexException::what()
-{
-  return (boost::format("Invalid map index: %1%, %2%") % m_x % m_y)
-      .str()
-      .c_str();
+const char *MapIndexException::what() {
+  return (boost::format("Invalid map index: %1%, %2%") % m_x % m_y).str().c_str();
 }
 
-Map2D::~Map2D()
-{
+Map2D::~Map2D() {
   CAP_THROW_ASSERT(Locator::videoManager != nullptr, "Video Manager is null");
   Locator::videoManager->closeSurface(surface);
 }
@@ -96,36 +85,29 @@ Map2D::~Map2D()
  \param json
    \li The json with the map data
 */
-void Map2D::load(jsoncons::json json)
-{
+void Map2D::load(jsoncons::json json) {
   // this must be called from main constructor so do some asserts
   assert(!(this->configPath.empty()));
 
   // get header information
   if (!json.has_key(kWidthParameterName))
-    BOOST_THROW_EXCEPTION(CapEngineException(
-        std::string("Json missing property: ") + kWidthParameterName));
+    BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kWidthParameterName));
   this->width = json[kWidthParameterName].as<unsigned int>();
 
   if (!json.has_key(kHeightParameterName))
-    BOOST_THROW_EXCEPTION(CapEngineException(
-        std::string("Json missing property: ") + kHeightParameterName));
+    BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kHeightParameterName));
   this->height = json[kHeightParameterName].as<unsigned int>();
 
   if (!json.has_key(kTilesetParamaterName))
-    BOOST_THROW_EXCEPTION(CapEngineException(
-        std::string("Json missing property: ") + kTilesetParamaterName));
+    BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kTilesetParamaterName));
   this->tileSetPath = json[kTilesetParamaterName].as<std::string>();
 
   // namespace fs = boost::filesystem;
   namespace fs = std::filesystem;
-  fs::path tileSetPath = fs::absolute(fs::path(stripPath(configPath)) /
-                                      fs::path(this->tileSetPath));
+  fs::path tileSetPath = fs::absolute(fs::path(stripPath(configPath)) / fs::path(this->tileSetPath));
   if (!fs::exists(tileSetPath)) {
     BOOST_THROW_EXCEPTION(
-        CapEngineException((boost::format("Tileset path does not exist: %1%") %
-                            tileSetPath.string())
-                               .str()));
+        CapEngineException((boost::format("Tileset path does not exist: %1%") % tileSetPath.string()).str()));
   }
   this->tileSetPath = tileSetPath;
 
@@ -134,13 +116,10 @@ void Map2D::load(jsoncons::json json)
   // make sure tileset path is not empty
   if (this->tileSetPath.empty())
     BOOST_THROW_EXCEPTION(
-        CapEngineException((boost::format("The property %1% cannot be empty.") %
-                            kTilesetParamaterName)
-                               .str()));
+        CapEngineException((boost::format("The property %1% cannot be empty.") % kTilesetParamaterName).str()));
 
   if (!json.has_key(kTileArrayParameterName))
-    BOOST_THROW_EXCEPTION(CapEngineException(
-        std::string("Json missing property: ") + kTileArrayParameterName));
+    BOOST_THROW_EXCEPTION(CapEngineException(std::string("Json missing property: ") + kTileArrayParameterName));
 
   // Get tiles
   jsoncons::json tileArray = json[kTileArrayParameterName];
@@ -156,10 +135,8 @@ void Map2D::load(jsoncons::json json)
     std::vector<TileTup> rowOfTiles;
     for (auto &&tile : row.array_range()) {
       if (!tile.has_key(kIndexParameterName))
-        BOOST_THROW_EXCEPTION(CapEngineException(
-            (boost::format("Array value missing %1% property") %
-             kIndexParameterName)
-                .str()));
+        BOOST_THROW_EXCEPTION(
+            CapEngineException((boost::format("Array value missing %1% property") % kIndexParameterName).str()));
 
       const int index = tile[kIndexParameterName].as<int>();
 
@@ -172,12 +149,10 @@ void Map2D::load(jsoncons::json json)
   }
 }
 
-Map2D::Map2D(const string &mapConfigPath) : tileSet(nullptr)
-{
+Map2D::Map2D(const string &mapConfigPath) : tileSet(nullptr) {
   // test that configPath exists and throw exception if it doesn't
   if (!fileExists(mapConfigPath)) {
-    BOOST_THROW_EXCEPTION(
-        CapEngineException(mapConfigPath + " is not a valid path"));
+    BOOST_THROW_EXCEPTION(CapEngineException(mapConfigPath + " is not a valid path"));
   }
 
   configPath = mapConfigPath;
@@ -199,15 +174,10 @@ Map2D::Map2D(const string &mapConfigPath) : tileSet(nullptr)
    \li The other map to copy.
 */
 Map2D::Map2D(const Map2D &other)
-    : configPath(other.configPath), tileSetPath(other.tileSetPath),
-      tileSet(other.tileSet), tiles(other.tiles),
-      m_surfaceDirty(other.m_surfaceDirty), width(other.width),
-      height(other.height), m_isDirty(other.m_isDirty)
-{
-}
+    : configPath(other.configPath), tileSetPath(other.tileSetPath), tileSet(other.tileSet), tiles(other.tiles),
+      m_surfaceDirty(other.m_surfaceDirty), width(other.width), height(other.height), m_isDirty(other.m_isDirty) {}
 
-void Map2D::drawSurface()
-{
+void Map2D::drawSurface() {
   if (Locator::videoManager->initialized == false) {
     BOOST_THROW_EXCEPTION(CapEngineException("VideoManager not initialized"));
   }
@@ -224,9 +194,8 @@ void Map2D::drawSurface()
       int destX = columnNum * tileSet->getTileSize();
       int destY = rowNum * tileSet->getTileSize();
       ;
-      Locator::videoManager->blitSurface(
-          pTileSurface.get(), column.tile.xpos, column.tile.ypos,
-          column.tile.width, column.tile.height, newSurface, destX, destY);
+      Locator::videoManager->blitSurface(pTileSurface.get(), column.tile.xpos, column.tile.ypos, column.tile.width,
+                                         column.tile.height, newSurface, destX, destY);
       columnNum++;
     }
     rowNum++;
@@ -237,8 +206,7 @@ void Map2D::drawSurface()
   boost::filesystem::path dir = path.parent_path();
   std::ostringstream filename;
   filename << path.stem() << ".bmp";
-  boost::filesystem::path filePath = dir /=
-      boost::filesystem::path(filename.str());
+  boost::filesystem::path filePath = dir /= boost::filesystem::path(filename.str());
 
   Locator::videoManager->saveSurface(newSurface, filePath.string());
   std::ostringstream msg;
@@ -250,12 +218,10 @@ void Map2D::drawSurface()
     SDL_FreeSurface(surface);
 
   surface = newSurface;
-  Locator::logger->log("Drew consolidated map texture", Logger::CDEBUG,
-                       __FILE__, __LINE__);
+  Locator::logger->log("Drew consolidated map texture", Logger::CDEBUG, __FILE__, __LINE__);
 }
 
-string Map2D::toString()
-{
+string Map2D::toString() {
   unsigned int xRes = 0;
   ostringstream output;
   output << "width=" << width << endl
@@ -276,8 +242,7 @@ string Map2D::toString()
   return output.str();
 }
 
-unique_ptr<Rectangle> Map2D::getTileMBR(int index)
-{
+unique_ptr<Rectangle> Map2D::getTileMBR(int index) {
   assert(tileSet != nullptr);
   auto tileWidth = tileSet->getTileWidth();
   auto tileHeight = tileSet->getTileHeight();
@@ -286,12 +251,10 @@ unique_ptr<Rectangle> Map2D::getTileMBR(int index)
   int xpos = tileWidth * (index % tilesWide);
   int ypos = tileHeight * (index / tilesWide);
 
-  return unique_ptr<Rectangle>(
-      new Rectangle(xpos, ypos, tileWidth, tileHeight));
+  return unique_ptr<Rectangle>(new Rectangle(xpos, ypos, tileWidth, tileHeight));
 }
 
-vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle &mbr)
-{
+vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle &mbr) {
   // do brute force search for collisions of all map MBRs
   vector<CollisionTup> collisions;
 
@@ -310,8 +273,7 @@ vector<Map2D::CollisionTup> Map2D::getCollisions(const Rectangle &mbr)
   return collisions;
 }
 
-Surface *Map2D::getSurface()
-{
+Surface *Map2D::getSurface() {
 
   if (m_surfaceDirty) {
     drawSurface();
@@ -325,30 +287,26 @@ int Map2D::getWidth() const { return width; }
 
 int Map2D::getHeight() const { return height; }
 
-void Map2D::setWidth(int newWidth)
-{
+void Map2D::setWidth(int newWidth) {
   width = newWidth;
   m_isDirty = true;
 }
 
-void Map2D::setHeight(int newHeight)
-{
+void Map2D::setHeight(int newHeight) {
   height = newHeight;
   m_isDirty = true;
 }
 
-int Map2D::getTileSize() const
-{
+int Map2D::getTileSize() const {
   CAP_THROW_ASSERT(tileSet.get() != nullptr, "TileSet is null");
   // TODO assuming tilesize is square.  Fix TileSet to be only square tiles.
   return tileSet->getTileWidth();
 }
 
-void Map2D::deleteTile(int x, int y)
-{
+void Map2D::deleteTile(int x, int y) {
   int tileSize = tileSet->getTileSize();
-  if (x > boost::numeric_cast<int>(width) / tileSize ||
-      y > boost::numeric_cast<int>(height) / tileSize || x < 0 || y < 0) {
+  if (x > boost::numeric_cast<int>(width) / tileSize || y > boost::numeric_cast<int>(height) / tileSize || x < 0 ||
+      y < 0) {
     BOOST_THROW_EXCEPTION(CapEngineException("Invalid Tile Index"));
   }
 
@@ -370,12 +328,11 @@ std::shared_ptr<TileSet> Map2D::getTileSet() { return tileSet; }
 //! Set a tile at the given index.
 /**
   \param x
-    \li The x location of the tile to set.
+        \li The x location of the tile to set.
   \param y
-    \li The y location of the tile to set.
+        \li The y location of the tile to set.
 */
-void Map2D::setTile(int x, int y, int tileSetIndex)
-{
+void Map2D::setTile(int x, int y, int tileSetIndex) {
   assert(tileSet != nullptr);
   int widthInTiles = this->width / tileSet->getTileWidth();
   int heightInTiles = this->height / tileSet->getTileHeight();
@@ -404,8 +361,7 @@ void Map2D::setTile(int x, int y, int tileSetIndex)
  \param filepath
    \li the filepath to write to.
 */
-void Map2D::save(const std::string &filepath) const
-{
+void Map2D::save(const std::string &filepath) const {
   const std::string path = filepath == "" ? configPath : filepath;
   if (path == configPath)
     m_isDirty = false;
@@ -413,8 +369,7 @@ void Map2D::save(const std::string &filepath) const
   std::ofstream f(path);
 
   jsoncons::json_serializing_options options;
-  options =
-      options.array_object_split_lines(jsoncons::line_split_kind::same_line);
+  options = options.array_object_split_lines(jsoncons::line_split_kind::same_line);
   f << jsoncons::pretty_print(this->json(), options);
 }
 
@@ -423,8 +378,7 @@ void Map2D::save(const std::string &filepath) const
  \return
    \li The json representation of the map
 */
-jsoncons::json Map2D::json() const
-{
+jsoncons::json Map2D::json() const {
   jsoncons::json json;
 
   json.insert_or_assign(kWidthParameterName, this->getWidth());
@@ -464,8 +418,7 @@ bool Map2D::isDirty() const { return m_isDirty; }
  \return
    \li Tile index
 */
-int Map2D::getTileIndex(int x, int y) const
-{
+int Map2D::getTileIndex(int x, int y) const {
   assert(tileSet != nullptr);
   int numTilesWide = width / tileSet->getTileWidth();
   int numTilesHigh = height / tileSet->getTileHeight();
@@ -495,8 +448,7 @@ std::string Map2D::getTileSetPath() const { return this->tileSetPath; }
  \return
    The properties.
 */
-std::vector<Property> getMapProperties(std::shared_ptr<Map2D> pMap)
-{
+std::vector<Property> getMapProperties(std::shared_ptr<Map2D> pMap) {
   assert(pMap != nullptr);
 
   Property widthProperty = Property::create("width", pMap->getWidth());

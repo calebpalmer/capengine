@@ -1,21 +1,30 @@
 [requires]
-libpng/1.6.37@bincrafters/stable
-zlib/1.2.11@conan/stable
-bzip2/1.0.8@conan/stable
+libpng/1.6.38
+zlib/1.2.13
 libiconv/1.16
+libalsa/1.2.4
 
-sdl2/2.0.9@bincrafters/stable
-sdl2_image/2.0.5@bincrafters/stable
-sdl2_ttf/2.0.15@bincrafters/stable
-libxml2/2.9.9@bincrafters/stable
+sdl/2.24.1
+sdl_image/2.0.5
+sdl_ttf/2.0.18
+
+# sdl2/2.0.16@bincrafters/stable
+# sdl2_image/2.0.5@bincrafters/stable
+# sdl2_ttf/2.0.15@bincrafters/stable
+# libxml2/2.9.9@bincrafters/stable
+
 cppunit/1.15.1
 libsndfile/1.0.28@bincrafters/stable
 boost/1.75.0
 
 [generators]
-cmake
+cmake_find_package
+cmake_paths
 
 [options]
 cppunit:shared=True
+sdl:wayland=False
+# sdl:alsa=False
+
 
 [imports]

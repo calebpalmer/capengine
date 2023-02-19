@@ -2,3 +2,5 @@
 .projectile
 build/
 compile_commands.json
+.cache
+.conan
