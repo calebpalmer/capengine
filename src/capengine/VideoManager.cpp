@@ -244,7 +244,7 @@ void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 //! Sets the clip rect for a window
 /**
 \param windowID - The window to set the clip rect on.
-                                                                                                                                                                                                                                                                  \param - The retanble to use for clipping.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \param - The retanble to use for clipping.
 Unsets clip rect if nullptr;
 */
 void VideoManager::setClipRect(Uint32 windowId, SDL_Rect const *clipRect) {
@@ -460,10 +460,8 @@ void VideoManager::setColorKey(Surface *surface) const {
   }
 }
 
-TexturePtr VideoManager::createTexturePtr(int width, int height)
-{
-  Texture *texture = createTexture(width, height);
-  return std::move(TexturePtr(texture, SDL_DestroyTexture));
+TexturePtr VideoManager::createTexturePtr(int width, int height) {
+  return TexturePtr(createTexture(width, height), SDL_DestroyTexture);
 }
 
 Texture *VideoManager::createTexture(int width, int height) {

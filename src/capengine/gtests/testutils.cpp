@@ -1,4 +1,6 @@
 #include "testutils.h"
+#include <capengine/filesystem.h>
+
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -30,5 +32,9 @@ TempFile::~TempFile() {
 }
 
 const std::filesystem::path &TempFile::getFilePath() const { return m_filePath; }
+
+std::filesystem::path getTestFilePath() {
+  return std::filesystem::path(CapEngine::getCurrentExecutablePath()).parent_path().parent_path() / "test_files";
+}
 } // namespace Testing
 } // namespace CapEngine

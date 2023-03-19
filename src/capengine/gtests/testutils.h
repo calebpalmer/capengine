@@ -2,6 +2,9 @@
 #define CAPENGINETESTING_TESTUTILS_H
 
 #include <filesystem>
+#include <string>
+
+#include <gtest/gtest.h>
 
 namespace CapEngine {
 namespace Testing {
@@ -15,6 +18,8 @@ public:
 private:
   std::filesystem::path m_filePath;
 };
+
+std::filesystem::path getTestFilePath();
 
 } // namespace Testing
 } // namespace CapEngine

@@ -4,32 +4,13 @@
 #include <capengine/tiledmap.h>
 #include <fstream>
 
-// test constructor the takes string
-TEST(TiledMapTest, TestConstructorStringData) {
-  const std::string mapData{
-      R"(
-	   { "id": "blah" }
-	   )"};
-
-  CapEngine::TiledMap map{mapData};
-  const std::string returnedMapData{map.getMapData()};
-
-  ASSERT_EQ(mapData, returnedMapData);
-}
-
-// Test constructor that takes path
-TEST(TiledMapTest, TestConstructorFileSystemPath) {
-  const std::string mapData{"{ \"id\": \"blah\" }"};
-
-  CapEngine::Testing::TempFile tempFile;
-
-  {
-    std::ofstream f{tempFile.getFilePath()};
-    f << mapData;
-  }
-
-  CapEngine::TiledMap map{tempFile.getFilePath()};
-  const std::string returnedMapData{map.getMapData()};
-
-  ASSERT_EQ(mapData, returnedMapData);
+TEST(TiledMapTest, TestConstructor) {
+  std::filesystem::path mapPath = CapEngine::Testing::getTestFilePath() / "tiled" / "testmap.json";
+  CapEngine::TiledMap map(mapPath);
+  ASSERT_EQ(16, map.tileWidth());
+  ASSERT_EQ(16, map.tileHeight());
+  ASSERT_EQ(2, map.width());
+  ASSERT_EQ(2, map.height());
+  ASSERT_EQ(1, map.tilesets().size());
+  ASSERT_EQ(1, map.layers().size());
 }

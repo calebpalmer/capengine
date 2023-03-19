@@ -1,5 +1,12 @@
 add_definitions(-DUNIX -DDEBUG)
 
+find_package(SDL2)
+find_package(SDL2_image)
+find_package(SDL2_ttf)
+find_package(libxml2)
+find_package(libsndfile)
+find_package(Boost)
+
 # capengine
 add_library(capengine SHARED
   Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp
@@ -13,7 +20,7 @@ add_library(capengine SHARED
   uipropertyvisitor.cpp simpleobjectmanager.cpp scene2d.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
   boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
-  components.cpp gamestate.cpp animatorv2.cpp tiledscene.cpp tiledmap.cpp
+  components.cpp gamestate.cpp animatorv2.cpp tiledscene.cpp tiledmap.cpp tiledtileset.cpp tiledtilelayer.cpp
   )
 
 target_include_directories(
@@ -35,3 +42,6 @@ target_link_libraries(capengine
 
 add_subdirectory(test)
 add_subdirectory(gtests)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_files DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/supportfiles DESTINATION ${CMAKE_BINARY_DIR})

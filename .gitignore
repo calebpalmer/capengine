@@ -1,6 +1,7 @@
 .clangd/
 .projectile
 build/
+build2/
 compile_commands.json
 .cache
 .conan
