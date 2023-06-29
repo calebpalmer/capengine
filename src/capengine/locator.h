@@ -19,20 +19,28 @@ namespace CapEngine
 
 class Locator
 {
-
-  public:
+   public:
     static bool insert(const std::string &id, std::any item);
     static void insertOrReplace(const std::string &id, std::any item);
     static std::any locate(const std::string &id);
 
-    static CapEngine::VideoManager *videoManager;
-    static CapEngine::Logger *logger;
-    static CapEngine::SoundPlayer *soundPlayer;
-    static CapEngine::Keyboard *keyboard;
-    static CapEngine::Mouse *mouse;
-    static CapEngine::AssetManager *assetManager;
-    static CapEngine::EventDispatcher *eventDispatcher;
-    static CapEngine::EventSubscriber *eventSubscriber;
+    static VideoManager *videoManager;
+    static Logger *logger;
+    static SoundPlayer *soundPlayer;
+    static Keyboard *keyboard;
+    static Mouse *mouse;
+    static AssetManager *assetManager;
+    static EventDispatcher *eventDispatcher;
+    static EventSubscriber *eventSubscriber;
+
+    static VideoManager &getVideoManager();
+    static Logger &getLogger();
+    static SoundPlayer &getSoundPlayer();
+    static Keyboard &getKeyboard();
+    static Mouse &getMouse();
+    static AssetManager &getAssetManager();
+    static EventDispatcher &getEventDispatcher();
+    static EventSubscriber &getEventSubscriber();
 };
 
 } // namespace CapEngine
