@@ -2,3 +2,5 @@
 Language:        Cpp
 BasedOnStyle:  Google
 UseTab:          Never
+IndentWidth:    4
+BreakBeforeBraces: Linux

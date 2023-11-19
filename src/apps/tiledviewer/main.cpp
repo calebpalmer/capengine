@@ -1,13 +1,14 @@
-#include "teststate.h"
-
 #include <capengine/game_management.h>
 #include <capengine/locator.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
 
-int main(int argc, char *argv[]) {
+#include "tiledviewer.h"
 
+int main(int argc, char *argv[])
+{
     if (argc < 2) {
         std::cout << "Not enough arguments\n";
         return 1;
@@ -19,10 +20,13 @@ int main(int argc, char *argv[]) {
     // set up the window
     const bool isFullScreen = false;
 
-    CapEngine::WindowParams windowParams{"tanks", 1280, 720, 32, isFullScreen, false, false, false, "main"};
+    CapEngine::WindowParams windowParams{
+        "tanks", 1600, 900, 32, isFullScreen, false, true, false, "main", true};
 
     unsigned int windowId = CapEngine::init(windowParams);
-    CapEngine::Locator::videoManager->setWindowLogicalResolution(windowId, 1280, 720);
+    // CapEngine::Locator::videoManager->setWindowLogicalResolution(windowId,
+    // 1280,
+    //                                                              720);
 
     CapEngine::setDefaultQuitEvents();
 
@@ -31,7 +35,8 @@ int main(int argc, char *argv[]) {
     // load custom components
 
     // create gamestate object
-    auto testState = std::make_shared<Game::TestState>(std::move(mapFile));
+    auto testState =
+        std::make_shared<Game::TiledViewerState>(windowId, std::move(mapFile));
 
     // start loop with the gamestate object
     CapEngine::startLoop(testState);

@@ -17,6 +17,9 @@
 
 int main()
 {
+    CapEngine::init(CapEngine::WindowParams{"Tests", 0, 0, 0, false, false,
+                                            false, false, "Tests"});
+
     // set current directory
     CapEngine::setCurrentDir(
         CapEngine::stripPath(CapEngine::getCurrentExecutablePath()));
@@ -34,9 +37,12 @@ int main()
     runner.addTest(CapEngine::Testing::CollisionsTests::suite());
     runner.addTest(CapEngine::Testing::EventSubscriberTest::suite());
 
-    if (runner.run()) {
+    if (runner.run())
+    {
         return EXIT_SUCCESS;
-    } else {
+    }
+    else
+    {
         return EXIT_FAILURE;
     }
 }

@@ -19,8 +19,20 @@ SurfacePtr getNullSurfacePtr()
  */
 TexturePtr getNullTexturePtr()
 {
-  TexturePtr nullTexturePtr(nullptr, [](SDL_Texture *) {});
-  return nullTexturePtr;
+    TexturePtr nullTexturePtr(nullptr, [](SDL_Texture *) {});
+    return nullTexturePtr;
 }
 
-} // namespace CapEngine
+WindowPtr getNullWindowPtr()
+{
+    WindowPtr nullWindowPtr(nullptr, [](SDL_Window *) {});
+    return nullWindowPtr;
+}
+
+RendererPtr getNullRendererPtr()
+{
+    RendererPtr nullRendererPtr(nullptr, [](SDL_Renderer *) {});
+    return nullRendererPtr;
+}
+
+}  // namespace CapEngine

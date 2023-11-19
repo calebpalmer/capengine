@@ -20,7 +20,13 @@ Camera2d::Camera2d(int in_width, int in_height)
 
 std::pair<int, int> Camera2d::getPosition() const
 {
-  return std::make_pair(m_viewRect.x, m_viewRect.y);
+    return std::make_pair(m_viewRect.x, m_viewRect.y);
+}
+
+void Camera2d::setPosition(int in_x, int in_y)
+{
+    m_viewRect.x = in_x;
+    m_viewRect.y = in_y;
 }
 
 //! Center camera on rectangle.
@@ -97,8 +103,12 @@ Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
     Rectangle rect(in_rect.x - viewingRect.x, in_rect.y - viewingRect.y,
                    in_rect.width, in_rect.height);
 
-    if (doYFlip)
-        rect.y = (in_windowHeight - rect.y - 1) - rect.height;
+    // scaling out means decreasing the rectangle size by a scale
+    // scaling in means increasing the rectangle size by a scale
+    rect.width = rect.width * in_camera.zoom();
+    rect.height = rect.height * in_camera.zoom();
+
+    if (doYFlip) rect.y = (in_windowHeight - rect.y) - rect.height;
 
     return rect;
 }
@@ -118,10 +128,7 @@ Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
 Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
                          uint32_t in_windowId, bool doYFlip)
 {
-
-    int windowHeight = 0;
-    int windowWidth = 0;
-    std::tie(windowWidth, windowHeight) =
+    auto [windowWidth, windowHeight] =
         Locator::videoManager->getWindowLogicalResolution(in_windowId);
 
     return toScreenCoords(in_camera, in_rect, windowWidth, windowHeight,
@@ -155,5 +162,15 @@ int Camera2d::getHeight() const { return m_viewRect.height; }
    The height of the camera.
 */
 void Camera2d::setHeight(int in_height) { m_viewRect.height = in_height; }
+
+float Camera2d::zoom() const { return m_zoom; }
+
+void Camera2d::zoom(float in_amount)
+{
+    m_zoom += in_amount;
+    std::cout << "Zoom set to " << m_zoom << "\n";
+}
+
+void Camera2d::setZoom(float in_amount) { m_zoom = in_amount; }
 
 } // namespace CapEngine

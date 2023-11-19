@@ -1,7 +1,7 @@
 # main
 add_executable(tiledviewer
-  tiledtest.cpp
-  teststate.cpp)
+  main.cpp
+  tiledviewer.cpp)
 
 target_include_directories(tiledviewer
   SYSTEM PUBLIC ../extern)

@@ -10,7 +10,7 @@ namespace CapEngine
 
 class Camera2d
 {
-  public:
+   public:
     Camera2d(int in_width, int in_height);
 
     std::pair<int, int> getPosition() const;
@@ -24,9 +24,13 @@ class Camera2d
     void center(const Rectangle &in_rectangle,
                 std::optional<Rectangle> in_outerBounds);
     const Rectangle &getViewingRectangle() const;
+    float zoom() const;
+    void zoom(float in_amount);
+    void setZoom(float in_amount);
 
-  private:
-    Rectangle m_viewRect; //<! The viewing rectangle.
+   private:
+    Rectangle m_viewRect;  //<! The viewing rectangle.
+    float m_zoom = 1.0;
 };
 
 Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,

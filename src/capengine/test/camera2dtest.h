@@ -12,26 +12,9 @@
 namespace CapEngine
 {
 
-namespace
-{
-
-class MockVideoManager : public VideoManager
-{
-  public:
-    MockVideoManager() {}
-    bool isValidWindowId(uint32_t windowId) const override { return true; }
-
-    int getWindowHeight(uint32_t) override { return 10; }
-};
-
-} // namespace
-
 class Camera2dTest : public CppUnit::TestFixture
 {
-  public:
-    void setUp() override;
-    void tearDown() override;
-
+   public:
     void testGetViewingRectangle();
     void testCenter();
     void testToScreenCoords();
@@ -42,23 +25,10 @@ class Camera2dTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testToScreenCoords);
     CPPUNIT_TEST_SUITE_END();
 
-  private:
+   private:
     VideoManager *m_pPrevVideoManager;
     std::unique_ptr<VideoManager> m_pMockVideoManager;
 };
-
-void Camera2dTest::setUp()
-{
-    m_pPrevVideoManager = Locator::videoManager;
-    m_pMockVideoManager.reset(new MockVideoManager);
-    Locator::videoManager = m_pMockVideoManager.get();
-}
-
-void Camera2dTest::tearDown()
-{
-    Locator::videoManager = m_pPrevVideoManager;
-    m_pMockVideoManager->shutdown();
-}
 
 //! Tests getthing the viewing rectangle
 void Camera2dTest::testGetViewingRectangle()
