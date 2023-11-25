@@ -11,32 +11,31 @@ namespace CapEngine {
 class TiledMap final
 {
    public:
-    explicit TiledMap(
-        const jsoncons::json &in_json,
-        std::optional<std::filesystem::path> in_path = std::nullopt);
-    explicit TiledMap(const std::filesystem::path &in_mapPath);
+	explicit TiledMap(
+		const jsoncons::json &in_json,
+		std::optional<std::filesystem::path> in_path = std::nullopt);
+	explicit TiledMap(const std::filesystem::path &in_mapPath);
 
-    int tileHeight() const;
-    int tileWidth() const;
-    int width() const;
-    int height() const;
-    const std::vector<TiledTileset> &tilesets() const;
-    const std::vector<TiledTileLayer> &layers() const;
-    void render(uint32_t in_windowId, const Camera2d &in_camera,
-                const Rectangle &in_mapPosition);
-    Texture *texture();
+	[[nodiscard]] int tileHeight() const;
+	[[nodiscard]] int tileWidth() const;
+	[[nodiscard]] int width() const;
+	[[nodiscard]] int height() const;
+	[[nodiscard]] const std::vector<TiledTileset> &tilesets() const;
+	[[nodiscard]] const std::vector<TiledTileLayer> &layers() const;
+	void render();
+	Texture *texture();
 
    private:
-    void loadJson(const jsoncons::json &in_json);
+	void loadJson(const jsoncons::json &in_json);
 
-    std::optional<std::filesystem::path> m_path;
-    TexturePtr m_texture;
-    int m_tileHeight{0};
-    int m_tileWidth{0};
-    int m_width{0};
-    int m_height{0};
-    std::shared_ptr<std::vector<TiledTileset>> m_tilesets;
-    std::vector<TiledTileLayer> m_layers;
+	std::optional<std::filesystem::path> m_path;
+	TexturePtr m_texture;
+	int m_tileHeight{0};
+	int m_tileWidth{0};
+	int m_width{0};
+	int m_height{0};
+	std::shared_ptr<std::vector<TiledTileset>> m_tilesets;
+	std::vector<TiledTileLayer> m_layers;
 };
 } // namespace CapEngine
 

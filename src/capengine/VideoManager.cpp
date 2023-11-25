@@ -4,6 +4,7 @@
 #include "VideoManager.h"
 
 #include <SDL2/SDL_image.h>
+#include <SDL_blendmode.h>
 
 #include <boost/throw_exception.hpp>
 #include <cassert>
@@ -309,16 +310,22 @@ void VideoManager::drawTexture(Texture *in_dstTexture, Texture *in_srcTexture, R
 	SDL_Renderer *renderer = this->getRenderer();
 
 	auto result = SDL_SetRenderTarget(renderer, in_dstTexture);
-	if (result) BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	if (result != 0) {
+		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	}
 
 	Defer deferSetRenderTarget(
 		[renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
 
-	result = SDL_SetTextureBlendMode(in_dstTexture, SDL_BLENDMODE_NONE);
-	if (result) BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	result = SDL_SetTextureBlendMode(in_dstTexture, SDL_BLENDMODE_BLEND);
+	if (result != 0) {
+		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	}
 
-	result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-	if (result) BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	if (result != 0) {
+		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+	}
 
 	SDL_RenderCopy(renderer, in_srcTexture, &in_srcRect, &in_dstRect);
 }
