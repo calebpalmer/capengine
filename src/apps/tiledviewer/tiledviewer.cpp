@@ -2,9 +2,11 @@
 
 #include <SDL_events.h>
 #include <SDL_mouse.h>
+#include <SDL_rect.h>
 #include <capengine/VideoManager.h>
 #include <capengine/camera2d.h>
 #include <capengine/captypes.h>
+#include <capengine/collision.h>
 #include <capengine/locator.h>
 
 #include <cstdint>
@@ -34,6 +36,11 @@ TiledViewerState::TiledViewerState(uint32_t in_windowId, fs::path in_mapPath)
 	m_texture = CapEngine::Locator::getVideoManager().createTexturePtr(
 		textureWidth, textureHeight);
 
+	// set the logical dimensions of the window to match the dimensions of the window
+	// TODO there should be an upper abount on the size of the window maybe
+
+	videoManager.setWindowLogicalResolution(m_windowId, m_map.width() * m_map.tileWidth(), m_map.height() * m_map.tileHeight());
+
 	CapEngine::Locator::getEventSubscriber().m_mouseButtonEventSignal.connect(
 		[&](SDL_MouseButtonEvent in_event) {
 			this->m_mouseState.handleMouseButtonEvent(*this, in_event);
@@ -50,40 +57,31 @@ void TiledViewerState::render()
 	auto& videoManager = CapEngine::Locator::getVideoManager();
 	auto [windowWidth, windowHeight] =
 		videoManager.getWindowResolution(m_windowId);
-	videoManager.setWindowLogicalResolution(m_windowId, windowWidth,
-											windowHeight);
+
+	auto [logicalWidth, logicalHeight] = videoManager.getWindowLogicalResolution(m_windowId);
 
 	// render background first
 	videoManager.drawFillRect(m_windowId,
-							  CapEngine::Rect{0, 0, windowWidth, windowHeight},
-							  CapEngine::Colour{0xFF, 0xFF, 0xFF, 0xFF});
+							  CapEngine::Rect{0, 0, logicalWidth, logicalHeight},
+							  CapEngine::Colour{0x20, 0x20, 0x20, 0xFF});
+
 
 	// render the map
-	CapEngine::Rectangle windowDims{
-		0, 0, windowWidth,
-		windowHeight};  // TODO replace use of m_postion with this
 	m_map.render();
 	CapEngine::Texture* mapTexture = m_map.texture();
-
-	SDL_Rect rect{0, 0, m_map.width() * m_map.tileWidth(),
-				  m_map.height() * m_map.tileHeight()};
-
-	assert(m_texture.get() != nullptr);
-	videoManager.drawTexture(m_texture.get(), mapTexture, rect, rect);
+	assert(mapTexture != nullptr);
 
 	// render map to the window
-	m_camera.setWidth(windowWidth);
-	m_camera.setHeight(windowHeight);
+	m_camera.setWidth(logicalWidth);
+	m_camera.setHeight(logicalHeight);
 
-	CapEngine::Rectangle mapDrawPosition{0, 0, windowWidth, windowHeight};
-	m_position.width = windowWidth;
-	m_position.height = windowHeight;
+	CapEngine::Rectangle mapDrawPosition{0, 0, logicalWidth, logicalHeight};
 
-	auto viewingRect = m_camera.getViewingRectangle();
 	mapDrawPosition =
 		CapEngine::toScreenCoords(m_camera, mapDrawPosition, m_windowId, true);
+	auto destRect = mapDrawPosition.toRect();
 
-	videoManager.drawTexture(m_windowId, mapDrawPosition.x, mapDrawPosition.y,
+	videoManager.drawTexture(m_windowId, destRect,
 							 mapTexture);
 }
 
@@ -98,7 +96,9 @@ void TiledViewerState::update(double /*ms*/)
 	}
 
 	if (m_mouseState.scrollAmount != 0) {
-		m_camera.zoom(static_cast<float>(m_mouseState.scrollAmount));
+		m_camera.zoom(static_cast<float>(m_mouseState.scrollAmount * 0.1));
+		// TODO center camera around location
+
 	}
 
 	m_mouseState.reset();

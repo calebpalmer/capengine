@@ -218,7 +218,8 @@ Texture *VideoManager::loadImage(string filePath) const
 	return texture;
 }
 
-void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture *texture,
+// TODO: This should take a destRect instead of x, y
+void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture *texture,
 							   Rect *srcRect, bool applyTransform)
 {
 	auto window = getWindow(windowID);
@@ -226,31 +227,13 @@ void VideoManager::drawTexture(Uint32 windowID, int x, int y, Texture *texture,
 
 	Viewport viewport = getViewport(windowID);
 
-	SDL_Rect dstRect;
-	dstRect.x = x;
-	dstRect.y = y;
-	if (srcRect != nullptr)
-	{
-		dstRect.w = srcRect->w;
-		dstRect.h = srcRect->h;
-	}
-
-	else
-	{
-		int result = SDL_QueryTexture(texture, nullptr, nullptr, &(dstRect.w),
-									  &(dstRect.h));
-		if (result != 0)
-		{
-			ostringstream errorMsg;
-			errorMsg << "Unable to draw texture:  " << SDL_GetError();
-			logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
-		}
-	}
-
 	// Transform the dstRect
-	if (applyTransform) dstRect = viewport.transformRect(dstRect);
+	if (applyTransform) {
+		dstRect = viewport.transformRect(dstRect);
+	}
 
-	auto [w, h] = getWindowResolution(windowID);
+	//auto [w, h] = getWindowResolution(windowID);
+	auto [w, h] = getWindowLogicalResolution(windowID);
 	Rect windowRect = {0, 0, w, h};
 
 	// only draw things that are in the window
@@ -396,7 +379,14 @@ void VideoManager::drawScreen(Uint32 windowID)
 
         int x = 15;
         int y = 15;
-        drawTexture(windowID, x, y, fpsTexture, nullptr, false);
+		auto textureWidth = this->getTextureWidth(fpsTexture);
+		auto textureHeight = this->getTextureHeight(fpsTexture);
+
+        //drawTexture(windowID, x, y, fpsTexture, nullptr, false);
+
+		// draw fpsTexture to the screen at x, y
+		drawTexture(windowID, Rect{x, y, x + static_cast<int>(textureWidth), y + static_cast<int>(textureHeight)}, fpsTexture, nullptr, false);
+
         this->closeTexture(fpsTexture);
     }
 
