@@ -2,14 +2,16 @@
 //@author - Caleb Palmer
 
 #include "vector.h"
-#include "CapEngineException.h"
-#include "capcommon.h"
-#include "trigonometry.h"
 
 #include <boost/exception/all.hpp>
 #include <cmath>
 #include <cstddef>
 #include <sstream>
+
+#include "CapEngineException.h"
+#include "capcommon.h"
+#include "captypes.h"
+#include "trigonometry.h"
 
 namespace CapEngine
 {
@@ -30,71 +32,93 @@ Vector::Vector(real x_in, real y_in, real z_in, real d_in)
 {
 }
 
+/* constructor for Vector
+   \param x_in the x component of the vector
+   \param y_in the y component of the vector
+   \param slopeX_in - the slope for the x component of the vector
+   \param slopeY_in - the slope for the y component of the vector
+*/
+Vector::Vector(int x_in, int y_in, int z_in, int d_in)
+    : x(static_cast<real>(x_in)),
+      y(static_cast<real>(y_in)),
+      z(static_cast<real>(z_in)),
+      d(static_cast<real>(d_in))
+{
+}
+
 // copy constructor
 Vector::Vector(const Vector &vec)
 {
-  this->x = vec.x;
-  this->y = vec.y;
-  this->z = vec.z;
-  this->d = vec.d;
+    this->x = vec.x;
+    this->y = vec.y;
+    this->z = vec.z;
+    this->d = vec.d;
 }
 
 // constructor taking a PolarVector as input, creates a vector on the xy plane
 Vector::Vector(const PolarVector &pVecIn)
 {
-  x = pVecIn.mag * cos(DEGTORAD(pVecIn.deg));
-  y = pVecIn.mag * sin(DEGTORAD(pVecIn.deg));
-  z = 0.0;
-  d = 0.0;
+    x = pVecIn.mag * cos(DEGTORAD(pVecIn.deg));
+    y = pVecIn.mag * sin(DEGTORAD(pVecIn.deg));
+    z = 0.0;
+    d = 0.0;
 }
 
 Vector::~Vector() {}
 
 /** returns x component of vector
   \return
-        \li the x component of the vector
+                                                                                                                                \li the x
+  component of the vector
 */
 real Vector::getX() const { return x; }
 
 /** returns y component of vector
   \return
-        \li the y component of the vector
+                                                                                                                                \li the y
+  component of the vector
 */
 real Vector::getY() const { return y; }
 
 /** returns z component of vector
   \return
-        \li the z component of the vector
+                                                                                                                                \li the z
+  component of the vector
 */
 real Vector::getZ() const { return z; }
 
 /** returns d component of vector
   \return
-        \li the d component of the vector
+                                                                                                                                \li the d
+  component of the vector
 */
 real Vector::getD() const { return d; }
 
 /** set the x componnet
   \param
-         \li the x component
+                                                                                                                                 \li the x
+  component
 */
 void Vector::setX(real xIn) { x = xIn; }
 
 /** set the y componnet
   \param
-        \li the y component
+                                                                                                                                \li the y
+  component
 */
 void Vector::setY(real yIn) { y = yIn; }
 
 /** set the y componnet
   \param
-        \li the y component
+                                                                                                                                \li the y
+  component
 */
 void Vector::setZ(real zIn) { z = zIn; }
 
 /** set the d componnet
   \param
-        \li the d component
+                                                                                                                                \li the d
+  component
 */
 void Vector::setD(real dIn) { d = dIn; }
 
@@ -112,12 +136,12 @@ Vector Vector::operator+(const Vector &vec2) const
 
 Vector &Vector::operator+=(const Vector &vec)
 {
-  this->x += vec.x;
-  this->y += vec.y;
-  this->z += vec.z;
-  this->d += vec.d;
+    this->x += vec.x;
+    this->y += vec.y;
+    this->z += vec.z;
+    this->d += vec.d;
 
-  return *this;
+    return *this;
 }
 
 /*
@@ -128,7 +152,7 @@ Vector &Vector::operator+=(const Vector &vec)
 */
 Vector Vector::operator-(const Vector &vec2) const
 {
-  return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
+    return Vector(x - vec2.getX(), y - vec2.getY(), z - vec2.getZ());
 }
 
 //! multipllies vector by a scalar
@@ -138,8 +162,8 @@ Vector Vector::operator-(const Vector &vec2) const
 */
 Vector Vector::operator*(real scalar) const
 {
-  // TODO does not scale d.  Is this right?
-  return Vector(x * scalar, y * scalar, z * scalar, d);
+    // TODO does not scale d.  Is this right?
+    return Vector(x * scalar, y * scalar, z * scalar, d);
 }
 
 // TODO: fix this so that it returns a proper value
@@ -151,17 +175,16 @@ Vector Vector::operator*(real scalar) const
 */
 Vector &Vector::operator=(const Vector &vec)
 {
-  Vector newVector;
-  x = vec.x;
-  y = vec.y;
-  z = vec.z;
-  d = vec.d;
-  return *this;
+    Vector newVector;
+    x = vec.x;
+    y = vec.y;
+    z = vec.z;
+    d = vec.d;
+    return *this;
 }
 
 bool Vector::operator==(const Vector &vec) const
 {
-
     return doubles_equal(this->x, vec.x) && doubles_equal(this->y, vec.y) &&
            doubles_equal(this->z, vec.z) && doubles_equal(this->d, vec.d);
 }
@@ -179,11 +202,11 @@ bool Vector::operator!=(const Vector &other) const { return !(*this == other); }
 */
 real distance(const Vector &vec1, const Vector &vec2)
 {
-  // sqrt (x*x + y*y
-  real xdelta = vec1.getX() - vec2.getX();
-  real ydelta = vec1.getY() - vec2.getY();
-  real zdelta = vec1.getZ() - vec2.getZ();
-  return sqrt(xdelta * xdelta + ydelta * ydelta + zdelta * zdelta);
+    // sqrt (x*x + y*y
+    real xdelta = vec1.getX() - vec2.getX();
+    real ydelta = vec1.getY() - vec2.getY();
+    real zdelta = vec1.getZ() - vec2.getZ();
+    return sqrt(xdelta * xdelta + ydelta * ydelta + zdelta * zdelta);
 }
 
 /*
@@ -193,9 +216,9 @@ real distance(const Vector &vec1, const Vector &vec2)
 */
 void Vector::scale(real factor)
 {
-  x = x * factor;
-  y = y * factor;
-  z = z * factor;
+    x = x * factor;
+    y = y * factor;
+    z = z * factor;
 }
 
 /*
@@ -212,8 +235,8 @@ real Vector::magnitude() const { return distance(*this, Vector(0, 0, 0)); }
 */
 Vector Vector::normalize() const
 {
-  real mag = this->magnitude();
-  return Vector(x / mag, y / mag, z / mag);
+    real mag = this->magnitude();
+    return Vector(x / mag, y / mag, z / mag);
 }
 
 /*
@@ -240,11 +263,11 @@ real dotProduct(const Vector &vec1, const Vector &vec2)
 */
 Vector crossProduct(const Vector &vec1, const Vector &vec2)
 {
-  real newx = vec1.getY() * vec2.getZ() + vec1.getZ() * vec2.getY();
-  real newy = vec1.getZ() * vec2.getX() + vec1.getX() * vec2.getZ();
-  real newz = vec1.getX() * vec2.getY() + vec1.getY() * vec2.getX();
+    real newx = vec1.getY() * vec2.getZ() + vec1.getZ() * vec2.getY();
+    real newy = vec1.getZ() * vec2.getX() + vec1.getX() * vec2.getZ();
+    real newz = vec1.getX() * vec2.getY() + vec1.getY() * vec2.getX();
 
-  return Vector(newx, newy, newz);
+    return Vector(newx, newy, newz);
 }
 
 /*
@@ -255,11 +278,11 @@ Vector crossProduct(const Vector &vec1, const Vector &vec2)
 */
 Vector projectedVector(const Vector &vec1, const Vector &vec2)
 {
-  real dotProd = CapEngine::dotProduct(vec1, vec2);
-  real magVec = vec2.magnitude();
-  Vector v(vec2);
-  v.scale(dotProd / (magVec * magVec));
-  return v;
+    real dotProd = CapEngine::dotProduct(vec1, vec2);
+    real magVec = vec2.magnitude();
+    Vector v(vec2);
+    v.scale(dotProd / (magVec * magVec));
+    return v;
 }
 
 /*
@@ -270,8 +293,8 @@ Vector projectedVector(const Vector &vec1, const Vector &vec2)
 */
 Vector projectedPerpendicularVector(const Vector &vec1, const Vector &vec2)
 {
-  Vector v = CapEngine::projectedVector(vec1, vec2);
-  return Vector(vec2 - v);
+    Vector v = CapEngine::projectedVector(vec1, vec2);
+    return Vector(vec2 - v);
 }
 
 /*
@@ -282,11 +305,11 @@ Vector projectedPerpendicularVector(const Vector &vec1, const Vector &vec2)
 */
 real angle(const Vector &vec1, const Vector &vec2)
 {
-  // acos (vec.x - x / distance)
-  real distance = CapEngine::distance(vec1, vec2);
-  real xDelta = vec1.getX() - vec2.getX();
-  real radAngle = acos(distance / xDelta);
-  return RADTODEG(radAngle);
+    // acos (vec.x - x / distance)
+    real distance = CapEngine::distance(vec1, vec2);
+    real xDelta = vec1.getX() - vec2.getX();
+    real radAngle = acos(distance / xDelta);
+    return RADTODEG(radAngle);
 }
 
 //! Not implemented for 2d vectors.  Throws exception.
@@ -294,8 +317,8 @@ real angle(const Vector &vec1, const Vector &vec2)
  */
 Vector surfaceNormal(const Vector &vec1, const Vector &vec2)
 {
-  Vector v = CapEngine::crossProduct(vec1, vec2);
-  return v.normalize();
+    Vector v = CapEngine::crossProduct(vec1, vec2);
+    return v.normalize();
 }
 
 //! return a PolarVector version of current vector
@@ -310,9 +333,9 @@ PolarVector *Vector::toPolarVector() const { return nullptr; }
 */
 std::string Vector::toString() const
 {
-  ostringstream desc;
-  desc << "  " << x << "  " << y << "  " << z << "  " << d;
-  return desc.str();
+    ostringstream desc;
+    desc << "  " << x << "  " << y << "  " << z << "  " << d;
+    return desc.str();
 }
 
 std::ostream &operator<<(std::ostream &stream, const CapEngine::Vector &vector)
@@ -344,4 +367,4 @@ Vector Vector::absolute() const
     return {std::abs(x), std::abs(y), std::abs(z), std::abs(d)};
 }
 
-} // namespace CapEngine
+}  // namespace CapEngine

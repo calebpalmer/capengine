@@ -6,8 +6,7 @@
 
 #include <gtest/gtest.h>
 
-namespace CapEngine {
-namespace Testing {
+namespace CapEngine::testing {
 
 class TempFile final {
 public:
@@ -21,7 +20,6 @@ private:
 
 std::filesystem::path getTestFilePath();
 
-} // namespace Testing
-} // namespace CapEngine
+} // namespace CapEngine::testing
 
 #endif /* CAPENGINETESTING_TESTUTILS_H */

@@ -1,6 +1,7 @@
 add_executable(gtests
   main.cpp
-  testutils.cpp)
+  testutils.cpp
+  testenvironment.cpp)
 
 target_include_directories(gtests
   PRIVATE

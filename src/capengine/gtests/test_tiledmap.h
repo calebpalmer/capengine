@@ -4,8 +4,10 @@
 #include <capengine/tiledmap.h>
 #include <fstream>
 
+namespace CapEngine::testing {
+
 TEST(TiledMapTest, TestConstructor) {
-  std::filesystem::path mapPath = CapEngine::Testing::getTestFilePath() / "tiled" / "testmap.json";
+  std::filesystem::path mapPath = CapEngine::testing::getTestFilePath() / "tiled" / "testmap.json";
   CapEngine::TiledMap map(mapPath);
   ASSERT_EQ(16, map.tileWidth());
   ASSERT_EQ(16, map.tileHeight());
@@ -13,4 +15,6 @@ TEST(TiledMapTest, TestConstructor) {
   ASSERT_EQ(2, map.height());
   ASSERT_EQ(1, map.tilesets().size());
   ASSERT_EQ(1, map.layers().size());
+}
+
 }

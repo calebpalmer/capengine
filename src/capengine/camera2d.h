@@ -3,6 +3,7 @@
 
 #include "collision.h"
 
+#include <cstdint>
 #include <optional>
 
 namespace CapEngine
@@ -34,10 +35,15 @@ class Camera2d
 };
 
 Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
-                         uint32_t in_windowId, bool doYFlip);
+						 uint32_t in_windowId, bool doYFlip);
 
 Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
                          int windowWidth, int windowHeight, bool doYFlip);
+
+Vector toScreenCoords(const Camera2d &in_camera, const Vector &in_point,
+                      uint32_t in_windowId, bool doYFlip);
+
+Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point, Rectangle const& in_rectangle, uint32_t windowId, bool doYFlip);
 
 } // namespace CapEngine
 
