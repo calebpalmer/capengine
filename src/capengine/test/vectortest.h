@@ -41,7 +41,7 @@ void VectorTest::testOperatorEquals()
 
 void VectorTest::testScalarMultiplication()
 {
-  real scalar = 1.2;
+  double scalar = 1.2;
   Vector v(1.0f, 2.0f, 3.0f);
 
   Vector result = v * scalar;

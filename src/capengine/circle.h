@@ -16,13 +16,13 @@ namespace CapEngine
 class Circle
 {
 public:
-  Circle(real x, real y, real r);
-  real getX() const;
-  void setX(real xIn);
-  real getY() const;
-  void setY(real yIn);
-  real getRadius() const;
-  void setRadius(real rIn);
+  Circle(double x, double y, double r);
+  double getX() const;
+  void setX(double xIn);
+  double getY() const;
+  void setY(double yIn);
+  double getRadius() const;
+  void setRadius(double rIn);
   bool collides(const Circle *circle);
 
 private:
@@ -31,8 +31,8 @@ private:
   Circle &operator=(const Circle &) { return *this; }
 
 private:
-  real x, y;
-  real radius;
+  double x, y;
+  double radius;
 };
 } // namespace CapEngine
 #endif

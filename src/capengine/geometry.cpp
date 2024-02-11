@@ -24,10 +24,10 @@ bool doVectorsIntersect2d(const Vector2d *vector1, const Vector2d *vector2)
   CAP_THROW_NULL(vector2, "vector is null");
 
   // if slopes are different then they do
-  real slope1 = vector1->getYSlope() / vector1->getXSlope();
-  real slope2 = vector2->getYSlope() / vector2->getXSlope();
+  double slope1 = vector1->getYSlope() / vector1->getXSlope();
+  double slope2 = vector2->getYSlope() / vector2->getXSlope();
   if (slope1 != slope2) {
-    return true;
+	return true;
   }
   // if slopes are the same and same y-intercept then they do
   // false otherwise
@@ -45,7 +45,7 @@ bool doVectorsIntersect2d(const Vector2d *vector1, const Vector2d *vector2)
   not intersect
  */
 Vector2d *vectorIntersectionPoint2d(const Vector2d *vector1,
-                                    const Vector2d *vector2)
+									const Vector2d *vector2)
 {
 
   CAP_THROW_NULL(vector1, "vector is null");
@@ -53,12 +53,12 @@ Vector2d *vectorIntersectionPoint2d(const Vector2d *vector1,
   // y = m1(x + x1) + y1 = m2(x + x2) + y2
   // x = (m1x1 - m2x2) + y2 - y1)/(m1 - m2)
   // y = -mx1 + y1
-  real slope1 = vector1->getYSlope() / vector1->getXSlope();
-  real slope2 = vector2->getYSlope() / vector2->getXSlope();
-  real x = ((slope1 * vector1->getX() - slope2 * vector2->getX()) +
-            vector2->getY() - vector1->getY()) /
-           (slope1 - slope2);
-  real y = (slope1 * (-1)) * vector1->getX() + vector1->getY();
+  double slope1 = vector1->getYSlope() / vector1->getXSlope();
+  double slope2 = vector2->getYSlope() / vector2->getXSlope();
+  double x = ((slope1 * vector1->getX() - slope2 * vector2->getX()) +
+			vector2->getY() - vector1->getY()) /
+		   (slope1 - slope2);
+  double y = (slope1 * (-1)) * vector1->getX() + vector1->getY();
   std::unique_ptr<Vector2d> position(new Vector2d(x, y));
   return position.release();
 }
@@ -73,7 +73,7 @@ Vector2d *vectorIntersectionPoint2d(const Vector2d *vector1,
   \li A pointer to a vector with the location of intersection, NULL if they do
   not intersect
  */
-real getDistance(const Vector2d *vector1, const Vector2d *vector2)
+double getDistance(const Vector2d *vector1, const Vector2d *vector2)
 {
   CAP_THROW_NULL(vector1, "vector is null");
   CAP_THROW_NULL(vector2, "vector is null");
@@ -81,8 +81,8 @@ real getDistance(const Vector2d *vector1, const Vector2d *vector2)
   // pythagoean theorem
   // c^2 = a^2 + b^2
   // c = sqrt((x2 - x1)^2 + (y2 - y1)^2)
-  real xDelta = vector2->getX() - vector1->getX();
-  real yDelta = vector2->getY() - vector1->getY();
+  double xDelta = vector2->getX() - vector1->getX();
+  double yDelta = vector2->getY() - vector1->getY();
   return sqrt((xDelta * xDelta) + (yDelta * yDelta));
 }
 
@@ -102,10 +102,10 @@ Vector2d *midPoint(const Vector2d *vector1, const Vector2d *vector2)
   CAP_THROW_NULL(vector1, "vector is null");
   CAP_THROW_NULL(vector2, "vector is null");
 
-  real x = (vector1->getX() + vector2->getX()) / 2.0;
-  real y = (vector1->getY() + vector2->getY()) / 2.0;
+  double x = (vector1->getX() + vector2->getX()) / 2.0;
+  double y = (vector1->getY() + vector2->getY()) / 2.0;
 
-  auto_ptr<Vector2d> newVector(new Vector2d(x, y));
+  std::unique_ptr<Vector2d> newVector(new Vector2d(x, y));
 
   return newVector.release();
 }

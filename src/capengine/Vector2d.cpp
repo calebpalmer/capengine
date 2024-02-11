@@ -18,7 +18,7 @@ Vector2d::Vector2d() : x(0), y(0) {}
    \param slopeX_in - the slope for the x component of the vector
    \param slopeY_in - the slope for the y component of the vector
 */
-Vector2d::Vector2d(real x_in, real y_in) : x(x_in), y(y_in) {}
+Vector2d::Vector2d(double x_in, double y_in) : x(x_in), y(y_in) {}
 
 // copy constructor
 Vector2d::Vector2d(const Vector2d &vec)
@@ -37,24 +37,24 @@ Vector2d::Vector2d(const PolarVector &pVecIn)
 Vector2d::~Vector2d() {}
 
 /** returns x component of vector
-    \returns the x component of the vector
+	\returns the x component of the vector
 */
-real Vector2d::getX() const { return x; }
+double Vector2d::getX() const { return x; }
 
 /** returns y component of vector
-    \returns the y component of the vector
+	\returns the y component of the vector
 */
-real Vector2d::getY() const { return y; }
+double Vector2d::getY() const { return y; }
 
 /** set the x componnet
-    \param the x component
+	\param the x component
 */
-void Vector2d::setX(real xIn) { x = xIn; }
+void Vector2d::setX(double xIn) { x = xIn; }
 
 /** set the y componnet
-    \param the y component
+	\param the y component
 */
-void Vector2d::setY(real yIn) { y = yIn; }
+void Vector2d::setY(double yIn) { y = yIn; }
 
 /*
   \fn operator+ definition
@@ -85,11 +85,11 @@ Vector2d Vector2d::operator-(const Vector2d &vec2)
   \return
   \li the distance of this from vec.
  */
-real Vector2d::distance(const Vector2d &vec) const
+double Vector2d::distance(const Vector2d &vec) const
 {
   // sqrt (x*x + y*y
-  real xdelta = x - vec.getX();
-  real ydelta = y - vec.getY();
+  double xdelta = x - vec.getX();
+  double ydelta = y - vec.getY();
   return sqrt(xdelta * xdelta + ydelta * ydelta);
 }
 
@@ -98,7 +98,7 @@ real Vector2d::distance(const Vector2d &vec) const
   \param factor
   \li the amount to scale the vector components
  */
-void Vector2d::scale(real factor)
+void Vector2d::scale(double factor)
 {
   x = x * factor;
   y = y * factor;
@@ -109,7 +109,7 @@ void Vector2d::scale(real factor)
   \return
   \li the magnitude of the vector
  */
-real Vector2d::magnitude() const { return distance(Vector2d(0, 0)); }
+double Vector2d::magnitude() const { return distance(Vector2d(0, 0)); }
 
 /*
   \fn return a normalized version of this vector
@@ -118,7 +118,7 @@ real Vector2d::magnitude() const { return distance(Vector2d(0, 0)); }
  */
 Vector2d *Vector2d::normalize() const
 {
-  real mag = this->magnitude();
+  double mag = this->magnitude();
   unique_ptr<Vector2d> normalVec(new Vector2d(x / mag, y / mag));
   return normalVec.release();
 }
@@ -129,7 +129,7 @@ Vector2d *Vector2d::normalize() const
   \return
   \li the dot product
  */
-real Vector2d::dotProduct(const Vector2d &vec) const
+double Vector2d::dotProduct(const Vector2d &vec) const
 {
   return (x * vec.getX() + y * vec.getY());
 }
@@ -152,12 +152,12 @@ Vector2d *Vector2d::crossProduct(const Vector2d &vec) const
   \return
   \li the angle
  */
-real Vector2d::angle(const Vector2d &vec) const
+double Vector2d::angle(const Vector2d &vec) const
 {
   // acos (vec.x - x / distance)
-  real distance = this->distance(vec);
-  real xDelta = x - vec.getX();
-  real radAngle = acos(distance / xDelta);
+  double distance = this->distance(vec);
+  double xDelta = x - vec.getX();
+  double radAngle = acos(distance / xDelta);
   return RADTODEG(radAngle);
 }
 
@@ -167,7 +167,7 @@ real Vector2d::angle(const Vector2d &vec) const
 Vector2d *Vector2d::surfaceNormal(const Vector2d &vec) const
 {
   throw CapEngineException(
-      "Tried to calculate the surface normal of 2d vectors");
+	  "Tried to calculate the surface normal of 2d vectors");
 }
 
 //! return a PolarVector version of current vector

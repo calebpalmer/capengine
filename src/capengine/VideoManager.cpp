@@ -499,7 +499,7 @@ void VideoManager::setWindowSize(Uint32 windowId, int width, int height)
 /*!
 \param texture
 */
-real VideoManager::getTextureWidth(Texture *texture) const
+double VideoManager::getTextureWidth(Texture *texture) const
 {
     CAP_THROW_NULL(texture, "Texture is null");
     int w;
@@ -518,7 +518,7 @@ real VideoManager::getTextureWidth(Texture *texture) const
 /*!
 \param texture
 */
-real VideoManager::getTextureHeight(Texture *texture) const
+double VideoManager::getTextureHeight(Texture *texture) const
 {
     CAP_THROW_NULL(texture, "texture is null");
     int h;
@@ -744,13 +744,13 @@ void VideoManager::blitSurface(Surface *sourceSurface, int srcX, int srcY,
     SDL_BlitSurface(sourceSurface, &srcLocation, destSurface, &dstLocation);
 }
 
-real VideoManager::getSurfaceWidth(const Surface *surface) const
+double VideoManager::getSurfaceWidth(const Surface *surface) const
 {
     CAP_THROW_NULL(surface, "surface passed to getSurfaceWidth is null");
     return surface->w;
 }
 
-real VideoManager::getSurfaceHeight(const Surface *surface) const
+double VideoManager::getSurfaceHeight(const Surface *surface) const
 {
     CAP_THROW_NULL(surface, "surface passed to getSurfaceHeight is null");
     return surface->h;

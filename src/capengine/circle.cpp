@@ -14,19 +14,19 @@ using namespace CapEngine;
   \param r
   \li The radius of the circle
  */
-Circle::Circle(real x, real y, real r) : x(x), y(x), radius(r){};
+Circle::Circle(double x, double y, double r) : x(x), y(x), radius(r){};
 
-real Circle::getX() const { return x; }
+double Circle::getX() const { return x; }
 
-void Circle::setX(real xIn) { x = xIn; }
+void Circle::setX(double xIn) { x = xIn; }
 
-real Circle::getY() const { return y; }
+double Circle::getY() const { return y; }
 
-void Circle::setY(real yIn) { y = yIn; }
+void Circle::setY(double yIn) { y = yIn; }
 
-real Circle::getRadius() const { return radius; }
+double Circle::getRadius() const { return radius; }
 
-void Circle::setRadius(real radiusIn) { radius = radiusIn; }
+void Circle::setRadius(double radiusIn) { radius = radiusIn; }
 
 /*
   \brief detects whether this circle collides with another
@@ -41,8 +41,8 @@ bool Circle::collides(const Circle *circle)
 
   Vector2d vector1(this->x, this->y);
   Vector2d vector2(circle->getX(), circle->getY());
-  real centerDistance = getDistance(&vector1, &vector2);
+  double centerDistance = getDistance(&vector1, &vector2);
   if (centerDistance < 0)
-    centerDistance *= -1.0;
+	centerDistance *= -1.0;
   return centerDistance <= (this->radius + circle->getRadius());
 }

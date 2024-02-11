@@ -12,8 +12,6 @@
 namespace CapEngine
 {
 
-typedef float real;
-
 using Surface = SDL_Surface;
 using Texture = SDL_Texture;
 using Renderer = SDL_Renderer;

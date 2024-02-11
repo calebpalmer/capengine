@@ -17,40 +17,40 @@ class Matrix
 {
 
   public:
-    Matrix(CapEngine::Vector vec1, CapEngine::Vector vec2,
-           CapEngine::Vector vec3, CapEngine::Vector vec4);
-    ~Matrix() = default;
+	Matrix(CapEngine::Vector vec1, CapEngine::Vector vec2,
+		   CapEngine::Vector vec3, CapEngine::Vector vec4);
+	~Matrix() = default;
 
-    Vector getColumnVector(int index) const;
-    Vector getRowVector(int index) const;
-    Vector &getColumnVectorRef(int index);
+	Vector getColumnVector(int index) const;
+	Vector getRowVector(int index) const;
+	Vector &getColumnVectorRef(int index);
 
-    void setRowVector(int index, Vector vector);
+	void setRowVector(int index, Vector vector);
 
-    static Matrix createZeroMatrix();
-    static Matrix createIdentityMatrix();
-    static Matrix createTranslationMatrix(real x, real y, real z);
-    static Matrix createScaleMatrix(real x, real y, real z);
-    static Matrix createXRotationMatrix(real degrees);
-    static Matrix createYRotationMatrix(real degrees);
-    static Matrix createZRotationMatrix(real degrees);
+	static Matrix createZeroMatrix();
+	static Matrix createIdentityMatrix();
+	static Matrix createTranslationMatrix(double x, double y, double z);
+	static Matrix createScaleMatrix(double x, double y, double z);
+	static Matrix createXRotationMatrix(double degrees);
+	static Matrix createYRotationMatrix(double degrees);
+	static Matrix createZRotationMatrix(double degrees);
 
-    std::string toString(bool pretty = false) const;
+	std::string toString(bool pretty = false) const;
 
-    // overloaded operators
-    Matrix operator*(const Matrix &right) const;
-    Matrix operator+(const Matrix &right) const;
-    Matrix operator-(const Matrix &right) const;
-    Vector operator*(const Vector &right) const;
-    bool operator==(const Matrix &other) const;
-    std::string pretty() const;
-    friend std::ostream &operator<<(std::ostream &stream, const Matrix &matix);
+	// overloaded operators
+	Matrix operator*(const Matrix &right) const;
+	Matrix operator+(const Matrix &right) const;
+	Matrix operator-(const Matrix &right) const;
+	Vector operator*(const Vector &right) const;
+	bool operator==(const Matrix &other) const;
+	std::string pretty() const;
+	friend std::ostream &operator<<(std::ostream &stream, const Matrix &matix);
 
-    std::unique_ptr<float> getGLMatrix() const;
-    const MatrixContainer &getVectors() const;
+	std::unique_ptr<float> getGLMatrix() const;
+	const MatrixContainer &getVectors() const;
 
   protected:
-    MatrixContainer vectors;
+	MatrixContainer vectors;
 };
 
 } // namespace CapEngine

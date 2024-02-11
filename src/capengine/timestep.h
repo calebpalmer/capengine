@@ -17,10 +17,10 @@ class TimeStep
   TimeStep &operator=(const TimeStep &);
 
 public:
-  real lastTimeStep;
+  double lastTimeStep;
 
   TimeStep();
-  real updateStep();
+  double updateStep();
   void renderStep();
 };
 

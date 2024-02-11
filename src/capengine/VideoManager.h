@@ -107,8 +107,8 @@ class VideoManager final
 	void blitSurface(Surface *sourceSurface, int srcX, int srcY,
 					 int sourceWidth, int sourceHeight, Surface *destSurface,
 					 int x, int y);
-	real getSurfaceWidth(const Surface *surface) const;
-	real getSurfaceHeight(const Surface *surface) const;
+	double getSurfaceWidth(const Surface *surface) const;
+	double getSurfaceHeight(const Surface *surface) const;
 	// Textures
 	Texture *loadImage(std::string fileName) const;
 	TexturePtr loadImagePtr(std::string const &in_filePath) const;
@@ -123,8 +123,8 @@ class VideoManager final
 					 bool applyTransform = true);
 	void drawTexture(Texture *in_dstTexture, Texture *in_srcTexture,
 					 Rect &in_dstRect, Rect &in_srcRect);
-	real getTextureWidth(Texture *texture) const;
-	real getTextureHeight(Texture *texture) const;
+	double getTextureWidth(Texture *texture) const;
+	double getTextureHeight(Texture *texture) const;
 	void getTextureDims(Texture *texture, int *x, int *y) const;
 	Texture *createTexture(int width, int height);
 	TexturePtr createTexturePtr(int width, int height);
