@@ -218,7 +218,6 @@ Texture *VideoManager::loadImage(string filePath) const
 	return texture;
 }
 
-// TODO: This should take a destRect instead of x, y
 void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture *texture,
 							   Rect *srcRect, bool applyTransform)
 {
@@ -232,7 +231,6 @@ void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture *texture,
 		dstRect = viewport.transformRect(dstRect);
 	}
 
-	//auto [w, h] = getWindowResolution(windowID);
 	auto [w, h] = getWindowLogicalResolution(windowID);
 	Rect windowRect = {0, 0, w, h};
 
@@ -251,6 +249,7 @@ void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture *texture,
 void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 							   Rect *dstRect,
 							   std::optional<double> rotationDegrees,
+							   SDL_RendererFlip flip,
 							   bool applyTransform)
 {
 	assert(texture != nullptr);
@@ -278,10 +277,12 @@ void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
 		{
 			const SDL_Point *center = nullptr;
 			SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect,
-							 *rotationDegrees, center, SDL_FLIP_NONE);
+							 *rotationDegrees, center, flip);
 		}
 		else
-			SDL_RenderCopy(pRenderer, texture, srcRect, dstRect);
+		{
+			SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, 0, nullptr, flip);
+		}
 	}
 }
 

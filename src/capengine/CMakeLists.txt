@@ -20,7 +20,7 @@ add_library(capengine SHARED
   uipropertyvisitor.cpp simpleobjectmanager.cpp scene2d.cpp scene2dstate.cpp camera2d.cpp layerfactory.cpp componentfactory.cpp
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
   boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
-  components.cpp gamestate.cpp animatorv2.cpp tiledscene.cpp tiledmap.cpp tiledtileset.cpp tiledtilelayer.cpp
+  components.cpp gamestate.cpp animatorv2.cpp tiledscene.cpp tiledmap.cpp tiledtileset.cpp tiledtilelayer.cpp tiledobjectgroup.cpp
   )
 
 target_include_directories(
@@ -43,5 +43,5 @@ target_link_libraries(capengine
 add_subdirectory(test)
 add_subdirectory(gtests)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_files DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/supportfiles DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_target(test_files ALL cp -r ${CMAKE_CURRENT_SOURCE_DIR}/test_files ${CMAKE_BINARY_DIR})
+add_custom_target(supportfiles ALL cp -r ${CMAKE_CURRENT_SOURCE_DIR}/supportfiles ${CMAKE_BINARY_DIR})

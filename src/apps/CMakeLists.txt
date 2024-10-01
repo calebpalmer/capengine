@@ -1,1 +1,2 @@
 add_subdirectory(tiledviewer)
+add_subdirectory(rockpaperscissors)

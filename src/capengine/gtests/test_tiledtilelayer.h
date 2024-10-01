@@ -9,7 +9,7 @@ namespace CapEngine::testing {
 
 TEST(TiledTileLayerTest, TestConstructor)
 {
-	jsoncons::json j = jsoncons::json::parse(R"(
+    jsoncons::json j = jsoncons::json::parse(R"(
 											  {
 												"data":[1, 1,
 														1, 31],
@@ -25,17 +25,15 @@ TEST(TiledTileLayerTest, TestConstructor)
 											  }
 )");
 
-	CapEngine::TiledTileLayer layer{
-		j,   std::make_shared<std::vector<CapEngine::TiledTileset>>(),
-		16,  16,
-		640, 480};
-	ASSERT_EQ(2, layer.width());
-	ASSERT_EQ(2, layer.height());
-	ASSERT_EQ(0, layer.x());
-	ASSERT_EQ(0, layer.y());
-	ASSERT_EQ(true, layer.visible());
-	std::vector<unsigned int> expectedData{1, 1, 1, 31};
-	ASSERT_EQ(expectedData, layer.data());
+    std::vector<std::unique_ptr<CapEngine::TiledTileset>> layers{};
+    CapEngine::TiledTileLayer layer{j, layers, 16, 16, 640, 480};
+    ASSERT_EQ(2, layer.width());
+    ASSERT_EQ(2, layer.height());
+    ASSERT_EQ(0, layer.x());
+    ASSERT_EQ(0, layer.y());
+    ASSERT_EQ(true, layer.visible());
+    std::vector<unsigned int> expectedData{1, 1, 1, 31};
+    ASSERT_EQ(expectedData, layer.data());
 }
 
 TEST(TiledTileLayerTest, TestGetGlobalTileInfo)

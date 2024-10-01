@@ -2,6 +2,7 @@
 #include "test_tiledmap.h"
 #include "test_tiledtilelayer.h"
 #include "test_tiledtileset.h"
+#include "test_tiledobjectgroup.h"
 #include "camera2d_test.h"
 
 #include <capengine/game_management.h>

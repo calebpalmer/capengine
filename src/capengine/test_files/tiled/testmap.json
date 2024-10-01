@@ -1,33 +1,107 @@
-{ "compressionlevel":-1,
- "height":2,
- "infinite":false,
- "layers":[
-        {
-         "data":[1, 1,
-            1, 31],
-         "height":2,
-         "id":1,
-         "name":"Tile Layer 1",
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":true,
-         "width":2,
-         "x":0,
-         "y":0
-        }],
- "nextlayerid":2,
- "nextobjectid":1,
- "orientation":"orthogonal",
- "renderorder":"right-down",
- "tiledversion":"1.9.2",
- "tileheight":16,
- "tilesets":[
-        {
-         "firstgid":1,
-         "source":"tileset.tsj"
-        }],
- "tilewidth":16,
- "type":"map",
- "version":"1.9",
- "width":2
+{
+  "compressionlevel": -1,
+  "height": 2,
+  "infinite": false,
+  "layers": [
+    {
+      "data": [
+	1,
+	1,
+	1,
+	31
+      ],
+      "height": 2,
+      "id": 1,
+      "name": "Tile Layer 1",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 2,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 2,
+      "name": "Positions",
+      "objects": [
+	{
+	  "class": "",
+	  "height": 118.602612796861,
+	  "id": 1,
+	  "name": "player-1-end",
+	  "rotation": 0,
+	  "visible": true,
+	  "width": 150.657373012229,
+	  "x": 103.376601694562,
+	  "y": 244.41754664218
+	},
+	{
+	  "class": "",
+	  "height": 118.603,
+	  "id": 2,
+	  "name": "player-2-start",
+	  "rotation": 0,
+	  "visible": true,
+	  "width": 150.657,
+	  "x": 399.88332019283,
+	  "y": 88.9517659960767
+	},
+	{
+	  "class": "",
+	  "height": 118.603,
+	  "id": 4,
+	  "name": "",
+	  "rotation": 0,
+	  "visible": true,
+	  "width": 150.657,
+	  "x": 103.376788200676,
+	  "y": 86.5476589799241
+	},
+	{
+	  "class": "",
+	  "height": 118.603,
+	  "id": 5,
+	  "name": "player-1-start",
+	  "rotation": 0,
+	  "visible": true,
+	  "width": 150.657,
+	  "x": 103.376788200676,
+	  "y": 86.5476589799241
+	},
+	{
+	  "class": "",
+	  "height": 118.603,
+	  "id": 6,
+	  "name": "player-2-end",
+	  "rotation": 0,
+	  "visible": true,
+	  "width": 150.657,
+	  "x": 398.280582182061,
+	  "y": 240.41050801369
+	}
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 2,
+  "nextobjectid": 1,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.9.2",
+  "tileheight": 16,
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "tileset.tsj"
+    }
+  ],
+  "tilewidth": 16,
+  "type": "map",
+  "version": "1.9",
+  "width": 2
 }

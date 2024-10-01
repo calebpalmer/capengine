@@ -21,172 +21,173 @@ namespace CapEngine
 using std::filesystem::path;
 
 TiledTileLayer::TiledTileLayer(
-	const jsoncons::json &in_data,
-	std::weak_ptr<std::vector<TiledTileset>> in_tilesets, int in_tileWidth,
-	int in_tileHeight, int in_mapWidth, int in_mapHeight,
-	std::optional<path> in_path)
-	: m_path(std::move(in_path)),
-	  m_tileWidth(in_tileWidth),
-	  m_tileHeight(in_tileHeight),
-	  m_mapWidth(in_mapWidth),
-	  m_mapHeight(in_mapHeight),
-	  m_texture(getNullTexturePtr()),
-	  m_tilesets(std::move(in_tilesets))
+    const jsoncons::json &in_data,
+    std::vector<std::unique_ptr<TiledTileset>> &in_tilesets, int in_tileWidth,
+    int in_tileHeight, int in_mapWidth, int in_mapHeight,
+    std::optional<path> in_path)
+    : m_path(std::move(in_path)),
+      m_tileWidth(in_tileWidth),
+      m_tileHeight(in_tileHeight),
+      m_mapWidth(in_mapWidth),
+      m_mapHeight(in_mapHeight),
+      m_texture(getNullTexturePtr()),
+      m_tilesets(in_tilesets)
 {
-	m_height = in_data["height"].as<int>();
-	m_width = in_data["width"].as<int>();
-	m_x = in_data["x"].as<int>();
-	m_y = in_data["y"].as<int>();
-	m_visible = in_data["visible"].as<bool>();
-	m_data = in_data["data"].as<std::vector<unsigned int>>();
+    m_height = in_data["height"].as<int>();
+    m_width = in_data["width"].as<int>();
+    m_x = in_data["x"].as<int>();
+    m_y = in_data["y"].as<int>();
+    m_visible = in_data["visible"].as<bool>();
+    m_data = in_data["data"].as<std::vector<unsigned int>>();
 
-	assert(Locator::videoManager != nullptr);
+    assert(Locator::videoManager != nullptr);
 
-	// create the texture
-	int textureWidth{m_width * m_tileWidth};
-	int textureHeight{m_width * m_tileHeight};
-	m_texture =
-		Locator::videoManager->createTexturePtr(textureWidth, textureHeight);
+    // create the texture
+    int textureWidth{m_width * m_tileWidth};
+    int textureHeight{m_width * m_tileHeight};
+    m_texture =
+        Locator::videoManager->createTexturePtr(textureWidth, textureHeight);
 
-	auto &videoManager = Locator::getVideoManager();
-	auto *renderer = Locator::videoManager->getRenderer();
-	assert(renderer != nullptr);
+    auto &videoManager = Locator::getVideoManager();
+    auto *renderer = Locator::videoManager->getRenderer();
+    assert(renderer != nullptr);
 
-	// create a transparent tile
-	auto transparentTexture =
-		videoManager.createTexturePtr(m_tileWidth, m_tileHeight);
-	Colour transparentColour{0, 0, 0, 0};
-	{
-		//set the render target for this scope to the transparent texture
-		auto result = SDL_SetRenderTarget(renderer, m_texture.get());
-		if (result != 0) {
-			BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-		}
+    // create a transparent tile
+    auto transparentTexture =
+        videoManager.createTexturePtr(m_tileWidth, m_tileHeight);
+    Colour transparentColour{0, 0, 0, 0};
+    {
+        // set the render target for this scope to the transparent texture
+        auto result = SDL_SetRenderTarget(renderer, m_texture.get());
+        if (result != 0) {
+            BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+        }
 
-		Defer deferSetRenderTarget(
-			[renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
+        Defer deferSetRenderTarget(
+            [renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
 
-		SDL_SetRenderDrawColor(renderer, transparentColour.m_r,
-							   transparentColour.m_g, transparentColour.m_b,
-							   transparentColour.m_a);
+        SDL_SetRenderDrawColor(renderer, transparentColour.m_r,
+                               transparentColour.m_g, transparentColour.m_b,
+                               transparentColour.m_a);
 
-		result = SDL_SetTextureBlendMode(transparentTexture.get(), SDL_BLENDMODE_BLEND);
-		if (result != 0) {
-			BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-		}
+        result = SDL_SetTextureBlendMode(transparentTexture.get(),
+                                         SDL_BLENDMODE_BLEND);
+        if (result != 0) {
+            BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+        }
 
-		result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-		if (result != 0) {
-			BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-		}
+        result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        if (result != 0) {
+            BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+        }
 
-		SDL_Rect destRect{0, 0, m_tileWidth, m_tileWidth};
-		auto &logger = Locator::getLogger();
+        SDL_Rect destRect{0, 0, m_tileWidth, m_tileWidth};
+        auto &logger = Locator::getLogger();
 
-		if (SDL_RenderFillRect(renderer, &destRect) != 0) {
-			std::string errorMessage(SDL_GetError());
-			logger.log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
-		}
-	}
+        if (SDL_RenderFillRect(renderer, &destRect) != 0) {
+            std::string errorMessage(SDL_GetError());
+            logger.log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
+        }
+    }
 
-	// populate the texture by reading the data and the tiles from the
-	// tilesets Need to read up on global tile ids from
-	// https://doc.mapeditor.org/en/stable/reference/global-tile-ids/
-	int tileIndex{0};
-	auto result = SDL_SetRenderTarget(renderer, m_texture.get());
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    // populate the texture by reading the data and the tiles from the
+    // tilesets Need to read up on global tile ids from
+    // https://doc.mapeditor.org/en/stable/reference/global-tile-ids/
+    int tileIndex{0};
+    auto result = SDL_SetRenderTarget(renderer, m_texture.get());
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	Defer deferSetRenderTarget(
-		[renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
+    Defer deferSetRenderTarget(
+        [renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
 
-	result = SDL_SetTextureBlendMode(m_texture.get(), SDL_BLENDMODE_BLEND);
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    result = SDL_SetTextureBlendMode(m_texture.get(), SDL_BLENDMODE_BLEND);
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	for (int y = 0; y < m_mapHeight; ++y) {
-		for (int x = 0; x < m_mapWidth; ++x) {
-			const GlobalTileInfo tileInfo =
-				getGlobalTileInfo(m_data[tileIndex]);
+    for (int y = 0; y < m_mapHeight; ++y) {
+        for (int x = 0; x < m_mapWidth; ++x) {
+            const GlobalTileInfo tileInfo =
+                getGlobalTileInfo(m_data[tileIndex]);
 
-			// find the tileset
-			auto &&tilesets = m_tilesets.lock();
-			assert(tilesets);
-			assert(renderer != nullptr);
+            // find the tileset
+            assert(renderer != nullptr);
 
-			for (auto &&tileset : boost::adaptors::reverse(*tilesets)) {
-				if (result != 0){
-					BOOST_THROW_EXCEPTION(
-						CapEngineException(std::string(SDL_GetError())));
-				}
+            for (auto &&tileset : boost::adaptors::reverse(m_tilesets)) {
+                if (result != 0) {
+                    BOOST_THROW_EXCEPTION(
+                        CapEngineException(std::string(SDL_GetError())));
+                }
 
-				// global tile id is 0 so no tile there, render transparent
-				if (tileInfo.globalTileId == 0) {
-					// render to the texture
-					SDL_Rect srcRect{0, 0, m_tileWidth, m_tileHeight};
+                // global tile id is 0 so no tile there, render transparent
+                if (tileInfo.globalTileId == 0) {
+                    // render to the texture
+                    SDL_Rect srcRect{0, 0, m_tileWidth, m_tileHeight};
 
-					SDL_Rect dstRect{x * m_tileWidth, y * m_tileHeight,
-									 m_tileWidth, m_tileHeight};
-					int result = SDL_RenderCopy(
-						renderer, transparentTexture.get(), &srcRect, &dstRect);
+                    SDL_Rect dstRect{x * m_tileWidth, y * m_tileHeight,
+                                     m_tileWidth, m_tileHeight};
+                    int result = SDL_RenderCopy(
+                        renderer, transparentTexture.get(), &srcRect, &dstRect);
 
-					if (result != 0) {
-						BOOST_THROW_EXCEPTION(
-							CapEngineException(std::string(SDL_GetError())));
-					}
-				}
+                    if (result != 0) {
+                        BOOST_THROW_EXCEPTION(
+                            CapEngineException(std::string(SDL_GetError())));
+                    }
+                }
 
-				else if (tileset.firstGid() <= tileInfo.globalTileId) {
-					int tileId = static_cast<int>(tileInfo.globalTileId) - tileset.firstGid();
-					int xTile =
-						tileId % (tileset.imageWidth() / tileset.tileWidth());
-					int yTile =
-						tileId / (tileset.imageWidth() / tileset.tileWidth());
+                else if (tileset->firstGid() <= tileInfo.globalTileId) {
+                    int tileId = static_cast<int>(tileInfo.globalTileId) -
+                                 tileset->firstGid();
+                    int xTile =
+                        tileId % (tileset->imageWidth() / tileset->tileWidth());
+                    int yTile =
+                        tileId / (tileset->imageWidth() / tileset->tileWidth());
 
-					// get the tile from the tileset
-					std::optional<Texture *> texture = tileset.texture();
-					if (texture == std::nullopt) {
-						tileset.loadTexture();
-					}
-					texture = tileset.texture();
-					assert(texture != std::nullopt);
+                    // get the tile from the tileset
+                    std::optional<Texture *> texture = tileset->texture();
+                    if (texture == std::nullopt) {
+                        tileset->loadTexture();
+                    }
+                    texture = tileset->texture();
+                    assert(texture != std::nullopt);
 
-					// render to the texture
-					SDL_Rect srcRect{xTile * tileset.tileWidth(),
-									 yTile * tileset.tileHeight(),
-									 tileset.tileWidth(), tileset.tileHeight()};
-					SDL_Rect dstRect{x * m_tileWidth, y * m_tileHeight,
-									 m_tileWidth, m_tileHeight};
-					int result =
-						SDL_RenderCopy(renderer, *texture, &srcRect, &dstRect);
-					if (result != 0) {
-						BOOST_THROW_EXCEPTION(
-							CapEngineException(std::string(SDL_GetError())));
-					}
-				}
-			}
+                    // render to the texture
+                    SDL_Rect srcRect{xTile * tileset->tileWidth(),
+                                     yTile * tileset->tileHeight(),
+                                     tileset->tileWidth(),
+                                     tileset->tileHeight()};
+                    SDL_Rect dstRect{x * m_tileWidth, y * m_tileHeight,
+                                     m_tileWidth, m_tileHeight};
+                    int result =
+                        SDL_RenderCopy(renderer, *texture, &srcRect, &dstRect);
+                    if (result != 0) {
+                        BOOST_THROW_EXCEPTION(
+                            CapEngineException(std::string(SDL_GetError())));
+                    }
+                }
+            }
 
-			tileIndex++;
-		}
-	}
+            tileIndex++;
+        }
+    }
 }
 
 TiledTileLayer TiledTileLayer::create(
-	std::filesystem::path in_path,
-	std::weak_ptr<std::vector<TiledTileset>> in_tilesets, int in_tileWidth,
-	int in_tileHeight, int in_mapWidth, int in_mapHeight)
+    std::filesystem::path in_path,
+    std::vector<std::unique_ptr<TiledTileset>> &in_tilesets, int in_tileWidth,
+    int in_tileHeight, int in_mapWidth, int in_mapHeight)
 {
-	std::ifstream f{in_path};
-	auto json = jsoncons::json::parse(f);
-	return TiledTileLayer(json, std::move(in_tilesets), in_tileWidth,
-						  in_tileHeight, in_mapWidth, in_mapHeight, in_path);
+    std::ifstream f{in_path};
+    auto json = jsoncons::json::parse(f);
+    return TiledTileLayer(json, in_tilesets, in_tileWidth, in_tileHeight,
+                          in_mapWidth, in_mapHeight, in_path);
 }
 
 int TiledTileLayer::width() const { return m_width; }
