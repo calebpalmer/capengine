@@ -90,7 +90,7 @@ void TiledMap::loadJson(const jsoncons::json &in_json)
         }
 
         if (i.at("type").as<std::string>() == "objectgroup") {
-            m_objectGroups.emplace_back(i, m_path);
+            m_objectGroups.emplace_back(i, m_tileWidth * m_width, m_tileHeight * m_height, m_path);
         }
     }
 }

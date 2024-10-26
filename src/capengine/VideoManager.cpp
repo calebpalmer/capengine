@@ -32,40 +32,40 @@ namespace CapEngine
 Window::Window() {}
 
 Window::Window(SDL_Window *pWindow, SDL_Renderer *pRenderer, Viewport viewport,
-			   WindowParams windowParams)
-	: m_window(pWindow),
-	  m_renderer(pRenderer),
-	  m_viewport(viewport),
-	  m_windowParams(windowParams)
+               WindowParams windowParams)
+    : m_window(pWindow),
+      m_renderer(pRenderer),
+      m_viewport(viewport),
+      m_windowParams(windowParams)
 {
 }
 
 bool VideoManager::instantiated = false;
 
 VideoManager::VideoManager()
-	: up_fontManager(new FontManager()),
-	  logger(nullptr),
-	  m_window(getNullWindowPtr()),
-	  m_renderer(getNullRendererPtr()),
-	  initialized(false),
-	  m_transformationMatrix(Matrix::createIdentityMatrix())
+    : up_fontManager(new FontManager()),
+      logger(nullptr),
+      m_window(getNullWindowPtr()),
+      m_renderer(getNullRendererPtr()),
+      initialized(false),
+      m_transformationMatrix(Matrix::createIdentityMatrix())
 {
-	assert(instantiated == false);
-	instantiated = true;
-	logger.reset(new Logger());
+    assert(instantiated == false);
+    instantiated = true;
+    logger.reset(new Logger());
 }
 
 VideoManager::VideoManager(Logger *loggerIn)
-	: up_fontManager(new FontManager()),
-	  logger(loggerIn),
-	  m_window(getNullWindowPtr()),
-	  m_renderer(getNullRendererPtr()),
-	  initialized(false),
-	  m_transformationMatrix(Matrix::createIdentityMatrix())
+    : up_fontManager(new FontManager()),
+      logger(loggerIn),
+      m_window(getNullWindowPtr()),
+      m_renderer(getNullRendererPtr()),
+      initialized(false),
+      m_transformationMatrix(Matrix::createIdentityMatrix())
 {
-	assert(instantiated == false);
-	instantiated = true;
-	initialized = false;
+    assert(instantiated == false);
+    instantiated = true;
+    initialized = false;
 }
 
 /**
@@ -74,244 +74,244 @@ VideoManager::VideoManager(Logger *loggerIn)
 */
 Uint32 VideoManager::initSystem(WindowParams windowParams, bool noWindow)
 {
-	Uint32 windowID = -1;
-	currentWindowParams = windowParams;
+    Uint32 windowID = -1;
+    currentWindowParams = windowParams;
 
-	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
-	{
-		ostringstream errorMsg;
-		errorMsg << "Unable to initialize SDL. Shutting down." << endl;
-		logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
-		shutdown();
-	}
+    if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
+    {
+        ostringstream errorMsg;
+        errorMsg << "Unable to initialize SDL. Shutting down." << endl;
+        logger->log(errorMsg.str(), Logger::CERROR, __FILE__, __LINE__);
+        shutdown();
+    }
 
-	if (!noWindow)
-	{
-		if (windowParams.opengl)
-		{
-			throw CapEngineException("OpenGL not implemented");
-		}
+    if (!noWindow)
+    {
+        if (windowParams.opengl)
+        {
+            throw CapEngineException("OpenGL not implemented");
+        }
 
-		else
-		{
-			m_window = createWindow(windowParams);
-			m_renderer = createRenderer(m_window.get(), windowParams);
+        else
+        {
+            m_window = createWindow(windowParams);
+            m_renderer = createRenderer(m_window.get(), windowParams);
 
-			windowID = SDL_GetWindowID(m_window.get());
+            windowID = SDL_GetWindowID(m_window.get());
 
-			// Create viewpor
-			Viewport viewport = {0, 0, windowParams.width, windowParams.height};
-			Window window = {m_window.get(), m_renderer.get(), viewport, windowParams};
+            // Create viewpor
+            Viewport viewport = {0, 0, windowParams.width, windowParams.height};
+            Window window = {m_window.get(), m_renderer.get(), viewport, windowParams};
 
-			m_windows[windowID] = window;
-			m_windowNamesToIds[mainWindowName] = windowID;
-		}
-	}
+            m_windows[windowID] = window;
+            m_windowNamesToIds[mainWindowName] = windowID;
+        }
+    }
 
-	// load controller maps
-	// loadControllerMaps();
+    // load controller maps
+    // loadControllerMaps();
 
-	initialized = true;
-	return windowID;
+    initialized = true;
+    return windowID;
 }
 
 TexturePtr VideoManager::createTextureFromSurfacePtr(Surface *surface,
-													 bool freeSurface)
+                                                     bool freeSurface)
 {
-	auto windowId = getWindowId(mainWindowName);
-	return createTextureFromSurfacePtr(windowId, surface, freeSurface);
+    auto windowId = getWindowId(mainWindowName);
+    return createTextureFromSurfacePtr(windowId, surface, freeSurface);
 }
 
 TexturePtr VideoManager::createTextureFromSurfacePtr(Uint32 windowId,
-													 Surface *surface,
-													 bool freeSurface)
+                                                     Surface *surface,
+                                                     bool freeSurface)
 {
-	Texture *texture = createTextureFromSurface(windowId, surface, freeSurface);
-	return std::move(TexturePtr(texture, SDL_DestroyTexture));
+    Texture *texture = createTextureFromSurface(windowId, surface, freeSurface);
+    return std::move(TexturePtr(texture, SDL_DestroyTexture));
 }
 
 Texture *VideoManager::createTextureFromSurface(Surface *surface,
-												bool freeSurface)
+                                                bool freeSurface)
 {
-	auto windowId = getWindowId(mainWindowName);
-	return createTextureFromSurface(windowId, surface, freeSurface);
+    auto windowId = getWindowId(mainWindowName);
+    return createTextureFromSurface(windowId, surface, freeSurface);
 }
 
 Texture *VideoManager::createTextureFromSurface(Uint32 windowId,
-												Surface *surface,
-												bool freeSurface)
+                                                Surface *surface,
+                                                bool freeSurface)
 {
-	// Create Texture from Surface
-	auto window = getWindow(windowId);
-	auto pRenderer = window.m_renderer;
+    // Create Texture from Surface
+    auto window = getWindow(windowId);
+    auto pRenderer = window.m_renderer;
 
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(pRenderer, surface);
-	if (texture == nullptr)
-	{
-		ostringstream errorMsg;
-		errorMsg << "Unable to load texture from surface "
-				 << " - " << SDL_GetError();
-		throw CapEngineException(errorMsg.str());
-	}
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(pRenderer, surface);
+    if (texture == nullptr)
+    {
+        ostringstream errorMsg;
+        errorMsg << "Unable to load texture from surface "
+                 << " - " << SDL_GetError();
+        throw CapEngineException(errorMsg.str());
+    }
 
-	if (freeSurface)
-	{
-		this->closeSurface(surface);
-	}
-	return texture;
+    if (freeSurface)
+    {
+        this->closeSurface(surface);
+    }
+    return texture;
 }
 
 TexturePtr VideoManager::loadImagePtr(std::string const &in_filePath) const
 {
-	Texture *texture = loadImage(in_filePath);
-	return TexturePtr(texture, SDL_DestroyTexture);
+    Texture *texture = loadImage(in_filePath);
+    return TexturePtr(texture, SDL_DestroyTexture);
 }
 
 std::shared_ptr<Texture> VideoManager::loadSharedImage(
-	std::string const &in_filePath) const
+    std::string const &in_filePath) const
 {
-	Texture *texture = loadImage(in_filePath);
-	return std::shared_ptr<Texture>(texture, SDL_DestroyTexture);
+    Texture *texture = loadImage(in_filePath);
+    return std::shared_ptr<Texture>(texture, SDL_DestroyTexture);
 }
 
 Texture *VideoManager::loadImage(string filePath) const
 {
-	// Try to initialise SDL_Image
-	int flags = IMG_INIT_JPG | IMG_INIT_PNG;
-	int initted = IMG_Init(flags);
-	if ((initted & flags) != flags)
-	{
-		ostringstream error_message;
-		error_message << "could not init SDL_Image" << endl;
-		error_message << "Reason: " << IMG_GetError() << endl;
-		throw CapEngineException(error_message.str());
-	}
+    // Try to initialise SDL_Image
+    int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+    int initted = IMG_Init(flags);
+    if ((initted & flags) != flags)
+    {
+        ostringstream error_message;
+        error_message << "could not init SDL_Image" << endl;
+        error_message << "Reason: " << IMG_GetError() << endl;
+        throw CapEngineException(error_message.str());
+    }
 
-	// Load Surface
-	SDL_Surface *tempSurface = NULL;
-	tempSurface = IMG_Load(filePath.c_str());
-	if (tempSurface == nullptr)
-	{
-		ostringstream errorMsg;
-		errorMsg << "Unable to load surface " << filePath << " - "
-				 << SDL_GetError();
-		throw CapEngineException(errorMsg.str());
-	}
-	ostringstream logString;
-	logString << "Loaded surface from file " << filePath;
-	logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    // Load Surface
+    SDL_Surface *tempSurface = NULL;
+    tempSurface = IMG_Load(filePath.c_str());
+    if (tempSurface == nullptr)
+    {
+        ostringstream errorMsg;
+        errorMsg << "Unable to load surface " << filePath << " - "
+                 << SDL_GetError();
+        throw CapEngineException(errorMsg.str());
+    }
+    ostringstream logString;
+    logString << "Loaded surface from file " << filePath;
+    logger->log(logString.str(), Logger::CDEBUG, __FILE__, __LINE__);
 
-	setColorKey(tempSurface);
+    setColorKey(tempSurface);
 
-	// Create Texture from Surface
-	SDL_Texture *texture =
-		SDL_CreateTextureFromSurface(m_renderer.get(), tempSurface);
-	if (texture == nullptr)
-	{
-		ostringstream errorMsg;
-		errorMsg << "Unable to load texture from file " << filePath << " - "
-				 << SDL_GetError();
-		throw CapEngineException(errorMsg.str());
-	}
+    // Create Texture from Surface
+    SDL_Texture *texture =
+        SDL_CreateTextureFromSurface(m_renderer.get(), tempSurface);
+    if (texture == nullptr)
+    {
+        ostringstream errorMsg;
+        errorMsg << "Unable to load texture from file " << filePath << " - "
+                 << SDL_GetError();
+        throw CapEngineException(errorMsg.str());
+    }
 
-	SDL_FreeSurface(tempSurface);
-	return texture;
+    SDL_FreeSurface(tempSurface);
+    return texture;
 }
 
 void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture *texture,
-							   Rect *srcRect, bool applyTransform)
+                               Rect *srcRect, bool applyTransform)
 {
-	auto window = getWindow(windowID);
-	auto pRenderer = window.m_renderer;
+    auto window = getWindow(windowID);
+    auto pRenderer = window.m_renderer;
 
-	Viewport viewport = getViewport(windowID);
+    Viewport viewport = getViewport(windowID);
 
-	// Transform the dstRect
-	if (applyTransform) {
-		dstRect = viewport.transformRect(dstRect);
-	}
+    // Transform the dstRect
+    if (applyTransform) {
+        dstRect = viewport.transformRect(dstRect);
+    }
 
-	auto [w, h] = getWindowLogicalResolution(windowID);
-	Rect windowRect = {0, 0, w, h};
+    auto [w, h] = getWindowLogicalResolution(windowID);
+    Rect windowRect = {0, 0, w, h};
 
-	// only draw things that are in the window
-	if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE)
-	{
-		int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
-		if (result != 0)
-		{
-			logger->log("Unable to render texture", Logger::CERROR, __FILE__,
-						__LINE__);
-		}
-	}
+    // only draw things that are in the window
+    if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE)
+    {
+        int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
+        if (result != 0)
+        {
+            logger->log("Unable to render texture", Logger::CERROR, __FILE__,
+                        __LINE__);
+        }
+    }
 }
 
 void VideoManager::drawTexture(Uint32 windowID, Texture *texture, Rect *srcRect,
-							   Rect *dstRect,
-							   std::optional<double> rotationDegrees,
-							   SDL_RendererFlip flip,
-							   bool applyTransform)
+                               Rect *dstRect,
+                               std::optional<double> rotationDegrees,
+                               SDL_RendererFlip flip,
+                               bool applyTransform)
 {
-	assert(texture != nullptr);
+    assert(texture != nullptr);
 
-	auto window = getWindow(windowID);
-	auto pRenderer = window.m_renderer;
+    auto window = getWindow(windowID);
+    auto pRenderer = window.m_renderer;
 
-	Viewport viewport = getViewport(windowID);
+    Viewport viewport = getViewport(windowID);
 
-	// Transform the dstRect
-	if (dstRect)
-	{
-		Rect newDstRect = *dstRect;
-		if (applyTransform) newDstRect = viewport.transformRect(*dstRect);
-		*dstRect = newDstRect;
-	}
+    // Transform the dstRect
+    if (dstRect)
+    {
+        Rect newDstRect = *dstRect;
+        if (applyTransform) newDstRect = viewport.transformRect(*dstRect);
+        *dstRect = newDstRect;
+    }
 
-	auto [w, h] = getWindowResolution(windowID);
-	Rect windowRect = {0, 0, w, h};
+    auto [w, h] = getWindowResolution(windowID);
+    Rect windowRect = {0, 0, w, h};
 
-	// only draw things that are in the window
-	if (!dstRect || detectMBRCollision(*dstRect, windowRect) != COLLISION_NONE)
-	{
-		if (rotationDegrees)
-		{
-			const SDL_Point *center = nullptr;
-			SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect,
-							 *rotationDegrees, center, flip);
-		}
-		else
-		{
-			SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, 0, nullptr, flip);
-		}
-	}
+    // only draw things that are in the window
+    if (!dstRect || detectMBRCollision(*dstRect, windowRect) != COLLISION_NONE)
+    {
+        if (rotationDegrees)
+        {
+            const SDL_Point *center = nullptr;
+            SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect,
+                             *rotationDegrees, center, flip);
+        }
+        else
+        {
+            SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, 0, nullptr, flip);
+        }
+    }
 }
 
 void VideoManager::drawTexture(Texture *in_dstTexture, Texture *in_srcTexture, Rect &in_dstRect,
-					 Rect &in_srcRect)
+                     Rect &in_srcRect)
 {
-	// set the rendering target to the current texture to have everything
-	// rendered to m_texture
-	SDL_Renderer *renderer = this->getRenderer();
+    // set the rendering target to the current texture to have everything
+    // rendered to m_texture
+    SDL_Renderer *renderer = this->getRenderer();
 
-	auto result = SDL_SetRenderTarget(renderer, in_dstTexture);
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    auto result = SDL_SetRenderTarget(renderer, in_dstTexture);
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	Defer deferSetRenderTarget(
-		[renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
+    Defer deferSetRenderTarget(
+        [renderer]() { SDL_SetRenderTarget(renderer, nullptr); });
 
-	result = SDL_SetTextureBlendMode(in_dstTexture, SDL_BLENDMODE_BLEND);
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    result = SDL_SetTextureBlendMode(in_dstTexture, SDL_BLENDMODE_BLEND);
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	if (result != 0) {
-		BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
-	}
+    result = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    if (result != 0) {
+        BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+    }
 
-	SDL_RenderCopy(renderer, in_srcTexture, &in_srcRect, &in_dstRect);
+    SDL_RenderCopy(renderer, in_srcTexture, &in_srcRect, &in_dstRect);
 }
 
 //! Sets the clip rect for a window
@@ -372,21 +372,20 @@ void VideoManager::drawScreen(Uint32 windowID)
     {
         string sFPS = to_string(fps);
         int fontSize = 14;
-        Surface *fpsSurface = up_fontManager->getTextSurface(
+        SurfacePtr fpsSurface = up_fontManager->getTextSurface(
             ttfFontPath, sFPS, fontSize, fpsColourR, fpsColourG, fpsColourB);
         Texture *fpsTexture =
-            SDL_CreateTextureFromSurface(pRenderer, fpsSurface);
-        SDL_FreeSurface(fpsSurface);
+            SDL_CreateTextureFromSurface(pRenderer, fpsSurface.get());
 
         int x = 15;
         int y = 15;
-		auto textureWidth = this->getTextureWidth(fpsTexture);
-		auto textureHeight = this->getTextureHeight(fpsTexture);
+        auto textureWidth = this->getTextureWidth(fpsTexture);
+        auto textureHeight = this->getTextureHeight(fpsTexture);
 
         //drawTexture(windowID, x, y, fpsTexture, nullptr, false);
 
-		// draw fpsTexture to the screen at x, y
-		drawTexture(windowID, Rect{x, y, x + static_cast<int>(textureWidth), y + static_cast<int>(textureHeight)}, fpsTexture, nullptr, false);
+        // draw fpsTexture to the screen at x, y
+        drawTexture(windowID, Rect{x, y, x + static_cast<int>(textureWidth), y + static_cast<int>(textureHeight)}, fpsTexture, nullptr, false);
 
         this->closeTexture(fpsTexture);
     }
@@ -411,11 +410,11 @@ void VideoManager::drawScreen(Uint32 windowID)
 std::pair<int, int> VideoManager::getWindowResolution(Uint32 windowID)
 {
     const Window window = getWindow(windowID);
-	int width = 0;
-	int height = 0;
+    int width = 0;
+    int height = 0;
     SDL_GetWindowSize(window.m_window, &width, &height);
 
-	return std::make_pair(width, height);
+    return std::make_pair(width, height);
 }
 
 //! Gets the logical size of a window renderer.
@@ -581,7 +580,7 @@ Texture *VideoManager::createTexture(int width, int height)
     SDL_Texture *texture =
         SDL_CreateTexture(m_renderer.get(), SDL_PIXELFORMAT_ARGB8888,
                           SDL_TEXTUREACCESS_TARGET
-						  ,width, height);
+                          ,width, height);
     if (texture == nullptr)
     {
         ostringstream error;
@@ -920,9 +919,9 @@ WindowPtr VideoManager::createWindow(WindowParams windowParams)
     else
     {
         // windowed
-		if(!windowParams.bordered){
-			flags |= SDL_WINDOW_BORDERLESS;
-		}
+        if(!windowParams.bordered){
+            flags |= SDL_WINDOW_BORDERLESS;
+        }
 
         if (windowParams.resizable) flags = flags | SDL_WINDOW_RESIZABLE;
 

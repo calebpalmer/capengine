@@ -1,0 +1,14 @@
+{ "columns":3,
+ "image":"rock_paper_scissors-table-120-80.png",
+ "imageheight":80,
+ "imagewidth":360,
+ "margin":0,
+ "name":"rps",
+ "spacing":0,
+ "tilecount":3,
+ "tiledversion":"1.9.2",
+ "tileheight":80,
+ "tilewidth":120,
+ "type":"tileset",
+ "version":"1.9"
+}

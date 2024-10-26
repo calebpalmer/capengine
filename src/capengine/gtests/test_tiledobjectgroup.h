@@ -12,39 +12,39 @@ const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
 {
 "objects":
   [
-	{
-	  "class":"superclass",
-	  "height": 120.0,
-	  "id":1,
-	  "name":"superobject",
-	  "rotation":0,
-	  "visible":true,
-	  "width":150.0,
-	  "x":103.2,
-	  "y":244.4
-	},
-	{
-	  "class":"superclass",
-	  "height": 120.0,
-	  "id":1,
-	  "name":"superobject2",
-	  "rotation":0,
-	  "visible":true,
-	  "width":150.0,
-	  "x":203.2,
-	  "y":44.4
-	},
-	{
-	  "class":"subclass",
-	  "height": 100.0,
-	  "id":1,
-	  "name":"sadsubobject",
-	  "rotation":0,
-	  "visible":true,
-	  "width":80.0,
-	  "x":10.0,
-	  "y":90.0
-	}
+    {
+      "class":"superclass",
+      "height": 120.0,
+      "id":1,
+      "name":"superobject",
+      "rotation":0,
+      "visible":true,
+      "width":150.0,
+      "x":103.2,
+      "y":244.4
+    },
+    {
+      "class":"superclass",
+      "height": 120.0,
+      "id":1,
+      "name":"superobject2",
+      "rotation":0,
+      "visible":true,
+      "width":150.0,
+      "x":203.2,
+      "y":44.4
+    },
+    {
+      "class":"subclass",
+      "height": 100.0,
+      "id":1,
+      "name":"sadsubobject",
+      "rotation":0,
+      "visible":true,
+      "width":80.0,
+      "x":10.0,
+      "y":90.0
+    }
   ]
 }
 )");
@@ -77,7 +77,7 @@ TEST(TiledObjectGroupTest, TestObjectFromJson)
 
 TEST(TiledObjectGroupTest, TestObjectGroupFromJson)
 {
-    TiledObjectGroup objectGroup{kTestObjects};
+    TiledObjectGroup objectGroup{kTestObjects, 64, 64};
 
     auto const& objects = objectGroup.objects();
     ASSERT_EQ(3, objects.size());
@@ -96,7 +96,7 @@ TEST(TiledObjectGroupTest, TestObjectGroupFromJson)
 
 TEST(TileOBjectGroupTest, TestFindObjectByName)
 {
-    TiledObjectGroup objectGroup{kTestObjects};
+    TiledObjectGroup objectGroup{kTestObjects, 64, 64};
 
     auto maybeObject = objectGroup.objectByName("superobject");
     ASSERT_TRUE(maybeObject.has_value());

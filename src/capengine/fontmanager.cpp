@@ -1,5 +1,7 @@
 #include "fontmanager.h"
 #include "CapEngineException.h"
+#include "captypes.h"
+#include "defer.h"
 
 #include <sstream>
 
@@ -54,56 +56,55 @@ FontManager::FontManager()
   }
 }
 
+SurfacePtr getTextSurface(const std::string &font, const std::string &text,
+                          int fontSize, Colour colour){
+    TTF_Font *fontFace = nullptr;
+    fontFace = TTF_OpenFont(font.c_str(), fontSize);
+    if (fontFace == 0) {
+        string ttf_error = TTF_GetError();
+        TTF_CloseFont(fontFace);
+        stringstream errorMsg;
+        errorMsg << "Unable to open font: " << font << endl
+                 << "\tDetails: " << ttf_error;
+        throw CapEngineException(errorMsg.str());
+        return getNullSurfacePtr();;
+    }
+    Defer defer([&fontFace](){TTF_CloseFont(fontFace);});
+
+    SDL_Surface *fontSurface = nullptr;
+    SDL_Color fontColor;
+    fontColor.r = colour.m_r;
+    fontColor.g = colour.m_g;
+    fontColor.b = colour.m_b;
+
+    fontSurface = TTF_RenderText_Solid(fontFace, text.c_str(), fontColor);
+    if (fontSurface == 0) {
+        string ttf_error = TTF_GetError();
+        TTF_CloseFont(fontFace);
+        throw CapEngineException("Unable to get text surface: " + ttf_error);
+    }
+
+    return SurfacePtr{fontSurface, SDL_FreeSurface};
+}
+
 FontManager::~FontManager() { TTF_Quit(); }
 
-Surface *FontManager::getTextSurface(const std::string &font,
-                                     const std::string &text, int fontSize,
-                                     int surfaceWidth, int surfaceHeight) const
-{
-  return getTextSurface(font, text, fontSize, 0, 0, 0);
-}
+// SurfacePtr FontManager::getTextSurface(const std::string &font,
+//                                      const std::string &text, int fontSize,
+//                                      int surfaceWidth, int surfaceHeight) const
+// {
+//   return getTextSurface(font, text, fontSize, 0, 0, 0);
+// }
 
-Surface *FontManager::getTextSurface(const std::string &font,
-                                     const std::string &text, int fontSize,
-                                     Uint8 r, Uint8 g, Uint8 b) const
-{
-  TTF_Font *fontFace;
-  string fontPath(font);
-  fontFace = TTF_OpenFont(font.c_str(), fontSize);
-  if (fontFace == 0) {
-    string ttf_error = TTF_GetError();
-    TTF_CloseFont(fontFace);
-    stringstream errorMsg;
-    errorMsg << "Unable to open font: " << font << endl
-             << "\tDetails: " << ttf_error;
-    throw CapEngineException(errorMsg.str());
-    return nullptr;
-  }
-
-  SDL_Surface *fontSurface;
-  SDL_Color fontColor;
-  fontColor.r = r;
-  fontColor.g = g;
-  fontColor.b = b;
-
-  fontSurface = TTF_RenderText_Solid(fontFace, text.c_str(), fontColor);
-  if (fontSurface == 0) {
-    string ttf_error = TTF_GetError();
-    TTF_CloseFont(fontFace);
-    throw CapEngineException("Unable to get text surface: " + ttf_error);
-  }
-
-  TTF_CloseFont(fontFace);
-  return fontSurface;
-}
-
-Surface *FontManager::getTextSurface(const std::string &font,
+SurfacePtr FontManager::getTextSurface(const std::string &font,
                                      const std::string &text, int fontSize,
                                      Colour colour) const
 {
   return getTextSurface(font, text, fontSize, colour.m_r, colour.m_g,
                         colour.m_b);
 }
+
+
 
 //! Get the height in pixels of the given font.
 /**

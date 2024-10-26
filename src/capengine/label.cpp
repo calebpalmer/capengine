@@ -79,11 +79,11 @@ void Label::loadTexture()
     CAP_THROW_ASSERT(m_windowId != VideoManager::kInvalidWindowId,
                      "Invalid window id");
 
-    SDL_Surface *surface =
+    auto surface =
         m_fontManager.getTextSurface(m_font, m_text, m_fontSize, m_colour);
 
     m_texture = Locator::videoManager->createTextureFromSurfacePtr(
-        m_windowId, surface, true);
+        m_windowId, surface.get(), true);
     CAP_THROW_ASSERT(m_texture != nullptr, "Unable to create texture");
 }
 
