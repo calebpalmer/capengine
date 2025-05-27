@@ -1,19 +1,20 @@
 #include "textbutton.h"
 
-#include "locator.h"
-#include "scanconvert.h"
-
 #include <SDL2/SDL_events.h>
+
+#include <boost/log/trivial.hpp>
 #include <functional>
 #include <sstream>
+
+#include "locator.h"
+#include "logging.h"
+#include "scanconvert.h"
 
 using namespace std;
 using namespace CapEngine;
 
-TextButton::TextButton(Uint32 windowID, string text, string font, int fontSize,
-                       Vector position)
-    : TextButton(windowID, text, font, fontSize, position,
-                 Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
+TextButton::TextButton(Uint32 windowID, string text, string font, int fontSize, Vector position)
+    : TextButton(windowID, text, font, fontSize, position, Colour(0xFF, 0xFF, 0xFF), Colour(0xBA, 0xBA, 0xBA))
 {
 }
 
@@ -27,21 +28,19 @@ TextButton::TextButton(Uint32 windowID, std::string text, std::string font,
 {
     // get surface
     FontManager fontManager;
-    Surface *textSurfaceInactive = fontManager.getTextSurface(
+    SurfacePtr textSurfaceInactive = fontManager.getTextSurface(
         m_font, m_text, m_fontSize, inactiveColour.m_r, inactiveColour.m_g,
         inactiveColour.m_b);
     m_pTextTextureInactive =
-        Locator::videoManager->createTextureFromSurface(textSurfaceInactive);
-    Locator::videoManager->closeSurface(textSurfaceInactive);
+        Locator::videoManager->createTextureFromSurface(textSurfaceInactive.get());
 
     // Surface* textSurfaceActive = fontManager.getTextSurface(m_font, m_text,
     // m_fontSize, 0xBA, 0xBA, 0xBA);
-    Surface *textSurfaceActive =
+    SurfacePtr textSurfaceActive =
         fontManager.getTextSurface(m_font, m_text, m_fontSize, activeColour.m_r,
                                    activeColour.m_g, activeColour.m_b);
     m_pTextTextureActive =
-        Locator::videoManager->createTextureFromSurface(textSurfaceActive);
-    Locator::videoManager->closeSurface(textSurfaceActive);
+        Locator::videoManager->createTextureFromSurface(textSurfaceActive.get());
 
     // set width and height
     m_width = Locator::videoManager->getTextureWidth(m_pTextTextureInactive);
@@ -183,13 +182,12 @@ void TextButton::executeCallback() { m_callback(); }
 void TextButton::setIndicator(const string imagePath)
 {
     try {
-        Texture *tempTexture = Locator::videoManager->loadImage(imagePath);
+        Texture* tempTexture = Locator::videoManager->loadImage(imagePath);
         m_pSelectedTexture = tempTexture;
-    } catch (const CapEngineException &e) {
+    }
+    catch (const CapEngineException& e) {
         ostringstream errorStream;
-        errorStream << "Unable to load indicator: " << e.what() << endl
-                    << "Using default indicator";
-        Locator::logger->log(errorStream.str(), Logger::CWARNING, __FILE__,
-                             __LINE__);
+        errorStream << "Unable to load indicator: " << e.what() << endl << "Using default indicator";
+        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning) << errorStream.str();
     }
 }

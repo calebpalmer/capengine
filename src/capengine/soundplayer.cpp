@@ -1,40 +1,42 @@
 #include "soundplayer.h"
-#include "CapEngineException.h"
-#include "locator.h"
+
 #include <assert.h>
+
 #include <iostream>
 #include <sstream>
+
+#include "CapEngineException.h"
+#include "locator.h"
+#include "logging.h"
 
 using namespace CapEngine;
 using namespace std;
 
-CapEngine::SoundPlayer *CapEngine::SoundPlayer::instance;
+CapEngine::SoundPlayer* CapEngine::SoundPlayer::instance;
 
 SoundPlayer::SoundPlayer() : idCounter(0)
 {
-  SDL_AudioSpec targetFormat;
-  memset(&targetFormat, 0, sizeof(SDL_AudioSpec));
-  memset(&audioFormat, 0, sizeof(SDL_AudioSpec));
-  targetFormat.freq = FREQ;
-  targetFormat.format = FORMAT;
-  targetFormat.samples = SAMPLES;
-  targetFormat.channels = CHANNELS;
-  targetFormat.callback =
-      (void (*)(void *, unsigned char *, int)) & audioCallback;
+    SDL_AudioSpec targetFormat;
+    memset(&targetFormat, 0, sizeof(SDL_AudioSpec));
+    memset(&audioFormat, 0, sizeof(SDL_AudioSpec));
+    targetFormat.freq = FREQ;
+    targetFormat.format = FORMAT;
+    targetFormat.samples = SAMPLES;
+    targetFormat.channels = CHANNELS;
+    targetFormat.callback = (void (*)(void*, unsigned char*, int)) & audioCallback;
 
-  if (SDL_OpenAudio(&targetFormat, &this->audioFormat) < 0) {
-    ostringstream errorMsg;
-    errorMsg << "Couldn't open audio: " << SDL_GetError();
-    throw CapEngineException(errorMsg.str());
-  }
+    if (SDL_OpenAudio(&targetFormat, &this->audioFormat) < 0) {
+        ostringstream errorMsg;
+        errorMsg << "Couldn't open audio: " << SDL_GetError();
+        throw CapEngineException(errorMsg.str());
+    }
 
-  ostringstream logMsg;
-  logMsg << "audio device format opened" << endl
-         << "\tfrequency: " << audioFormat.freq << endl
-         << "\tchannels: " << audioFormat.channels << endl
-         << "\tformat: "
-         << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
-  Locator::logger->log(logMsg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    ostringstream logMsg;
+    logMsg << "audio device format opened" << endl
+           << "\tfrequency: " << audioFormat.freq << endl
+           << "\tchannels: " << audioFormat.channels << endl
+           << "\tformat: " << (audioFormat.format == AUDIO_U8 ? "PCM U8" : "PCM S16");
+    BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << logMsg.str();
 }
 
 SoundPlayer::~SoundPlayer() { SDL_CloseAudio(); }

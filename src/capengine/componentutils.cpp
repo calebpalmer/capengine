@@ -39,7 +39,7 @@ std::string componentTypeToString(ComponentType in_componentType)
 void assertPropertyExists(const jsoncons::json &in_json,
                           const std::string &in_propertyName)
 {
-  if (!in_json.has_key(in_propertyName)) {
+  if (!in_json.contains(in_propertyName)) {
     std::ostringstream msg;
     msg << in_propertyName << " property is required.";
     CAP_THROW(CapEngineException(msg.str()));

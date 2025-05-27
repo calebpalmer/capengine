@@ -21,7 +21,14 @@ const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
       "visible":true,
       "width":150.0,
       "x":103.2,
-      "y":244.4
+          "y":244.4,
+          "properties":[
+              {
+                  "name":"capengine-font-ttf",
+                      "type":"string",
+                      "value":"tahoma.ttf"
+              }
+          ]
     },
     {
       "class":"superclass",

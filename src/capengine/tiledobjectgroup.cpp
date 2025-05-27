@@ -2,6 +2,7 @@
 
 #include <boost/throw_exception.hpp>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -9,14 +10,47 @@
 #include "captypes.h"
 #include "locator.h"
 #include "jsoncons/basic_json.hpp"
+#include "tiledcustomproperty.h"
 
 namespace CapEngine
 {
 
 namespace {
 
-void renderText(Texture* io_texture, const TiledObjectGroup::Text& in_text){
+void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object){
+    if(!in_object.text.has_value()){
+        return;
+    }
 
+    // create a surface with the text
+    Colour colour{in_object.text->colour};
+
+    // get the font settings
+    auto fontFamily = std::find_if(in_object.properties.begin(), in_object.properties.end(),
+                                   [](const TiledCustomProperty& in_property){
+                                       return in_property.name == "capengine-font-ttf";
+                                   });
+    if(fontFamily == in_object.properties.end()){
+        BOOST_THROW_EXCEPTION(CapEngineException("Missing tiled object property \"capengine-font-ttf\""));
+    }
+
+    auto fontSizeProperty = std::find_if(in_object.properties.begin(), in_object.properties.end(),
+                                   [](const TiledCustomProperty& in_property){
+                                       return in_property.name == "capengine-font-size";
+                                   });
+    if(fontSizeProperty == in_object.properties.end()){
+        BOOST_THROW_EXCEPTION(CapEngineException("Missing tiled object property \"capengine-font-size\""));
+    }
+
+    auto surface = Locator::getFontManager().getTextSurface(fontFamily->value, in_object.text->text, fontSizeProperty->as<int>(), colour);
+    auto& videoManager = Locator::getVideoManager();
+    auto texture = videoManager.createTextureFromSurfacePtr(surface.get(), true);
+    auto srcWidth = videoManager.getTextureWidth(texture.get());
+    auto srcHeight = videoManager.getTextureHeight(texture.get());
+    Rect srcRect{0, 0, static_cast<int>(srcWidth), static_cast<int>(srcHeight)}; // TODO get width and heights
+    Rect dstRect{static_cast<int>(in_object.x), static_cast<int>(in_object.y), static_cast<int>(in_object.width), static_cast<int>(in_object.height)};
+
+    videoManager.drawTexture(io_texture, texture.get(), dstRect, srcRect);
 }
 
 }  // namespace
@@ -27,7 +61,7 @@ TiledObjectGroup::Text::Text(const jsoncons::json& in_json)
     fontfamily = in_json.get_value_or<std::string>("fontfamily", "");
     pixelsize = in_json.get_value_or<int>("pixelsize", 16);
     wrap = in_json.get_value_or<bool>("wrap", false);
-    color = in_json.get_value_or<std::string>("color", "#000000");
+    colour = in_json.get_value_or<std::string>("color", "#000000");
     bold = in_json.get_value_or<bool>("bold", false);
     italic = in_json.get_value_or<bool>("italic", false);
     underline = in_json.get_value_or<bool>("underline", false);
@@ -35,6 +69,7 @@ TiledObjectGroup::Text::Text(const jsoncons::json& in_json)
     kerning = in_json.get_value_or<bool>("kerning", true);
     halign = in_json.get_value_or<std::string>("halign", "left");
     valign = in_json.get_value_or<std::string>("valign", "top");
+
 }
 
 TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
@@ -52,6 +87,17 @@ TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
     if (in_json.contains("text")) {
         text = std::make_optional<Text>(in_json["text"]);
     }
+
+    if (in_json.contains("properties")) {
+        for (const auto& property : in_json["properties"].array_range()) {
+            properties.push_back(TiledCustomProperty{property["name"].as_string(),
+                                          property["type"].as_string(),
+                                          property["value"].as_string()});
+        }
+    }
+
+    std::cout << "Loaded object with id " << id << "\n";
+
 }
 
 
@@ -60,6 +106,9 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data,
                                    std::optional<std::filesystem::path> in_path)
     : m_path(in_path), m_mapWidth(in_width), m_mapHeight(in_height), m_texture(getNullTexturePtr())
 {
+    m_id = in_data["id"].as_integer<int>();
+    m_name = in_data.get_value_or<std::string>("name", "");
+
     if (!in_data.contains("objects")) {
         BOOST_THROW_EXCEPTION(CapEngineException("Missing key \"objects\""));
     }
@@ -70,6 +119,8 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data,
             object.name != std::nullopt ? *(object.name) : object.id;
         m_objects.emplace(key, std::move(object));
     }
+
+    std::cout << "Loaded object group with id " << m_id << " with name " << (m_name != std::nullopt ? *m_name : "Unknown") << "\n";
 }
 
 std::map<std::string, TiledObjectGroup::Object> const&
@@ -94,9 +145,9 @@ std::optional<TiledObjectGroup::Object> TiledObjectGroup::objectByName(
 
     if (maybeObject != m_objects.end()) {
         return maybeObject->second;
-    } else {
-        return std::nullopt;
     }
+
+    return std::nullopt;
 }
 
 void TiledObjectGroup::render(Texture* io_texture){
@@ -104,7 +155,9 @@ void TiledObjectGroup::render(Texture* io_texture){
     if(m_texture == nullptr){
         for(auto && object : m_objects){
             if(object.second.text.has_value()){
-                renderText(m_texture.get(), object.second.text.value());
+                renderText(m_texture.get(), object.second);
+            }
+            else {
             }
         }
     }

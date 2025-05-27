@@ -2,9 +2,14 @@
 #define CAPENGINE_TILEDOBJECTGROUP_H
 
 #include "captypes.h"
+#include "tiledcustomproperty.h"
 
+#include <charconv>
+#include <string>
+#include <system_error>
 #include <filesystem>
 #include <jsoncons/json.hpp>
+#include <stdexcept>
 #include <string_view>
 
 namespace CapEngine
@@ -16,7 +21,7 @@ class TiledObjectGroup
         std::string text;
         std::string fontfamily;
         int pixelsize = 10;
-        std::string color;
+        std::string colour;
         bool wrap = false;
         bool bold = false;
         bool italic = false;
@@ -39,6 +44,7 @@ class TiledObjectGroup
         double x;
         double y;
         std::optional<Text> text;
+        std::vector<TiledCustomProperty> properties;
 
         explicit Object(const jsoncons::json& in_json);
     };
@@ -57,10 +63,13 @@ class TiledObjectGroup
    private:
     std::optional<std::filesystem::path> m_path;
     std::map<std::string, Object> m_objects;
+    int m_id = 0;
+    std::optional<std::string> m_name;
     int m_mapWidth;
     int m_mapHeight;
     TexturePtr m_texture;
 };
+
 }  // namespace CapEngine
 
 #endif /* CAPENGINE_TILEDOBJECTGROUP_H */

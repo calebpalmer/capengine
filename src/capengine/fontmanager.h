@@ -1,36 +1,39 @@
-#ifndef FONTMANAGER_H
-#define FONTMANAGER_H
+#ifndef CAPENGINE_FONTMANAGER_H
+#define CAPENGINE_FONTMANAGER_H
+
+#include <SDL2/SDL_ttf.h>
+
+#include <map>
+#include <string>
 
 #include "VideoManager.h"
 #include "captypes.h"
 #include "colour.h"
-#include <SDL2/SDL_ttf.h>
-#include <map>
-#include <string>
 
 namespace CapEngine
 {
 
-// TODO: this doesn't need to be a class
 //! Class for creating text surfaces
 class FontManager
 {
-public:
-  FontManager();
-  ~FontManager();
+   public:
+    FontManager();
+    ~FontManager();
 
-
-  SurfacePtr getTextSurface(const std::string &font, const std::string &text,
-                          int fontSize, Uint8 r, Uint8 g, Uint8 b) const;
-  SurfacePtr getTextSurface(const std::string &font, const std::string &text,
-                          int fontSize, Colour colour) const;
-  SurfacePtr getTextSurface(const std::string &font, const std::string &text,
-                            int fontSize, Colour colour);
-
-}; // FontManager
+    [[nodiscard]] SurfacePtr getTextSurface(const std::string &font,
+                                            const std::string &text,
+                                            int fontSize, Uint8 r, Uint8 g,
+                                            Uint8 b) const;
+    [[nodiscard]] SurfacePtr getTextSurface(const std::string &font,
+                                            const std::string &text,
+                                            int fontSize, Colour colour) const;
+    [[nodiscard]] SurfacePtr getTextSurface(const std::string &font,
+                                     const std::string &text, int fontSize,
+                                     int surfaceWidth, int surfaceHeight) const;
+};  // FontManager
 
 int getFontHeight(const std::string &font, int fontSize);
 
-} // namespace CapEngine
+}  // namespace CapEngine
 
-#endif
+#endif // CAPENGINE_FONTMANAGER_H

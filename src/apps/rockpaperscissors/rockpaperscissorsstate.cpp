@@ -121,7 +121,9 @@ void RockPaperScissorsState::renderPlayers()
         &m_state.player2.drawPosition, std::nullopt, SDL_FLIP_HORIZONTAL);
 }
 
-void RockPaperScissorsState::renderScore() {}
+void RockPaperScissorsState::renderScore() {
+
+}
 
 void RockPaperScissorsState::render()
 {
@@ -137,7 +139,10 @@ void RockPaperScissorsState::render()
         m_windowId, CapEngine::Rect{0, 0, logicalWidth, logicalHeight},
         CapEngine::Colour{0xA0, 0xA0, 0xA0, 0xFF});
 
+    assert(m_map != nullptr);
+    m_map->render();
     renderPlayers();
+    renderScore();
 }
 
 void RockPaperScissorsState::update(double ms)

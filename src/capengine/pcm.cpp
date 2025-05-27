@@ -1,15 +1,21 @@
 #include "pcm.h"
-#include "CapEngineException.h"
-#include "locator.h"
-#include "soundplayer.h"
+
+#include <assert.h>
+#include <stdlib.h>
+
 #include <algorithm>
 #include <array>
-#include <assert.h>
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/trivial.hpp>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <stdlib.h>
+
+#include "CapEngineException.h"
+#include "locator.h"
+#include "logging.h"
+#include "soundplayer.h"
 
 using namespace std;
 using namespace CapEngine;
@@ -17,7 +23,7 @@ using namespace CapEngine;
 PCM::PCM(const string filePath) : position(0)
 {
     // set it up for reading a sound file
-    SNDFILE *sndFile;
+    SNDFILE* sndFile;
     SF_INFO sndInfo;
     memset(&sndInfo, 0, sizeof(sndInfo));
     sndInfo.format = 0;
@@ -29,8 +35,7 @@ PCM::PCM(const string filePath) : position(0)
         throw CapEngineException(msg.str());
     }
 
-    if ((sndInfo.format & SF_FORMAT_PCM_U8) == 0 &&
-        (sndInfo.format * SF_FORMAT_PCM_16 == 0)) {
+    if ((sndInfo.format & SF_FORMAT_PCM_U8) == 0 && (sndInfo.format * SF_FORMAT_PCM_16 == 0)) {
         throw CapEngineException("Sound file is not U8 or S16 PCM format");
     }
 
@@ -43,7 +48,7 @@ PCM::PCM(const string filePath) : position(0)
     sf_close(sndFile);
     ostringstream msg;
     msg << "Successfully loaded sound from " << filePath;
-    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << msg.str();
 }
 
 PCM::~PCM() {}

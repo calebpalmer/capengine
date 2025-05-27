@@ -1,13 +1,11 @@
 #include "uiutils.h"
+#include <boost/log/sources/severity_feature.hpp>
 
 #include "linearlayout.h"
 #include "locator.h"
 #include "uipropertyvisitor.h"
 
-namespace CapEngine
-{
-namespace UI
-{
+namespace CapEngine::UI {
 
 //! Gets the WidgetState
 /**
@@ -15,19 +13,19 @@ namespace UI
 */
 std::shared_ptr<WidgetState> getWidgetState()
 {
-  try {
-    boost::any maybeWidgetState =
-        Locator::locate(WidgetState::kWidgetStateLocatorId);
-    auto pWidgetState =
-        boost::any_cast<std::shared_ptr<WidgetState>>(maybeWidgetState);
+    try {
+        boost::any maybeWidgetState =
+            Locator::locate(WidgetState::kWidgetStateLocatorId);
+        auto pWidgetState =
+            boost::any_cast<std::shared_ptr<WidgetState>>(maybeWidgetState);
 
-    assert(pWidgetState != nullptr);
-    return pWidgetState;
-  } catch (const boost::bad_any_cast &e) {
-    assert(Locator::logger != nullptr);
-    Locator::logger->log(e, Logger::CWARNING, __FILE__, __LINE__);
-    BOOST_THROW_EXCEPTION(CapEngineException("Could not locate WidgetState"));
-  }
+        assert(pWidgetState != nullptr);
+        return pWidgetState;
+    }
+    catch (const boost::bad_any_cast& e) {
+        BOOST_THROW_EXCEPTION(
+            CapEngineException("Could not locate WidgetState"));
+    }
 }
 
 //! Get the current active control if there is one.
@@ -37,11 +35,10 @@ std::shared_ptr<WidgetState> getWidgetState()
 */
 boost::optional<std::shared_ptr<Control>> getCurrentControl()
 {
-  std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
-  if (pWidgetState == nullptr)
-    return boost::none;
+    std::shared_ptr<WidgetState> pWidgetState = getWidgetState();
+    if (pWidgetState == nullptr) return boost::none;
 
-  return pWidgetState->peekControl();
+    return pWidgetState->peekControl();
 }
 
 //! Creates a Property Grid widget.
@@ -51,27 +48,27 @@ boost::optional<std::shared_ptr<Control>> getCurrentControl()
  \return
    The Widget holding the properties.
 */
-std::shared_ptr<Widget>
-    createPropertyGrid(const std::vector<Property> &properties)
+std::shared_ptr<Widget> createPropertyGrid(
+    const std::vector<Property>& properties)
 {
-  auto pGridLayout = LinearLayout::create(LinearLayout::Orientation::Vertical);
-  assert(pGridLayout != nullptr);
+    auto pGridLayout =
+        LinearLayout::create(LinearLayout::Orientation::Vertical);
+    assert(pGridLayout != nullptr);
 
-  UIPropertyVisitor visitor;
-  for (size_t i = 0; i < properties.size(); i++) {
-    Property prop = properties[i];
-    prop.accept(visitor);
+    UIPropertyVisitor visitor;
+    for (size_t i = 0; i < properties.size(); i++) {
+        Property prop = properties[i];
+        prop.accept(visitor);
 
-    std::optional<std::shared_ptr<Widget>> maybePropertyWidget =
-        visitor.getWidget();
-    assert(maybePropertyWidget != std::nullopt);
-    assert(*maybePropertyWidget != nullptr);
+        std::optional<std::shared_ptr<Widget>> maybePropertyWidget =
+            visitor.getWidget();
+        assert(maybePropertyWidget != std::nullopt);
+        assert(*maybePropertyWidget != nullptr);
 
-    pGridLayout->addWidget(std::move(*maybePropertyWidget));
-  }
+        pGridLayout->addWidget(std::move(*maybePropertyWidget));
+    }
 
-  return pGridLayout;
+    return pGridLayout;
 }
 
-} // namespace UI
-} // namespace CapEngine
+}  // namespace CapEngine::UI

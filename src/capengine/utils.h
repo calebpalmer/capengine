@@ -3,8 +3,9 @@
 
 #include <SDL2/SDL.h>
 
-//#include <boost/optional.hpp>
+#include <cstdlib>
 #include <optional>
+#include <string>
 
 namespace CapEngine
 {
@@ -14,6 +15,7 @@ SDL_Rect expandRectToFit(const SDL_Rect &srcRect,
 std::optional<SDL_Rect> clipRect(const SDL_Rect &srcRect,
                                  const SDL_Rect &dstRect);
 std::optional<SDL_Rect> intersectRects(const SDL_Rect &r1, const SDL_Rect &r2);
+std::optional<std::string> getEnv(std::string const& in_varName);
 
 } // namespace CapEngine
 

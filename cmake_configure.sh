@@ -2,7 +2,7 @@
 set -e
 set -x
 
-#./conan_install.sh
+./conan_install.sh
 
 BUILDDIR=$1
 INSTALLDIR=$BUILDDIR/install
@@ -16,6 +16,7 @@ CC=gcc CXX=g++ cmake -S${SCRIPT_DIR} -B. \
       -GNinja \
       -DCMAKE_INSTALL_PREFIX=$INSTALLDIR \
       -DCMAKE_BUILD_TYPE=$BUILDTYPE \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+      -DCMAKE_TOOLCHAIN_FILE="build/Debug/generators/conan_toolchain.cmake"
 
 popd

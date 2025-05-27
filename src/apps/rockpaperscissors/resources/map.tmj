@@ -119,12 +119,23 @@
                  "height":19,
                  "id":7,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"capengine-font-size",
+                         "type":"string",
+                         "value":"12"
+                        }, 
+                        {
+                         "name":"capengine-font-ttf",
+                         "type":"string",
+                         "value":"tahoma.ttf"
+                        }],
                  "rotation":0,
                  "text":
                     {
                      "color":"#ffffff",
-                     "text":"Player 1",
-                     "wrap":true
+                     "fontfamily":"Tahoma",
+                     "text":"Player 1"
                     },
                  "visible":true,
                  "width":74.2080663842398,
@@ -136,12 +147,23 @@
                  "height":19,
                  "id":10,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"capengine-font-size",
+                         "type":"string",
+                         "value":"12"
+                        }, 
+                        {
+                         "name":"capengine-font-ttf",
+                         "type":"string",
+                         "value":"tahoma.ttf"
+                        }],
                  "rotation":0,
                  "text":
                     {
                      "color":"#ffffff",
-                     "text":"Player 2",
-                     "wrap":true
+                     "fontfamily":"Tahoma",
+                     "text":"Player 2"
                     },
                  "visible":true,
                  "width":74.2081,
@@ -151,6 +173,12 @@
          "offsetx":-40.8698192745941,
          "offsety":-0.400684502692105,
          "opacity":1,
+         "properties":[
+                {
+                 "name":"capengine-objectgroup-visible",
+                 "type":"string",
+                 "value":"true"
+                }],
          "type":"objectgroup",
          "visible":true,
          "x":0,

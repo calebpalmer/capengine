@@ -3,6 +3,10 @@
 #include "logger.h"
 #include "objectmanager.h"
 #include "simpleobjectmanager.h"
+#include "logging.h"
+
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/trivial.hpp>
 #include <memory>
 
 // implementation
@@ -81,12 +85,12 @@ void Scene2d::load(const jsoncons::json &in_json)
                 m_pObjectManager->addObject(std::move(pHeapObject));
             } catch (const ObjectCreationError &e) {
                 // log and move on
-                CAP_LOG_EXCEPTION(Locator::logger, e, Logger::CWARNING);
+                CapEngine::logException(e);
             }
         }
     }
 
-    catch (const jsoncons::parse_error &e) {
+    catch (const jsoncons::ser_error &e) {
         throw SceneLoadException(in_json, e.what());
     }
 }
@@ -116,8 +120,7 @@ void Scene2d::update(double in_ms)
         CAP_THROW_NULL(objects[i], "Object in objectmanager is null");
         auto pUpdateObject = objects[i]->update(in_ms);
         if (!pUpdateObject) {
-            CAP_LOG(Locator::logger, "GameObject::update returned nullptr",
-                    Logger::CWARNING);
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning) << "GameObject::update returned nullptr";
             continue;
         }
 
@@ -134,10 +137,9 @@ void Scene2d::update(double in_ms)
                     const auto succeeded =
                         layer.second->resolveCollisions(*pUpdateObject);
 
-                    if (!succeeded)
-                        CAP_LOG(Locator::logger,
-                                "Collisions could not be resolved",
-                                Logger::CWARNING);
+                    if (!succeeded){
+                        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning) << "Collisions could not be resolved";
+                    }
                 }
             }
         }

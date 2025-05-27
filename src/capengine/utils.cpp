@@ -2,6 +2,9 @@
 #include "collision.h"
 
 #include <algorithm>
+#include <cstdlib>
+#include <optional>
+#include <string_view>
 
 namespace CapEngine
 {
@@ -100,6 +103,12 @@ std::optional<SDL_Rect> intersectRects(const SDL_Rect &r1, const SDL_Rect &r2)
   }
 
   return std::nullopt;
+}
+
+std::optional<std::string> getEnv(std::string const& in_varName)
+{
+    const char* val = std::getenv(in_varName.c_str());
+    return val == nullptr ? std::nullopt : std::make_optional(std::string{val});
 }
 
 } // namespace CapEngine

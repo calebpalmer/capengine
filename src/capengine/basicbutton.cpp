@@ -1,30 +1,36 @@
 #include "basicbutton.h"
+
+#include <boost/log/trivial.hpp>
+
 #include "locator.h"
+#include "logging.h"
 
 using namespace std;
 using namespace CapEngine;
 
-BasicButton::BasicButton(string text, int fontSize, Vector position, int width,
-                         int height)
-    : m_text(text), m_width(width), m_height(height), m_selected(false),
-      m_enabled(false), m_activated(true), m_position(position)
+BasicButton::BasicButton(string text, int fontSize, Vector position, int width, int height)
+    : m_text(text),
+      m_width(width),
+      m_height(height),
+      m_selected(false),
+      m_enabled(false),
+      m_activated(true),
+      m_position(position)
 {
+    // create text surface
+    FontManager fontManager;
+    string font = "res/tahoma.ttf";
+    m_pTextSurface = fontManager.getTextSurface(font, m_text, fontSize);
 
-  // create text surface
-  FontManager fontManager;
-  string font = "res/tahoma.ttf";
-  m_pTextSurface = fontManager.getTextSurface(font, m_text, fontSize);
+    // check dimensions of font surface to make sure they do not overflow the
+    // button size
+    VideoManager* pVideoManager = Locator::videoManager;
+    int fontWidth = pVideoManager->getSurfaceWidth(m_pTextSurface);
+    int fontHeight = pVideoManager->getSurfaceHeight(m_pTextSurface);
 
-  // check dimensions of font surface to make sure they do not overflow the
-  // button size
-  VideoManager *pVideoManager = Locator::videoManager;
-  int fontWidth = pVideoManager->getSurfaceWidth(m_pTextSurface);
-  int fontHeight = pVideoManager->getSurfaceHeight(m_pTextSurface);
-
-  if (fontWidth > m_width || fontHeight > m_height) {
-    Locator::logger->log("font exceeds button size", Logger::CWARNING, __FILE__,
-                         __LINE__);
-  }
+    if (fontWidth > m_width || fontHeight > m_height) {
+        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning) << "font exceeds button size";
+    }
 }
 
 BasicButton::~BasicButton()

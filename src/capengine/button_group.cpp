@@ -2,11 +2,12 @@
 
 #include <SDL2/SDL_events.h>
 #include <assert.h>
+
 #include <cmath>
 #include <sstream>
 
 #include "locator.h"
-#include "logger.h"
+#include "logging.h"
 
 using namespace CapEngine;
 using namespace std;
@@ -14,11 +15,8 @@ using namespace std;
 ButtonGroup::ButtonGroup() : m_activeButtonIndex(0)
 {
     assert(Locator::eventSubscriber != nullptr);
-    m_keyboardEventConnection =
-        Locator::eventSubscriber->m_keyboardEventSignal.connect(
-            [this](SDL_KeyboardEvent in_keyboardEvent) {
-                this->handleKeyboardEvent(in_keyboardEvent);
-            });
+    m_keyboardEventConnection = Locator::eventSubscriber->m_keyboardEventSignal.connect(
+        [this](SDL_KeyboardEvent in_keyboardEvent) { this->handleKeyboardEvent(in_keyboardEvent); });
 }
 
 ButtonGroup::~ButtonGroup()
@@ -49,22 +47,18 @@ void ButtonGroup::handleKeyboardEvent(SDL_KeyboardEvent in_keyboardEvent)
 {
     if (m_enabled) {
         // keyboard
-        if (in_keyboardEvent.keysym.sym == SDLK_UP &&
-            in_keyboardEvent.type == SDL_KEYDOWN) {
+        if (in_keyboardEvent.keysym.sym == SDLK_UP && in_keyboardEvent.type == SDL_KEYDOWN) {
             ostringstream msg;
             m_activeButtonIndex =
-                static_cast<int>(
-                    std::abs(static_cast<double>(m_activeButtonIndex - 1))) %
-                m_buttons.size();
+                static_cast<int>(std::abs(static_cast<double>(m_activeButtonIndex - 1))) % m_buttons.size();
             msg << "Button group index changed to " << m_activeButtonIndex;
-            Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << msg.str();
         }
-        if (in_keyboardEvent.keysym.sym == SDLK_DOWN &&
-            in_keyboardEvent.type == SDL_KEYUP) {
+        if (in_keyboardEvent.keysym.sym == SDLK_DOWN && in_keyboardEvent.type == SDL_KEYUP) {
             ostringstream msg;
             m_activeButtonIndex = (m_activeButtonIndex + 1) % m_buttons.size();
             msg << "Button group index changed to " << m_activeButtonIndex;
-            Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << msg.str();
         }
         // if enter, activate current button
         if (in_keyboardEvent.keysym.sym == SDLK_RETURN) {
@@ -73,75 +67,7 @@ void ButtonGroup::handleKeyboardEvent(SDL_KeyboardEvent in_keyboardEvent)
     }
 }
 
-// void ButtonGroup::receiveEvent(const SDL_Event event, CapEngine::Time *time)
-// {
-//     if (m_enabled) {
-//         // keyboard
-//         if (event.type == SDL_KEYUP) {
-//             const SDL_KeyboardEvent *keyboardEvent =
-//                 reinterpret_cast<const SDL_KeyboardEvent *>(&event);
-//             if (keyboardEvent->keysym.sym == SDLK_UP) {
-//                 ostringstream msg;
-//                 m_activeButtonIndex =
-//                     static_cast<int>(std::abs(
-//                         static_cast<double>(m_activeButtonIndex - 1))) %
-//                     m_buttons.size();
-//                 msg << "Button group index changed to " <<
-//                 m_activeButtonIndex; Locator::logger->log(msg.str(),
-//                 Logger::CDEBUG, __FILE__,
-//                                      __LINE__);
-//             }
-//             if (keyboardEvent->keysym.sym == SDLK_DOWN) {
-//                 ostringstream msg;
-//                 m_activeButtonIndex =
-//                     (m_activeButtonIndex + 1) % m_buttons.size();
-//                 msg << "Button group index changed to " <<
-//                 m_activeButtonIndex; Locator::logger->log(msg.str(),
-//                 Logger::CDEBUG, __FILE__,
-//                                      __LINE__);
-//             }
-//             // if enter, activate current button
-//             if (keyboardEvent->keysym.sym == SDLK_RETURN) {
-//                 m_buttons[m_activeButtonIndex]->executeCallback();
-//             }
-//         }
-
-//         // game controller
-//         if (m_controllers.size() > 0 && event.type == SDL_CONTROLLERBUTTONUP)
-//         {
-//             const SDL_ControllerButtonEvent *controllerEvent =
-//                 reinterpret_cast<const SDL_ControllerButtonEvent *>(&event);
-//             SDL_GameControllerButton button =
-//                 (SDL_GameControllerButton)controllerEvent->button;
-//             if (button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
-//                 ostringstream msg;
-//                 m_activeButtonIndex =
-//                     static_cast<int>(std::abs(
-//                         static_cast<double>(m_activeButtonIndex - 1))) %
-//                     m_buttons.size();
-//                 msg << "Button group index changed to " <<
-//                 m_activeButtonIndex; Locator::logger->log(msg.str(),
-//                 Logger::CDEBUG, __FILE__,
-//                                      __LINE__);
-//             } else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
-//                 ostringstream msg;
-//                 m_activeButtonIndex =
-//                     (m_activeButtonIndex + 1) % m_buttons.size();
-//                 msg << "Button group index changed to " <<
-//                 m_activeButtonIndex; Locator::logger->log(msg.str(),
-//                 Logger::CDEBUG, __FILE__,
-//                                      __LINE__);
-//             } else if (button == SDL_CONTROLLER_BUTTON_A) {
-//                 m_buttons[m_activeButtonIndex]->executeCallback();
-//             }
-//         }
-//     }
-// }
-
-void ButtonGroup::addButton(std::unique_ptr<Button> pbutton)
-{
-  m_buttons.push_back(std::move(pbutton));
-}
+void ButtonGroup::addButton(std::unique_ptr<Button> pbutton) { m_buttons.push_back(std::move(pbutton)); }
 
 void ButtonGroup::removeButton(int index) {}
 

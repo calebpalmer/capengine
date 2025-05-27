@@ -1,21 +1,21 @@
 #include "gameobject.h"
 
-#include "CapEngineException.h"
-#include "locator.h"
-#include "logger.h"
-
 #include <algorithm>
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/trivial.hpp>
 #include <cmath>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
 
-namespace CapEngine
-{
+#include "CapEngineException.h"
+#include "locator.h"
+#include "logging.h"
 
-namespace
-{
+namespace CapEngine {
+
+namespace {
 
 /**
  * @brief Get a set of specific component types.
@@ -23,19 +23,17 @@ namespace
  * @return A collection of components of the specific type.
  */
 template <typename T>
-std::vector<std::shared_ptr<T>> getComponentsOfType(
-    const std::vector<std::shared_ptr<Component>> &in_components)
+std::vector<std::shared_ptr<T>> getComponentsOfType(const std::vector<std::shared_ptr<Component>>& in_components)
 {
     std::vector<std::shared_ptr<T>> components;
-    for (auto &&component : in_components) {
+    for (auto&& component : in_components) {
         auto tComponent = std::dynamic_pointer_cast<T>(component);
-        if (tComponent)
-            components.push_back(tComponent);
+        if (tComponent) components.push_back(tComponent);
     }
     return components;
 }
 
-} // namespace
+}  // namespace
 
 using namespace std;
 
@@ -56,7 +54,7 @@ GameObject::GameObject(bool newID)
    \param io_other
    The other object.
 */
-void GameObject::swap(GameObject &io_other) noexcept
+void GameObject::swap(GameObject& io_other) noexcept
 {
     if (this != &io_other) {
         std::swap(position, io_other.position);
@@ -76,7 +74,7 @@ void GameObject::swap(GameObject &io_other) noexcept
 }
 
 //! Copy constructor.
-GameObject::GameObject(const GameObject &in_other)
+GameObject::GameObject(const GameObject& in_other)
 {
     position = in_other.position;
     previousPosition = in_other.previousPosition;
@@ -96,13 +94,11 @@ GameObject::GameObject(const GameObject &in_other)
     // deep copy the componentsn
     m_components.reserve(in_other.m_components.size());
     std::transform(
-        in_other.m_components.begin(), in_other.m_components.end(),
-        std::back_inserter(m_components),
-        [](std::shared_ptr<Component> in_pComponent)
-            -> std::shared_ptr<Component> { return in_pComponent->clone(); });
+        in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
+        [](std::shared_ptr<Component> in_pComponent) -> std::shared_ptr<Component> { return in_pComponent->clone(); });
 }
 
-GameObject::GameObject(GameObject &&in_other)
+GameObject::GameObject(GameObject&& in_other)
 {
     position = in_other.position;
     previousPosition = in_other.previousPosition;
@@ -131,7 +127,7 @@ GameObject::GameObject(GameObject &&in_other)
     this->m_components = std::move(in_other.m_components);
 }
 
-GameObject &GameObject::operator=(GameObject &&in_other)
+GameObject& GameObject::operator=(GameObject&& in_other)
 {
     if (this != &in_other) {
         this->position = in_other.position;
@@ -160,7 +156,7 @@ GameObject &GameObject::operator=(GameObject &&in_other)
 }
 
 //! Copy assignment operator.
-GameObject &GameObject::operator=(const GameObject &in_other)
+GameObject& GameObject::operator=(const GameObject& in_other)
 {
     // GameObject tmp(in_other);
     // swap(tmp);
@@ -187,11 +183,8 @@ GameObject &GameObject::operator=(const GameObject &in_other)
 
         // deep copy the components
         m_components.reserve(in_other.m_components.size());
-        std::transform(in_other.m_components.begin(),
-                       in_other.m_components.end(),
-                       std::back_inserter(m_components),
-                       [](std::shared_ptr<Component> in_pComponent)
-                           -> std::shared_ptr<Component> {
+        std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
+                       [](std::shared_ptr<Component> in_pComponent) -> std::shared_ptr<Component> {
                            return in_pComponent->clone();
                        });
     }
@@ -199,14 +192,12 @@ GameObject &GameObject::operator=(const GameObject &in_other)
     return *this;
 }
 
-void GameObject::render(const Camera2d &in_camera, uint32_t in_windowId)
+void GameObject::render(const Camera2d& in_camera, uint32_t in_windowId)
 {
-    std::vector<std::shared_ptr<Component>> graphicsComponents =
-        this->getComponents(ComponentType::Graphics);
+    std::vector<std::shared_ptr<Component>> graphicsComponents = this->getComponents(ComponentType::Graphics);
 
-    for (auto &&pComponent : graphicsComponents) {
-        auto pGraphicsComponent =
-            std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
+    for (auto&& pComponent : graphicsComponents) {
+        auto pGraphicsComponent = std::dynamic_pointer_cast<GraphicsComponent>(pComponent);
         assert(pGraphicsComponent != nullptr);
 
         pGraphicsComponent->render(*this, in_camera, in_windowId);
@@ -215,12 +206,11 @@ void GameObject::render(const Camera2d &in_camera, uint32_t in_windowId)
 
 unique_ptr<GameObject> GameObject::update(double ms) const
 {
-
     // clone new game object and pas to updates
 
     auto newObject = std::make_unique<GameObject>(*this);
 
-    for (auto &&pComponent : newObject->getComponents()) {
+    for (auto&& pComponent : newObject->getComponents()) {
         pComponent->update(*newObject, ms);
     }
 
@@ -232,14 +222,11 @@ Rectangle GameObject::boundingPolygon() const
     Rectangle rectangle;
     bool first = true;
 
-    for (auto &&pComponent : m_components) {
-
-        auto pPhysicsComponent =
-            std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
+    for (auto&& pComponent : m_components) {
+        auto pPhysicsComponent = std::dynamic_pointer_cast<PhysicsComponent>(pComponent);
 
         if (pPhysicsComponent) {
-            std::optional<Rectangle> maybeRectangle =
-                pPhysicsComponent->boundingPolygon(*this);
+            std::optional<Rectangle> maybeRectangle = pPhysicsComponent->boundingPolygon(*this);
 
             if (!maybeRectangle) {
                 continue;
@@ -258,61 +245,44 @@ Rectangle GameObject::boundingPolygon() const
 
     if (first) {
         // no collider was found.  make a 1x1 rect based off position.
-        return Rectangle{static_cast<int>(std::round(position.getX())),
-                         static_cast<int>(std::round(position.getY())), 1, 1};
+        return Rectangle{static_cast<int>(std::round(position.getX())), static_cast<int>(std::round(position.getY())),
+                         1, 1};
     }
 
     return rectangle;
 }
 
-bool GameObject::handleCollision(CapEngine::CollisionType type,
-                                 CapEngine::CollisionClass class_,
-                                 GameObject *otherObject,
-                                 Vector collisionLocation)
+bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::CollisionClass class_,
+                                 GameObject* otherObject, Vector collisionLocation)
 {
-    std::optional<GameObject *> maybeOtherObject = std::nullopt;
-    if (otherObject)
-        maybeOtherObject = otherObject;
+    std::optional<GameObject*> maybeOtherObject = std::nullopt;
+    if (otherObject) maybeOtherObject = otherObject;
 
-    const auto physicsComponents =
-        getComponentsOfType<PhysicsComponent>(this->m_components);
+    const auto physicsComponents = getComponentsOfType<PhysicsComponent>(this->m_components);
 
-    for (auto &&component : physicsComponents) {
-        if (component->handleCollision(type, class_, *this, maybeOtherObject,
-                                       collisionLocation))
-            return true;
+    for (auto&& component : physicsComponents) {
+        if (component->handleCollision(type, class_, *this, maybeOtherObject, collisionLocation)) return true;
     }
 
     return false;
 }
 
-unique_ptr<GameObject> GameObject::clone() const
-{
-    return std::make_unique<GameObject>(*this);
-}
+unique_ptr<GameObject> GameObject::clone() const { return std::make_unique<GameObject>(*this); }
 
 ObjectID GameObject::generateID()
 {
     ostringstream msg;
     msg << "ID " << (nextID) << " generated";
-    Locator::logger->log(msg.str(), Logger::CDEBUG, __FILE__, __LINE__);
+    BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << msg.str();
+
     return nextID++;
 }
 
-std::shared_ptr<ObjectData> GameObject::getObjectData() const
-{
-    return m_pObjectData;
-}
+std::shared_ptr<ObjectData> GameObject::getObjectData() const { return m_pObjectData; }
 
-void GameObject::setObjectData(std::shared_ptr<ObjectData> pObjectData)
-{
-    m_pObjectData = pObjectData;
-}
+void GameObject::setObjectData(std::shared_ptr<ObjectData> pObjectData) { m_pObjectData = pObjectData; }
 
-GameObject::ObjectState GameObject::getObjectState() const
-{
-    return m_objectState;
-}
+GameObject::ObjectState GameObject::getObjectState() const { return m_objectState; }
 
 void GameObject::setObjectState(GameObject::ObjectState objectState)
 {
@@ -332,37 +302,31 @@ ObjectID GameObject::getParentObjectID() const { return m_parentObjectID; }
 
 void GameObject::setParentObjectID(ObjectID id) { m_parentObjectID = id; }
 
-Vector const &GameObject::getPosition() const { return position; }
+Vector const& GameObject::getPosition() const { return position; }
 
 void GameObject::setPosition(Vector positionIn) { position = positionIn; }
 
-Vector const &GameObject::getOrientation() const { return orientation; }
+Vector const& GameObject::getOrientation() const { return orientation; }
 
-void GameObject::setOrientation(Vector orientationIn)
-{
-    orientation = orientationIn;
-}
+void GameObject::setOrientation(Vector orientationIn) { orientation = orientationIn; }
 
-Vector const &GameObject::getVelocity() const { return velocity; }
+Vector const& GameObject::getVelocity() const { return velocity; }
 
 void GameObject::setVelocity(Vector velocityIn) { velocity = velocityIn; }
 
-Vector const &GameObject::getAcceleration() const { return acceleration; }
+Vector const& GameObject::getAcceleration() const { return acceleration; }
 
-void GameObject::setAcceleration(Vector accelerationIn)
-{
-    acceleration = accelerationIn;
-}
+void GameObject::setAcceleration(Vector accelerationIn) { acceleration = accelerationIn; }
 
-Vector const &GameObject::getForce() const { return force; }
+Vector const& GameObject::getForce() const { return force; }
 
 void GameObject::setForce(Vector in_force) { this->force = in_force; }
 
 int GameObject::generateMessageId() { return nextMessageId++; }
 
-void GameObject::send(int id, const string &message)
+void GameObject::send(int id, const string& message)
 {
-    for (auto &&pComponent : m_components) {
+    for (auto&& pComponent : m_components) {
         assert(pComponent != nullptr);
         pComponent->receive(*this, id, message);
     }
@@ -371,27 +335,18 @@ void GameObject::send(int id, const string &message)
 /**
    Return the previous position of the object
 */
-Vector const &GameObject::getPreviousPosition() const
-{
-    return previousPosition;
-}
+Vector const& GameObject::getPreviousPosition() const { return previousPosition; }
 
 /**
    Set the previous position of the object
 */
-void GameObject::setPreviousPosition(Vector position)
-{
-    previousPosition = position;
-}
+void GameObject::setPreviousPosition(Vector position) { previousPosition = position; }
 
-std::ostream &operator<<(std::ostream &stream,
-                         const CollisionEvent collisionEvent)
+std::ostream& operator<<(std::ostream& stream, const CollisionEvent collisionEvent)
 {
     std::ostringstream repr;
-    repr << collisionEvent.type << " with "
-         << collisionEvent.object1->getObjectID();
-    if (collisionEvent.object2 != nullptr)
-        repr << " and " << collisionEvent.object2->getObjectID();
+    repr << collisionEvent.type << " with " << collisionEvent.object1->getObjectID();
+    if (collisionEvent.object2 != nullptr) repr << " and " << collisionEvent.object2->getObjectID();
 
     repr << " class: " << collisionEvent.class_;
 
@@ -399,26 +354,19 @@ std::ostream &operator<<(std::ostream &stream,
     return stream;
 }
 
-std::ostream &operator<<(std::ostream &stream, GameObject const &gameObject)
+std::ostream& operator<<(std::ostream& stream, GameObject const& gameObject)
 {
     std::ostringstream repr;
-    repr << "GameObject[" << gameObject.m_objectID << "]@"
-         << gameObject.boundingPolygon();
+    repr << "GameObject[" << gameObject.m_objectID << "]@" << gameObject.boundingPolygon();
     ;
 
     stream << repr.str();
     return stream;
 }
 
-GameObject::ObjectType GameObject::getObjectType() const
-{
-    return m_objectType;
-}
+GameObject::ObjectType GameObject::getObjectType() const { return m_objectType; }
 
-void GameObject::setObjectType(GameObject::ObjectType in_objectType)
-{
-    m_objectType = in_objectType;
-}
+void GameObject::setObjectType(GameObject::ObjectType in_objectType) { m_objectType = in_objectType; }
 
 //! Adds a new component
 /**
@@ -439,10 +387,7 @@ void GameObject::addComponent(std::shared_ptr<Component> in_pComponent)
 \return
 The components
 */
-const std::vector<std::shared_ptr<Component>> &GameObject::getComponents()
-{
-    return m_components;
-}
+const std::vector<std::shared_ptr<Component>>& GameObject::getComponents() { return m_components; }
 
 //! Gets all the components of a given type.
 /**
@@ -451,16 +396,12 @@ const std::vector<std::shared_ptr<Component>> &GameObject::getComponents()
 \return
   The components.
 */
-std::vector<std::shared_ptr<Component>>
-    GameObject::getComponents(ComponentType in_type)
+std::vector<std::shared_ptr<Component>> GameObject::getComponents(ComponentType in_type)
 {
     std::vector<std::shared_ptr<Component>> components;
 
-    std::copy_if(m_components.begin(), m_components.end(),
-                 std::back_inserter(components),
-                 [in_type](auto &&in_component) {
-                     return in_component->getType() == in_type;
-                 });
+    std::copy_if(m_components.begin(), m_components.end(), std::back_inserter(components),
+                 [in_type](auto&& in_component) { return in_component->getType() == in_type; });
 
     return components;
 }
@@ -469,32 +410,21 @@ std::vector<std::shared_ptr<Component>>
  * @brief returns the y axis orientation of the object.
  * @return The y axis orientation.
  */
-YAxisOrientation GameObject::getYAxisOrientation() const
-{
-    return m_yAxisOrientation;
-}
+YAxisOrientation GameObject::getYAxisOrientation() const { return m_yAxisOrientation; }
 
 /**
  * @brief Sets the y axis orientation of the object.
  * @param[in] in_orientation The orientation.
  */
-void GameObject::setYAxisOrientation(YAxisOrientation in_orientation)
-{
-    m_yAxisOrientation = in_orientation;
-}
+void GameObject::setYAxisOrientation(YAxisOrientation in_orientation) { m_yAxisOrientation = in_orientation; }
 
-GameObject::Metadata const &GameObject::metadata() const { return m_metadata; }
-void GameObject::setMetadata(std::string const &in_key,
-                             MetadataType const &in_value)
-{
-    m_metadata[in_key] = in_value;
-}
+GameObject::Metadata const& GameObject::metadata() const { return m_metadata; }
+void GameObject::setMetadata(std::string const& in_key, MetadataType const& in_value) { m_metadata[in_key] = in_value; }
 
-GameObjectStateChangedEvent::GameObjectStateChangedEvent(
-    GameObject *object, GameObject::ObjectState stateBefore,
-    GameObject::ObjectState stateAfter)
+GameObjectStateChangedEvent::GameObjectStateChangedEvent(GameObject* object, GameObject::ObjectState stateBefore,
+                                                         GameObject::ObjectState stateAfter)
     : m_object(object), m_stateBefore(stateBefore), m_stateAfter(stateAfter)
 {
 }
 
-} // namespace CapEngine
+}  // namespace CapEngine

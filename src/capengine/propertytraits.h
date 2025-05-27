@@ -4,10 +4,9 @@
 #include "property.h"
 
 #include <string>
+#include <cstdint>
 
-namespace CapEngine
-{
-namespace TypeTraits
+namespace CapEngine::TypeTraits
 {
 
 // TypeTrait class for Properties
@@ -41,7 +40,6 @@ template <> struct PropertyTraits<double> {
   static const PropertyType propertyType = PropertyType::Float64;
 };
 
-} // namespace TypeTraits
-} // namespace CapEngine
+} // namespace CapEngine::TypeTraits
 
 #endif // CAPENGINE_PROPERTYTRAITS_H

@@ -1,63 +1,55 @@
 #include "collision.h"
 
-#include "locator.h"
-#include "logger.h"
-#include "scanconvert.h"
-
 #include <algorithm>
+#include <boost/log/trivial.hpp>
 #include <functional>
 #include <sstream>
 
+#include "locator.h"
+#include "logging.h"
+#include "scanconvert.h"
+
 using namespace std;
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 Rectangle::Rectangle() {}
-Rectangle::Rectangle(int xIn, int yIn, int widthIn, int heightIn)
-    : x(xIn), y(yIn), width(widthIn), height(heightIn)
-{
-}
-Rectangle::Rectangle(const Rect &rect)
-    : x(rect.x), y(rect.y), width(rect.w), height(rect.h)
-{
-}
+Rectangle::Rectangle(int xIn, int yIn, int widthIn, int heightIn) : x(xIn), y(yIn), width(widthIn), height(heightIn) {}
+Rectangle::Rectangle(const Rect& rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h) {}
 
 Rect Rectangle::toRect() const
 {
-    Rect rect = {static_cast<int>(std::round(x)),
-                 static_cast<int>(std::round(y)),
-                 static_cast<int>(std::round(width)),
+    Rect rect = {static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), static_cast<int>(std::round(width)),
                  static_cast<int>(std::round(height))};
     return rect;
 }
 
 Rectangle Rectangle::raiseBottom(int in_amount) const
 {
-  Rectangle newRect = *this;
-  newRect.height = newRect.height - in_amount;
-  return newRect;
+    Rectangle newRect = *this;
+    newRect.height = newRect.height - in_amount;
+    return newRect;
 }
 
 Rectangle Rectangle::lowerTop(int in_amount) const
 {
-  Rectangle newRect = *this;
-  newRect.y = newRect.y + in_amount;
-  return newRect;
+    Rectangle newRect = *this;
+    newRect.y = newRect.y + in_amount;
+    return newRect;
 }
 
 Rectangle Rectangle::narrowLeft(int in_amount) const
 {
-  Rectangle newRect = *this;
-  newRect.x = newRect.x + in_amount;
-  return newRect;
+    Rectangle newRect = *this;
+    newRect.x = newRect.x + in_amount;
+    return newRect;
 }
 
 Rectangle Rectangle::narrowRight(int in_amount) const
 {
-  Rectangle newRect = *this;
-  newRect.width = newRect.width - in_amount;
-  return newRect;
+    Rectangle newRect = *this;
+    newRect.width = newRect.width - in_amount;
+    return newRect;
 }
 
 //! joins to rectangles together to make a single greater rectangle.
@@ -69,23 +61,25 @@ Rectangle Rectangle::narrowRight(int in_amount) const
 \return
   \li The joined rectangles.
 */
-Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
+Rectangle join(const Rectangle& in_left, const Rectangle& in_right)
 {
     // calculate x and y
-    Rectangle rect{in_left.x <= in_right.x ? in_left.x : in_right.x,
-                   in_left.y <= in_right.y ? in_left.y : in_right.y, 0, 0};
+    Rectangle rect{in_left.x <= in_right.x ? in_left.x : in_right.x, in_left.y <= in_right.y ? in_left.y : in_right.y,
+                   0, 0};
 
     // calculate width
     if (in_left.x + in_left.width >= in_right.x + in_right.width) {
         rect.width = in_left.x + in_left.width - rect.x;
-    } else {
+    }
+    else {
         rect.width = in_right.x + in_right.width - rect.x;
     }
 
     // calculate height
     if (in_left.y + in_left.height >= in_right.y + in_right.height) {
         rect.height = in_left.y + in_left.height - rect.y;
-    } else {
+    }
+    else {
         rect.height = in_right.y + in_right.height - rect.y;
     }
 
@@ -101,13 +95,12 @@ Rectangle join(const Rectangle &in_left, const Rectangle &in_right)
  \return
    \li True if point is in rect. False otherwise.
 */
-bool pointInRect(const Point &point, const Rectangle &rect)
+bool pointInRect(const Point& point, const Rectangle& rect)
 {
-    return point.x >= rect.x && point.x <= rect.x + rect.width &&
-           point.y >= rect.y && point.y <= rect.y + rect.height;
+    return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }
 
-CollisionType detectMBRCollision(const Rectangle &r1, const Rectangle &r2)
+CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2)
 {
     int top1, top2, bottom1, bottom2, right1, right2, left1, left2;
     left1 = r1.x;
@@ -119,17 +112,14 @@ CollisionType detectMBRCollision(const Rectangle &r1, const Rectangle &r2)
     right1 = left1 + r1.width;
     right2 = left2 + r2.width;
 
-    if (bottom1 < top2 || bottom2 < top1)
-        return COLLISION_NONE;
-    if (right1 < left2 || right2 < left1)
-        return COLLISION_NONE;
+    if (bottom1 < top2 || bottom2 < top1) return COLLISION_NONE;
+    if (right1 < left2 || right2 < left1) return COLLISION_NONE;
 
     // objects collided.  What side? TODO
     return COLLISION_GENERAL;
 }
 
-CollisionType detectMBRCollisionInterior(const Rectangle &r1,
-                                         const Rectangle &r2)
+CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2)
 {
     // assumes window coordinate system
     if (r1.x < r2.x) {
@@ -148,7 +138,7 @@ CollisionType detectMBRCollisionInterior(const Rectangle &r1,
     return COLLISION_NONE;
 }
 
-Relation MBRRelate(const Rectangle &r1, const Rectangle &r2)
+Relation MBRRelate(const Rectangle& r1, const Rectangle& r2)
 {
     if (detectMBRCollision(r1, r2) != COLLISION_NONE) {
         return TOUCH;
@@ -161,7 +151,7 @@ Relation MBRRelate(const Rectangle &r1, const Rectangle &r2)
     return INSIDE;
 }
 
-Relation MBRRelate(int x, int y, const Rectangle &r)
+Relation MBRRelate(int x, int y, const Rectangle& r)
 {
     if ((x >= r.x && x <= r.x + r.width) && (y >= r.y && y <= r.y + r.height)) {
         return INSIDE;
@@ -173,12 +163,9 @@ Relation MBRRelate(int x, int y, const Rectangle &r)
 }
 
 // anonymous functions for bitmap collision detection
-namespace
-{
+namespace {
 
-bool detectTopBitmapCollision(const CapEngine::Rectangle &rect,
-                              const Surface *bitmapSurface,
-                              Vector &collisionPoint)
+bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
     Uint8 g;
@@ -196,8 +183,7 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle &rect,
     int y = rect.y + (rect.height / 2);
     for (; y >= rect.y; y--) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
-            if (y < 0 || y >= height || x < 0 or x >= width)
-                continue;
+            if (y < 0 || y >= height || x < 0 or x >= width) continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -211,9 +197,7 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle &rect,
     return false;
 }
 
-bool detectBottomBitmapCollision(const CapEngine::Rectangle &rect,
-                                 const Surface *bitmapSurface,
-                                 Vector &collisionPoint)
+bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
     Uint8 g;
@@ -230,8 +214,7 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle &rect,
     int y = rect.y + (rect.height / 2);
     for (; y <= rect.y + rect.height; y++) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
-            if (y < 0 || y >= height || x < 0 or x >= width)
-                continue;
+            if (y < 0 || y >= height || x < 0 or x >= width) continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -245,9 +228,7 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle &rect,
     return false;
 }
 
-bool detectRightBitmapCollision(const CapEngine::Rectangle &rect,
-                                const Surface *bitmapSurface,
-                                Vector &collisionPoint)
+bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
     Uint8 g;
@@ -263,8 +244,7 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle &rect,
     int x = rect.x + (rect.width / 2);
     for (; x < rect.x + rect.width; x++) {
         for (int y = rect.y; y < rect.y + rect.height; y++) {
-            if (y < 0 || y >= height || x < 0 or x >= width)
-                continue;
+            if (y < 0 || y >= height || x < 0 or x >= width) continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -278,9 +258,7 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle &rect,
     return false;
 }
 
-bool detectLeftBitmapCollision(const CapEngine::Rectangle &rect,
-                               const Surface *bitmapSurface,
-                               Vector &collisionPoint)
+bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
     Uint8 g;
@@ -296,8 +274,7 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle &rect,
     int x = rect.x + (rect.width / 2);
     for (; x >= rect.x; x--) {
         for (int y = rect.y; y < rect.y + rect.height; y++) {
-            if (y < 0 || y >= height || x < 0 or x >= width)
-                continue;
+            if (y < 0 || y >= height || x < 0 or x >= width) continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -311,14 +288,12 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle &rect,
     return false;
 }
 
-} // namespace
+}  // namespace
 
 // assumes 32bpp surface
-std::vector<std::pair<CollisionType, Vector>>
-    detectBitmapCollision(const CapEngine::Rectangle &rect,
-                          const Surface *bitmapSurface)
+std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const CapEngine::Rectangle& rect,
+                                                                    const Surface* bitmapSurface)
 {
-
     std::vector<std::pair<CollisionType, Vector>> collisionTypes;
     Vector collisionPoint;
 
@@ -329,29 +304,24 @@ std::vector<std::pair<CollisionType, Vector>>
 
     // check bottom collision
     if (detectBottomBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(
-            std::make_pair(COLLISION_BOTTOM, collisionPoint));
+        collisionTypes.push_back(std::make_pair(COLLISION_BOTTOM, collisionPoint));
     }
 
     // check left side collition
     if (detectLeftBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(
-            std::make_pair(COLLISION_LEFT, collisionPoint));
+        collisionTypes.push_back(std::make_pair(COLLISION_LEFT, collisionPoint));
     }
 
     // check left side collition
     if (detectRightBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(
-            std::make_pair(COLLISION_RIGHT, collisionPoint));
+        collisionTypes.push_back(std::make_pair(COLLISION_RIGHT, collisionPoint));
     }
 
     return collisionTypes;
 }
 
-vector<PixelCollision> detectBitmapCollisions(const Rectangle &rect,
-                                              const Surface *bitmapSurface)
+vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface)
 {
-
     vector<PixelCollision> pixelCollisions;
     Vector collisionPoint;
 
@@ -390,9 +360,8 @@ vector<PixelCollision> detectBitmapCollisions(const Rectangle &rect,
     return pixelCollisions;
 }
 
-std::vector<PixelCollision> detectBitmapCollisions(
-    std::vector<std::pair<CollisionType, Rectangle>> const &in_rects,
-    const Surface *in_bitmapSurface)
+std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects,
+                                                   const Surface* in_bitmapSurface)
 {
     std::vector<PixelCollision> pixelCollisions;
 
@@ -406,37 +375,28 @@ std::vector<PixelCollision> detectBitmapCollisions(
         pixelCollisions.push_back(pixelCollision);
     };
 
-    for (auto &&i : in_rects) {
+    for (auto&& i : in_rects) {
         CollisionType collisionType = i.first;
         Rectangle rect = i.second;
 
         switch (collisionType) {
-        case COLLISION_BOTTOM:
-            if (detectBottomBitmapCollision(rect, in_bitmapSurface,
-                                            collisionPoint))
-                addCollision(collisionType);
-            break;
-        case COLLISION_TOP:
-            if (detectTopBitmapCollision(rect, in_bitmapSurface,
-                                         collisionPoint))
-                addCollision(collisionType);
-            break;
-        case COLLISION_LEFT:
-            if (detectLeftBitmapCollision(rect, in_bitmapSurface,
-                                          collisionPoint))
-                addCollision(collisionType);
-            break;
-        case COLLISION_RIGHT:
-            if (detectRightBitmapCollision(rect, in_bitmapSurface,
-                                           collisionPoint))
-                addCollision(collisionType);
-            break;
-        default: {
-            std::ostringstream msg;
-            msg << "Unsupported Collision Type \"" << collisionType << "\"";
-            Locator::logger->log(msg.str(), Logger::CWARNING, __FILE__,
-                                 __LINE__);
-        }
+            case COLLISION_BOTTOM:
+                if (detectBottomBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                break;
+            case COLLISION_TOP:
+                if (detectTopBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                break;
+            case COLLISION_LEFT:
+                if (detectLeftBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                break;
+            case COLLISION_RIGHT:
+                if (detectRightBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                break;
+            default: {
+                std::ostringstream msg;
+                msg << "Unsupported Collision Type \"" << collisionType << "\"";
+                BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning) << msg.str();
+            }
         }
     }
 
@@ -444,202 +404,167 @@ std::vector<PixelCollision> detectBitmapCollisions(
 }
 
 std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
-    std::vector<std::pair<CollisionType, Rectangle>> const &in_rects,
-    const Surface *in_bitmapSurface)
+    std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface)
 {
-    std::vector<PixelCollision> pixelCollisions =
-        detectBitmapCollisions(in_rects, in_bitmapSurface);
+    std::vector<PixelCollision> pixelCollisions = detectBitmapCollisions(in_rects, in_bitmapSurface);
 
-    auto findPredicate = [](const CollisionType in_collisionType,
-                            const PixelCollision &in_pixelCollision) {
+    auto findPredicate = [](const CollisionType in_collisionType, const PixelCollision& in_pixelCollision) {
         return in_collisionType == in_pixelCollision.collisionType;
     };
 
-    auto topCollision = std::find_if(
-        pixelCollisions.begin(), pixelCollisions.end(),
-        std::bind(findPredicate, COLLISION_TOP, std::placeholders::_1));
-    auto bottomCollision = std::find_if(
-        pixelCollisions.begin(), pixelCollisions.end(),
-        std::bind(findPredicate, COLLISION_BOTTOM, std::placeholders::_1));
-    auto rightCollision = std::find_if(
-        pixelCollisions.begin(), pixelCollisions.end(),
-        std::bind(findPredicate, COLLISION_RIGHT, std::placeholders::_1));
-    auto leftCollision = std::find_if(
-        pixelCollisions.begin(), pixelCollisions.end(),
-        std::bind(findPredicate, COLLISION_LEFT, std::placeholders::_1));
+    auto topCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(),
+                                     std::bind(findPredicate, COLLISION_TOP, std::placeholders::_1));
+    auto bottomCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(),
+                                        std::bind(findPredicate, COLLISION_BOTTOM, std::placeholders::_1));
+    auto rightCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(),
+                                       std::bind(findPredicate, COLLISION_RIGHT, std::placeholders::_1));
+    auto leftCollision = std::find_if(pixelCollisions.begin(), pixelCollisions.end(),
+                                      std::bind(findPredicate, COLLISION_LEFT, std::placeholders::_1));
 
     std::vector<PixelCollision> pixelCollisionWithTangents;
 
     // bottom
-    if (bottomCollision != pixelCollisions.end() &&
-        rightCollision != pixelCollisions.end()) {
-        Vector tangent =
-            rightCollision->collisionPoint - bottomCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_BOTTOM, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (bottomCollision != pixelCollisions.end() && rightCollision != pixelCollisions.end()) {
+        Vector tangent = rightCollision->collisionPoint - bottomCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_BOTTOM, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
-    if (bottomCollision != pixelCollisions.end() &&
-        leftCollision != pixelCollisions.end()) {
-        Vector tangent =
-            leftCollision->collisionPoint - bottomCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_BOTTOM, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (bottomCollision != pixelCollisions.end() && leftCollision != pixelCollisions.end()) {
+        Vector tangent = leftCollision->collisionPoint - bottomCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_BOTTOM, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
     // top
-    if (topCollision != pixelCollisions.end() &&
-        rightCollision != pixelCollisions.end()) {
-        Vector tangent =
-            rightCollision->collisionPoint - topCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_TOP, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (topCollision != pixelCollisions.end() && rightCollision != pixelCollisions.end()) {
+        Vector tangent = rightCollision->collisionPoint - topCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_TOP, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
-    if (topCollision != pixelCollisions.end() &&
-        leftCollision != pixelCollisions.end()) {
-        Vector tangent =
-            leftCollision->collisionPoint - topCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_TOP, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (topCollision != pixelCollisions.end() && leftCollision != pixelCollisions.end()) {
+        Vector tangent = leftCollision->collisionPoint - topCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_TOP, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
     // right
-    if (rightCollision != pixelCollisions.end() &&
-        topCollision != pixelCollisions.end()) {
-        Vector tangent =
-            topCollision->collisionPoint - rightCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_RIGHT, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (rightCollision != pixelCollisions.end() && topCollision != pixelCollisions.end()) {
+        Vector tangent = topCollision->collisionPoint - rightCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_RIGHT, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
-    if (rightCollision != pixelCollisions.end() &&
-        bottomCollision != pixelCollisions.end()) {
-        Vector tangent =
-            bottomCollision->collisionPoint - rightCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_RIGHT, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (rightCollision != pixelCollisions.end() && bottomCollision != pixelCollisions.end()) {
+        Vector tangent = bottomCollision->collisionPoint - rightCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_RIGHT, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
     // left
-    if (leftCollision != pixelCollisions.end() &&
-        topCollision != pixelCollisions.end()) {
-        Vector tangent =
-            topCollision->collisionPoint - leftCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_LEFT, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (leftCollision != pixelCollisions.end() && topCollision != pixelCollisions.end()) {
+        Vector tangent = topCollision->collisionPoint - leftCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_LEFT, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
-    if (leftCollision != pixelCollisions.end() &&
-        bottomCollision != pixelCollisions.end()) {
-        Vector tangent =
-            bottomCollision->collisionPoint - leftCollision->collisionPoint;
-        PixelCollision collision = {COLLISION_LEFT, tangent,
-                                    COLLISIONVECTORTYPE_LINE};
+    if (leftCollision != pixelCollisions.end() && bottomCollision != pixelCollisions.end()) {
+        Vector tangent = bottomCollision->collisionPoint - leftCollision->collisionPoint;
+        PixelCollision collision = {COLLISION_LEFT, tangent, COLLISIONVECTORTYPE_LINE};
         pixelCollisionWithTangents.push_back(collision);
     }
 
     return pixelCollisionWithTangents;
 }
 
-std::ostream &operator<<(std::ostream &stream,
-                         const CollisionType &collisionType)
+std::ostream& operator<<(std::ostream& stream, const CollisionType& collisionType)
 {
     using namespace CapEngine;
 
     std::string repr;
 
     switch (collisionType) {
-    case COLLISION_NONE:
-        repr = "COLLISION_NONE";
-        break;
-    case COLLISION_GENERAL:
-        repr = "COLLISION_GENERAL";
-        break;
-    case COLLISION_ONX:
-        repr = "COLLISION_ONX";
-        break;
-    case COLLISION_ONY:
-        repr = "COLLISION_ONY";
-        break;
-    case COLLISION_LEFT:
-        repr = "COLLISION_LEFT";
-        break;
-    case COLLISION_RIGHT:
-        repr = "COLLISION_RIGHT";
-        break;
-    case COLLISION_TOP:
-        repr = "COLLISION_TOP";
-        break;
-    case COLLISION_BOTTOM:
-        repr = "COLLISION_BOTTOM";
-        break;
+        case COLLISION_NONE:
+            repr = "COLLISION_NONE";
+            break;
+        case COLLISION_GENERAL:
+            repr = "COLLISION_GENERAL";
+            break;
+        case COLLISION_ONX:
+            repr = "COLLISION_ONX";
+            break;
+        case COLLISION_ONY:
+            repr = "COLLISION_ONY";
+            break;
+        case COLLISION_LEFT:
+            repr = "COLLISION_LEFT";
+            break;
+        case COLLISION_RIGHT:
+            repr = "COLLISION_RIGHT";
+            break;
+        case COLLISION_TOP:
+            repr = "COLLISION_TOP";
+            break;
+        case COLLISION_BOTTOM:
+            repr = "COLLISION_BOTTOM";
+            break;
     }
     stream << repr;
     return stream;
 }
 
-std::ostream &operator<<(std::ostream &stream,
-                         const PixelCollision &pixelCollision)
+std::ostream& operator<<(std::ostream& stream, const PixelCollision& pixelCollision)
 {
     std::ostringstream repr;
-    repr << pixelCollision.collisionType << " @ "
-         << pixelCollision.collisionPoint;
+    repr << pixelCollision.collisionType << " @ " << pixelCollision.collisionPoint;
 
     stream << repr.str();
     return stream;
 }
 
-std::ostream &operator<<(std::ostream &stream,
-                         const CollisionClass &collisionClass)
+std::ostream& operator<<(std::ostream& stream, const CollisionClass& collisionClass)
 {
     using namespace CapEngine;
 
     std::string repr;
 
     switch (collisionClass) {
-    case COLLISION_UNKNOWN:
-        repr = "COLLISION_UNKNOWN";
-        break;
-    case COLLISION_WALL:
-        repr = "COLLISION_WALL";
-        break;
-    case COLLISION_PROJECTILE:
-        repr = "COLLISION_PROJECTILE";
-        break;
-    case COLLISION_ENTITY:
-        repr = "COLLISION_ENTITY";
-        break;
-    case COLLISION_BITMAP:
-        repr = "COLLISION_BITMAP";
-        break;
+        case COLLISION_UNKNOWN:
+            repr = "COLLISION_UNKNOWN";
+            break;
+        case COLLISION_WALL:
+            repr = "COLLISION_WALL";
+            break;
+        case COLLISION_PROJECTILE:
+            repr = "COLLISION_PROJECTILE";
+            break;
+        case COLLISION_ENTITY:
+            repr = "COLLISION_ENTITY";
+            break;
+        case COLLISION_BITMAP:
+            repr = "COLLISION_BITMAP";
+            break;
     }
 
     stream << repr;
     return stream;
 }
 
-std::ostream &operator<<(std::ostream &stream, const Rectangle &rectangle)
+std::ostream& operator<<(std::ostream& stream, const Rectangle& rectangle)
 {
     using namespace CapEngine;
 
-    stream << "Rectangle (" << rectangle.x << ", " << rectangle.y << ", "
-           << rectangle.width << " x " << rectangle.height << ")";
+    stream << "Rectangle (" << rectangle.x << ", " << rectangle.y << ", " << rectangle.width << " x "
+           << rectangle.height << ")";
 
     return stream;
 }
 
-bool operator==(const Rectangle &in_lhs, const Rectangle &in_rhs)
+bool operator==(const Rectangle& in_lhs, const Rectangle& in_rhs)
 {
-    return in_lhs.x == in_rhs.x && in_lhs.y == in_rhs.y &&
-           in_lhs.width == in_rhs.width && in_lhs.height == in_rhs.height;
+    return in_lhs.x == in_rhs.x && in_lhs.y == in_rhs.y && in_lhs.width == in_rhs.width &&
+           in_lhs.height == in_rhs.height;
 }
 
-} // namespace CapEngine
+}  // namespace CapEngine

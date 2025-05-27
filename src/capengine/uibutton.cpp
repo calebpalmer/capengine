@@ -161,13 +161,13 @@ void Button::readUIConfig()
   }
 
   // neutral settings
-  if (!settings.has_key("neutral"))
+  if (!settings.contains("neutral"))
     CAP_THROW(
         CapEngineException("Button settings missing \"neutral\" property."));
 
   auto getColourSetting =
       [](const jsoncons::json colourParent) -> boost::optional<Colour> {
-    if (!colourParent.has_key("colour"))
+    if (!colourParent.contains("colour"))
       return boost::none;
     else {
       boost::optional<Colour> maybeColour = getColour(colourParent["colour"]);

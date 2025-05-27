@@ -3,7 +3,7 @@
 #include "CapEngineException.h"
 #include "filesystem.h"
 #include "locator.h"
-#include "logger.h"
+#include "logging.h"
 
 #include <fstream>
 #include <jsoncons_ext/jsonpath/json_query.hpp>
@@ -68,8 +68,7 @@ boost::optional<jsoncons::json>
     else
       return boost::none;
   } catch (const std::exception &e) {
-    assert(Locator::logger != nullptr);
-    Locator::logger->log(boost::diagnostic_information(e), Logger::CWARNING);
+    CapEngine::logException(e);
     return boost::none;
   }
 }
@@ -81,13 +80,13 @@ boost::optional<jsoncons::json>
 */
 boost::optional<Colour> getColour(const jsoncons::json &object)
 {
-  if (!object.has_key("r") || !object.has_key("g") || !object.has_key("b"))
+  if (!object.contains("r") || !object.contains("g") || !object.contains("b"))
     return boost::none;
 
   Colour colour = {object["r"].as<uint8_t>(), object["g"].as<uint8_t>(),
                    object["b"].as<uint8_t>(), 255};
 
-  if (object.has_key("a"))
+  if (object.contains("a"))
     colour.m_a = object["a"].as<uint8_t>();
 
   return colour;
@@ -104,7 +103,7 @@ jsoncons::json getProperty(jsoncons::json object,
                            const std::string &propertyName,
                            jsoncons::json defaultValue)
 {
-  if (!object.has_key(propertyName))
+  if (!object.contains(propertyName))
     return defaultValue;
   else
     return object[propertyName];

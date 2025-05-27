@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <sstream>
+#include <algorithm>
 
 #include "CapEngineException.h"
 #include "defer.h"
@@ -90,6 +91,7 @@ void TiledMap::loadJson(const jsoncons::json &in_json)
         }
 
         if (i.at("type").as<std::string>() == "objectgroup") {
+            std::cout << "Adding objectgroup to map\n";
             m_objectGroups.emplace_back(i, m_tileWidth * m_width, m_tileHeight * m_height, m_path);
         }
     }
@@ -110,14 +112,21 @@ void TiledMap::render()
 {
     assert(m_texture != nullptr);
 
-    for (auto &&layer : m_layers) {
+    // render the layers
+    std::for_each(m_layers.begin(), m_layers.end(), [this](auto& layer){
         auto *texture = layer.texture();
         assert(texture != nullptr);
 
         SDL_Rect rect{0, 0, m_width * m_tileWidth, m_height * m_tileHeight};
         Locator::getVideoManager().drawTexture(m_texture.get(), texture, rect,
                                                rect);
-    }
+    });
+
+    // render objects
+    //std::cout << "object groups has size " << m_objectGroups.size() << "\n";
+    std::for_each(m_objectGroups.begin(), m_objectGroups.end(), [this](auto& objectGroup){
+        objectGroup.render(this->m_texture.get());
+    });
 }
 
 const std::vector<TiledObjectGroup> &TiledMap::objectGroups() const

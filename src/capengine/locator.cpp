@@ -11,14 +11,15 @@
 namespace CapEngine
 {
 
-VideoManager *Locator::videoManager = nullptr;
-Logger *Locator::logger = nullptr;
-SoundPlayer *Locator::soundPlayer = nullptr;
-Keyboard *Locator::keyboard = nullptr;
-Mouse *Locator::mouse = nullptr;
-AssetManager *Locator::assetManager = nullptr;
-EventDispatcher *Locator::eventDispatcher = nullptr;
-EventSubscriber *Locator::eventSubscriber = nullptr;
+VideoManager* Locator::videoManager = nullptr;
+Logger* Locator::logger = nullptr;
+SoundPlayer* Locator::soundPlayer = nullptr;
+Keyboard* Locator::keyboard = nullptr;
+Mouse* Locator::mouse = nullptr;
+AssetManager* Locator::assetManager = nullptr;
+EventDispatcher* Locator::eventDispatcher = nullptr;
+EventSubscriber* Locator::eventSubscriber = nullptr;
+FontManager* Locator::fontManager = nullptr;
 
 namespace
 {
@@ -38,7 +39,7 @@ Throws if the
  \param item - The item to register.
  \returns - true if successful, false otherwise.
 */
-bool Locator::insert(const std::string &id, std::any item)
+bool Locator::insert(const std::string& id, std::any item)
 {
     if (itemMap.find(id) == itemMap.end()) {
         itemMap.emplace(id, item);
@@ -53,7 +54,7 @@ bool Locator::insert(const std::string &id, std::any item)
  \param id - The id of the  item to register.
  \param item - The item to register.
 */
-void Locator::insertOrReplace(const std::string &id, std::any item)
+void Locator::insertOrReplace(const std::string& id, std::any item)
 {
     if (itemMap.find(id) == itemMap.end())
         itemMap.emplace(id, item);
@@ -67,7 +68,7 @@ void Locator::insertOrReplace(const std::string &id, std::any item)
  \param id - The id of the item to locate.
  \return - The item if it's found, boost::none if not.
 */
-std::any Locator::locate(const std::string &id)
+std::any Locator::locate(const std::string& id)
 {
     auto itemItr = itemMap.find(id);
     if (itemItr != itemMap.end())
@@ -77,7 +78,7 @@ std::any Locator::locate(const std::string &id)
         return std::any{};
 }
 
-VideoManager &Locator::getVideoManager()
+VideoManager& Locator::getVideoManager()
 {
     if (videoManager == nullptr) {
         BOOST_THROW_EXCEPTION(
@@ -87,7 +88,7 @@ VideoManager &Locator::getVideoManager()
     return *videoManager;
 }
 
-Logger &Locator::getLogger()
+Logger& Locator::getLogger()
 {
     if (logger == nullptr) {
         BOOST_THROW_EXCEPTION(CapEngineException("logger not initialized."));
@@ -96,7 +97,7 @@ Logger &Locator::getLogger()
     return *logger;
 }
 
-SoundPlayer &Locator::getSoundPlayer()
+SoundPlayer& Locator::getSoundPlayer()
 {
     if (soundPlayer == nullptr) {
         BOOST_THROW_EXCEPTION(
@@ -106,7 +107,7 @@ SoundPlayer &Locator::getSoundPlayer()
     return *soundPlayer;
 }
 
-Keyboard &Locator::getKeyboard()
+Keyboard& Locator::getKeyboard()
 {
     if (keyboard == nullptr) {
         BOOST_THROW_EXCEPTION(CapEngineException("keyboard not initialized."));
@@ -115,7 +116,7 @@ Keyboard &Locator::getKeyboard()
     return *keyboard;
 }
 
-Mouse &Locator::getMouse()
+Mouse& Locator::getMouse()
 {
     if (mouse == nullptr) {
         BOOST_THROW_EXCEPTION(CapEngineException("mouse not initialized."));
@@ -124,7 +125,7 @@ Mouse &Locator::getMouse()
     return *mouse;
 }
 
-AssetManager &Locator::getAssetManager()
+AssetManager& Locator::getAssetManager()
 {
     if (assetManager == nullptr) {
         BOOST_THROW_EXCEPTION(
@@ -134,7 +135,7 @@ AssetManager &Locator::getAssetManager()
     return *assetManager;
 }
 
-EventDispatcher &Locator::getEventDispatcher()
+EventDispatcher& Locator::getEventDispatcher()
 {
     if (eventDispatcher == nullptr) {
         BOOST_THROW_EXCEPTION(
@@ -144,7 +145,7 @@ EventDispatcher &Locator::getEventDispatcher()
     return *eventDispatcher;
 }
 
-EventSubscriber &Locator::getEventSubscriber()
+EventSubscriber& Locator::getEventSubscriber()
 {
     if (eventSubscriber == nullptr) {
         BOOST_THROW_EXCEPTION(
@@ -152,6 +153,16 @@ EventSubscriber &Locator::getEventSubscriber()
     }
 
     return *eventSubscriber;
+}
+
+FontManager& Locator::getFontManager()
+{
+    if (fontManager == nullptr) {
+        BOOST_THROW_EXCEPTION(
+            CapEngineException("fontManager not initialized."));
+    }
+
+    return *fontManager;
 }
 
 }  // namespace CapEngine

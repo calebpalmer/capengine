@@ -21,6 +21,7 @@ add_library(capengine SHARED
   imagelayer.cpp scene2dutils.cpp scene2dschema.cpp bitmapcollisionlayer.cpp gameobjectutils.cpp componentutils.cpp
   boxcollider.cpp rigidbodycomponent.cpp placeholdergraphics.cpp keyboard.cpp vectorcollisionlayer.h sdlutils.cpp
   components.cpp gamestate.cpp animatorv2.cpp tiledscene.cpp tiledmap.cpp tiledtileset.cpp tiledtilelayer.cpp tiledobjectgroup.cpp
+  tiledcustomproperty.cpp logging.cpp
   )
 
 target_include_directories(
