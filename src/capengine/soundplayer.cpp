@@ -1,16 +1,19 @@
 #include "soundplayer.h"
 
-#include <assert.h>
-
+#include <cassert>
+#include <cstdint>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include "CapEngineException.h"
-#include "locator.h"
 #include "logging.h"
 
-using namespace CapEngine;
-using namespace std;
+using std::endl;
+using std::ostringstream;
+using std::unique_ptr;
+
+namespace CapEngine {
 
 CapEngine::SoundPlayer* CapEngine::SoundPlayer::instance;
 
@@ -45,59 +48,59 @@ SoundPlayer::~SoundPlayer() { SDL_CloseAudio(); }
 /*!
 
  */
-SoundPlayer &SoundPlayer::getSoundPlayer()
+SoundPlayer& SoundPlayer::getSoundPlayer()
 {
-  if (instance == nullptr) {
-    instance = new SoundPlayer;
-  }
+    if (instance == nullptr) {
+        instance = new SoundPlayer;
+    }
 
-  return *instance;
+    return *instance;
 }
 
 //! the audio callback for SDL to fill audio buffer
 /*!
 
  */
-void CapEngine::audioCallback(void *udataNotUsed, Uint8 *stream, int len)
+void audioCallback(void* udataNotUsed, Uint8* stream, int len)
 {
-  memset(stream, SoundPlayer::getSoundPlayer().getSilence(), len);
+    memset(stream, SoundPlayer::getSoundPlayer().getSilence(), len);
 
-  SoundCollection &sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
-  if (sounds.size() <= 0)
-    return;
-  // SoundCollectionIter iter;
-  Uint32 amount, position;
+    SoundCollection& sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
+    if (sounds.size() <= 0) return;
+    // SoundCollectionIter iter;
+    Uint32 amount, position;
 
-  for (auto &i : sounds) {
-    if ((i->pcm->currentPosition() + len) > i->pcm->getLength()) {
-      amount = i->pcm->getLength() - i->pcm->currentPosition();
-    } else {
-      amount = len;
+    for (auto& i : sounds) {
+        if ((i->pcm->currentPosition() + len) > i->pcm->getLength()) {
+            amount = i->pcm->getLength() - i->pcm->currentPosition();
+        }
+        else {
+            amount = len;
+        }
+
+        position = i->pcm->currentPosition();
+        Uint8* bufStart = &(i->pcm->getBuf())[position];
+        SDL_MixAudio(stream, bufStart, amount, SDL_MIX_MAXVOLUME);
+
+        i->pcm->incrementPosition(amount);
     }
-
-    position = i->pcm->currentPosition();
-    Uint8 *bufStart = &(i->pcm->getBuf())[position];
-    SDL_MixAudio(stream, bufStart, amount, SDL_MIX_MAXVOLUME);
-
-    i->pcm->incrementPosition(amount);
-  }
 }
 
-long SoundPlayer::addSound(PCM *sound, bool repeat)
+int64_t SoundPlayer::addSound(PCM* sound, bool repeat)
 {
-  long id = idCounter++;
-  unique_ptr<PCMType> pSound(new PCMType());
-  pSound->id = id;
-  pSound->repeat = repeat;
-  pSound->pcm = sound;
+    int64_t id = idCounter++;
+    unique_ptr<PCMType> pSound(new PCMType());
+    pSound->id = id;
+    pSound->repeat = repeat;
+    pSound->pcm = sound;
 
-  SDL_LockAudio();
-  cleanSounds();
-  // resetting sound position
-  sounds.push_back(pSound.release());
-  SDL_UnlockAudio();
+    SDL_LockAudio();
+    cleanSounds();
+    // resetting sound position
+    sounds.push_back(pSound.release());
+    SDL_UnlockAudio();
 
-  return id;
+    return id;
 }
 
 //! set the state of the sound system
@@ -106,11 +109,12 @@ long SoundPlayer::addSound(PCM *sound, bool repeat)
  */
 void SoundPlayer::setState(SoundState state)
 {
-  if (state == SoundState::PAUSE) {
-    SDL_PauseAudio(1);
-  } else if (state == SoundState::PLAY) {
-    SDL_PauseAudio(0);
-  }
+    if (state == SoundState::PAUSE) {
+        SDL_PauseAudio(1);
+    }
+    else if (state == SoundState::PLAY) {
+        SDL_PauseAudio(0);
+    }
 }
 
 //! clean up null or empty sounds
@@ -119,34 +123,35 @@ void SoundPlayer::setState(SoundState state)
  */
 void SoundPlayer::cleanSounds()
 {
-  SoundCollectionIter iter;
-  iter = sounds.begin();
+    SoundCollectionIter iter;
+    iter = sounds.begin();
 
-  // I don't think this iteration is safe because deletes are occurring.
-  while (iter != sounds.end()) {
-    if (*iter == nullptr ||
-        ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())) {
-      if (*iter != nullptr && (*iter)->repeat == false) {
-        delete ((*iter)->pcm);
-        delete *iter;
-        iter = sounds.erase(iter);
-      } else {
-        // if not null, set position back to beginning
-        if (*iter != nullptr) {
-          (*iter)->pcm->resetPosition();
+    // I don't think this iteration is safe because deletes are occurring.
+    while (iter != sounds.end()) {
+        if (*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())) {
+            if (*iter != nullptr && (*iter)->repeat == false) {
+                delete ((*iter)->pcm);
+                delete *iter;
+                iter = sounds.erase(iter);
+            }
+            else {
+                // if not null, set position back to beginning
+                if (*iter != nullptr) {
+                    (*iter)->pcm->resetPosition();
+                }
+            }
         }
-      }
-    } else {
-      ++iter;
+        else {
+            ++iter;
+        }
     }
-  }
 }
 
 //!  return the soundCollection
 /*!
 
  */
-SoundCollection &SoundPlayer::getSoundCollection() { return sounds; }
+SoundCollection& SoundPlayer::getSoundCollection() { return sounds; }
 
 //! return silence value
 /*!
@@ -154,19 +159,21 @@ SoundCollection &SoundPlayer::getSoundCollection() { return sounds; }
  */
 uint8_t SoundPlayer::getSilence() const { return audioFormat.silence; }
 
-void SoundPlayer::deleteSound(long id)
+void SoundPlayer::deleteSound(int64_t id)
 {
-  SoundCollectionIter iter;
-  iter = sounds.begin();
-  while (iter != sounds.end()) {
-    if (((*iter)->id) == id) {
-
-      delete ((*iter)->pcm);
-      delete *iter;
-      iter = sounds.erase(iter);
-      return;
-    } else {
-      ++iter;
+    SoundCollectionIter iter;
+    iter = sounds.begin();
+    while (iter != sounds.end()) {
+        if (((*iter)->id) == id) {
+            delete ((*iter)->pcm);
+            delete *iter;
+            iter = sounds.erase(iter);
+            return;
+        }
+        else {
+            ++iter;
+        }
     }
-  }
 }
+
+}  // namespace CapEngine

@@ -1,6 +1,7 @@
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <string>
@@ -77,17 +78,19 @@ class AssetManager {
     Image* getImage(int id);
     std::optional<AnimatedImage> getAnimatedImage(int in_id);
     SoftwareImage getSoftwareImage(int id);
-    bool imageExists(int id) const;
+    [[nodiscard]] bool imageExists(int id) const;
     int getImageWidth(int id);
     int getImageHeight(int id);
     Frame getFrame(int assetID, std::string frameName);
     Frame getFrame(int assetID, int rowNum);
 
-    long playSound(int id, bool repeat = false);
+    int64_t playSound(int id, bool repeat = false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
     Sound* getSound(int id);
-    bool soundExists(int id) const;
+    [[nodiscard]] bool soundExists(int id) const;
+
+    [[nodiscard]] std::optional<std::filesystem::path> getBasePath() const;
 
    private:
     std::map<int, Image> m_imageMap;

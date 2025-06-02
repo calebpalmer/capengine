@@ -3,7 +3,8 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
-#include <memory>
+
+#include <cstdint>
 #include <vector>
 
 #include "pcm.h"
@@ -14,42 +15,41 @@
 #define FORMAT AUDIO_S16
 
 struct PCMType {
-  long id;
-  bool repeat;
-  CapEngine::PCM *pcm;
+    int64_t id;
+    bool repeat;
+    CapEngine::PCM* pcm;
 };
 
 // Using vector instead of map because I'm expecting to iterate over the
 // collection more then accessing by id
-typedef std::vector<PCMType *> SoundCollection;
-typedef std::vector<PCMType *>::iterator SoundCollectionIter;
+using SoundCollection = std::vector<PCMType*>;
+using SoundCollectionIter = std::vector<PCMType*>::iterator;
 
 namespace CapEngine
 {
 enum class SoundState { PAUSE, PLAY };
 void audioCallback(void *udata, Uint8 *stream, int len);
 
-class SoundPlayer
-{
-public:
-  friend class PCM;
-  ~SoundPlayer();
-  long addSound(PCM *sound, bool repeat = false);
-  void cleanSounds();
-  void setState(SoundState state); // should change this to take an enum
-  SoundCollection &getSoundCollection();
-  static SoundPlayer &getSoundPlayer();
-  uint8_t getSilence() const;
-  void deleteSound(long id);
+class SoundPlayer {
+   public:
+    friend class PCM;
+    ~SoundPlayer();
+    int64_t addSound(PCM* sound, bool repeat = false);
+    void cleanSounds();
+    void setState(SoundState state);  // should change this to take an enum
+    SoundCollection& getSoundCollection();
+    static SoundPlayer& getSoundPlayer();
+    [[nodiscard]] uint8_t getSilence() const;
+    void deleteSound(int64_t id);
 
-private:
-  SoundPlayer();
-  static SoundPlayer *instance;
+   private:
+    SoundPlayer();
+    static SoundPlayer* instance;
 
-  SoundCollection sounds;
-  SDL_AudioSpec audioFormat;
-  long idCounter;
+    SoundCollection sounds;
+    SDL_AudioSpec audioFormat;
+    int64_t idCounter;
 };
-} // namespace CapEngine
+}  // namespace CapEngine
 
 #endif

@@ -3,7 +3,6 @@
 
 #include <SDL2/SDL_ttf.h>
 
-#include <map>
 #include <string>
 
 #include "VideoManager.h"

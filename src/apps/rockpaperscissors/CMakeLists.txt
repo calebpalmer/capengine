@@ -15,11 +15,21 @@ target_include_directories(rps
 target_link_libraries(rps
   capengine)
 
+# add_custom_command(
+#   OUTPUT ${CMAKE_BINARY_DIR}/rps_resources
+#   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/rps_resources
+#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/resources
+#   COMMENT "Copying resources directory"
+# )
+
+file(GLOB_RECURSE RESOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/resources/*)
+
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/rps_resources
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/rps_resources
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/resources
+  DEPENDS ${RESOURCE_FILES}
   COMMENT "Copying resources directory"
 )
+
 
 add_custom_target(resources ALL DEPENDS ${CMAKE_BINARY_DIR}/rps_resources)
