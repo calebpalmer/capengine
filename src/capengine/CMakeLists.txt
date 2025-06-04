@@ -39,7 +39,8 @@ target_link_libraries(capengine
   libsndfile::libsndfile
   stdc++fs
   sndio
-  )
+  stdc++_libbacktrace
+  ) # until <stacktrace> is not experimental we need to link to stdc++_libbacktrace
 
 add_subdirectory(test)
 add_subdirectory(gtests)

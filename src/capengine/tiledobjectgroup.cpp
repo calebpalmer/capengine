@@ -43,7 +43,7 @@ void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
     auto surface = Locator::getFontManager().getTextSurface(fontFamily->value, in_object.text->text,
                                                             fontSizeProperty->as<int>(), colour);
     auto& videoManager = Locator::getVideoManager();
-    auto texture = videoManager.createTextureFromSurfacePtr(surface.get(), true);
+    auto texture = videoManager.createTextureFromSurfacePtr(surface.get(), false);
     auto srcWidth = videoManager.getTextureWidth(texture.get());
     auto srcHeight = videoManager.getTextureHeight(texture.get());
     Rect srcRect{0, 0, static_cast<int>(srcWidth), static_cast<int>(srcHeight)};  // TODO get width and heights
