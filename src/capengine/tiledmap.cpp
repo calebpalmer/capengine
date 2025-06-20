@@ -1,6 +1,5 @@
 #include "tiledmap.h"
 
-#include <algorithm>
 #include <boost/log/trivial.hpp>
 #include <boost/throw_exception.hpp>
 #include <filesystem>
@@ -23,8 +22,8 @@ TiledMap::TiledMap(const jsoncons::json& in_json, std::optional<std::filesystem:
 
     // create the texture
     int textureWidth{m_width * m_tileWidth};
-    int textureHeight{m_width * m_tileHeight};
-    m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight);
+    int textureHeight{m_height * m_tileHeight};
+    m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight, Colour{0, 0, 0, 0});
 }
 
 TiledMap::TiledMap(const std::filesystem::path& in_mapPath) : m_path(in_mapPath), m_texture(getNullTexturePtr())
@@ -38,8 +37,8 @@ TiledMap::TiledMap(const std::filesystem::path& in_mapPath) : m_path(in_mapPath)
 
     // create the texture
     int textureWidth{m_width * m_tileWidth};
-    int textureHeight{m_width * m_tileHeight};
-    m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight);
+    int textureHeight{m_height * m_tileHeight};
+    m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight, Colour{0, 0, 0, 0});
 }
 
 void TiledMap::loadJson(const jsoncons::json& in_json)
@@ -80,8 +79,7 @@ void TiledMap::loadJson(const jsoncons::json& in_json)
         }
 
         if (i.at("type").as<std::string>() == "objectgroup") {
-            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Addingobjectgroup to map";
-
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Adding objectgroup to map";
             m_objectGroups.emplace_back(i, m_tileWidth * m_width, m_tileHeight * m_height, m_path);
         }
     }
@@ -101,6 +99,10 @@ void TiledMap::render()
 
     // render the layers
     std::for_each(m_layers.begin(), m_layers.end(), [this](auto& layer) {
+        if (!layer.visible()) {
+            return;  // skip invisible layers
+        }
+
         auto* texture = layer.texture();
         assert(texture != nullptr);
 
@@ -108,7 +110,7 @@ void TiledMap::render()
         Locator::getVideoManager().drawTexture(m_texture.get(), texture, rect, rect);
     });
 
-    // render objects
+    // // render objects
     std::for_each(m_objectGroups.begin(), m_objectGroups.end(),
                   [this](auto& objectGroup) { objectGroup.render(this->m_texture.get()); });
 }

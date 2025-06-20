@@ -31,4 +31,6 @@ class CapEngineException : public std::runtime_error {
 #define CAP_THROW_ASSERT(expr, msg) \
     if ((expr) == false) BOOST_THROW_EXCEPTION(CapEngine::CapEngineException(msg));
 
+#define CAP_THROW_SDL_ERROR() BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
+
 #endif

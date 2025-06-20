@@ -4,7 +4,7 @@
        ;; compilation shortcut
        (eval . (local-set-key (kbd "<f12>") 'compile))
        (eval . (setq cap/build-dir (concat projectile-project-root "/build")))
-       (eval . (setq compile-command (concat  "cmake --build " (cap/find-dir-locals-folder) "build -- -j4")))
+       (eval . (setq compile-command (concat  "cmake --build " (cap/find-dir-locals-folder) "build")))
        (eval . (setq gdb-command-name (concat "gdb -i=mi " cap/build-dir "/bin/rps")))
        ;; debug function
        (eval . (defun cap/debug ()

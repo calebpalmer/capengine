@@ -90,6 +90,7 @@ SurfacePtr FontManager::getTextSurface(const std::string& font, const std::strin
     fontColor.r = colour.m_r;
     fontColor.g = colour.m_g;
     fontColor.b = colour.m_b;
+    fontColor.a = colour.m_a;
 
     fontSurface = TTF_RenderText_Solid(fontFace.get(), text.c_str(), fontColor);
     if (fontSurface == 0) {

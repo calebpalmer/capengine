@@ -44,11 +44,10 @@ void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
                                                             fontSizeProperty->as<int>(), colour);
     auto& videoManager = Locator::getVideoManager();
     auto texture = videoManager.createTextureFromSurfacePtr(surface.get(), false);
-    auto srcWidth = videoManager.getTextureWidth(texture.get());
-    auto srcHeight = videoManager.getTextureHeight(texture.get());
-    Rect srcRect{0, 0, static_cast<int>(srcWidth), static_cast<int>(srcHeight)};  // TODO get width and heights
-    Rect dstRect{static_cast<int>(in_object.x), static_cast<int>(in_object.y), static_cast<int>(in_object.width),
-                 static_cast<int>(in_object.height)};
+    auto srcWidth = static_cast<int>(videoManager.getTextureWidth(texture.get()));
+    auto srcHeight = static_cast<int>(videoManager.getTextureHeight(texture.get()));
+    Rect srcRect{0, 0, srcWidth, srcHeight};
+    Rect dstRect{static_cast<int>(in_object.x), static_cast<int>(in_object.y), srcWidth, srcHeight};
 
     videoManager.drawTexture(io_texture, texture.get(), dstRect, srcRect);
 }
@@ -108,8 +107,17 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_width, 
 
     for (const auto& objectJson : in_data["objects"].array_range()) {
         Object object{objectJson};
-        std::string key = object.name != std::nullopt ? *(object.name) : object.id;
-        m_objects.emplace(key, std::move(object));
+        // std::string key = object.name != std::nullopt ? *(object.name) : object.id;
+        // m_objects.emplace(key, std::move(object));
+        m_objects.emplace(object.id, std::move(object));
+    }
+
+    m_texture = Locator::getVideoManager().createTexturePtr(m_mapWidth, m_mapHeight, Colour{0, 0, 0, 0});
+
+    for (auto&& object : m_objects) {
+        if (object.second.text.has_value()) {
+            renderText(m_texture.get(), object.second);
+        }
     }
 
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loaded object group with id " << m_id << " with name "
@@ -135,17 +143,6 @@ std::optional<TiledObjectGroup::Object> TiledObjectGroup::objectByName(std::stri
 
 void TiledObjectGroup::render(Texture* io_texture)
 {
-    // draw all our text objects to a texture if not already done
-    if (m_texture == nullptr) {
-        for (auto&& object : m_objects) {
-            if (object.second.text.has_value()) {
-                renderText(m_texture.get(), object.second);
-            }
-            else {
-            }
-        }
-    }
-
     // draw the combined text texture to the input texture
     SDL_Rect rect{0, 0, m_mapWidth, m_mapHeight};
     Locator::getVideoManager().drawTexture(io_texture, m_texture.get(), rect, rect);

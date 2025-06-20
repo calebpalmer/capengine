@@ -46,6 +46,7 @@ class TiledTileLayer
 
    private:
     std::optional<std::filesystem::path> m_path;
+    std::string m_name;
     int m_height{0};
     int m_width{0};
     int m_x{0};
