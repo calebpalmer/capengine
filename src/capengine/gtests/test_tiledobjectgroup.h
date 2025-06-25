@@ -2,12 +2,13 @@
 #include <gtest/gtest.h>
 
 #include <jsoncons/json.hpp>
+#include <memory>
 
-namespace CapEngine::testing
-{
+#include "capengine/tiledtileset.h"
 
-namespace
-{
+namespace CapEngine::testing {
+
+namespace {
 const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
 {
 "objects":
@@ -84,7 +85,8 @@ TEST(TiledObjectGroupTest, TestObjectFromJson)
 
 TEST(TiledObjectGroupTest, TestObjectGroupFromJson)
 {
-    TiledObjectGroup objectGroup{kTestObjects, 64, 64};
+    std::vector<std::unique_ptr<TiledTileset>> tilesets;
+    TiledObjectGroup objectGroup{kTestObjects, 64, 64, tilesets};
 
     auto const& objects = objectGroup.objects();
     ASSERT_EQ(3, objects.size());
@@ -103,7 +105,8 @@ TEST(TiledObjectGroupTest, TestObjectGroupFromJson)
 
 TEST(TileOBjectGroupTest, TestFindObjectByName)
 {
-    TiledObjectGroup objectGroup{kTestObjects, 64, 64};
+    std::vector<std::unique_ptr<TiledTileset>> tilesets;
+    TiledObjectGroup objectGroup{kTestObjects, 64, 64, tilesets};
 
     auto maybeObject = objectGroup.objectByName("superobject");
     ASSERT_TRUE(maybeObject.has_value());

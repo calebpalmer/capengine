@@ -3,6 +3,8 @@
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_rect.h>
+#include <capengine/CapEngineException.h>
+#include <capengine/VideoManager.h>
 #include <capengine/collision.h>
 #include <capengine/colour.h>
 #include <capengine/filesystem.h>
@@ -14,6 +16,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <random>
@@ -29,6 +32,9 @@ const int kEndChoiceWaitTimeMs = 2000;
 
 constexpr int kNumTilesets = 2;
 constexpr int kNumObjectGroups = 2;
+constexpr char const* kPositionsObjectGroupName = "Positions";
+constexpr char const* kPlayer1ScoreObjectName = "player-1-score";
+constexpr char const* kPlayer2ScoreObjectName = "player-2-score";
 
 Choice generateRandomChoice()
 {
@@ -101,16 +107,69 @@ void RockPaperScissorsState::renderPlayers()
     auto&& texture = (*tileset)->texture();
     assert(texture != std::nullopt);
 
-    auto const& objectGroups = m_map->objectGroups();
-    assert(objectGroups.size() == kNumObjectGroups);
-    auto const& objectGroup = objectGroups[0];
-
     videoManager.drawTexture(m_windowId, m_state.player1.drawPosition, *texture, &m_state.player1.tilePosition);
     videoManager.drawTexture(m_windowId, *texture, &m_state.player2.tilePosition, &m_state.player2.drawPosition,
                              std::nullopt, SDL_FLIP_HORIZONTAL);
 }
 
-void RockPaperScissorsState::renderScore() {}
+void RockPaperScissorsState::renderScore()
+{
+    auto& videoManager = CapEngine::Locator::getVideoManager();
+    assert(m_map != nullptr);
+
+    // get the positions object group
+    std::optional<std::reference_wrapper<const CapEngine::TiledObjectGroup>> positions =
+        m_map->objectGroupByName(kPositionsObjectGroupName);
+
+    if (!positions) CAP_THROW(CapEngine::CapEngineException{"Could not find Positions ObjectGroup"});
+
+    // get the player 1 score position from the object group
+    auto player1ScorePosition = positions->get().objectByName(kPlayer1ScoreObjectName);
+    if (!player1ScorePosition.has_value()) {
+        CAP_THROW(CapEngine::CapEngineException{"Could not find player 1 score position."});
+    }
+
+    auto player2ScorePosition = positions->get().objectByName(kPlayer2ScoreObjectName);
+    if (!player2ScorePosition.has_value()) {
+        CAP_THROW(CapEngine::CapEngineException{"Could not find player 2 score position."});
+    }
+
+    auto renderFont = [&](CapEngine::TiledObjectGroup::Object const& in_object, int in_score) {
+        // get the fonts to render for the score
+        auto fontFamily = std::find_if(
+            in_object.properties.begin(), in_object.properties.end(),
+            [](const CapEngine::TiledCustomProperty& in_property) { return in_property.name == "capengine-font-ttf"; });
+        if (fontFamily == in_object.properties.end()) {
+            CAP_THROW(CapEngine::CapEngineException("Missing tiled object property \"capengine-font-ttf\""));
+        }
+
+        auto fontSizeProperty = std::find_if(in_object.properties.begin(), in_object.properties.end(),
+                                             [](const CapEngine::TiledCustomProperty& in_property) {
+                                                 return in_property.name == "capengine-font-size";
+                                             });
+        if (fontSizeProperty == in_object.properties.end()) {
+            CAP_THROW(CapEngine::CapEngineException("Missing tiled object property \"capengine-font-size\""));
+        }
+
+        // render the font
+        CapEngine::Colour fontColour{255, 255, 255, 255};
+        CapEngine::SurfacePtr surface = CapEngine::Locator::getFontManager().getTextSurface(
+            fontFamily->value, std::to_string(in_score), fontSizeProperty->as<int>(), fontColour);
+
+        CapEngine::VideoManager& videoManager = CapEngine::Locator::getVideoManager();
+        CapEngine::TexturePtr texture = videoManager.createTextureFromSurfacePtr(surface.get(), false);
+
+        auto srcWidth = static_cast<int>(videoManager.getTextureWidth(texture.get()));
+        auto srcHeight = static_cast<int>(videoManager.getTextureHeight(texture.get()));
+        CapEngine::Rect srcRect{0, 0, srcWidth, srcHeight};
+        CapEngine::Rect dstRect{static_cast<int>(in_object.x), static_cast<int>(in_object.y), srcWidth, srcHeight};
+
+        videoManager.drawTexture(m_windowId, dstRect, texture.get(), &srcRect);
+    };
+
+    renderFont(*player1ScorePosition, m_state.player1.score);
+    renderFont(*player2ScorePosition, m_state.player2.score);
+}
 
 void RockPaperScissorsState::render()
 {

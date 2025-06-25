@@ -80,7 +80,7 @@ void TiledMap::loadJson(const jsoncons::json& in_json)
 
         if (i.at("type").as<std::string>() == "objectgroup") {
             BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Adding objectgroup to map";
-            m_objectGroups.emplace_back(i, m_tileWidth * m_width, m_tileHeight * m_height, m_path);
+            m_objectGroups.emplace_back(i, m_tileWidth * m_width, m_tileHeight * m_height, m_tilesets, m_path);
         }
     }
 }
@@ -127,4 +127,17 @@ std::optional<TiledTileset const*> TiledMap::tileset(unsigned int index) const
 
     return std::nullopt;
 }
+
+std::optional<std::reference_wrapper<const TiledObjectGroup>> TiledMap::objectGroupByName(
+    std::string_view in_name) const
+{
+    auto result = std::find_if(m_objectGroups.begin(), m_objectGroups.end(),
+                               [in_name](const TiledObjectGroup& group) { return group.name() == in_name; });
+    if (result != m_objectGroups.end()) {
+        return std::cref(*result);
+    }
+
+    return std::nullopt;
+}
+
 }  // namespace CapEngine

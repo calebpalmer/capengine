@@ -1,5 +1,6 @@
 #include "tiledobjectgroup.h"
 
+#include <boost/range/adaptor/reversed.hpp>
 #include <boost/throw_exception.hpp>
 #include <optional>
 #include <string>
@@ -52,6 +53,17 @@ void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
     videoManager.drawTexture(io_texture, texture.get(), dstRect, srcRect);
 }
 
+void renderTile(Texture* io_texture, const TiledObjectGroup::Object& in_object,
+                std::vector<std::unique_ptr<TiledTileset>>& in_tilesets)
+{
+    for (auto&& tileset : boost::adaptors::reverse(in_tilesets)) {
+        if (tileset->firstGid() <= *in_object.gid) {
+            tileset->drawTile(*in_object.gid, io_texture, static_cast<int>(in_object.x), static_cast<int>(in_object.y),
+                              in_object.width, in_object.height);
+        }
+    }
+}
+
 }  // namespace
 
 TiledObjectGroup::Text::Text(const jsoncons::json& in_json)
@@ -78,10 +90,18 @@ TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
       width(in_json["width"].as_double()),
       height(in_json["height"].as_double()),
       x(in_json["x"].as_double()),
-      y(in_json["y"].as_double())
+      y(in_json["y"].as_double())  // tiled uses the bottom left as the origin but we want the top left
 {
     if (in_json.contains("text")) {
         text = std::make_optional<Text>(in_json["text"]);
+    }
+
+    if (in_json.contains("gid")) {
+        gid = std::make_optional<uint32_t>(in_json["gid"].as<uint32_t>());
+
+        // tile objects have their origin as the bottom left rather than top left like non-tile objects on an object
+        // layer.
+        y = y - height;
     }
 
     if (in_json.contains("properties")) {
@@ -94,9 +114,14 @@ TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loaded object with id " << id;
 }
 
-TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_width, int in_height,
+TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_mapWidth, int in_mapHeight,
+                                   std::vector<std::unique_ptr<TiledTileset>>& in_tilesets,
                                    std::optional<std::filesystem::path> in_path)
-    : m_path(in_path), m_mapWidth(in_width), m_mapHeight(in_height), m_texture(getNullTexturePtr())
+    : m_path(std::move(in_path)),
+      m_mapWidth(in_mapWidth),
+      m_mapHeight(in_mapHeight),
+      m_texture(getNullTexturePtr()),
+      m_tilesets(in_tilesets)
 {
     m_id = in_data["id"].as_integer<int>();
     m_name = in_data.get_value_or<std::string>("name", "");
@@ -117,6 +142,10 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_width, 
     for (auto&& object : m_objects) {
         if (object.second.text.has_value()) {
             renderText(m_texture.get(), object.second);
+        }
+
+        if (object.second.gid.has_value()) {
+            renderTile(m_texture.get(), object.second, m_tilesets);
         }
     }
 
@@ -147,5 +176,7 @@ void TiledObjectGroup::render(Texture* io_texture)
     SDL_Rect rect{0, 0, m_mapWidth, m_mapHeight};
     Locator::getVideoManager().drawTexture(io_texture, m_texture.get(), rect, rect);
 }
+
+std::optional<std::string> TiledObjectGroup::name() const { return m_name; }
 
 }  // namespace CapEngine

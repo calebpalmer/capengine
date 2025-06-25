@@ -2,39 +2,36 @@
 #define CAPENGINE_TILEDMAP_H
 
 #include <filesystem>
+#include <functional>
 #include <jsoncons/json.hpp>
 
 #include "tiledobjectgroup.h"
 #include "tiledtilelayer.h"
 #include "tiledtileset.h"
 
-namespace CapEngine
-{
-class TiledMap final
-{
+namespace CapEngine {
+class TiledMap final {
    public:
-    explicit TiledMap(
-        const jsoncons::json &in_json,
-        std::optional<std::filesystem::path> in_path = std::nullopt);
-    explicit TiledMap(const std::filesystem::path &in_mapPath);
+    explicit TiledMap(const jsoncons::json& in_json, std::optional<std::filesystem::path> in_path = std::nullopt);
+    explicit TiledMap(const std::filesystem::path& in_mapPath);
 
     [[nodiscard]] int tileHeight() const;
     [[nodiscard]] int tileWidth() const;
     [[nodiscard]] int width() const;
     [[nodiscard]] int height() const;
-    [[nodiscard]] const std::vector<std::unique_ptr<TiledTileset>> &tilesets()
-        const;
-    [[nodiscard]] const std::vector<TiledTileLayer> &layers() const;
-    [[nodiscard]] const std::vector<TiledObjectGroup> &objectGroups() const;
+    [[nodiscard]] const std::vector<std::unique_ptr<TiledTileset>>& tilesets() const;
+    [[nodiscard]] const std::vector<TiledTileLayer>& layers() const;
+    [[nodiscard]] const std::vector<TiledObjectGroup>& objectGroups() const;
 
-    [[nodiscard]] std::optional<TiledTileset const *> tileset(
-        unsigned int index) const;
+    [[nodiscard]] std::optional<TiledTileset const*> tileset(unsigned int index) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<const TiledObjectGroup>> objectGroupByName(
+        std::string_view in_name) const;
 
     void render();
-    Texture *texture();
+    Texture* texture();
 
    private:
-    void loadJson(const jsoncons::json &in_json);
+    void loadJson(const jsoncons::json& in_json);
 
     std::optional<std::filesystem::path> m_path;
     TexturePtr m_texture;

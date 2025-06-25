@@ -72,4 +72,27 @@ Rectangle TiledTileset::tileRect(int in_tileId) const
     return Rectangle{xTile * this->tileWidth(), yTile * this->tileHeight(), this->tileWidth(), this->tileHeight()};
 }
 
+void TiledTileset::drawTile(uint32_t in_gid, Texture* io_texture, int in_x, int in_y, std::optional<int> in_destWidth,
+                            std::optional<int> in_destHeight)
+{
+    if (m_firstGid > in_gid) {
+        CAP_THROW(CapEngineException{"Global Tiled id does not exist in this tileset: " + std::to_string(in_gid)});
+    }
+
+    int tileId = static_cast<int>(in_gid) - m_firstGid;
+    int xTile = tileId % (m_imageWidth / m_tileWidth);
+    int yTile = tileId / (m_imageWidth / m_tileWidth);
+
+    // get the tile from the tileset
+    if (!m_texture) {
+        this->loadTexture();
+    }
+    assert(m_texture != nullptr);
+
+    SDL_Rect srcRect{xTile * m_tileWidth, yTile * m_tileHeight, m_tileWidth, m_tileHeight};
+    SDL_Rect dstRect{in_x, in_y, in_destWidth.has_value() ? *in_destWidth : m_tileWidth,
+                     in_destHeight.has_value() ? *in_destHeight : m_tileHeight};
+    Locator::getVideoManager().drawTexture(io_texture, m_texture.get(), dstRect, srcRect);
+}
+
 }  // namespace CapEngine

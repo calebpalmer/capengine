@@ -1,21 +1,17 @@
 #ifndef CAPENGINE_TILEDOBJECTGROUP_H
 #define CAPENGINE_TILEDOBJECTGROUP_H
 
-#include "captypes.h"
-#include "tiledcustomproperty.h"
-
-#include <charconv>
-#include <string>
-#include <system_error>
 #include <filesystem>
 #include <jsoncons/json.hpp>
-#include <stdexcept>
+#include <string>
 #include <string_view>
 
-namespace CapEngine
-{
-class TiledObjectGroup
-{
+#include "captypes.h"
+#include "tiledcustomproperty.h"
+#include "tiledtileset.h"
+
+namespace CapEngine {
+class TiledObjectGroup {
    public:
     struct Text {
         std::string text;
@@ -44,15 +40,17 @@ class TiledObjectGroup
         double x;
         double y;
         std::optional<Text> text;
+        std::optional<uint32_t> gid;
         std::vector<TiledCustomProperty> properties;
 
         explicit Object(const jsoncons::json& in_json);
     };
 
-    explicit TiledObjectGroup(
-        const jsoncons::json& in_data,
-        int in_mapWidth, int in_mapHeight,
-        std::optional<std::filesystem::path> in_path = std::nullopt);
+    explicit TiledObjectGroup(const jsoncons::json& in_data, int in_mapWidth, int in_mapHeight,
+                              std::vector<std::unique_ptr<TiledTileset>>& in_tilesets,
+                              std::optional<std::filesystem::path> in_path = std::nullopt);
+
+    [[nodiscard]] std::optional<std::string> name() const;
 
     [[nodiscard]] std::map<std::string, Object> const& objects() const;
     [[nodiscard]] std::map<std::string, Object>& objects();
@@ -68,6 +66,7 @@ class TiledObjectGroup
     int m_mapWidth;
     int m_mapHeight;
     TexturePtr m_texture;
+    std::vector<std::unique_ptr<TiledTileset>>& m_tilesets;
 };
 
 }  // namespace CapEngine
