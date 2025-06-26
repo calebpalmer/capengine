@@ -17,6 +17,8 @@ namespace CapEngine {
 
 namespace {
 
+constexpr char const* kObjectGroupVisiblePropertyName = "capengine-objectgroup-visible";
+
 void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
 {
     if (!in_object.text.has_value()) {
@@ -149,6 +151,18 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_mapWidt
         }
     }
 
+    if (in_data.contains("properties")) {
+        for (const auto& property : in_data["properties"].array_range()) {
+            m_properties.push_back(TiledCustomProperty{property["name"].as_string(), property["type"].as_string(),
+                                                       property["value"].as_string()});
+            if (property["name"].as_string() == kObjectGroupVisiblePropertyName) {
+                // if the object has the property "capengine-objectgroup-visible" set to false, we set the visible
+                // property to false
+                m_visible = property["value"].as_string_view() == "true";
+            }
+        }
+    }
+
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loaded object group with id " << m_id << " with name "
                                                               << (m_name != std::nullopt ? *m_name : "Unknown") << "\n";
 }
@@ -172,11 +186,12 @@ std::optional<TiledObjectGroup::Object> TiledObjectGroup::objectByName(std::stri
 
 void TiledObjectGroup::render(Texture* io_texture)
 {
-    // draw the combined text texture to the input texture
     SDL_Rect rect{0, 0, m_mapWidth, m_mapHeight};
     Locator::getVideoManager().drawTexture(io_texture, m_texture.get(), rect, rect);
 }
 
 std::optional<std::string> TiledObjectGroup::name() const { return m_name; }
+
+bool TiledObjectGroup::visible() const { return m_visible; }
 
 }  // namespace CapEngine

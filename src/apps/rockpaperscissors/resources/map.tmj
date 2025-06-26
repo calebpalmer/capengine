@@ -369,9 +369,55 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"DynamicObjects",
+         "objects":[
+                {
+                 "class":"",
+                 "height":54.5,
+                 "id":33,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"capengine-font-size",
+                         "type":"int",
+                         "value":29
+                        }, 
+                        {
+                         "name":"capengine-font-ttf",
+                         "type":"string",
+                         "value":"tahoma.ttf"
+                        }],
+                 "rotation":0,
+                 "text":
+                    {
+                     "fontfamily":"Sans Serif",
+                     "pixelsize":39,
+                     "text":"Player x Wins!",
+                     "wrap":true
+                    },
+                 "visible":true,
+                 "width":262.71875,
+                 "x":190.140625,
+                 "y":190.5
+                }],
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"capengine-objectgroup-visible",
+                 "type":"string",
+                 "value":"false"
+                }],
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":28,
+ "nextlayerid":7,
+ "nextobjectid":34,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

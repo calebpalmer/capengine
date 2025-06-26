@@ -36,7 +36,7 @@ struct PlayerState {
     CapEngine::Rect tilePosition;
     CapEngine::Rect drawPosition;
     Choice currentChoice = Choice::Rock;
-    std::optional<Choice> nextChoice = Choice::Rock;
+    std::optional<Choice> nextChoice = std::nullopt;
     int score = 0;
 };
 

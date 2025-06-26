@@ -51,6 +51,7 @@ class TiledObjectGroup {
                               std::optional<std::filesystem::path> in_path = std::nullopt);
 
     [[nodiscard]] std::optional<std::string> name() const;
+    [[nodiscard]] bool visible() const;
 
     [[nodiscard]] std::map<std::string, Object> const& objects() const;
     [[nodiscard]] std::map<std::string, Object>& objects();
@@ -67,6 +68,8 @@ class TiledObjectGroup {
     int m_mapHeight;
     TexturePtr m_texture;
     std::vector<std::unique_ptr<TiledTileset>>& m_tilesets;
+    std::vector<TiledCustomProperty> m_properties;
+    bool m_visible = false;
 };
 
 }  // namespace CapEngine

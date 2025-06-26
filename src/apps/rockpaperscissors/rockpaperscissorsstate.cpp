@@ -31,7 +31,7 @@ const int kChoiceTimeMs = 3000;
 const int kEndChoiceWaitTimeMs = 2000;
 
 constexpr int kNumTilesets = 2;
-constexpr int kNumObjectGroups = 2;
+constexpr int kNumObjectGroups = 3;
 constexpr char const* kPositionsObjectGroupName = "Positions";
 constexpr char const* kPlayer1ScoreObjectName = "player-1-score";
 constexpr char const* kPlayer2ScoreObjectName = "player-2-score";
@@ -283,7 +283,7 @@ void RockPaperScissorsState::updateChoose(double in_ms)
     // increment our current timer in this state
     m_state.choiceTimeMs += in_ms;
 
-    // if were still under choide time, perform the movement
+    // if were still under choice time, perform the movement
     if (m_state.choiceTimeMs < kChoiceTimeMs) {
         int timePerMovementMs = kChoiceTimeMs / 5;
 
@@ -331,6 +331,7 @@ void RockPaperScissorsState::updateChoose(double in_ms)
             m_state.player2.drawPosition.y = rightObjectEnd->y;
             m_state.player2.drawPosition.x = rightObjectEnd->x;
 
+            // set default of rock if no choices made
             if (m_state.player1.nextChoice == std::nullopt) {
                 m_state.player1.nextChoice = Choice::Rock;
             }

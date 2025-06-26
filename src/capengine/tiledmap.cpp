@@ -111,8 +111,11 @@ void TiledMap::render()
     });
 
     // // render objects
-    std::for_each(m_objectGroups.begin(), m_objectGroups.end(),
-                  [this](auto& objectGroup) { objectGroup.render(this->m_texture.get()); });
+    std::for_each(m_objectGroups.begin(), m_objectGroups.end(), [this](auto& objectGroup) {
+        if (objectGroup.visible()) {
+            objectGroup.render(this->m_texture.get());
+        }
+    });
 }
 
 const std::vector<TiledObjectGroup>& TiledMap::objectGroups() const { return m_objectGroups; }
