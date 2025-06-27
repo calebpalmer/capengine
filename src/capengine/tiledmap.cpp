@@ -15,6 +15,11 @@
 
 namespace CapEngine {
 
+/**
+ * \brief Constructs a TiledMap from JSON data.
+ * \param in_json The JSON representation of the map.
+ * \param in_path Optional path to the map file for resolving relative paths.
+ */
 TiledMap::TiledMap(const jsoncons::json& in_json, std::optional<std::filesystem::path> in_path)
     : m_path(std::move(in_path)), m_texture(getNullTexturePtr())
 {
@@ -26,6 +31,10 @@ TiledMap::TiledMap(const jsoncons::json& in_json, std::optional<std::filesystem:
     m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight, Colour{0, 0, 0, 0});
 }
 
+/**
+ * \brief Constructs a TiledMap from a file path.
+ * \param in_mapPath Path to the .tmj map file to load.
+ */
 TiledMap::TiledMap(const std::filesystem::path& in_mapPath) : m_path(in_mapPath), m_texture(getNullTexturePtr())
 {
     std::ifstream t(in_mapPath, std::ios::in);
@@ -41,6 +50,10 @@ TiledMap::TiledMap(const std::filesystem::path& in_mapPath) : m_path(in_mapPath)
     m_texture = Locator::getVideoManager().createTexturePtr(textureWidth, textureHeight, Colour{0, 0, 0, 0});
 }
 
+/**
+ * \brief Loads map data from JSON.
+ * \param in_json The JSON data to parse.
+ */
 void TiledMap::loadJson(const jsoncons::json& in_json)
 {
     m_tileHeight = in_json["tileheight"].as<int>();
@@ -85,14 +98,45 @@ void TiledMap::loadJson(const jsoncons::json& in_json)
     }
 }
 
+/**
+ * \brief Gets the height of individual tiles in pixels.
+ * \return The tile height in pixels.
+ */
 int TiledMap::tileHeight() const { return m_tileHeight; }
+
+/**
+ * \brief Gets the width of individual tiles in pixels.
+ * \return The tile width in pixels.
+ */
 int TiledMap::tileWidth() const { return m_tileWidth; }
+
+/**
+ * \brief Gets the width of the map in tiles.
+ * \return The map width in tiles.
+ */
 int TiledMap::width() const { return m_width; }
+
+/**
+ * \brief Gets the height of the map in tiles.
+ * \return The map height in tiles.
+ */
 int TiledMap::height() const { return m_height; }
 
+/**
+ * \brief Gets all tilesets used by this map.
+ * \return A vector of unique pointers to TiledTileset objects.
+ */
 const std::vector<std::unique_ptr<TiledTileset>>& TiledMap::tilesets() const { return m_tilesets; }
+
+/**
+ * \brief Gets all tile layers in this map.
+ * \return A vector of TiledTileLayer objects.
+ */
 const std::vector<TiledTileLayer>& TiledMap::layers() const { return m_layers; }
 
+/**
+ * \brief Renders all visible layers and objects to the map's texture.
+ */
 void TiledMap::render()
 {
     assert(m_texture != nullptr);
@@ -118,10 +162,23 @@ void TiledMap::render()
     });
 }
 
+/**
+ * \brief Gets all object groups in this map.
+ * \return A vector of TiledObjectGroup objects.
+ */
 const std::vector<TiledObjectGroup>& TiledMap::objectGroups() const { return m_objectGroups; }
 
+/**
+ * \brief Gets the rendered texture of the map.
+ * \return A pointer to the map's texture.
+ */
 Texture* TiledMap::texture() { return m_texture.get(); }
 
+/**
+ * \brief Gets a tileset by index.
+ * \param index The index of the tileset to retrieve.
+ * \return A pointer to the tileset if found, std::nullopt otherwise.
+ */
 std::optional<TiledTileset const*> TiledMap::tileset(unsigned int index) const
 {
     if (index < m_tilesets.size()) {
@@ -131,6 +188,11 @@ std::optional<TiledTileset const*> TiledMap::tileset(unsigned int index) const
     return std::nullopt;
 }
 
+/**
+ * \brief Gets an object group by name.
+ * \param in_name The name of the object group to find.
+ * \return A reference wrapper to the object group if found, std::nullopt otherwise.
+ */
 std::optional<std::reference_wrapper<const TiledObjectGroup>> TiledMap::objectGroupByName(
     std::string_view in_name) const
 {

@@ -19,6 +19,11 @@ namespace {
 
 constexpr char const* kObjectGroupVisiblePropertyName = "capengine-objectgroup-visible";
 
+/**
+ * \brief Renders a text object to a texture.
+ * \param io_texture The texture to render to.
+ * \param in_object The text object to render.
+ */
 void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
 {
     if (!in_object.text.has_value()) {
@@ -55,6 +60,12 @@ void renderText(Texture* io_texture, const TiledObjectGroup::Object& in_object)
     videoManager.drawTexture(io_texture, texture.get(), dstRect, srcRect);
 }
 
+/**
+ * \brief Renders a tile object to a texture.
+ * \param io_texture The texture to render to.
+ * \param in_object The tile object to render.
+ * \param in_tilesets The tilesets containing the tile graphics.
+ */
 void renderTile(Texture* io_texture, const TiledObjectGroup::Object& in_object,
                 std::vector<std::unique_ptr<TiledTileset>>& in_tilesets)
 {
@@ -68,6 +79,10 @@ void renderTile(Texture* io_texture, const TiledObjectGroup::Object& in_object,
 
 }  // namespace
 
+/**
+ * \brief Constructs Text from JSON data.
+ * \param in_json The JSON representation of the text properties.
+ */
 TiledObjectGroup::Text::Text(const jsoncons::json& in_json)
 {
     text = in_json["text"].as_string();
@@ -84,6 +99,10 @@ TiledObjectGroup::Text::Text(const jsoncons::json& in_json)
     valign = in_json.get_value_or<std::string>("valign", "top");
 }
 
+/**
+ * \brief Constructs Object from JSON data.
+ * \param in_json The JSON representation of the object.
+ */
 TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
     : id(in_json["id"].as_string()),
       name(in_json.get_value_or<std::optional<std::string>>("name", std::nullopt)),
@@ -116,6 +135,14 @@ TiledObjectGroup::Object::Object(const jsoncons::json& in_json)
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loaded object with id " << id;
 }
 
+/**
+ * \brief Constructs a TiledObjectGroup from JSON data.
+ * \param in_data The JSON representation of the object group.
+ * \param in_mapWidth Width of the parent map in pixels.
+ * \param in_mapHeight Height of the parent map in pixels.
+ * \param in_tilesets Reference to the map's tilesets for tile objects.
+ * \param in_path Optional path for resolving relative references.
+ */
 TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_mapWidth, int in_mapHeight,
                                    std::vector<std::unique_ptr<TiledTileset>>& in_tilesets,
                                    std::optional<std::filesystem::path> in_path)
@@ -167,10 +194,23 @@ TiledObjectGroup::TiledObjectGroup(const jsoncons::json& in_data, int in_mapWidt
                                                               << (m_name != std::nullopt ? *m_name : "Unknown") << "\n";
 }
 
+/**
+ * \brief Gets all objects in the group (const version).
+ * \return A const reference to the map of objects keyed by ID.
+ */
 std::map<std::string, TiledObjectGroup::Object> const& TiledObjectGroup::objects() const { return m_objects; }
 
+/**
+ * \brief Gets all objects in the group (mutable version).
+ * \return A mutable reference to the map of objects keyed by ID.
+ */
 std::map<std::string, TiledObjectGroup::Object>& TiledObjectGroup::objects() { return m_objects; }
 
+/**
+ * \brief Finds an object by name.
+ * \param in_name The name of the object to find.
+ * \return The object if found, std::nullopt otherwise.
+ */
 std::optional<TiledObjectGroup::Object> TiledObjectGroup::objectByName(std::string_view in_name) const
 {
     auto maybeObject = std::find_if(
@@ -184,14 +224,26 @@ std::optional<TiledObjectGroup::Object> TiledObjectGroup::objectByName(std::stri
     return std::nullopt;
 }
 
+/**
+ * \brief Renders all visible objects in the group to a texture.
+ * \param io_texture The texture to render to.
+ */
 void TiledObjectGroup::render(Texture* io_texture)
 {
     SDL_Rect rect{0, 0, m_mapWidth, m_mapHeight};
     Locator::getVideoManager().drawTexture(io_texture, m_texture.get(), rect, rect);
 }
 
+/**
+ * \brief Gets the name of the object group.
+ * \return The name if set, std::nullopt otherwise.
+ */
 std::optional<std::string> TiledObjectGroup::name() const { return m_name; }
 
+/**
+ * \brief Gets whether the object group is visible.
+ * \return True if the object group should be rendered, false otherwise.
+ */
 bool TiledObjectGroup::visible() const { return m_visible; }
 
 }  // namespace CapEngine

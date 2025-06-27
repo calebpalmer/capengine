@@ -38,6 +38,10 @@ constexpr char const* kPlayer1ScoreObjectName = "player-1-score";
 constexpr char const* kPlayer2ScoreObjectName = "player-2-score";
 constexpr char const* kVictoryBannerObjectName = "player-victory-banner";
 
+/**
+ * \brief Generates a random choice for rock, paper, or scissors.
+ * \return A randomly selected Choice (Rock, Paper, or Scissors).
+ */
 Choice generateRandomChoice()
 {
     std::random_device randomDevice;
@@ -48,6 +52,12 @@ Choice generateRandomChoice()
     return static_cast<Choice>(uniformDist(randomEngine));
 }
 
+/**
+ * \brief Gets the tile position for a given choice from the tileset.
+ * \param in_tileset The tileset containing the choice sprites.
+ * \param in_choice The player's choice (Rock, Paper, or Scissors).
+ * \return The rectangle defining the tile position in the tileset.
+ */
 CapEngine::Rect getTilePosition(CapEngine::TiledTileset const& in_tileset, RPS::Choice in_choice)
 {
     switch (in_choice) {
@@ -64,8 +74,17 @@ CapEngine::Rect getTilePosition(CapEngine::TiledTileset const& in_tileset, RPS::
 
 }  // namespace
 
+//! Default constructor for State.
+/**
+ * \brief Initializes the game state with default settings and Start phase.
+ */
 State::State() : settings{1}, phase(GamePhase::Start) {}
 
+//! Constructor for RockPaperScissorsState.
+/**
+ * \brief Initializes the Rock Paper Scissors game state.
+ * \param in_windowId The ID of the window to render to.
+ */
 RockPaperScissorsState::RockPaperScissorsState(uint32_t in_windowId) : m_windowId(in_windowId)
 {
     // read in tileset from rps_resources/rps.tsj
@@ -94,6 +113,9 @@ RockPaperScissorsState::RockPaperScissorsState(uint32_t in_windowId) : m_windowI
         [this](SDL_KeyboardEvent in_event) { this->handleKeyboardEvent(in_event); });
 }
 
+/**
+ * \brief Renders both players' current choices on screen.
+ */
 void RockPaperScissorsState::renderPlayers()
 {
     auto& videoManager = CapEngine::Locator::getVideoManager();
@@ -114,6 +136,9 @@ void RockPaperScissorsState::renderPlayers()
                              std::nullopt, SDL_FLIP_HORIZONTAL);
 }
 
+/**
+ * \brief Renders the current scores for both players.
+ */
 void RockPaperScissorsState::renderScore()
 {
     auto& videoManager = CapEngine::Locator::getVideoManager();
@@ -173,6 +198,9 @@ void RockPaperScissorsState::renderScore()
     renderFont(*player2ScorePosition, m_state.player2.score);
 }
 
+/**
+ * \brief Renders the victory banner showing which player won the round.
+ */
 void RockPaperScissorsState::renderVictoryBanner()
 {
     // get the layer
@@ -224,6 +252,9 @@ void RockPaperScissorsState::renderVictoryBanner()
     videoManager.drawTexture(m_windowId, dstRect, texture.get(), &srcRect);
 }
 
+/**
+ * \brief Renders the entire game scene including background, map, players, and UI.
+ */
 void RockPaperScissorsState::render()
 {
     auto& videoManager = CapEngine::Locator::getVideoManager();
@@ -250,6 +281,10 @@ void RockPaperScissorsState::render()
     }
 }
 
+/**
+ * \brief Updates the game state based on the current phase.
+ * \param ms The time elapsed since the last update in milliseconds.
+ */
 void RockPaperScissorsState::update(double ms)
 {
     // The game is not in progress
@@ -268,6 +303,10 @@ void RockPaperScissorsState::update(double ms)
     }
 }
 
+/**
+ * \brief Updates the game when in the Start or Stopped phase.
+ * \param in_ms The time elapsed since the last update in milliseconds.
+ */
 void RockPaperScissorsState::updateStopped(double in_ms)
 {
     assert(m_map != nullptr);
@@ -309,6 +348,10 @@ void RockPaperScissorsState::updateStopped(double in_ms)
                         (*tileset)->tileWidth(), (*tileset)->tileHeight()};
 }
 
+/**
+ * \brief Updates the game during the Choice and ChoiceEnd phases.
+ * \param in_ms The time elapsed since the last update in milliseconds.
+ */
 void RockPaperScissorsState::updateChoose(double in_ms)
 {
     // grab a bunch of stuff that we need
@@ -439,6 +482,10 @@ void RockPaperScissorsState::updateChoose(double in_ms)
     }
 }
 
+/**
+ * \brief Handles keyboard input events for game control and player choices.
+ * \param in_event The SDL keyboard event to process.
+ */
 void RockPaperScissorsState::handleKeyboardEvent(SDL_KeyboardEvent in_event)
 {
     if (m_state.phase == GamePhase::Start || m_state.phase == GamePhase::Stopped) {

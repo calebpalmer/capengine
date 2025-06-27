@@ -14,14 +14,26 @@
 
 namespace CapEngine
 {
+//! Tiled tile layer representation
+/**
+ * \brief Represents a tile layer from a Tiled map.
+ * 
+ * This class manages a single tile layer containing a 2D array of tiles.
+ * It handles loading tile data from JSON, rendering tiles from tilesets,
+ * and creating the final layer texture.
+ */
 class TiledTileLayer
 {
    public:
+    //! Global tile information
+    /**
+     * \brief Contains information about a tile's orientation and ID.
+     */
     struct GlobalTileInfo {
-        bool xFlip{false};
-        bool yFlip{false};
-        bool diagFlip{false};
-        unsigned int globalTileId{0};
+        bool xFlip{false};               //!< Whether the tile is flipped horizontally
+        bool yFlip{false};               //!< Whether the tile is flipped vertically
+        bool diagFlip{false};            //!< Whether the tile is flipped diagonally
+        unsigned int globalTileId{0};    //!< The global tile ID (across all tilesets)
     };
 
     explicit TiledTileLayer(
@@ -45,20 +57,20 @@ class TiledTileLayer
     Texture* texture();
 
    private:
-    std::optional<std::filesystem::path> m_path;
-    std::string m_name;
-    int m_height{0};
-    int m_width{0};
-    int m_x{0};
-    int m_y{0};
-    int m_mapHeight{0};
-    int m_mapWidth{0};
-    int m_tileWidth{0};
-    int m_tileHeight{0};
-    bool m_visible{true};
-    std::vector<unsigned int> m_data;
-    TexturePtr m_texture;
-    std::vector<std::unique_ptr<TiledTileset>>& m_tilesets;
+    std::optional<std::filesystem::path> m_path;          //!< Optional path to the layer file
+    std::string m_name;                                   //!< Name of the layer
+    int m_height{0};                                      //!< Height of the layer in tiles
+    int m_width{0};                                       //!< Width of the layer in tiles
+    int m_x{0};                                           //!< X offset of the layer
+    int m_y{0};                                           //!< Y offset of the layer
+    int m_mapHeight{0};                                   //!< Height of the parent map in tiles
+    int m_mapWidth{0};                                    //!< Width of the parent map in tiles
+    int m_tileWidth{0};                                   //!< Width of individual tiles in pixels
+    int m_tileHeight{0};                                  //!< Height of individual tiles in pixels
+    bool m_visible{true};                                 //!< Whether the layer is visible
+    std::vector<unsigned int> m_data;                     //!< Raw tile data (global tile IDs)
+    TexturePtr m_texture;                                 //!< Rendered texture of the layer
+    std::vector<std::unique_ptr<TiledTileset>>& m_tilesets; //!< Reference to the map's tilesets
 };
 
 TiledTileLayer::GlobalTileInfo getGlobalTileInfo(unsigned int in_tileId);

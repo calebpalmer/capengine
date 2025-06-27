@@ -19,6 +19,16 @@
 namespace CapEngine {
 using std::filesystem::path;
 
+/**
+ * \brief Constructs a TiledTileLayer from JSON data.
+ * \param in_data The JSON representation of the tile layer.
+ * \param in_tilesets Reference to the map's tilesets.
+ * \param in_tileWidth Width of individual tiles in pixels.
+ * \param in_tileHeight Height of individual tiles in pixels.
+ * \param in_mapWidth Width of the map in tiles.
+ * \param in_mapHeight Height of the map in tiles.
+ * \param in_path Optional path for resolving relative references.
+ */
 TiledTileLayer::TiledTileLayer(const jsoncons::json& in_data, std::vector<std::unique_ptr<TiledTileset>>& in_tilesets,
                                int in_tileWidth, int in_tileHeight, int in_mapWidth, int in_mapHeight,
                                std::optional<path> in_path)
@@ -102,6 +112,16 @@ TiledTileLayer::TiledTileLayer(const jsoncons::json& in_data, std::vector<std::u
     Locator::getVideoManager().saveTexture(m_texture.get(), (boost::format("layer_%1%.png") % m_name).str());
 }
 
+/**
+ * \brief Creates a TiledTileLayer from a file path.
+ * \param in_path Path to the JSON file containing the layer data.
+ * \param in_tilesets Reference to the map's tilesets.
+ * \param in_tileWidth Width of individual tiles in pixels.
+ * \param in_tileHeight Height of individual tiles in pixels.
+ * \param in_mapWidth Width of the map in tiles.
+ * \param in_mapHeight Height of the map in tiles.
+ * \return A new TiledTileLayer instance.
+ */
 TiledTileLayer TiledTileLayer::create(std::filesystem::path in_path,
                                       std::vector<std::unique_ptr<TiledTileset>>& in_tilesets, int in_tileWidth,
                                       int in_tileHeight, int in_mapWidth, int in_mapHeight)
@@ -111,18 +131,56 @@ TiledTileLayer TiledTileLayer::create(std::filesystem::path in_path,
     return TiledTileLayer(json, in_tilesets, in_tileWidth, in_tileHeight, in_mapWidth, in_mapHeight, in_path);
 }
 
+/**
+ * \brief Gets the width of the layer in tiles.
+ * \return The layer width in tiles.
+ */
 int TiledTileLayer::width() const { return m_width; }
+
+/**
+ * \brief Gets the height of the layer in tiles.
+ * \return The layer height in tiles.
+ */
 int TiledTileLayer::height() const { return m_height; }
+
+/**
+ * \brief Gets the X offset of the layer.
+ * \return The X offset in pixels.
+ */
 int TiledTileLayer::x() const { return m_x; }
+
+/**
+ * \brief Gets the Y offset of the layer.
+ * \return The Y offset in pixels.
+ */
 int TiledTileLayer::y() const { return m_y; }
+
+/**
+ * \brief Gets whether the layer is visible.
+ * \return True if the layer should be rendered, false otherwise.
+ */
 bool TiledTileLayer::visible() const { return m_visible; }
+
+/**
+ * \brief Gets the raw tile data for the layer.
+ * \return A vector of tile IDs representing the layer's tiles.
+ */
 std::vector<unsigned int> const& TiledTileLayer::data() const { return m_data; }
 
+/**
+ * \brief Renders the layer to a specific window.
+ * \param in_windowId The ID of the window to render to.
+ */
 void TiledTileLayer::render(uint32_t in_windowId) const
 {
     // do nothing
 }
 
+/**
+ * \brief Extracts global tile information from a raw tile ID.
+ * \param in_tileId The raw tile ID with flip flags.
+ * \return GlobalTileInfo containing the clean tile ID and flip flags.
+ */
 TiledTileLayer::GlobalTileInfo getGlobalTileInfo(unsigned int in_tileId)
 {
     const unsigned FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -142,6 +200,10 @@ TiledTileLayer::GlobalTileInfo getGlobalTileInfo(unsigned int in_tileId)
     return TiledTileLayer::GlobalTileInfo{flipped_horizontally, flipped_vertically, flipped_diagonally, in_tileId};
 }
 
+/**
+ * \brief Gets the rendered texture of the layer.
+ * \return A pointer to the layer's texture.
+ */
 Texture* TiledTileLayer::texture() { return m_texture.get(); }
 
 }  // namespace CapEngine
