@@ -379,7 +379,7 @@
                  "class":"",
                  "height":54.5,
                  "id":33,
-                 "name":"",
+                 "name":"player-victory-banner",
                  "properties":[
                         {
                          "name":"capengine-font-size",
@@ -400,9 +400,9 @@
                      "wrap":true
                     },
                  "visible":true,
-                 "width":262.71875,
-                 "x":190.140625,
-                 "y":190.5
+                 "width":288.21875,
+                 "x":211.640625,
+                 "y":191
                 }],
          "opacity":1,
          "properties":[

@@ -32,9 +32,11 @@ const int kEndChoiceWaitTimeMs = 2000;
 
 constexpr int kNumTilesets = 2;
 constexpr int kNumObjectGroups = 3;
-constexpr char const* kPositionsObjectGroupName = "Positions";
+constexpr char const* kPositionsObjectsGroupName = "Positions";
+constexpr char const* kDynamicObjectsGroupName = "DynamicObjects";
 constexpr char const* kPlayer1ScoreObjectName = "player-1-score";
 constexpr char const* kPlayer2ScoreObjectName = "player-2-score";
+constexpr char const* kVictoryBannerObjectName = "player-victory-banner";
 
 Choice generateRandomChoice()
 {
@@ -119,7 +121,7 @@ void RockPaperScissorsState::renderScore()
 
     // get the positions object group
     std::optional<std::reference_wrapper<const CapEngine::TiledObjectGroup>> positions =
-        m_map->objectGroupByName(kPositionsObjectGroupName);
+        m_map->objectGroupByName(kPositionsObjectsGroupName);
 
     if (!positions) CAP_THROW(CapEngine::CapEngineException{"Could not find Positions ObjectGroup"});
 
@@ -171,6 +173,57 @@ void RockPaperScissorsState::renderScore()
     renderFont(*player2ScorePosition, m_state.player2.score);
 }
 
+void RockPaperScissorsState::renderVictoryBanner()
+{
+    // get the layer
+    std::optional<std::reference_wrapper<const CapEngine::TiledObjectGroup>> dynamicObjects =
+        m_map->objectGroupByName(kDynamicObjectsGroupName);
+
+    if (!dynamicObjects)
+        CAP_THROW(
+            CapEngine::CapEngineException{std::format("Could not find {} ObjectGroup", kDynamicObjectsGroupName)});
+
+    // get the object that holds the position
+    std::optional<CapEngine::TiledObjectGroup::Object> victoryBannerPosition =
+        dynamicObjects->get().objectByName(kVictoryBannerObjectName);
+    if (!victoryBannerPosition.has_value()) {
+        CAP_THROW(CapEngine::CapEngineException{std::format("Could not find {} object.", kVictoryBannerObjectName)});
+    }
+
+    // get the fonts to render for the score
+    auto fontFamily = std::find_if(
+        victoryBannerPosition->properties.begin(), victoryBannerPosition->properties.end(),
+        [](const CapEngine::TiledCustomProperty& in_property) { return in_property.name == "capengine-font-ttf"; });
+    if (fontFamily == victoryBannerPosition->properties.end()) {
+        CAP_THROW(CapEngine::CapEngineException("Missing tiled object property \"capengine-font-ttf\""));
+    }
+
+    auto fontSizeProperty = std::find_if(
+        victoryBannerPosition->properties.begin(), victoryBannerPosition->properties.end(),
+        [](const CapEngine::TiledCustomProperty& in_property) { return in_property.name == "capengine-font-size"; });
+    if (fontSizeProperty == victoryBannerPosition->properties.end()) {
+        CAP_THROW(CapEngine::CapEngineException("Missing tiled object property \"capengine-font-size\""));
+    }
+
+    // render the font
+    CapEngine::Colour fontColour{255, 255, 255, 255};
+
+    CapEngine::SurfacePtr surface = CapEngine::Locator::getFontManager().getTextSurface(
+        fontFamily->value, std::format("Player {} wins!", m_state.currentWinner), fontSizeProperty->as<int>(),
+        fontColour);
+
+    CapEngine::VideoManager& videoManager = CapEngine::Locator::getVideoManager();
+    CapEngine::TexturePtr texture = videoManager.createTextureFromSurfacePtr(surface.get(), false);
+
+    auto srcWidth = static_cast<int>(videoManager.getTextureWidth(texture.get()));
+    auto srcHeight = static_cast<int>(videoManager.getTextureHeight(texture.get()));
+    CapEngine::Rect srcRect{0, 0, srcWidth, srcHeight};
+    CapEngine::Rect dstRect{static_cast<int>(victoryBannerPosition->x), static_cast<int>(victoryBannerPosition->y),
+                            srcWidth, srcHeight};
+
+    videoManager.drawTexture(m_windowId, dstRect, texture.get(), &srcRect);
+}
+
 void RockPaperScissorsState::render()
 {
     auto& videoManager = CapEngine::Locator::getVideoManager();
@@ -191,6 +244,10 @@ void RockPaperScissorsState::render()
 
     renderPlayers();
     renderScore();
+
+    if (m_state.phase == GamePhase::ChoiceEnd) {
+        renderVictoryBanner();
+    }
 }
 
 void RockPaperScissorsState::update(double ms)
@@ -349,24 +406,30 @@ void RockPaperScissorsState::updateChoose(double in_ms)
             // calculate the winner
             if (m_state.player1.currentChoice == Choice::Rock && m_state.player2.currentChoice == Choice::Scissors) {
                 m_state.player1.score += 1;
+                m_state.currentWinner = 1;
             }
             else if (m_state.player1.currentChoice == Choice::Rock && m_state.player2.currentChoice == Choice::Paper) {
                 m_state.player2.score += 1;
+                m_state.currentWinner = 2;
             }
             else if (m_state.player1.currentChoice == Choice::Paper && m_state.player2.currentChoice == Choice::Rock) {
                 m_state.player1.score += 1;
+                m_state.currentWinner = 1;
             }
             else if (m_state.player1.currentChoice == Choice::Paper &&
                      m_state.player2.currentChoice == Choice::Scissors) {
                 m_state.player2.score += 1;
+                m_state.currentWinner = 2;
             }
             else if (m_state.player1.currentChoice == Choice::Scissors &&
                      m_state.player2.currentChoice == Choice::Paper) {
                 m_state.player1.score += 1;
+                m_state.currentWinner = 1;
             }
             else if (m_state.player1.currentChoice == Choice::Scissors &&
                      m_state.player2.currentChoice == Choice::Rock) {
                 m_state.player2.score += 1;
+                m_state.currentWinner = 2;
             }
 
             // else no one wins

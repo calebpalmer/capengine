@@ -47,10 +47,10 @@ struct State {
     PlayerState player1;
     PlayerState player2;
     int choiceTimeMs = 0;
+    int currentWinner = 0;
 };
 
-class RockPaperScissorsState final : public CapEngine::GameState
-{
+class RockPaperScissorsState final : public CapEngine::GameState {
    public:
     explicit RockPaperScissorsState(uint32_t in_windowId);
     ~RockPaperScissorsState() override = default;
@@ -61,6 +61,7 @@ class RockPaperScissorsState final : public CapEngine::GameState
    private:
     void renderPlayers();
     void renderScore();
+    void renderVictoryBanner();
     void handleKeyboardEvent(SDL_KeyboardEvent in_event);
 
     // State update functions
