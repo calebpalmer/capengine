@@ -5,6 +5,7 @@
 #include <SDL_rect.h>
 #include <capengine/CapEngineException.h>
 #include <capengine/VideoManager.h>
+#include <capengine/captypes.h>
 #include <capengine/collision.h>
 #include <capengine/colour.h>
 #include <capengine/filesystem.h>
@@ -72,6 +73,23 @@ CapEngine::Rect getTilePosition(CapEngine::TiledTileset const& in_tileset, RPS::
     }
 }
 
+CapEngine::Texture* getHandSpritesheet(CapEngine::TiledMap const& in_map)
+{
+    CapEngine::VideoManager& videoManager = CapEngine::Locator::getVideoManager();
+
+    auto const& tilesets = in_map.tilesets();
+    assert(tilesets.size() >= kNumTilesets);
+
+    // get the tileset with the hands
+    auto const& tileset = std::find_if(tilesets.begin(), tilesets.end(),
+                                       [](auto const& tileset) { return tileset->name() == "rps.tsj"; });
+    assert(tileset != tilesets.end());
+    auto&& texture = (*tileset)->texture();
+    assert(texture != std::nullopt);
+
+    return *texture;
+}
+
 }  // namespace
 
 //! Default constructor for State.
@@ -85,7 +103,8 @@ State::State() : settings{1}, phase(GamePhase::Start) {}
  * \brief Initializes the Rock Paper Scissors game state.
  * \param in_windowId The ID of the window to render to.
  */
-RockPaperScissorsState::RockPaperScissorsState(uint32_t in_windowId) : m_windowId(in_windowId)
+RockPaperScissorsState::RockPaperScissorsState(uint32_t in_windowId)
+    : m_windowId(in_windowId), m_victorySprites(CapEngine::getNullTexturePtr())
 {
     // read in tileset from rps_resources/rps.tsj
     std::filesystem::path tiledMapPath =
@@ -111,6 +130,16 @@ RockPaperScissorsState::RockPaperScissorsState(uint32_t in_windowId) : m_windowI
     // register for keyboard events
     CapEngine::Locator::getEventSubscriber().m_keyboardEventSignal.connect(
         [this](SDL_KeyboardEvent in_event) { this->handleKeyboardEvent(in_event); });
+
+    // render victory textures from hand sprites
+    CapEngine::Texture* spriteTexture = getHandSpritesheet(*m_map);
+    // create a copy of texture because the sprite texture was loaded from an image which is loaded with
+    // SDL_TEXTUREACCESS_STATIC which can't be a render target. Copy it into another texture with
+    // SDL_TEXTUREACCESS_TARGET
+    CapEngine::TexturePtr copy = videoManager.copyTexture(spriteTexture);
+    CapEngine::SurfacePtr surface = videoManager.createSurfaceFromTexture(copy.get());
+    videoManager.replaceColour(surface.get(), CapEngine::Colour{255, 255, 255, 255}, CapEngine::Colour{0, 255, 0, 255});
+    m_victorySprites = videoManager.createTextureFromSurfacePtr(surface.release(), true);
 }
 
 /**
@@ -131,9 +160,12 @@ void RockPaperScissorsState::renderPlayers()
     auto&& texture = (*tileset)->texture();
     assert(texture != std::nullopt);
 
-    videoManager.drawTexture(m_windowId, m_state.player1.drawPosition, *texture, &m_state.player1.tilePosition);
-    videoManager.drawTexture(m_windowId, *texture, &m_state.player2.tilePosition, &m_state.player2.drawPosition,
-                             std::nullopt, SDL_FLIP_HORIZONTAL);
+    videoManager.drawTexture(m_windowId, m_state.player1.drawPosition,
+                             m_state.currentWinner == 1 ? m_victorySprites.get() : *texture,
+                             &m_state.player1.tilePosition);
+    videoManager.drawTexture(m_windowId, m_state.currentWinner == 2 ? m_victorySprites.get() : *texture,
+                             &m_state.player2.tilePosition, &m_state.player2.drawPosition, std::nullopt,
+                             SDL_FLIP_HORIZONTAL);
 }
 
 /**
@@ -420,6 +452,7 @@ void RockPaperScissorsState::updateChoose(double in_ms)
         m_state.player2.currentChoice = Choice::Rock;
         m_state.player1.nextChoice = std::nullopt;
         m_state.player2.nextChoice = std::nullopt;
+        m_state.currentWinner = 0;
     }
     // choice time is over but wait a bit to show the end choices
     else {

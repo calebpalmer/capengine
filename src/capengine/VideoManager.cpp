@@ -5,6 +5,7 @@
 
 #include <SDL2/SDL_image.h>
 #include <SDL_blendmode.h>
+#include <SDL_pixels.h>
 
 #include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/trivial.hpp>
@@ -120,6 +121,60 @@ TexturePtr VideoManager::createTextureFromSurfacePtr(Uint32 windowId, Surface* s
 {
     Texture* texture = createTextureFromSurface(windowId, surface, freeSurface);
     return TexturePtr(texture, SDL_DestroyTexture);
+}
+
+/**
+ * \brief Creates a copy of an existing texture.
+ * \param sourceTexture The texture to copy from.
+ * \return A new TexturePtr containing a copy of the source texture.
+ */
+TexturePtr VideoManager::copyTexture(Texture* sourceTexture)
+{
+    if (sourceTexture == nullptr) {
+        CAP_THROW(CapEngineException{"Cannot copy null texture"});
+    }
+
+    // Get source texture dimensions and format
+    int width = 0;
+    int height = 0;
+    Uint32 format = 0;
+    int access;
+    if (SDL_QueryTexture(sourceTexture, &format, &access, &width, &height) != 0) {
+        std::ostringstream error;
+        error << "Error querying source texture: " << SDL_GetError();
+        CAP_THROW(CapEngineException{error.str()});
+    }
+
+    // Create destination texture with same dimensions and format
+    SDL_Renderer* renderer = m_renderer.get();
+    SDL_Texture* destTexture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, width, height);
+    if (destTexture == nullptr) {
+        std::ostringstream error;
+        error << "Error creating destination texture: " << SDL_GetError();
+        CAP_THROW(CapEngineException{error.str()});
+    }
+
+    // Set destination texture as render target
+    SDL_Texture* originalTarget = SDL_GetRenderTarget(renderer);
+    Defer deferSetRenderTarget([renderer, originalTarget]() { SDL_SetRenderTarget(renderer, originalTarget); });
+
+    if (SDL_SetRenderTarget(renderer, destTexture) != 0) {
+        SDL_DestroyTexture(destTexture);
+        std::ostringstream error;
+        error << "Error setting render target: " << SDL_GetError();
+        CAP_THROW(CapEngineException{error.str()});
+    }
+
+    // Copy source texture to destination
+    if (SDL_RenderCopy(renderer, sourceTexture, nullptr, nullptr) != 0) {
+        SDL_SetRenderTarget(renderer, originalTarget);
+        SDL_DestroyTexture(destTexture);
+        std::ostringstream error;
+        error << "Error copying texture: " << SDL_GetError();
+        CAP_THROW(CapEngineException{error.str()});
+    }
+
+    return TexturePtr(destTexture, SDL_DestroyTexture);
 }
 
 Texture* VideoManager::createTextureFromSurface(Surface* surface, bool freeSurface)
@@ -1180,5 +1235,26 @@ SDL_Renderer* VideoManager::getRenderer()
 }
 
 TexturePtr textureToTexturePtr(Texture* texture) { return std::move(TexturePtr(texture, SDL_DestroyTexture)); }
+
+void VideoManager::replaceColour(Surface* in_surface, Colour in_oldColour, Colour in_newColour)
+{
+    CAP_THROW_NULL(in_surface, "Surface is null");
+
+    // SDL_MapRGBA will handle the pixel format conversion of the colour to the pixel format of the surface
+    Uint32 oldColour =
+        SDL_MapRGBA(in_surface->format, in_oldColour.m_r, in_oldColour.m_g, in_oldColour.m_b, in_oldColour.m_a);
+    Uint32 newColour =
+        SDL_MapRGBA(in_surface->format, in_newColour.m_r, in_newColour.m_g, in_newColour.m_b, in_newColour.m_a);
+
+    // Lock the surface and iterate through pixels
+    SDL_LockSurface(in_surface);
+    auto* pixels = reinterpret_cast<Uint32*>(in_surface->pixels);
+    for (int i = 0; i < in_surface->w * in_surface->h; i++) {
+        if (pixels[i] == oldColour) {
+            pixels[i] = newColour;
+        }
+    }
+    SDL_UnlockSurface(in_surface);
+}
 
 }  // namespace CapEngine

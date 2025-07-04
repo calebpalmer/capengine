@@ -105,9 +105,10 @@ class RockPaperScissorsState final : public CapEngine::GameState {
     void updateStopped(double ms);
     void updateChoose(double ms);
 
-    uint32_t m_windowId = 0;                       //!< ID of the window to render to
-    std::unique_ptr<CapEngine::TiledMap> m_map;    //!< Tiled map containing game layout and assets
-    State m_state;                                 //!< Current game state
+    uint32_t m_windowId = 0;                     //!< ID of the window to render to
+    std::unique_ptr<CapEngine::TiledMap> m_map;  //!< Tiled map containing game layout and assets
+    State m_state;                               //!< Current game state
+    CapEngine::TexturePtr m_victorySprites;
 };
 }  // namespace RPS
 

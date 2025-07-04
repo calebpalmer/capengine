@@ -101,6 +101,7 @@ class VideoManager final {
     Surface* createSurface(int width, int height);
     SurfacePtr createSurfacePtr(int in_width, int in_height);
     SurfacePtr createSurfaceFromTexture(Texture* in_texture);
+    static void replaceColour(Surface* in_surface, Colour in_oldColour, Colour in_newColour);
     void saveSurface(Surface* surface, const std::string& filePath);
     void closeSurface(Surface* surface) const;
     void blitSurface(Surface* sourceSurface, int srcX, int srcY, int sourceWidth, int sourceHeight,
@@ -127,6 +128,7 @@ class VideoManager final {
     Texture* createTextureFromSurface(Uint32 windowID, Surface* surface, bool freeSurface = false);
     TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false);
     TexturePtr createTextureFromSurfacePtr(Uint32 windowId, Surface* surface, bool freeSurface = false);
+    TexturePtr copyTexture(Texture* sourceTexture);
     void saveTexture(Texture* texture, const std::string& filePath);
     void setClipRect(Uint32 windowId, SDL_Rect const* clipRect);
 
