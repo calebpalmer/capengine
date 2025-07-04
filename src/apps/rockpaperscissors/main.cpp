@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
         // set up the window
         const bool isFullScreen = false;
 
-        CapEngine::WindowParams windowParams{
-            "tanks", 1600, 900, 32, isFullScreen, false, true, false, "rockpaperscissors", true};
+        CapEngine::WindowParams windowParams{"rockpaperscissors", 1280, 960, 32, isFullScreen, false, true, false,
+                                             "rockpaperscissors", true};
 
         unsigned int windowId = CapEngine::init(windowParams);
         if (windowId == 0) {
