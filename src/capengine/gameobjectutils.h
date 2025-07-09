@@ -15,6 +15,7 @@ struct ObjectCreationError : public CapEngineException {
                       const jsoncons::json &in_json);
 };
 
+// Utility function for making game objects from JSON data in the Scened2d schema.
 GameObject makeObject(const jsoncons::json &in_json);
 
 } // namespace CapEngine

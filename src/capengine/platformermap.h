@@ -1,45 +1,43 @@
 #ifndef PLATFORMERMAP_H
 #define PLATFORMERMAP_H
 
-#include "mapobjectdescriptor.h"
-#include "vector.h"
-
 #include <memory>
 #include <vector>
 
-namespace CapEngine
-{
+#include "captypes.h"
+#include "mapobjectdescriptor.h"
+#include "vector.h"
 
-class PlatformerMap
-{
-public:
-  static std::unique_ptr<PlatformerMap>
-      createPlatformerMapFromFile(std::string const &in_arenaConfigPath,
-                                  int in_arenaId);
+namespace CapEngine {
 
-  PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX);
-  ~PlatformerMap();
+class PlatformerMap {
+   public:
+    static std::unique_ptr<PlatformerMap> createPlatformerMapFromFile(std::string const& in_arenaConfigPath,
+                                                                      int in_arenaId);
 
-  void update(double ms);
-  void render(Uint32 in_windowId);
+    PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX);
+    ~PlatformerMap();
 
-  std::vector<Vector> getSpawnPoints() const;
-  void addSpawnPoint(Vector spawnPoint);
-  const std::vector<MapObjectDescriptor> &getObjectDescriptors();
-  Surface *getCollisionMap();
-  int getWidth();
-  int getHeight();
+    void update(double ms);
+    void render(Uint32 in_windowId);
 
-private:
-  int m_mapAssetID = -1;
-  int m_collisionMapAssetID = -1;
-  Surface *m_collisionMapSurface;
-  std::vector<Vector> m_spawnPoints;
-  std::vector<CapEngine::MapObjectDescriptor> m_objectDescriptors;
-  int m_finishLineX = -1;
-  int m_width = -1;
-  int m_height = -1;
+    std::vector<Vector> getSpawnPoints() const;
+    void addSpawnPoint(Vector spawnPoint);
+    const std::vector<MapObjectDescriptor>& getObjectDescriptors();
+    Surface* getCollisionMap();
+    int getWidth();
+    int getHeight();
+
+   private:
+    int m_mapAssetID = -1;
+    int m_collisionMapAssetID = -1;
+    Surface* m_collisionMapSurface;
+    std::vector<Vector> m_spawnPoints;
+    std::vector<CapEngine::MapObjectDescriptor> m_objectDescriptors;
+    int m_finishLineX = -1;
+    int m_width = -1;
+    int m_height = -1;
 };
-} // namespace CapEngine
+}  // namespace CapEngine
 
 #endif // PLATFORMERMAP_H

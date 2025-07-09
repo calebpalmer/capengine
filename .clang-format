@@ -7,3 +7,8 @@ BreakBeforeBraces: Stroustrup
 PointerAlignment: Left
 DerivePointerAlignment: false
 ColumnLimit: 120
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never

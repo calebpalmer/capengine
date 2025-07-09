@@ -1,33 +1,28 @@
 #ifndef TEXTBUTTON_H
 #define TEXTBUTTON_H
 
-#include "IEventSubscriber.h"
-#include "button.h"
-#include "colour.h"
-
 #include <boost/signals2.hpp>
 #include <boost/signals2/connection.hpp>
 #include <string>
 
-namespace CapEngine
-{
+#include "IEventSubscriber.h"
+#include "button.h"
+#include "captypes.h"
+#include "colour.h"
 
-class TextButton : public Button
-{
+namespace CapEngine {
 
-  private:
-    TextButton(const TextButton &);
-    TextButton &operator=(const TextButton &);
+class TextButton : public Button {
+   private:
+    TextButton(const TextButton&);
+    TextButton& operator=(const TextButton&);
 
-  public:
-    TextButton(Uint32 windowID, std::string text, std::string font,
-               int fontSize, CapEngine::Vector position);
-    TextButton(Uint32 windowID, std::string text, std::string font,
-               int fontSize, CapEngine::Vector position,
-               CapEngine::Colour inactiveColour,
-               CapEngine::Colour activeColour);
+   public:
+    TextButton(Uint32 windowID, std::string text, std::string font, int fontSize, CapEngine::Vector position);
+    TextButton(Uint32 windowID, std::string text, std::string font, int fontSize, CapEngine::Vector position,
+               CapEngine::Colour inactiveColour, CapEngine::Colour activeColour);
     ~TextButton();
-    void registerCallback(void (*callback)(void *), void *context) override;
+    void registerCallback(void (*callback)(void*), void* context) override;
     void registerCallback(std::function<void()> in_function) override;
     void executeCallback();
     void update() override;
@@ -46,7 +41,7 @@ class TextButton : public Button
     // IEventSubscriber virtual
     void receiveEvent(const SDL_MouseButtonEvent event);
 
-  protected:
+   protected:
     std::string m_text;
     std::string m_font;
     int m_fontSize;
@@ -56,19 +51,19 @@ class TextButton : public Button
     bool m_enabled;
     bool m_activated;
     Uint32 m_windowID;
-    CapEngine::Texture *m_pTextTextureInactive;
-    CapEngine::Texture *m_pTextTextureActive;
-    CapEngine::Texture *m_pSelectedTexture;
+    CapEngine::Texture* m_pTextTextureInactive;
+    CapEngine::Texture* m_pTextTextureActive;
+    CapEngine::Texture* m_pSelectedTexture;
     CapEngine::Vector m_position;
     Colour m_fontColour;
     // void (*m_callback)(void *);
     std::function<void()> m_callback;
-    void *m_context;
+    void* m_context;
     boost::signals2::scoped_connection m_mouseButtonEventConnection;
 
-  protected:
+   protected:
     bool mouseInButton(CapEngine::Vector position);
 };
 
-} // namespace CapEngine
-#endif // TEXTBUTTON_H
+}  // namespace CapEngine
+#endif  // TEXTBUTTON_H
