@@ -16,9 +16,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(GNUInstallDirs)
 
-execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/conan_install.sh
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
 include(.conan/conan_paths.cmake)
 
 find_package(SDL2)

@@ -4,6 +4,8 @@ find_package(Boost)
 add_executable(flappypei
   main.cpp
   maingamestate.cpp
+  playergraphicscomponent.cpp
+  playerphysicscomponent.cpp
 )
 
 # submodule dependencies

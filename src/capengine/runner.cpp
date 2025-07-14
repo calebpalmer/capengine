@@ -198,12 +198,10 @@ void Runner::receiveEvent(const SDL_Event event, CapEngine::Time* /*time*/)
                 }
                 else {
                     m_showFPS = true;
-                    std::ostringstream ttfStream;
-                    ttfStream << getCurrentDir() << "/res/fonts/tahoma.ttf";
                     Uint8 r = 255;
                     Uint8 g = 255;
                     Uint8 b = 255;
-                    Locator::videoManager->displayFPS(true, ttfStream.str(), r, g, b);
+                    Locator::videoManager->displayFPS(true, "tahoma.ttf", r, g, b);
                 }
             }
         }

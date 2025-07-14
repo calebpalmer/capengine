@@ -2,8 +2,6 @@
 set -e
 set -x
 
-
-
 BUILDDIR=$1
 INSTALLDIR=$BUILDDIR/install
 BUILDTYPE=$2
