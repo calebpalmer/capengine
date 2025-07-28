@@ -22,6 +22,7 @@ class CompressorRecipe(ConanFile):
         self.requires("libxml2/2.13.8")
         self.requires("libsndfile/1.2.2")
         self.requires("boost/1.75.0")
+        self.requires("gsl-lite/0.42.0")
 
         # dev deps
         self.requires("cppunit/1.15.1")

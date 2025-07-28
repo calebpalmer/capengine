@@ -122,6 +122,7 @@ class VideoManager final {
     double getTextureWidth(Texture* texture) const;
     double getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;
+    std::pair<int, int> getTextureDims(Texture* texture) const;
     Texture* createTexture(int width, int height, Colour fillColour = Colour{0, 0, 0, 0});
     TexturePtr createTexturePtr(int width, int height, Colour fillColour = Colour{0, 0, 0, 0});
     Texture* createTextureFromSurface(Surface* surface, bool freeSurface = false);

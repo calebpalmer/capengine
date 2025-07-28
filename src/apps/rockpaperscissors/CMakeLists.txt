@@ -1,6 +1,4 @@
 # main
-find_package(Boost)
-
 add_executable(rps
   main.cpp
   rockpaperscissorsstate.cpp

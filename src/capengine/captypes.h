@@ -19,6 +19,7 @@ using Rect = SDL_Rect;
 
 using SurfacePtr = std::unique_ptr<Surface, decltype(&SDL_FreeSurface)>;
 using TexturePtr = std::unique_ptr<Texture, decltype(&SDL_DestroyTexture)>;
+using SharedTexturePtr = std::shared_ptr<Texture>;
 using RendererPtr = std::unique_ptr<Renderer, decltype(&SDL_DestroyRenderer)>;
 using WindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 //! Metadata value type

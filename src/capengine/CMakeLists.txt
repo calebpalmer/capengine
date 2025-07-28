@@ -1,12 +1,5 @@
 add_definitions(-DUNIX -DDEBUG)
 
-find_package(SDL2)
-find_package(SDL2_image)
-find_package(SDL2_ttf)
-find_package(libxml2)
-find_package(libsndfile)
-find_package(Boost)
-
 # capengine
 add_library(capengine SHARED
   Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp
@@ -34,9 +27,9 @@ target_link_libraries(capengine
   SDL2::SDL2
   SDL2_image::SDL2_image
   SDL2_ttf::SDL2_ttf
-  Boost::Boost
-  libxml2::libxml2
-  libsndfile::libsndfile
+  boost::boost
+  LibXml2::LibXml2
+  SndFile::sndfile
   stdc++fs
   sndio
   stdc++_libbacktrace

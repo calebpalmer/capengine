@@ -5,25 +5,23 @@ set -x
 BUILDDIR=$1
 INSTALLDIR=$BUILDDIR/install
 BUILDTYPE=$2
-if [ $BUILDTYPE -eq "Debug" ]; then
+
+if [[ "$BUILDTYPE" == "Debug" ]]; then
     CONANPROFILE=debug.profile
+    PRESET=conan-debug
 else
     CONANPROFILE=release.profile
+    PRESET=conan-release
 fi
 
 ./conan_install.sh $CONANPROFILE
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
 mkdir -p $BUILDDIR
-pushd $BUILDDIR
 
-CC=gcc CXX=g++ cmake -S${SCRIPT_DIR} -B. \
+CC=gcc CXX=g++ cmake -B $BUILDDIR \
+       --preset $PRESET \
       -GNinja \
       -DCMAKE_INSTALL_PREFIX=$INSTALLDIR \
       -DCMAKE_BUILD_TYPE=$BUILDTYPE \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-      -DCMAKE_TOOLCHAIN_FILE="build/Debug/generators/conan_toolchain.cmake" \
       -DBOOST_STACKTRACE_USE_ADDR2LINE=true
-
-popd

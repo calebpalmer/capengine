@@ -16,14 +16,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(GNUInstallDirs)
 
-include(.conan/conan_paths.cmake)
 
 find_package(SDL2)
 find_package(SDL2_image)
 find_package(SDL2_ttf)
 find_package(libxml2)
-find_package(libsndfile)
+find_package(SndFile)
 find_package(Boost)
+find_package(gsl-lite)
 
 add_subdirectory(extern)
 add_subdirectory(src)

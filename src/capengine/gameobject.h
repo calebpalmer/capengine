@@ -53,10 +53,14 @@ class GameObject {
     explicit GameObject(bool newID = true);
 
     ~GameObject() = default;
-    GameObject(const GameObject&);
-    GameObject& operator=(const GameObject&);
-    GameObject(GameObject&& in_other) noexcept;
-    GameObject& operator=(GameObject&& in_other) noexcept;
+    GameObject(const GameObject&) = default;
+    GameObject& operator=(const GameObject&) = default;
+    GameObject(GameObject&& in_other) noexcept = default;
+    GameObject& operator=(GameObject&& in_other) noexcept = default;
+    // defaulted copy cosntructor/operator might need to be revisited at some point
+    // because it copies the shared_ptr to components rather than deep copies them.
+    // if the component has state that doesn't work well with rollback then this can
+    // cause issues
 
     void swap(GameObject& io_other) noexcept;
 
@@ -143,6 +147,8 @@ std::vector<std::shared_ptr<T>> GameObject::getComponents()
             components.push_back(castedObject);
         }
     }
+
+    return components;
 }
 
 // events

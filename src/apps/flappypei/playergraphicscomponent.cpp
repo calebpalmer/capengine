@@ -18,8 +18,10 @@ namespace FlappyPei {
 void PlayerGraphicsComponent::render(CapEngine::GameObject& object, const CapEngine::Camera2d& in_camera,
                                      uint32_t in_windowId)
 {
-    CapEngine::Rect position{static_cast<int>(object.getPosition().getX()),
-                             static_cast<int>(object.getPosition().getY()), kSpriteWidth, kSpriteHeight};
+    CapEngine::Rect position{.x = static_cast<int>(object.getPosition().getX()),
+                             .y = static_cast<int>(object.getPosition().getY()),
+                             .w = kSpriteWidth,
+                             .h = kSpriteHeight};
     CapEngine::Colour fillColour{139, 69, 19, 255};
     CapEngine::Locator::getVideoManager().drawFillRect(in_windowId, position, fillColour);
 }
@@ -31,20 +33,6 @@ void PlayerGraphicsComponent::render(CapEngine::GameObject& object, const CapEng
  */
 void PlayerGraphicsComponent::update(CapEngine::GameObject& object, double timestep)
 {
-    if (object.getObjectState() != CapEngine::GameObject::ObjectState::Active) {
-        return;  // No update if the object is not active
-    }
-
-    auto appliedGravity = CapEngine::Vector{0.0, kGravity} * (timestep / 1000.0);
-    std::cout << "Appliedgravity: " << appliedGravity.toString() << std::endl;  // Debug output of gravity
-    object.setVelocity(object.getVelocity() + appliedGravity);                  // Apply gravity
-
-    auto appliedVelocity = (object.getVelocity() * (timestep / 1000.0));
-    std::cout << "AppliedVelocity: " << appliedVelocity.toString() << std::endl;  // Debug output of velocity
-    object.setPosition(object.getPosition() + appliedVelocity);                   // Apply velocity
-
-    std::cout << "Velocity: " << object.getVelocity().toString() << std::endl;  // Debug output of position
-    std::cout << "Position: " << object.getPosition().toString() << std::endl;  // Debug output of position
 }
 
 /**

@@ -7,6 +7,8 @@
 #include <capengine/gamestate.h>
 
 #include <cstdint>
+#include <gsl/gsl-lite.hpp>
+#include <memory>
 
 namespace FlappyPei {
 
@@ -33,17 +35,19 @@ class MainGameState final : public CapEngine::GameState {
     explicit MainGameState(uint32_t in_windowId);
     ~MainGameState() override = default;
 
-    bool onLoad() override;
     void render() override;
     void update(double timestepMs) override;
     void handleKeyboardEvent(const SDL_KeyboardEvent& event);
 
    private:
-    uint32_t m_windowId;                                    //!< The id of the window.
-    Telemetry m_telemetry;                                  //!< The telemetry data for the game state.
-    GameState m_gameState;                                  //!< The current game state.
-    CapEngine::Camera2d m_camera;                           //!< The camera used for rendering.
-    std::unique_ptr<CapEngine::GameObject> m_playerObject;  //!< The player object.
+    void generateCats();
+
+    uint32_t m_windowId;                                                   //!< The id of the window.
+    Telemetry m_telemetry;                                                 //!< The telemetry data for the game state.
+    GameState m_gameState;                                                 //!< The current game state.
+    CapEngine::Camera2d m_camera;                                          //!< The camera used for rendering.
+    gsl::not_null<std::unique_ptr<CapEngine::GameObject>> m_playerObject;  //!< The player object.
+    std::vector<gsl::not_null<std::unique_ptr<CapEngine::GameObject>>> m_cats;  //!< The cats.
 };
 
 }  // namespace FlappyPei

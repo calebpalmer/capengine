@@ -1,11 +1,11 @@
 # main
-find_package(Boost)
-
 add_executable(flappypei
   main.cpp
   maingamestate.cpp
   playergraphicscomponent.cpp
   playerphysicscomponent.cpp
+  catgraphicscomponent.cpp
+  catphysicscomponent.cpp
 )
 
 # submodule dependencies
@@ -19,7 +19,9 @@ target_include_directories(flappypei
 
 target_link_libraries(flappypei PRIVATE
   capengine
-  stdc++_libbacktrace) # until <stacktrace> is not experimental we need to link to stdc++_libbacktrace
+  stdc++_libbacktrace
+  gsl::gsl-lite
+  ) # until <stacktrace> is not experimental we need to link to stdc++_libbacktrace
 
 # resoources
 file(GLOB_RECURSE RESOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/resources/*)

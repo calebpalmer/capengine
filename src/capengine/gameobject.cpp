@@ -74,124 +74,124 @@ void GameObject::swap(GameObject& io_other) noexcept
 }
 
 //! Copy constructor.
-GameObject::GameObject(const GameObject& in_other)
-{
-    position = in_other.position;
-    previousPosition = in_other.previousPosition;
-    orientation = in_other.orientation;
-    velocity = in_other.velocity;
-    acceleration = in_other.acceleration;
-    force = in_other.force;
+// GameObject::GameObject(const GameObject& in_other)
+// {
+//     position = in_other.position;
+//     previousPosition = in_other.previousPosition;
+//     orientation = in_other.orientation;
+//     velocity = in_other.velocity;
+//     acceleration = in_other.acceleration;
+//     force = in_other.force;
 
-    m_objectState = in_other.m_objectState;
-    m_objectID = in_other.m_objectID;
-    m_parentObjectID = in_other.m_parentObjectID;
-    m_objectType = in_other.m_objectType;
-    m_yAxisOrientation = in_other.m_yAxisOrientation;
+//     m_objectState = in_other.m_objectState;
+//     m_objectID = in_other.m_objectID;
+//     m_parentObjectID = in_other.m_parentObjectID;
+//     m_objectType = in_other.m_objectType;
+//     m_yAxisOrientation = in_other.m_yAxisOrientation;
 
-    m_metadata = in_other.m_metadata;
+//     m_metadata = in_other.m_metadata;
 
-    // deep copy the componentsn
-    m_components.reserve(in_other.m_components.size());
-    std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
-                   [](std::shared_ptr<Component> const& in_pComponent) -> std::shared_ptr<Component> {
-                       return in_pComponent->clone();
-                   });
-}
+//     // deep copy the componentsn
+//     m_components.reserve(in_other.m_components.size());
+//     std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
+//                    [](std::shared_ptr<Component> const& in_pComponent) -> std::shared_ptr<Component> {
+//                        return in_pComponent->clone();
+//                    });
+// }
 
-GameObject::GameObject(GameObject&& in_other) noexcept
-{
-    position = in_other.position;
-    previousPosition = in_other.previousPosition;
-    orientation = in_other.orientation;
-    velocity = in_other.velocity;
-    acceleration = in_other.acceleration;
-    force = in_other.force;
+// GameObject::GameObject(GameObject&& in_other) noexcept
+// {
+//     position = in_other.position;
+//     previousPosition = in_other.previousPosition;
+//     orientation = in_other.orientation;
+//     velocity = in_other.velocity;
+//     acceleration = in_other.acceleration;
+//     force = in_other.force;
 
-    m_objectState = in_other.m_objectState;
-    m_objectID = generateID();
-    m_parentObjectID = in_other.m_parentObjectID;
-    m_objectType = in_other.m_objectType;
-    m_yAxisOrientation = in_other.m_yAxisOrientation;
+//     m_objectState = in_other.m_objectState;
+//     m_objectID = generateID();
+//     m_parentObjectID = in_other.m_parentObjectID;
+//     m_objectType = in_other.m_objectType;
+//     m_yAxisOrientation = in_other.m_yAxisOrientation;
 
-    m_metadata = in_other.m_metadata;
+//     m_metadata = in_other.m_metadata;
 
-    // deep copy the components
-    // m_components = std::move(in_other.m_components);
-    // m_components.reserve(in_other.m_components.size());
-    // std::transform(
-    //     in_other.m_components.begin(), in_other.m_components.end(),
-    //     std::back_inserter(m_components),
-    //     [](std::shared_ptr<Component> in_pComponent)
-    //         -> std::shared_ptr<Component> { return in_pComponent->clone();
-    //         });
-    this->m_components = std::move(in_other.m_components);
-}
+//     // deep copy the components
+//     // m_components = std::move(in_other.m_components);
+//     // m_components.reserve(in_other.m_components.size());
+//     // std::transform(
+//     //     in_other.m_components.begin(), in_other.m_components.end(),
+//     //     std::back_inserter(m_components),
+//     //     [](std::shared_ptr<Component> in_pComponent)
+//     //         -> std::shared_ptr<Component> { return in_pComponent->clone();
+//     //         });
+//     this->m_components = std::move(in_other.m_components);
+// }
 
-GameObject& GameObject::operator=(GameObject&& in_other) noexcept
-{
-    if (this != &in_other) {
-        this->position = in_other.position;
-        this->previousPosition = in_other.previousPosition;
-        this->orientation = in_other.orientation;
-        this->velocity = in_other.velocity;
-        this->acceleration = in_other.acceleration;
-        this->force = in_other.force;
+// GameObject& GameObject::operator=(GameObject&& in_other) noexcept
+// {
+//     if (this != &in_other) {
+//         this->position = in_other.position;
+//         this->previousPosition = in_other.previousPosition;
+//         this->orientation = in_other.orientation;
+//         this->velocity = in_other.velocity;
+//         this->acceleration = in_other.acceleration;
+//         this->force = in_other.force;
 
-        // darn, I don't have a clone for this polymorphic type.
-        // pretty sure I'm not doing much with it though.
-        // this->m_pObjectData = std::move(in_other.m_pObjectData);
+//         // darn, I don't have a clone for this polymorphic type.
+//         // pretty sure I'm not doing much with it though.
+//         // this->m_pObjectData = std::move(in_other.m_pObjectData);
 
-        this->m_objectState = in_other.m_objectState;
-        this->m_objectID = generateID();
-        this->m_parentObjectID = in_other.m_parentObjectID;
-        this->m_objectType = in_other.m_objectType;
+//         this->m_objectState = in_other.m_objectState;
+//         this->m_objectID = generateID();
+//         this->m_parentObjectID = in_other.m_parentObjectID;
+//         this->m_objectType = in_other.m_objectType;
 
-        this->m_metadata = in_other.m_metadata;
+//         this->m_metadata = in_other.m_metadata;
 
-        // deep copy the components
-        this->m_components = std::move(in_other.m_components);
-    }
+//         // deep copy the components
+//         this->m_components = std::move(in_other.m_components);
+//     }
 
-    return *this;
-}
+//     return *this;
+// }
 
-//! Copy assignment operator.
-GameObject& GameObject::operator=(const GameObject& in_other)
-{
-    // GameObject tmp(in_other);
-    // swap(tmp);
-    // return *this;
+// //! Copy assignment operator.
+// GameObject& GameObject::operator=(const GameObject& in_other)
+// {
+//     // GameObject tmp(in_other);
+//     // swap(tmp);
+//     // return *this;
 
-    if (this != &in_other) {
-        this->position = in_other.position;
-        this->previousPosition = in_other.previousPosition;
-        this->orientation = in_other.orientation;
-        this->velocity = in_other.velocity;
-        this->acceleration = in_other.acceleration;
-        this->force = in_other.force;
+//     if (this != &in_other) {
+//         this->position = in_other.position;
+//         this->previousPosition = in_other.previousPosition;
+//         this->orientation = in_other.orientation;
+//         this->velocity = in_other.velocity;
+//         this->acceleration = in_other.acceleration;
+//         this->force = in_other.force;
 
-        // darn, I don't have a clone for this polymorphic type.
-        // pretty sure I'm not doing much with it though.
-        // this->m_pObjectData = std::move(in_other.m_pObjectData);
+//         // darn, I don't have a clone for this polymorphic type.
+//         // pretty sure I'm not doing much with it though.
+//         // this->m_pObjectData = std::move(in_other.m_pObjectData);
 
-        this->m_objectState = in_other.m_objectState;
-        this->m_objectID = generateID();
-        this->m_parentObjectID = in_other.m_parentObjectID;
-        this->m_objectType = in_other.m_objectType;
+//         this->m_objectState = in_other.m_objectState;
+//         this->m_objectID = generateID();
+//         this->m_parentObjectID = in_other.m_parentObjectID;
+//         this->m_objectType = in_other.m_objectType;
 
-        this->m_metadata = in_other.m_metadata;
+//         this->m_metadata = in_other.m_metadata;
 
-        // deep copy the components
-        m_components.reserve(in_other.m_components.size());
-        std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
-                       [](std::shared_ptr<Component> const& in_pComponent) -> std::shared_ptr<Component> {
-                           return in_pComponent->clone();
-                       });
-    }
+//         // deep copy the components
+//         m_components.reserve(in_other.m_components.size());
+//         std::transform(in_other.m_components.begin(), in_other.m_components.end(), std::back_inserter(m_components),
+//                        [](std::shared_ptr<Component> const& in_pComponent) -> std::shared_ptr<Component> {
+//                            return in_pComponent->clone();
+//                        });
+//     }
 
-    return *this;
-}
+//     return *this;
+// }
 
 void GameObject::render(const Camera2d& in_camera, uint32_t in_windowId)
 {

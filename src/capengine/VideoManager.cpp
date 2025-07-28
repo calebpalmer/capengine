@@ -25,6 +25,7 @@
 #include "captypes.h"
 #include "collision.h"
 #include "defer.h"
+#include "locator.h"
 #include "logger.h"
 #include "logging.h"
 #include "scopeguard.h"
@@ -33,7 +34,9 @@ using namespace std;
 
 namespace CapEngine {
 
-Window::Window() {}
+Window::Window()
+{
+}
 
 Window::Window(SDL_Window* pWindow, SDL_Renderer* pRenderer, Viewport viewport, WindowParams windowParams)
     : m_window(pWindow), m_renderer(pRenderer), m_viewport(viewport), m_windowParams(windowParams)
@@ -289,7 +292,8 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect,
     // Transform the dstRect
     if (dstRect) {
         Rect newDstRect = *dstRect;
-        if (applyTransform) newDstRect = viewport.transformRect(*dstRect);
+        if (applyTransform)
+            newDstRect = viewport.transformRect(*dstRect);
         *dstRect = newDstRect;
     }
 
@@ -543,14 +547,29 @@ double VideoManager::getTextureHeight(Texture* texture) const
 
 void VideoManager::getTextureDims(Texture* texture, int* x, int* y) const
 {
+    CAP_THROW_NULL(x, "x is null");
+    CAP_THROW_NULL(y, "y is null");
+
+    auto [width, height] = this->getTextureDims(texture);
+    *x = width;
+    *y = height;
+}
+
+std::pair<int, int> VideoManager::getTextureDims(Texture* texture) const
+{
     CAP_THROW_NULL(texture, "texture is null");
-    int result = SDL_QueryTexture(texture, nullptr, nullptr, x, y);
+
+    int x = 0;
+    int y = 0;
+    int result = SDL_QueryTexture(texture, nullptr, nullptr, &x, &y);
     if (result < 0) {
         ostringstream error;
         error << "Unable to get texture height" << endl << SDL_GetError();
         logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
         throw CapEngineException(error.str());
     }
+
+    return std::make_pair(x, y);
 }
 
 //! close a texture openned by the VideoManager
@@ -558,7 +577,10 @@ void VideoManager::getTextureDims(Texture* texture, int* x, int* y) const
 \param texture
 \li the texture to close
 */
-void VideoManager::closeTexture(Texture* texture) const { SDL_DestroyTexture(texture); }
+void VideoManager::closeTexture(Texture* texture) const
+{
+    SDL_DestroyTexture(texture);
+}
 
 //! Set the color key for the image
 /*! by default it is 0x00ffff
@@ -583,6 +605,7 @@ Texture* VideoManager::createTexture(int width, int height, Colour fillColour)
     SDL_Texture* texture =
         SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
     if (texture == nullptr) {
+        std::cout << "Dims: " << width << " x " << height << "\n";
         ostringstream error;
         error << "Error creating texture" << endl << SDL_GetError();
         logger->log(error.str(), Logger::CERROR, __FILE__, __LINE__);
@@ -621,7 +644,10 @@ Texture* VideoManager::createTexture(int width, int height, Colour fillColour)
 \param func
  The reshape function pointer
 */
-void VideoManager::setReshapeFunc(void (*func)(int x, int y)) { reshapeFunc = func; }
+void VideoManager::setReshapeFunc(void (*func)(int x, int y))
+{
+    reshapeFunc = func;
+}
 
 void VideoManager::callReshapeFunc(int w, int h)
 {
@@ -752,7 +778,10 @@ Surface* VideoManager::createSurface(int width, int height)
     return surface;
 }
 
-void VideoManager::closeSurface(Surface* surface) const { SDL_FreeSurface(surface); }
+void VideoManager::closeSurface(Surface* surface) const
+{
+    SDL_FreeSurface(surface);
+}
 
 void VideoManager::saveSurface(SDL_Surface* surface, const std::string& filePath)
 {
@@ -960,7 +989,10 @@ int VideoManager::fromScreenCoord(const Surface* surface, int y) const
     return surface->h - 1 - y;
 }
 
-void VideoManager::setBackgroundColour(Colour colour) { m_backgroundColour = colour; }
+void VideoManager::setBackgroundColour(Colour colour)
+{
+    m_backgroundColour = colour;
+}
 
 WindowPtr VideoManager::createWindow(WindowParams windowParams)
 {
@@ -979,9 +1011,11 @@ WindowPtr VideoManager::createWindow(WindowParams windowParams)
             flags |= SDL_WINDOW_BORDERLESS;
         }
 
-        if (windowParams.resizable) flags = flags | SDL_WINDOW_RESIZABLE;
+        if (windowParams.resizable)
+            flags = flags | SDL_WINDOW_RESIZABLE;
 
-        if (windowParams.maximized) flags = flags | SDL_WINDOW_MAXIMIZED;
+        if (windowParams.maximized)
+            flags = flags | SDL_WINDOW_MAXIMIZED;
 
         pWindow = SDL_CreateWindow(windowParams.windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                    windowParams.width, windowParams.height, flags);
@@ -1176,7 +1210,10 @@ std::vector<Uint32> VideoManager::getWindows() const
 /**
  Accessor function for FPS metric
 */
-int VideoManager::getFPS() const { return fps; }
+int VideoManager::getFPS() const
+{
+    return fps;
+}
 
 /**
  Set Window to full screen or windowed
@@ -1234,7 +1271,10 @@ SDL_Renderer* VideoManager::getRenderer()
     return m_renderer.get();
 }
 
-TexturePtr textureToTexturePtr(Texture* texture) { return std::move(TexturePtr(texture, SDL_DestroyTexture)); }
+TexturePtr textureToTexturePtr(Texture* texture)
+{
+    return std::move(TexturePtr(texture, SDL_DestroyTexture));
+}
 
 void VideoManager::replaceColour(Surface* in_surface, Colour in_oldColour, Colour in_newColour)
 {
@@ -1256,5 +1296,4 @@ void VideoManager::replaceColour(Surface* in_surface, Colour in_oldColour, Colou
     }
     SDL_UnlockSurface(in_surface);
 }
-
 }  // namespace CapEngine

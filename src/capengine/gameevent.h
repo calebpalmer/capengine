@@ -6,11 +6,10 @@
 namespace CapEngine
 {
 
-class GameEvent
-{
-  public:
+class GameEvent {
+   public:
     virtual ~GameEvent() = default;
-    virtual std::string type() const = 0;
+    [[nodiscard]] virtual std::string type() const = 0;
 };
 
 } // namespace CapEngine
