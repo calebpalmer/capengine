@@ -78,6 +78,17 @@ gsl::not_null<std::unique_ptr<CapEngine::GameObject>> createCatObject(uint32_t i
     return catObject;
 }
 
+std::queue<MainGameState::LevelSettings> makeLevels()
+{
+    std::queue<MainGameState::LevelSettings> levels;
+    levels.push(MainGameState::LevelSettings{.totalTime = 30.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity,
+                                             .gapSize = kStartingGapSize,
+                                             .catInterval = kStartingCatInterval});
+
+    return levels;
+}
+
 void renderBanner(Uint32 in_windowId, std::string const& in_text)
 {
     CapEngine::SurfacePtr surface = CapEngine::Locator::getFontManager().getTextSurface(
@@ -109,7 +120,8 @@ MainGameState::MainGameState(uint32_t in_windowId)
     : CapEngine::GameState(),
       m_windowId(in_windowId),
       m_camera({kLogicalWindowHeight, kLogicalWindowWidth}),
-      m_playerObject(createPlayerObject(m_windowId))
+      m_playerObject(createPlayerObject(m_windowId)),
+      m_levels(makeLevels())
 {
     // register for keyboard events
     CapEngine::Locator::getEventSubscriber().m_keyboardEventSignal.connect(
@@ -136,7 +148,11 @@ void MainGameState::render()
     }
 
     if (m_gameState.status == GameStatus::Dead) {
-        renderBanner(m_windowId, "Game Over");
+        renderBanner(m_windowId, "Game Over!");
+    }
+
+    if (m_gameState.status == GameStatus::Win) {
+        renderBanner(m_windowId, "You Win!");
     }
 }
 
@@ -147,6 +163,7 @@ void MainGameState::render()
 void MainGameState::update(double timestepMs)
 {
     m_telemetry.elapsedTimeMs += timestepMs;
+    m_telemetry.currentLevelTimeMs += timestepMs;
 
     // game starting
     if (m_gameState.status == GameStatus::Starting && m_telemetry.elapsedTimeMs >= kGameWaitTime) {
@@ -166,10 +183,11 @@ void MainGameState::update(double timestepMs)
         std::ranges::for_each(m_cats, [&](const auto& cat) { newCats.push_back(cat->update(timestepMs)); });
         m_cats = std::move(newCats);
 
+        // update player
         std::unique_ptr<CapEngine::GameObject> newPlayerObject = m_playerObject->update(timestepMs);
         CAP_THROW_NULL(newPlayerObject, "New player object is null");
 
-        // check collision with window and player object
+        // collision with window
         const CapEngine::Rectangle windowRect{0, 0, kLogicalWindowWidth, kLogicalWindowHeight};
         const CapEngine::CollisionType collisionType =
             CapEngine::detectMBRCollisionInterior(newPlayerObject->boundingPolygon(), windowRect);
@@ -178,7 +196,7 @@ void MainGameState::update(double timestepMs)
             m_playerObject = std::move(newPlayerObject);
         }
 
-        // check collisions with cats
+        // collisions with cats
         bool collidesWithCat = std::ranges::any_of(m_cats, [&](auto const& in_cat) {
             // When calling a template member function on a dependent type, you must prefix the call with the template
             // keyword to tell the compiler it's a template.
@@ -197,7 +215,16 @@ void MainGameState::update(double timestepMs)
             std::cout << "Cat got you!\n";
         }
 
-        // generate new cats
+        // check level
+        if (m_telemetry.currentLevelTimeMs > m_levels.front().totalTime) {
+            m_levels.pop();
+            m_telemetry.currentLevelTimeMs = 0.0;
+            if (m_levels.size() == 0) {
+                m_gameState.status = GameStatus::Win;
+            }
+        }
+
+        // generate new cats if not dead
         generateCats();
     }
 }
@@ -208,24 +235,36 @@ void MainGameState::update(double timestepMs)
  */
 void MainGameState::handleKeyboardEvent(const SDL_KeyboardEvent& in_event)
 {
-    if (in_event.type == SDL_KEYUP && in_event.keysym.sym == SDLK_SPACE) {
-        PlayerInputEvent playerInputEvent;
-        playerInputEvent.inputType = PlayerInputEvent::PlayerInputType::Jump;
-        CapEngine::Locator::getEventSubscriber().m_gameEventSignal(playerInputEvent);
+    if (m_gameState.status == GameStatus::Active) {
+        if (in_event.type == SDL_KEYUP && in_event.keysym.sym == SDLK_SPACE) {
+            PlayerInputEvent playerInputEvent;
+            playerInputEvent.inputType = PlayerInputEvent::PlayerInputType::Jump;
+            CapEngine::Locator::getEventSubscriber().m_gameEventSignal(playerInputEvent);
+        }
+    }
+
+    if (m_gameState.status == GameStatus::Dead || m_gameState.status == GameStatus::Win) {
+        if (in_event.type == SDL_KEYUP && in_event.keysym.sym == SDLK_SPACE) {
+            m_gameState.status = GameStatus::Starting;
+            m_telemetry.elapsedTimeMs = 0.0;
+            m_cats.clear();
+            m_playerObject = createPlayerObject(m_windowId);
+        }
     }
 }
 
 void MainGameState::generateCats()
 {
-    std::optional<CapEngine::Rectangle> previousMbr;
     CapEngine::Vector position{1600};
-    // make a cat object for testing
-    int previousGapSize = kStartingGapSize;
-    int previousGapStart = 450;
-    int maxLocationDifference = 50;
-    int velocity = kStartingCatVelocity;
+
+    LevelSettings const& currentLevelSettings = m_levels.front();
+
+    int previousGapSize = currentLevelSettings.gapSize;
+    int previousGapStart = 450;  // just make a starting point. It'll get updated when we retrieve the last cat.
 
     // get the last cat
+    std::optional<CapEngine::Rectangle> previousMbr;
+
     if (m_cats.size() > 0) {
         gsl::not_null<std::unique_ptr<CapEngine::GameObject>> const& lastCat = m_cats.back();
 
@@ -243,8 +282,8 @@ void MainGameState::generateCats()
 
     // if this is the first cat or the last cat is fully in the screen
     if (previousMbr == std::nullopt || (previousMbr->x + previousMbr->width) <= kLogicalWindowWidth) {
-        m_cats.push_back(createCatObject(m_windowId, kStartingGapSize, previousGapSize, previousGapStart,
-                                         maxLocationDifference, velocity, position));
+        m_cats.push_back(createCatObject(m_windowId, currentLevelSettings.gapSize, previousGapSize, previousGapStart,
+                                         currentLevelSettings.catInterval, currentLevelSettings.velocity, position));
     }
 }
 

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <gsl/gsl-lite.hpp>
 #include <memory>
+#include <queue>
 
 namespace FlappyPei {
 
@@ -20,6 +21,7 @@ class MainGameState final : public CapEngine::GameState {
         Starting,  //!< The game is starting.
         Active,    //!< The game is currently being played.
         Dead,      //!< The player has died.
+        Win        //!< The player has won.
     };
 
     //! The current game state.
@@ -30,6 +32,14 @@ class MainGameState final : public CapEngine::GameState {
     //! Telemetry data for the game state.
     struct Telemetry {
         double elapsedTimeMs = 0.0;  //!< The elapsed time in milliseconds.
+        double currentLevelTimeMs = 0.0;
+    };
+
+    struct LevelSettings {
+        double totalTime;
+        int velocity;
+        int gapSize;
+        int catInterval;
     };
 
     explicit MainGameState(uint32_t in_windowId);
@@ -48,6 +58,7 @@ class MainGameState final : public CapEngine::GameState {
     CapEngine::Camera2d m_camera;                                          //!< The camera used for rendering.
     gsl::not_null<std::unique_ptr<CapEngine::GameObject>> m_playerObject;  //!< The player object.
     std::vector<gsl::not_null<std::unique_ptr<CapEngine::GameObject>>> m_cats;  //!< The cats.
+    std::queue<LevelSettings> m_levels;
 };
 
 }  // namespace FlappyPei
