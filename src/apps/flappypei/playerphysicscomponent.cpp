@@ -37,7 +37,6 @@ void PlayerPhysicsComponent::update(CapEngine::GameObject& object, double timest
 
     // if jumping, set velocity to jump velocity
     if (m_jump) {
-        std::cout << "Jump!\n";
         object.setVelocity(CapEngine::Vector{0.0, kJumpVelocity});
         m_jump = false;
     }

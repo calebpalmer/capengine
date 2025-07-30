@@ -29,6 +29,11 @@ void CatPhysicsComponent::update(CapEngine::GameObject& object, double timestep)
     // update MBRs
     m_topMbr.x = object.getPosition().getX();
     m_bottomMbr.x = m_topMbr.x;
+
+    // check to see if cat is out of bounds
+    if (m_topMbr.x + m_topMbr.width < 0) {
+        object.setObjectState(CapEngine::GameObject::Dead);
+    }
 }
 
 std::optional<CapEngine::Rectangle> CatPhysicsComponent::boundingPolygon(const CapEngine::GameObject& object) const

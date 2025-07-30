@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <memory>
 #include <random>
+#include <ranges>
 #include <string>
 
 #include "catgraphicscomponent.h"
@@ -81,9 +82,59 @@ gsl::not_null<std::unique_ptr<CapEngine::GameObject>> createCatObject(uint32_t i
 std::queue<MainGameState::LevelSettings> makeLevels()
 {
     std::queue<MainGameState::LevelSettings> levels;
-    levels.push(MainGameState::LevelSettings{.totalTime = 30.0 * 1000.0,
+
+    // level 1
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
                                              .velocity = kStartingCatVelocity,
                                              .gapSize = kStartingGapSize,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 2
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity,
+                                             .gapSize = kStartingGapSize - 20,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 3
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 20,
+                                             .gapSize = kStartingGapSize - 20,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 3
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 40,
+                                             .gapSize = kStartingGapSize - 20,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 4
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 40,
+                                             .gapSize = kStartingGapSize - 40,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 5
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 60,
+                                             .gapSize = kStartingGapSize - 40,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 6
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 60,
+                                             .gapSize = kStartingGapSize - 60,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 7
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 80,
+                                             .gapSize = kStartingGapSize - 60,
+                                             .catInterval = kStartingCatInterval});
+
+    // level 8
+    levels.push(MainGameState::LevelSettings{.totalTime = 10.0 * 1000.0,
+                                             .velocity = kStartingCatVelocity - 80,
+                                             .gapSize = kStartingGapSize - 80,
                                              .catInterval = kStartingCatInterval});
 
     return levels;
@@ -162,10 +213,11 @@ void MainGameState::render()
  */
 void MainGameState::update(double timestepMs)
 {
+    // update timeings
     m_telemetry.elapsedTimeMs += timestepMs;
     m_telemetry.currentLevelTimeMs += timestepMs;
 
-    // game starting
+    // Starting State
     if (m_gameState.status == GameStatus::Starting && m_telemetry.elapsedTimeMs >= kGameWaitTime) {
         // set the game status
         m_gameState.status = GameStatus::Active;
@@ -176,7 +228,7 @@ void MainGameState::update(double timestepMs)
         }
     }
 
-    // game active
+    // Active state
     if (m_gameState.status == GameStatus::Active) {
         // update cats
         decltype(m_cats) newCats;
@@ -212,20 +264,63 @@ void MainGameState::update(double timestepMs)
 
         if (collidesWithCat) {
             m_gameState.status = GameStatus::Dead;
-            std::cout << "Cat got you!\n";
         }
 
         // check level
-        if (m_telemetry.currentLevelTimeMs > m_levels.front().totalTime) {
-            m_levels.pop();
-            m_telemetry.currentLevelTimeMs = 0.0;
-            if (m_levels.size() == 0) {
-                m_gameState.status = GameStatus::Win;
+        if (m_levels.size() == 0 || m_telemetry.currentLevelTimeMs > m_levels.front().totalTime) {
+            // more levels, switch to new level
+            if (m_levels.size() > 0) {
+                std::cout << "Next Level\n";
+                m_levels.pop();
+                m_telemetry.currentLevelTimeMs = 0.0;
+
+                if (m_levels.size() > 0) {
+                    // update velocity of all existing cats to match current level
+                    std::ranges::for_each(m_cats,
+                                          [this](gsl::not_null<std::unique_ptr<CapEngine::GameObject>>& in_cat) {
+                                              CapEngine::Vector velocity = in_cat->getVelocity();
+                                              velocity.setX(m_levels.front().velocity);
+                                              in_cat->setVelocity(velocity);
+                                          });
+                }
+            }
+
+            // no more levels, check if past the last cat
+            else {
+                gsl::not_null<std::unique_ptr<CapEngine::GameObject>> const& lastCat = m_cats.back();
+                CapEngine::Rectangle lastCatMBR = lastCat->boundingPolygon();
+                CapEngine::Rectangle playerMBR = m_playerObject->boundingPolygon();
+                const int buffer = 40;
+
+                if ((lastCatMBR.x + lastCatMBR.width) < (playerMBR.x + buffer)) {
+                    m_gameState.status = GameStatus::Win;
+                    m_gameState.inTransition = true;
+                }
             }
         }
 
         // generate new cats if not dead
-        generateCats();
+        if (m_levels.size() > 0) {
+            generateCats();
+        }
+
+        // clean up dead cats
+        auto result = std::ranges::remove_if(
+            m_cats, [](auto const& gameObject) { return gameObject->getObjectState() == CapEngine::GameObject::Dead; });
+        m_cats.erase(result.begin(), result.end());
+    }
+
+    // Win State
+    if (m_gameState.status == GameStatus::Win) {
+        if (m_gameState.inTransition) {
+            m_telemetry.transitionTimeMs += timestepMs;
+        }
+
+        const double requiredTransitionTimeRequired = 2000.0;
+        if (m_telemetry.transitionTimeMs > requiredTransitionTimeRequired) {
+            m_telemetry.transitionTimeMs = 0.0;
+            m_gameState.inTransition = false;
+        }
     }
 }
 
@@ -243,7 +338,7 @@ void MainGameState::handleKeyboardEvent(const SDL_KeyboardEvent& in_event)
         }
     }
 
-    if (m_gameState.status == GameStatus::Dead || m_gameState.status == GameStatus::Win) {
+    if (m_gameState.status == GameStatus::Dead || m_gameState.status == GameStatus::Win && !m_gameState.inTransition) {
         if (in_event.type == SDL_KEYUP && in_event.keysym.sym == SDLK_SPACE) {
             m_gameState.status = GameStatus::Starting;
             m_telemetry.elapsedTimeMs = 0.0;

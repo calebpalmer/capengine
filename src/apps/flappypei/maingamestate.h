@@ -27,12 +27,14 @@ class MainGameState final : public CapEngine::GameState {
     //! The current game state.
     struct GameState {
         GameStatus status = GameStatus::Starting;  //!< The current game status.
+        bool inTransition = false;
     };
 
     //! Telemetry data for the game state.
     struct Telemetry {
         double elapsedTimeMs = 0.0;  //!< The elapsed time in milliseconds.
         double currentLevelTimeMs = 0.0;
+        double transitionTimeMs = 0.0;
     };
 
     struct LevelSettings {
