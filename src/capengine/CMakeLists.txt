@@ -32,6 +32,7 @@ target_link_libraries(capengine
   SndFile::sndfile
   stdc++fs
   sndio
+  gsl::gsl-lite
   stdc++_libbacktrace
   ) # until <stacktrace> is not experimental we need to link to stdc++_libbacktrace
 

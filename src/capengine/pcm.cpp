@@ -51,16 +51,14 @@ PCM::PCM(const string filePath) : position(0)
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << msg.str();
 }
 
-PCM::~PCM() {}
+// PCM::PCM(const PCM &old)
+// {
+//     position = old.position;
 
-PCM::PCM(const PCM &old)
-{
-    position = old.position;
-
-    buf.clear();
-    buf.reserve(old.buf.size());
-    std::copy(old.buf.begin(), old.buf.end(), std::back_inserter(buf));
-}
+//     buf.clear();
+//     buf.reserve(old.buf.size());
+//     std::copy(old.buf.begin(), old.buf.end(), std::back_inserter(buf));
+// }
 
 //! copy the data from the sndfile to member buffer
 /*!

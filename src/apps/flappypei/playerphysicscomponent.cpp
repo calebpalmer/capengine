@@ -3,8 +3,15 @@
 #include <capengine/collision.h>
 #include <capengine/gameobject.h>
 #include <capengine/locator.h>
+#include <capengine/logging.h>
+#include <capengine/pcm.h>
 #include <capengine/vector.h>
 
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/trivial.hpp>
+#include <filesystem>
+#include <gsl/gsl-lite.hpp>
+#include <memory>
 #include <optional>
 
 #include "constants.h"
@@ -12,7 +19,26 @@
 
 namespace FlappyPei {
 
-PlayerPhysicsComponent::PlayerPhysicsComponent()
+namespace {
+
+gsl::not_null<std::shared_ptr<CapEngine::PCM>> loadJumpSound()
+{
+    std::optional<std::filesystem::path> assetBasePath = CapEngine::Locator::getAssetManager().getBasePath();
+    if (!assetBasePath.has_value()) {
+        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error) << "Unable to locate sound assets.";
+    }
+
+    std::filesystem::path soundPath = *assetBasePath / "sounds" / kJumpSound;
+    if (!std::filesystem::exists(soundPath)) {
+        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error) << "Unable to locate sound file: " << soundPath;
+    }
+
+    return std::make_shared<CapEngine::PCM>(soundPath.string());
+}
+
+}  // namespace
+
+PlayerPhysicsComponent::PlayerPhysicsComponent() : m_jumpSound(loadJumpSound())
 {
     // using std::forward here doesn't really matter since handleGameEvent
     // only takes an l-value. Since std::forward preserves the l/r-value ness
@@ -38,6 +64,9 @@ void PlayerPhysicsComponent::update(CapEngine::GameObject& object, double timest
     // if jumping, set velocity to jump velocity
     if (m_jump) {
         object.setVelocity(CapEngine::Vector{0.0, kJumpVelocity});
+        m_jumpSound->resetPosition();
+
+        CapEngine::Locator::getSoundPlayer().addSound(std::make_unique<CapEngine::PCM>(*m_jumpSound));
         m_jump = false;
     }
     // otherwise apply gravity to current velocity

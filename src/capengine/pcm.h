@@ -9,27 +9,31 @@
 
 namespace CapEngine
 {
-class PCM
-{
-  public:
+class PCM {
+   public:
     PCM(const std::string filePath);
-    ~PCM();
-    PCM(const PCM &pcm);
+
+    ~PCM() = default;
+    PCM(const PCM& pcm) = default;
+    PCM& operator=(PCM const& in_pcm) = default;
+    PCM(PCM&& pcm) = default;
+    PCM& operator=(PCM&& in_pcm) = default;
+
     void incrementPosition(Uint32 addition);
     Uint32 currentPosition();
     Uint32 getLength();
-    Uint8 *getBuf();
+    Uint8* getBuf();
     void resetPosition();
 
-  private:
+   private:
     const std::string filePath;
     std::vector<short> buf;
     Uint32 position;
 
     SDL_AudioSpec sndFileToSDLAudioSpec(SF_INFO sndInfo);
-    void copySndFileToBuffer(SNDFILE *sndFile, SF_INFO sndInfo);
+    void copySndFileToBuffer(SNDFILE* sndFile, SF_INFO sndInfo);
     void convertToDeviceFormat(SDL_AudioSpec spec);
 };
-} // namespace CapEngine
+}  // namespace CapEngine
 
 #endif // PCM_H

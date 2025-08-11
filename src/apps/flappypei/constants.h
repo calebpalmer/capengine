@@ -7,6 +7,7 @@ static constexpr int kLogicalWindowHeight = 900;
 // player
 static constexpr int kSpriteWidth = 48;
 static constexpr int kSpriteHeight = 32;
+static constexpr char const* kJumpSound = "jump.wav";
 
 // cats
 static constexpr int kCatWidth = 32;

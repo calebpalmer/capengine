@@ -3,6 +3,9 @@
 
 #include <capengine/components.h>
 #include <capengine/gameevent.h>
+#include <capengine/pcm.h>
+
+#include <gsl/gsl-lite.hpp>
 
 namespace FlappyPei {
 
@@ -19,6 +22,7 @@ class PlayerPhysicsComponent : public CapEngine::PhysicsComponent {
    private:
     void handleGameEvent(const CapEngine::GameEvent& in_event);
 
+    gsl::not_null<std::shared_ptr<CapEngine::PCM>> m_jumpSound;
     bool m_jump = false;
 };
 }  // namespace FlappyPei

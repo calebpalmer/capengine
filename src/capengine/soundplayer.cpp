@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <type_traits>
 
 #include "CapEngineException.h"
 #include "logging.h"
@@ -42,7 +43,10 @@ SoundPlayer::SoundPlayer() : idCounter(0)
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << logMsg.str();
 }
 
-SoundPlayer::~SoundPlayer() { SDL_CloseAudio(); }
+SoundPlayer::~SoundPlayer()
+{
+    SDL_CloseAudio();
+}
 
 //! The singleton method
 /*!
@@ -66,7 +70,10 @@ void audioCallback(void* udataNotUsed, Uint8* stream, int len)
     memset(stream, SoundPlayer::getSoundPlayer().getSilence(), len);
 
     SoundCollection& sounds = SoundPlayer::getSoundPlayer().getSoundCollection();
-    if (sounds.size() <= 0) return;
+    if (sounds.size() <= 0) {
+        return;
+    }
+
     // SoundCollectionIter iter;
     Uint32 amount, position;
 
@@ -86,18 +93,15 @@ void audioCallback(void* udataNotUsed, Uint8* stream, int len)
     }
 }
 
-int64_t SoundPlayer::addSound(PCM* sound, bool repeat)
+int64_t SoundPlayer::addSound(gsl::not_null<std::unique_ptr<PCM>> pcm, bool repeat)
 {
     int64_t id = idCounter++;
-    unique_ptr<PCMType> pSound(new PCMType());
-    pSound->id = id;
-    pSound->repeat = repeat;
-    pSound->pcm = sound;
+    // auto sound = std::make_unsigned<PCMType>(id, repeat, std::move(pcm));
 
     SDL_LockAudio();
     cleanSounds();
     // resetting sound position
-    sounds.push_back(pSound.release());
+    sounds.emplace_back(std::make_unique<PCMType>(id, repeat, std::move(pcm)));
     SDL_UnlockAudio();
 
     return id;
@@ -130,8 +134,8 @@ void SoundPlayer::cleanSounds()
     while (iter != sounds.end()) {
         if (*iter == nullptr || ((*iter)->pcm->currentPosition() >= (*iter)->pcm->getLength())) {
             if (*iter != nullptr && (*iter)->repeat == false) {
-                delete ((*iter)->pcm);
-                delete *iter;
+                // delete ((*iter)->pcm);
+                // delete *iter;
                 iter = sounds.erase(iter);
             }
             else {
@@ -151,13 +155,19 @@ void SoundPlayer::cleanSounds()
 /*!
 
  */
-SoundCollection& SoundPlayer::getSoundCollection() { return sounds; }
+SoundCollection& SoundPlayer::getSoundCollection()
+{
+    return sounds;
+}
 
 //! return silence value
 /*!
 
  */
-uint8_t SoundPlayer::getSilence() const { return audioFormat.silence; }
+uint8_t SoundPlayer::getSilence() const
+{
+    return audioFormat.silence;
+}
 
 void SoundPlayer::deleteSound(int64_t id)
 {
@@ -165,8 +175,8 @@ void SoundPlayer::deleteSound(int64_t id)
     iter = sounds.begin();
     while (iter != sounds.end()) {
         if (((*iter)->id) == id) {
-            delete ((*iter)->pcm);
-            delete *iter;
+            // delete ((*iter)->pcm);
+            // delete *iter;
             iter = sounds.erase(iter);
             return;
         }

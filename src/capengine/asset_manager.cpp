@@ -2,6 +2,7 @@
 #include "asset_manager.h"
 
 #include <cassert>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -9,6 +10,7 @@
 #include <vector>
 
 #include "CapEngineException.h"
+#include "filesystem.h"
 #include "locator.h"
 #include "xml_parser.h"
 
@@ -80,10 +82,22 @@ AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
         m_assetFile = std::filesystem::absolute(*assetFile).string();
         XmlParser parser(*assetFile);
         parseAssetFile(parser);
+    }
 
-        // if base path is not provided, set it from the asset file
-        if (!m_basePath.has_value()) {
+    // if the asset base path is not provided. try to find it.
+    if (!m_basePath.has_value()) {
+        // set it relative to the asset file if there is one.
+        if (m_assetFile.has_value()) {
             m_basePath = std::filesystem::path{*m_assetFile}.parent_path();
+        }
+
+        // try to get it relative to the executable
+        else {
+            std::filesystem::path basePath =
+                std::filesystem::path{CapEngine::getCurrentExecutablePath()}.parent_path().parent_path() / "resources";
+            if (std::filesystem::exists(basePath) && std::filesystem::is_directory(basePath)) {
+                m_basePath = basePath;
+            }
         }
     }
 }
@@ -392,17 +406,25 @@ int64_t AssetManager::playSound(int id, bool repeat)
 {
     // TODO implement repeat functionality
     Sound* sound = getSound(id);
-    unique_ptr<PCM> upTempPCM(new PCM(*(sound->pcm)));
-    int64_t soundID = m_soundPlayer.addSound(upTempPCM.release(), repeat);
+    auto pcm = std::make_unique<PCM>(*sound->pcm);
+    int64_t soundID = m_soundPlayer.addSound(std::move(pcm), repeat);
     return soundID;
 }
 
-void AssetManager::stopSound(int id) { m_soundPlayer.deleteSound(id); }
+void AssetManager::stopSound(int id)
+{
+    m_soundPlayer.deleteSound(id);
+}
 
-bool AssetManager::imageExists(int id) const { return m_imageMap.find(id) != m_imageMap.end(); }
+bool AssetManager::imageExists(int id) const
+{
+    return m_imageMap.find(id) != m_imageMap.end();
+}
 
-bool AssetManager::soundExists(int id) const { return m_soundMap.find(id) != m_soundMap.end(); }
-
+bool AssetManager::soundExists(int id) const
+{
+    return m_soundMap.find(id) != m_soundMap.end();
+}
 
 std::optional<std::filesystem::path> AssetManager::getBasePath() const
 {

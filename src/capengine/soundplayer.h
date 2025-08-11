@@ -5,6 +5,7 @@
 #include <SDL2/SDL_audio.h>
 
 #include <cstdint>
+#include <gsl/gsl-lite.hpp>
 #include <vector>
 
 #include "pcm.h"
@@ -17,13 +18,13 @@
 struct PCMType {
     int64_t id;
     bool repeat;
-    CapEngine::PCM* pcm;
+    gsl::not_null<std::unique_ptr<CapEngine::PCM>> pcm;
 };
 
 // Using vector instead of map because I'm expecting to iterate over the
 // collection more then accessing by id
-using SoundCollection = std::vector<PCMType*>;
-using SoundCollectionIter = std::vector<PCMType*>::iterator;
+using SoundCollection = std::vector<std::unique_ptr<PCMType>>;
+using SoundCollectionIter = std::vector<std::unique_ptr<PCMType>>::iterator;
 
 namespace CapEngine
 {
@@ -34,7 +35,7 @@ class SoundPlayer {
    public:
     friend class PCM;
     ~SoundPlayer();
-    int64_t addSound(PCM* sound, bool repeat = false);
+    int64_t addSound(gsl::not_null<std::unique_ptr<PCM>> pcm, bool repeat = false);
     void cleanSounds();
     void setState(SoundState state);  // should change this to take an enum
     SoundCollection& getSoundCollection();
