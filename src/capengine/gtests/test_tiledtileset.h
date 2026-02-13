@@ -10,13 +10,11 @@
 
 #include "testutils.h"
 
-namespace CapEngine::testing
-{
+namespace CapEngine::testing {
 
 TEST(TiledTilesetTest, TestConstructor)
 {
-    std::filesystem::path mapPath =
-        CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
+    std::filesystem::path mapPath = CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
     std::ifstream f(mapPath);
     ASSERT_TRUE(f);
     jsoncons::json json = jsoncons::json::parse(f);
@@ -31,25 +29,20 @@ TEST(TiledTilesetTest, TestConstructor)
 
 TEST(TiledTilesetTest, TestLoadTexture)
 {
-    std::filesystem::path mapPath =
-        CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
-    auto tileset = CapEngine::TiledTileset::create("test.tmj", mapPath, 1);
-
-    ASSERT_EQ(std::nullopt, tileset.texture());
+    std::filesystem::path tilesetPath = CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
+    auto tileset = CapEngine::TiledTileset::create("test.tmj", tilesetPath, 1);
 
     ASSERT_NO_THROW(tileset.loadTexture());
 
     auto texture = tileset.texture();
     ASSERT_EQ(480, CapEngine::Locator::videoManager->getTextureWidth(*texture));
-    ASSERT_EQ(320,
-              CapEngine::Locator::videoManager->getTextureHeight(*texture));
+    ASSERT_EQ(320, CapEngine::Locator::videoManager->getTextureHeight(*texture));
     ASSERT_EQ(1, tileset.firstGid());
 }
 
 TEST(TiledTilesetTest, TestTileRect)
 {
-    std::filesystem::path mapPath =
-        CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
+    std::filesystem::path mapPath = CapEngine::testing::getTestFilePath() / "tiled" / "tileset.tsj";
     auto tileset = CapEngine::TiledTileset::create("test.tmj", mapPath, 0);
 
     ASSERT_EQ(Rectangle(0, 0, 16, 16), tileset.tileRect(0));

@@ -207,39 +207,34 @@ bool TextBox::canFocus() const { return true; }
 //! \copydoc Widget::doFocus
 bool TextBox::doFocus(bool focus, int downX, int downY, int upX, int upY)
 {
-	if (focus == false)
-	{
-		if (m_hasFocus)
-		{
-			SDL_StopTextInput();
-			assert(!SDL_IsTextInputActive());
+    if (focus == false) {
+        if (m_hasFocus) {
+            SDL_StopTextInput();
+            assert(!SDL_IsTextInputActive());
 
-			m_hasFocus = false;
-		}
+            m_hasFocus = false;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	else
-	{
-		if (pointInRect({downX, downY}, m_boxRect) &&
-			pointInRect({upX, upY}, m_boxRect))
-		{
-			if (!m_hasFocus)
-			{
-				SDL_StartTextInput();
-				assert(SDL_IsTextInputActive());
+    else {
+        if (pointInRect({static_cast<double>(downX), static_cast<double>(downY)}, m_boxRect) &&
+            pointInRect({static_cast<double>(upX), static_cast<double>(upY)}, m_boxRect)) {
+            if (!m_hasFocus) {
+                SDL_StartTextInput();
+                assert(SDL_IsTextInputActive());
 
-				m_hasFocus = true;
-				m_cursorTimerMs = 0;
-				m_cursorState = false;
-			}
+                m_hasFocus = true;
+                m_cursorTimerMs = 0;
+                m_cursorState = false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 }
 
 //! Update the texture that is displayed.
@@ -434,79 +429,70 @@ TextBox::DisplaySettings TextBox::getDisplaySettings()
 //! \copydoc Widget::handleMouseMotionEvent
 void TextBox::handleMouseMotionEvent(SDL_MouseMotionEvent event)
 {
-	assert(s_pHoverCursor != nullptr);
-	SDL_Cursor *pCurrentCursor = SDL_GetCursor();
+    assert(s_pHoverCursor != nullptr);
+    SDL_Cursor* pCurrentCursor = SDL_GetCursor();
 
-	// no mouse?
-	if (pCurrentCursor == nullptr) return;
+    // no mouse?
+    if (pCurrentCursor == nullptr)
+        return;
 
-	// check if cursor needs to be changed if in the textbox
-	if (pointInRect({event.x, event.y}, m_boxRect) &&
-		pCurrentCursor != s_pHoverCursor)
-	{
-		m_pPreviousCursor = pCurrentCursor;
-		SDL_SetCursor(s_pHoverCursor);
-	}
+    // check if cursor needs to be changed if in the textbox
+    if (pointInRect({static_cast<double>(event.x), static_cast<double>(event.y)}, m_boxRect) &&
+        pCurrentCursor != s_pHoverCursor) {
+        m_pPreviousCursor = pCurrentCursor;
+        SDL_SetCursor(s_pHoverCursor);
+    }
 
-	else
-	{
-		if (pCurrentCursor == s_pHoverCursor)
-		{
-			SDL_SetCursor(m_pPreviousCursor);
-		}
-	}
+    else {
+        if (pCurrentCursor == s_pHoverCursor) {
+            SDL_SetCursor(m_pPreviousCursor);
+        }
+    }
 
-	// do possible text selection
-	if (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT))
-	{
-		int prevCursorPosition = this->getCursorPositionFromMousePosition(
-			m_lastMouseDownPosition->first, m_lastMouseDownPosition->second);
+    // do possible text selection
+    if (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+        int prevCursorPosition =
+            this->getCursorPositionFromMousePosition(m_lastMouseDownPosition->first, m_lastMouseDownPosition->second);
 
-		int currentCursorPosition =
-			this->getCursorPositionFromMousePosition(event.x, event.y);
+        int currentCursorPosition = this->getCursorPositionFromMousePosition(event.x, event.y);
 
-		// check to see if dragging was done for text selection
-		if (currentCursorPosition != prevCursorPosition)
-		{
-			if (prevCursorPosition < currentCursorPosition)
-			{
-				this->setCursorSelectStart(prevCursorPosition);
-				this->setCursorSelectEnd(currentCursorPosition);
-			}
+        // check to see if dragging was done for text selection
+        if (currentCursorPosition != prevCursorPosition) {
+            if (prevCursorPosition < currentCursorPosition) {
+                this->setCursorSelectStart(prevCursorPosition);
+                this->setCursorSelectEnd(currentCursorPosition);
+            }
 
-			else
-			{
-				this->setCursorSelectEnd(prevCursorPosition);
-				this->setCursorSelectStart(currentCursorPosition);
-			}
-		}
-	}
+            else {
+                this->setCursorSelectEnd(prevCursorPosition);
+                this->setCursorSelectStart(currentCursorPosition);
+            }
+        }
+    }
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
 void TextBox::handleMouseButtonEvent(SDL_MouseButtonEvent event)
 {
-	if (event.button == SDL_BUTTON_LEFT && event.state == SDL_PRESSED)
-	{
-		m_lastMouseDownPosition = std::make_pair(event.x, event.y);
-	}
+    if (event.button == SDL_BUTTON_LEFT && event.state == SDL_PRESSED) {
+        m_lastMouseDownPosition = std::make_pair(event.x, event.y);
+    }
 
-	else if (event.button == SDL_BUTTON_LEFT && event.state == SDL_RELEASED)
-	{
-		// only set the cursor based on click if the button down and button
-		// released were in the textbox.
-		if (m_lastMouseDownPosition != std::nullopt &&
-			pointInRect(Point(*m_lastMouseDownPosition), m_boxRect) &&
-			pointInRect(Point{event.x, event.y}, m_boxRect))
-		{
-			int currentCursorPosition =
-				this->getCursorPositionFromMousePosition(event.x, event.y);
+    else if (event.button == SDL_BUTTON_LEFT && event.state == SDL_RELEASED) {
+        // only set the cursor based on click if the button down and button
+        // released were in the textbox.
+        if (m_lastMouseDownPosition != std::nullopt &&
+            pointInRect(Point{static_cast<double>(m_lastMouseDownPosition->first),
+                              static_cast<double>(m_lastMouseDownPosition->second)},
+                        m_boxRect) &&
+            pointInRect(Point{static_cast<double>(event.x), static_cast<double>(event.y)}, m_boxRect)) {
+            int currentCursorPosition = this->getCursorPositionFromMousePosition(event.x, event.y);
 
-			// set the current cursor position
-			m_cursorPosition = currentCursorPosition;
-			m_lastMouseDownPosition = std::nullopt;
-		}
-	}
+            // set the current cursor position
+            m_cursorPosition = currentCursorPosition;
+            m_lastMouseDownPosition = std::nullopt;
+        }
+    }
 }
 
 // \copydoc Widget::handleKeyboardEvent

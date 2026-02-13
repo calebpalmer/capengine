@@ -1,108 +1,121 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
+#include <SDL2/SDL_keycode.h>
+
 #include <map>
+#include <optional>
 #include <vector>
 
-#include "SDL_keycode.h"
 #include "captypes.h"
 #include "vector.h"
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 //! class to  represent a 2D rectangle
-class Rectangle
-{
-public:
-  int x;
-  int y;
-  int width;
-  int height;
+class Rectangle {
+   public:
+    int x;
+    int y;
+    int width;
+    int height;
 
-  Rectangle();
-  Rectangle(int xIn, int yIn, int widthIn, int heightIn);
-  Rectangle(const Rect &rect);
+    Rectangle();
+    Rectangle(int xIn, int yIn, int widthIn, int heightIn);
+    Rectangle(const Rect& rect);
 
-  friend bool operator==(const Rectangle &in_lhs, const Rectangle &in_rhs);
+    friend bool operator==(const Rectangle& in_lhs, const Rectangle& in_rhs);
 
-  Rect toRect() const;
+    Rect toRect() const;
 
-  Rectangle raiseBottom(int in_amount) const;
-  Rectangle lowerTop(int in_amount) const;
-  Rectangle narrowRight(int in_amount) const;
-  Rectangle narrowLeft(int in_amount) const;
+    Rectangle raiseBottom(int in_amount) const;
+    Rectangle lowerTop(int in_amount) const;
+    Rectangle narrowRight(int in_amount) const;
+    Rectangle narrowLeft(int in_amount) const;
 };
 
-Rectangle join(const Rectangle &in_left, const Rectangle &in_right);
+Rectangle join(const Rectangle& in_left, const Rectangle& in_right);
 
 //! structure to represent a 2D point.
 struct Point {
-  int x;
-  int y;
+    double x = 0;
+    double y = 0;
 
-  Point(int in_x, int in_y) : x(in_x), y(in_y) {}
-
-  Point(std::pair<int, int> point) : x(point.first), y(point.second) {}
+    bool operator==(const Point&) const = default;
 };
 
 enum CollisionType {
-  COLLISION_NONE,
-  COLLISION_GENERAL,
-  COLLISION_ONX,
-  COLLISION_ONY,
-  COLLISION_LEFT,
-  COLLISION_RIGHT,
-  COLLISION_TOP,
-  COLLISION_BOTTOM
+    COLLISION_NONE,
+    COLLISION_GENERAL,
+    COLLISION_ONX,
+    COLLISION_ONY,
+    COLLISION_LEFT,
+    COLLISION_RIGHT,
+    COLLISION_TOP,
+    COLLISION_BOTTOM
 };
 
 enum Relation { OUTSIDE, INSIDE, TOUCH };
 
-enum CollisionClass {
-  COLLISION_UNKNOWN,
-  COLLISION_WALL,
-  COLLISION_PROJECTILE,
-  COLLISION_ENTITY,
-  COLLISION_BITMAP
+enum CollisionClass { COLLISION_UNKNOWN, COLLISION_WALL, COLLISION_PROJECTILE, COLLISION_ENTITY, COLLISION_BITMAP };
+
+enum CollisionVectorType { COLLISIONVECTORTYPE_POINT, COLLISIONVECTORTYPE_LINE };
+
+//! enum for methods to determine the representative point of a collision
+enum class RepresentativePointMethod {
+    //! Snaps to the side of rect a where the collision first happened.
+    Simple,
+    //! Calculated a rectangle for the intersection region, returns the center point.
+    IntersectionRectangle
 };
 
-enum CollisionVectorType {
-  COLLISIONVECTORTYPE_POINT,
-  COLLISIONVECTORTYPE_LINE
+struct BoxCollision {
+    //! The type: top, bottom, left, right
+    CollisionType collisionType;
+    //! A normal vector for the collision.
+    Vector collisionNormal;
+    //! A point approximating where the collision first occured.
+    Point representativePoint;
 };
 
+//! structure reprenting a collision via bitmap detection
 struct PixelCollision {
-  CollisionType collisionType;
-  Vector collisionPoint;
-  CollisionVectorType vectorType;
+    CollisionType collisionType;
+    Vector collisionPoint;
+    CollisionVectorType vectorType;
 };
 
-bool pointInRect(const Point &point, const Rectangle &rect);
-CollisionType detectMBRCollision(const Rectangle &r1, const Rectangle &r2);
-CollisionType detectMBRCollisionInterior(const Rectangle &r1,
-                                         const Rectangle &r2);
-Relation MBRRelate(const Rectangle &r1, const Rectangle &r2);
-Relation MBRRelate(int x, int y, const Rectangle &r);
-std::vector<std::pair<CollisionType, Vector>>
-    detectBitmapCollision(const Rectangle &rect, const Surface *bitmapSurface);
-std::vector<PixelCollision>
-    detectBitmapCollisions(const Rectangle &rect, const Surface *bitmapSurface);
-std::vector<PixelCollision> detectBitmapCollisions(
-    std::vector<std::pair<CollisionType, Rectangle>> const &in_rects,
-    const Surface *in_bitmapSurface);
-std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
-    std::vector<std::pair<CollisionType, Rectangle>> const &in_rects,
-    const Surface *in_bitmapSurface);
+bool pointInRect(const Point& point, const Rectangle& rect);
 
-std::ostream &operator<<(std::ostream &stream,
-                         const CapEngine::Rectangle &rectangle);
-std::ostream &operator<<(std::ostream &stream,
-                         const CapEngine::CollisionType &collisionTyoe);
-std::ostream &operator<<(std::ostream &stream,
-                         const CapEngine::PixelCollision &pixelCollision);
-std::ostream &operator<<(std::ostream &stream,
-                         const CapEngine::CollisionClass &collisionClass);
-} // namespace CapEngine
+// box collisions
+CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2);
+std::optional<BoxCollision> detectBoxCollision(
+    const Rectangle& a, const Rectangle& b,
+    RepresentativePointMethod in_representativePointMethod = RepresentativePointMethod::Simple,
+    bool preferLeftRight = true);
+std::optional<BoxCollision> detectBoxCollisionWithContactManifold(
+    const Rectangle& a, const Rectangle& b,
+    RepresentativePointMethod in_representativePointMethod = RepresentativePointMethod::Simple,
+    bool preferLeftRight = true);
+CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
+Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
+Relation MBRRelate(int x, int y, const Rectangle& r);
+
+// bitmap collisions
+std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const Rectangle& rect,
+                                                                    const Surface* bitmapSurface);
+std::vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface);
+std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects,
+                                                   const Surface* in_bitmapSurface);
+std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
+    std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
+
+// operators
+std::ostream& operator<<(std::ostream& stream, const CapEngine::Point& point);
+std::ostream& operator<<(std::ostream& stream, const CapEngine::Rectangle& rectangle);
+std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionType& collisionTyoe);
+std::ostream& operator<<(std::ostream& stream, const CapEngine::PixelCollision& pixelCollision);
+std::ostream& operator<<(std::ostream& stream, const CapEngine::CollisionClass& collisionClass);
+}  // namespace CapEngine
 
 #endif // COLLISION_H

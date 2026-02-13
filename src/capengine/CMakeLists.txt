@@ -1,5 +1,13 @@
 add_definitions(-DUNIX -DDEBUG)
 
+find_package(SDL2)
+find_package(SDL2_image)
+find_package(SDL2_ttf)
+find_package(libxml2)
+find_package(SndFile)
+find_package(Boost)
+find_package(gsl-lite)
+
 # capengine
 add_library(capengine SHARED
   Point2d.cpp Time.cpp VideoManager.cpp EventDispatcher.cpp vector.cpp matrix.cpp collision.cpp fontmanager.cpp
@@ -23,7 +31,7 @@ target_include_directories(
   "../../extern/jsoncons/include"
 )
 
-target_link_libraries(capengine
+target_link_libraries(capengine PUBLIC
   SDL2::SDL2
   SDL2_image::SDL2_image
   SDL2_ttf::SDL2_ttf

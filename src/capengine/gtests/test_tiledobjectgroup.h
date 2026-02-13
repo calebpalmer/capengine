@@ -11,6 +11,8 @@ namespace CapEngine::testing {
 namespace {
 const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
 {
+"id": 1,
+"name": "TestObjectGroup",
 "objects":
   [
     {
@@ -34,7 +36,7 @@ const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
     {
       "class":"superclass",
       "height": 120.0,
-      "id":1,
+      "id":2,
       "name":"superobject2",
       "rotation":0,
       "visible":true,
@@ -45,7 +47,7 @@ const jsoncons::json kTestObjects = jsoncons::json::parse(R"(
     {
       "class":"subclass",
       "height": 100.0,
-      "id":1,
+      "id":3,
       "name":"sadsubobject",
       "rotation":0,
       "visible":true,
@@ -91,13 +93,13 @@ TEST(TiledObjectGroupTest, TestObjectGroupFromJson)
     auto const& objects = objectGroup.objects();
     ASSERT_EQ(3, objects.size());
 
-    auto const& object = objects.find("superobject");
+    auto const& object = objects.find("1");
     ASSERT_NE(objects.end(), object);
 
-    auto const& object2 = objects.find("superobject2");
+    auto const& object2 = objects.find("2");
     ASSERT_NE(objects.end(), object);
 
-    auto const& object3 = objects.find("sadsubobject");
+    auto const& object3 = objects.find("3");
     ASSERT_NE(objects.end(), object);
 
     auto nonConstObjects = objectGroup.objects();

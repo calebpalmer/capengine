@@ -12,6 +12,11 @@
 		 (progn
 		   (gdb (concat "gdb -i=mi --cd " projectile-project-root "/build/src --args tiledtest " (projectile-project-root) "/res/raw/map.tmj")))))
 
+       (eval . (defun cap/debug-tests ()
+		 (interactive)
+		 (progn
+		   (gdb (concat "gdb -i=mi --cd " projectile-project-root "/build/bin --args gtests")))))
+
        (eval . (defun cap/run-tests ()
 		 (interactive)
 		 (progn

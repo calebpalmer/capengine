@@ -2,21 +2,55 @@
 
 #include <algorithm>
 #include <boost/log/trivial.hpp>
+#include <boost/throw_exception.hpp>
 #include <functional>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
 
 #include "locator.h"
 #include "logging.h"
+#include "physics.h"
 #include "scanconvert.h"
 
 using namespace std;
 
 namespace CapEngine {
 
-Rectangle::Rectangle() {}
-Rectangle::Rectangle(int xIn, int yIn, int widthIn, int heightIn) : x(xIn), y(yIn), width(widthIn), height(heightIn) {}
-Rectangle::Rectangle(const Rect& rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h) {}
+//! Default constructor.
+Rectangle::Rectangle()
+{
+}
 
+//! Constructor.
+/**
+ \param xIn
+   The x-coordinate.
+ \param yIn
+   The y-coordinate.
+ \param widthIn
+   The width.
+ \param heightIn
+   The height.
+*/
+Rectangle::Rectangle(int xIn, int yIn, int widthIn, int heightIn) : x(xIn), y(yIn), width(widthIn), height(heightIn)
+{
+}
+
+//! Constructor from a Rect.
+/**
+ \param rect
+   The Rect object.
+*/
+Rectangle::Rectangle(const Rect& rect) : x(rect.x), y(rect.y), width(rect.w), height(rect.h)
+{
+}
+
+//! Converts the Rectangle to a Rect.
+/**
+ \return
+   The Rect object.
+*/
 Rect Rectangle::toRect() const
 {
     Rect rect = {static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), static_cast<int>(std::round(width)),
@@ -24,6 +58,13 @@ Rect Rectangle::toRect() const
     return rect;
 }
 
+//! Raises the bottom of the rectangle.
+/**
+ \param in_amount
+   The amount to raise the bottom by.
+ \return
+   The new rectangle.
+*/
 Rectangle Rectangle::raiseBottom(int in_amount) const
 {
     Rectangle newRect = *this;
@@ -31,6 +72,13 @@ Rectangle Rectangle::raiseBottom(int in_amount) const
     return newRect;
 }
 
+//! Lowers the top of the rectangle.
+/**
+ \param in_amount
+   The amount to lower the top by.
+ \return
+   The new rectangle.
+*/
 Rectangle Rectangle::lowerTop(int in_amount) const
 {
     Rectangle newRect = *this;
@@ -38,6 +86,13 @@ Rectangle Rectangle::lowerTop(int in_amount) const
     return newRect;
 }
 
+//! Narrows the rectangle from the left.
+/**
+ \param in_amount
+   The amount to narrow by.
+ \return
+   The new rectangle.
+*/
 Rectangle Rectangle::narrowLeft(int in_amount) const
 {
     Rectangle newRect = *this;
@@ -45,6 +100,13 @@ Rectangle Rectangle::narrowLeft(int in_amount) const
     return newRect;
 }
 
+//! Narrows the rectangle from the right.
+/**
+ \param in_amount
+   The amount to narrow by.
+ \return
+   The new rectangle.
+*/
 Rectangle Rectangle::narrowRight(int in_amount) const
 {
     Rectangle newRect = *this;
@@ -52,14 +114,14 @@ Rectangle Rectangle::narrowRight(int in_amount) const
     return newRect;
 }
 
-//! joins to rectangles together to make a single greater rectangle.
+//! Joins two rectangles together to make a single greater rectangle.
 /**
-\param left
-  \li The first rectangle
-\param right
-  \li The second rectangle
-\return
-  \li The joined rectangles.
+ \param in_left
+   The first rectangle.
+ \param in_right
+   The second rectangle.
+ \return
+   The joined rectangles.
 */
 Rectangle join(const Rectangle& in_left, const Rectangle& in_right)
 {
@@ -86,20 +148,29 @@ Rectangle join(const Rectangle& in_left, const Rectangle& in_right)
     return rect;
 }
 
-//! detects if point is within a rectangle.
+//! Detects if a point is within a rectangle.
 /**
  \param point
-   \li The point.
+   The point.
  \param rect
-        \li the rect.
+   The rect.
  \return
-   \li True if point is in rect. False otherwise.
+   True if point is in rect. False otherwise.
 */
 bool pointInRect(const Point& point, const Rectangle& rect)
 {
     return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }
 
+//! Detects collision between two minimum bounding rectangles.
+/**
+ \param r1
+   The first rectangle.
+ \param r2
+   The second rectangle.
+ \return
+   The type of collision.
+*/
 CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2)
 {
     int top1, top2, bottom1, bottom2, right1, right2, left1, left2;
@@ -112,13 +183,138 @@ CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2)
     right1 = left1 + r1.width;
     right2 = left2 + r2.width;
 
-    if (bottom1 < top2 || bottom2 < top1) return COLLISION_NONE;
-    if (right1 < left2 || right2 < left1) return COLLISION_NONE;
+    if (bottom1 < top2 || bottom2 < top1)
+        return COLLISION_NONE;
+    if (right1 < left2 || right2 < left1)
+        return COLLISION_NONE;
 
     // objects collided.  What side? TODO
     return COLLISION_GENERAL;
 }
 
+//! Detects the side of collision between two rectangles.
+/**
+ Determines which side of r1 is hit by r2 using minimum overlap detection.
+ Computes the overlap distance on all four sides and returns the side with
+ the minimum overlap, indicating the collision direction.
+ \param r1
+   The first rectangle.
+ \param r2
+   The second rectangle.
+ \param in_representativePointMethod
+   The algorithm to use for generating a representative point
+ \param in_preferLeftRight
+   Prefer collisions reported on left or right when it could go either way.
+ \return
+   The side of r1 where collision occurs (COLLISION_LEFT, COLLISION_RIGHT,
+   COLLISION_TOP, or COLLISION_BOTTOM), or COLLISION_NONE if no collision.
+*/
+std::optional<BoxCollision> detectBoxCollision(const Rectangle& a, const Rectangle& b,
+                                               RepresentativePointMethod in_representativePointMethod,
+                                               bool in_preferLeftRight)
+{
+    double aXmin = a.x;
+    double aXmax = a.x + a.width;
+    double aYmin = a.y;
+    double aYmax = a.y + a.height;
+    double bXmin = b.x;
+    double bXmax = b.x + b.width;
+    double bYmin = b.y;
+    double bYmax = b.y + b.height;
+
+    bool overlapX = aXmin < bXmax && aXmax > bXmin;
+    bool overlapY = aYmin < bYmax && aYmax > bYmin;
+
+    // If there is no overlap on one or both of the axis then
+    // there is no collision
+    if (!overlapX || not overlapY) {
+        return std::nullopt;
+    }
+
+    double overlapLeft = bXmax - aXmin;    // b hits a's left
+    double overlapRight = aXmax - bXmin;   // b hits a's right
+    double overlapBottom = bYmax - aYmin;  // b hits a's bottom
+    double overlapTop = aYmax - bYmin;     // b hits as top
+
+    bool yIsDownSetting = yIsDown();
+    BoxCollision boxCollision;
+
+    double minOverlap = std::min({overlapLeft, overlapRight, overlapBottom, overlapTop});
+
+    // Figure out first which side has our collision
+    if (minOverlap == overlapLeft) {
+        boxCollision.collisionType = CollisionType::COLLISION_LEFT;
+        boxCollision.collisionNormal = Vector{-1.0};
+    }
+    if (minOverlap == overlapRight) {
+        boxCollision.collisionType = CollisionType::COLLISION_RIGHT;
+        boxCollision.collisionNormal = Vector{1.0};
+    }
+    if (minOverlap == overlapBottom &&
+        (!in_preferLeftRight || (minOverlap != overlapLeft && minOverlap != overlapRight))) {
+        boxCollision.collisionType = CollisionType::COLLISION_BOTTOM;
+        boxCollision.collisionNormal = Vector{0.0, -1.0};
+    }
+    if (minOverlap == overlapTop &&
+        (!in_preferLeftRight || (minOverlap != overlapLeft && minOverlap != overlapRight))) {
+        boxCollision.collisionType = CollisionType::COLLISION_TOP;
+        boxCollision.collisionNormal = Vector{0.0, 1.0};
+    }
+
+    // Figure out a representative point
+    if (in_representativePointMethod == RepresentativePointMethod::Simple) {
+        Point representativePoint;
+        Point centerB{b.x + (b.width / 2.0), b.y + (b.height / 2.0)};
+        if (boxCollision.collisionNormal.x == 1) {  // A's right
+            representativePoint.x = aXmax;
+            representativePoint.y = std::clamp(centerB.y, aYmin, aYmax);
+        }
+        else if (boxCollision.collisionNormal.x == -1) {  // A's left
+            representativePoint.x = aXmin;
+            representativePoint.y = std::clamp(centerB.y, aYmin, aYmax);
+        }
+        else if (boxCollision.collisionNormal.y == 1) {  // A's top
+            representativePoint.y = aYmax;
+            representativePoint.x = std::clamp(centerB.x, aXmin, aXmax);
+        }
+        else if (boxCollision.collisionNormal.y == -1) {  // A's bottom
+            representativePoint.y = aYmin;
+            representativePoint.x = std::clamp(centerB.x, aXmin, aXmax);
+        }
+        boxCollision.representativePoint = representativePoint;
+    }
+    else if (in_representativePointMethod == RepresentativePointMethod::IntersectionRectangle) {
+        // Create an overlap rectangle so we can choose a representative point of intersection
+        float iXmin = max(aXmin, bXmin);
+        float iYmin = max(aYmin, bYmin);
+        float iXmax = min(aXmax, bXmax);
+        float iYmax = min(aYmax, bYmax);
+
+        Point representativePoint{(iXmin + iXmax) * 0.5f, (iYmin + iYmax) * 0.5f};
+        boxCollision.representativePoint = representativePoint;
+    }
+
+    return boxCollision;
+}
+
+std::optional<BoxCollision> detectBoxCollisionWithContactManifold(
+    const Rectangle& a, const Rectangle& b, RepresentativePointMethod in_representativePointMethod,
+    bool in_preferLeftRight)
+{
+    // TODO Contact manifold is a more accurate way to perform physics on collisions
+    // It returns more than one representative contact point
+    BOOST_THROW_EXCEPTION(std::runtime_error{"Not Implemented"});
+}
+
+//! Detects if a rectangle is outside another (interior) rectangle.
+/**
+ \param r1
+   The rectangle that should be inside.
+ \param r2
+   The rectangle that should contain r1.
+ \return
+   The side of collision if r1 is outside r2, otherwise COLLISION_NONE.
+*/
 CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2)
 {
     // assumes window coordinate system
@@ -138,6 +334,15 @@ CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r
     return COLLISION_NONE;
 }
 
+//! Determines the spatial relation between two rectangles.
+/**
+ \param r1
+   The first rectangle.
+ \param r2
+   The second rectangle.
+ \return
+   The relation (TOUCH, OUTSIDE, INSIDE).
+*/
 Relation MBRRelate(const Rectangle& r1, const Rectangle& r2)
 {
     if (detectMBRCollision(r1, r2) != COLLISION_NONE) {
@@ -151,6 +356,17 @@ Relation MBRRelate(const Rectangle& r1, const Rectangle& r2)
     return INSIDE;
 }
 
+//! Determines the spatial relation of a point to a rectangle.
+/**
+ \param x
+   The x-coordinate of the point.
+ \param y
+   The y-coordinate of the point.
+ \param r
+   The rectangle.
+ \return
+   The relation (INSIDE, OUTSIDE).
+*/
 Relation MBRRelate(int x, int y, const Rectangle& r)
 {
     if ((x >= r.x && x <= r.x + r.width) && (y >= r.y && y <= r.y + r.height)) {
@@ -165,6 +381,17 @@ Relation MBRRelate(int x, int y, const Rectangle& r)
 // anonymous functions for bitmap collision detection
 namespace {
 
+//! Detects a collision with the top part of a rectangle against a bitmap.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The surface of the bitmap.
+ \param collisionPoint
+   The point of collision (out-parameter).
+ \return
+   True if a collision was detected, false otherwise.
+*/
 bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
@@ -183,7 +410,8 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* b
     int y = rect.y + (rect.height / 2);
     for (; y >= rect.y; y--) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
-            if (y < 0 || y >= height || x < 0 or x >= width) continue;
+            if (y < 0 || y >= height || x < 0 or x >= width)
+                continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -197,6 +425,17 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* b
     return false;
 }
 
+//! Detects a collision with the bottom part of a rectangle against a bitmap.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The surface of the bitmap.
+ \param collisionPoint
+   The point of collision (out-parameter).
+ \return
+   True if a collision was detected, false otherwise.
+*/
 bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
@@ -214,7 +453,8 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface
     int y = rect.y + (rect.height / 2);
     for (; y <= rect.y + rect.height; y++) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
-            if (y < 0 || y >= height || x < 0 or x >= width) continue;
+            if (y < 0 || y >= height || x < 0 or x >= width)
+                continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -228,6 +468,17 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface
     return false;
 }
 
+//! Detects a collision with the right part of a rectangle against a bitmap.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The surface of the bitmap.
+ \param collisionPoint
+   The point of collision (out-parameter).
+ \return
+   True if a collision was detected, false otherwise.
+*/
 bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
@@ -244,7 +495,8 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface*
     int x = rect.x + (rect.width / 2);
     for (; x < rect.x + rect.width; x++) {
         for (int y = rect.y; y < rect.y + rect.height; y++) {
-            if (y < 0 || y >= height || x < 0 or x >= width) continue;
+            if (y < 0 || y >= height || x < 0 or x >= width)
+                continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -258,6 +510,17 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface*
     return false;
 }
 
+//! Detects a collision with the left part of a rectangle against a bitmap.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The surface of the bitmap.
+ \param collisionPoint
+   The point of collision (out-parameter).
+ \return
+   True if a collision was detected, false otherwise.
+*/
 bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* bitmapSurface, Vector& collisionPoint)
 {
     Uint8 r;
@@ -274,7 +537,8 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* 
     int x = rect.x + (rect.width / 2);
     for (; x >= rect.x; x--) {
         for (int y = rect.y; y < rect.y + rect.height; y++) {
-            if (y < 0 || y >= height || x < 0 or x >= width) continue;
+            if (y < 0 || y >= height || x < 0 or x >= width)
+                continue;
 
             getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
@@ -290,6 +554,15 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* 
 
 }  // namespace
 
+//! Detects bitmap collision for a rectangle.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The bitmap surface.
+ \return
+   A vector of collision types and points.
+*/
 // assumes 32bpp surface
 std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const CapEngine::Rectangle& rect,
                                                                     const Surface* bitmapSurface)
@@ -320,6 +593,15 @@ std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const CapEng
     return collisionTypes;
 }
 
+//! Detects bitmap collisions for a rectangle.
+/**
+ \param rect
+   The rectangle to check.
+ \param bitmapSurface
+   The bitmap surface.
+ \return
+   A vector of pixel collisions.
+*/
 vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface)
 {
     vector<PixelCollision> pixelCollisions;
@@ -360,6 +642,15 @@ vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surfa
     return pixelCollisions;
 }
 
+//! Detects bitmap collisions for a set of rectangles.
+/**
+ \param in_rects
+   The rectangles to check, paired with a collision type hint.
+ \param in_bitmapSurface
+   The bitmap surface.
+ \return
+   A vector of pixel collisions.
+*/
 std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects,
                                                    const Surface* in_bitmapSurface)
 {
@@ -381,16 +672,20 @@ std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<Collisi
 
         switch (collisionType) {
             case COLLISION_BOTTOM:
-                if (detectBottomBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                if (detectBottomBitmapCollision(rect, in_bitmapSurface, collisionPoint))
+                    addCollision(collisionType);
                 break;
             case COLLISION_TOP:
-                if (detectTopBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                if (detectTopBitmapCollision(rect, in_bitmapSurface, collisionPoint))
+                    addCollision(collisionType);
                 break;
             case COLLISION_LEFT:
-                if (detectLeftBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                if (detectLeftBitmapCollision(rect, in_bitmapSurface, collisionPoint))
+                    addCollision(collisionType);
                 break;
             case COLLISION_RIGHT:
-                if (detectRightBitmapCollision(rect, in_bitmapSurface, collisionPoint)) addCollision(collisionType);
+                if (detectRightBitmapCollision(rect, in_bitmapSurface, collisionPoint))
+                    addCollision(collisionType);
                 break;
             default: {
                 std::ostringstream msg;
@@ -403,6 +698,15 @@ std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<Collisi
     return pixelCollisions;
 }
 
+//! Detects bitmap collisions and calculates tangents.
+/**
+ \param in_rects
+   The rectangles to check.
+ \param in_bitmapSurface
+   The bitmap surface.
+ \return
+   A vector of pixel collisions with tangents.
+*/
 std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
     std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface)
 {
@@ -478,6 +782,15 @@ std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
     return pixelCollisionWithTangents;
 }
 
+//! Overload for streaming CollisionType.
+/**
+ \param stream
+   The output stream.
+ \param collisionType
+   The collision type.
+ \return
+   The output stream.
+*/
 std::ostream& operator<<(std::ostream& stream, const CollisionType& collisionType)
 {
     using namespace CapEngine;
@@ -514,6 +827,15 @@ std::ostream& operator<<(std::ostream& stream, const CollisionType& collisionTyp
     return stream;
 }
 
+//! Overload for streaming PixelCollision.
+/**
+ \param stream
+   The output stream.
+ \param pixelCollision
+   The pixel collision object.
+ \return
+   The output stream.
+*/
 std::ostream& operator<<(std::ostream& stream, const PixelCollision& pixelCollision)
 {
     std::ostringstream repr;
@@ -523,6 +845,15 @@ std::ostream& operator<<(std::ostream& stream, const PixelCollision& pixelCollis
     return stream;
 }
 
+//! Overload for streaming CollisionClass.
+/**
+ \param stream
+   The output stream.
+ \param collisionClass
+   The collision class.
+ \return
+   The output stream.
+*/
 std::ostream& operator<<(std::ostream& stream, const CollisionClass& collisionClass)
 {
     using namespace CapEngine;
@@ -551,6 +882,30 @@ std::ostream& operator<<(std::ostream& stream, const CollisionClass& collisionCl
     return stream;
 }
 
+//! Overload for streaming Point.
+/**
+ \param stream
+   The output stream.
+ \param point
+   The point object.
+ \return
+   The output stream.
+*/
+std::ostream& operator<<(std::ostream& stream, const Point& point)
+{
+    stream << "Point{" << point.x << ", " << point.y << "}";
+    return stream;
+}
+
+//! Overload for streaming Rectangle.
+/**
+ \param stream
+   The output stream.
+ \param rectangle
+   The rectangle object.
+ \return
+   The output stream.
+*/
 std::ostream& operator<<(std::ostream& stream, const Rectangle& rectangle)
 {
     using namespace CapEngine;
@@ -561,6 +916,15 @@ std::ostream& operator<<(std::ostream& stream, const Rectangle& rectangle)
     return stream;
 }
 
+//! Equality operator for Rectangle.
+/**
+ \param in_lhs
+   The left-hand side rectangle.
+ \param in_rhs
+   The right-hand side rectangle.
+ \return
+   True if the rectangles are equal, false otherwise.
+*/
 bool operator==(const Rectangle& in_lhs, const Rectangle& in_rhs)
 {
     return in_lhs.x == in_rhs.x && in_lhs.y == in_rhs.y && in_lhs.width == in_rhs.width &&

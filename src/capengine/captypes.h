@@ -5,12 +5,12 @@
 #include <SDL_render.h>
 #include <SDL_video.h>
 
+#include <gsl/gsl-lite.hpp>
 #include <map>
 #include <memory>
 #include <variant>
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 using Surface = SDL_Surface;
 using Texture = SDL_Texture;

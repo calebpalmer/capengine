@@ -1,3 +1,4 @@
 add_subdirectory(tiledviewer)
 add_subdirectory(rockpaperscissors)
 add_subdirectory(flappypei)
+add_subdirectory(breakout)

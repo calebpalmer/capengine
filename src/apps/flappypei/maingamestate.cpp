@@ -39,8 +39,8 @@ std::unique_ptr<CapEngine::GameObject> createPlayerObject(uint32_t in_windowId)
     playerObject->addComponent(std::make_shared<FlappyPei::PlayerGraphicsComponent>());
     playerObject->addComponent(std::make_shared<FlappyPei::PlayerPhysicsComponent>());
 
-    CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2) + (kSpriteWidth / 2),
-                                      (kLogicalWindowHeight / 2) + (kSpriteHeight / 2)};
+    CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2) - (kSpriteWidth / 2),
+                                      (kLogicalWindowHeight / 2) - (kSpriteHeight / 2)};
     playerObject->setPosition(initialPosition);  // Set initial position
     playerObject->setObjectState(CapEngine::GameObject::ObjectState::Starting);
 
