@@ -33,7 +33,8 @@ Rectangle::Rectangle()
  \param heightIn
    The height.
 */
-Rectangle::Rectangle(int xIn, int yIn, int widthIn, int heightIn) : x(xIn), y(yIn), width(widthIn), height(heightIn)
+Rectangle::Rectangle(double xIn, double yIn, double widthIn, double heightIn)
+    : x(xIn), y(yIn), width(widthIn), height(heightIn)
 {
 }
 
@@ -65,7 +66,7 @@ Rect Rectangle::toRect() const
  \return
    The new rectangle.
 */
-Rectangle Rectangle::raiseBottom(int in_amount) const
+Rectangle Rectangle::raiseBottom(double in_amount) const
 {
     Rectangle newRect = *this;
     newRect.height = newRect.height - in_amount;
@@ -79,7 +80,7 @@ Rectangle Rectangle::raiseBottom(int in_amount) const
  \return
    The new rectangle.
 */
-Rectangle Rectangle::lowerTop(int in_amount) const
+Rectangle Rectangle::lowerTop(double in_amount) const
 {
     Rectangle newRect = *this;
     newRect.y = newRect.y + in_amount;
@@ -93,7 +94,7 @@ Rectangle Rectangle::lowerTop(int in_amount) const
  \return
    The new rectangle.
 */
-Rectangle Rectangle::narrowLeft(int in_amount) const
+Rectangle Rectangle::narrowLeft(double in_amount) const
 {
     Rectangle newRect = *this;
     newRect.x = newRect.x + in_amount;
@@ -107,7 +108,7 @@ Rectangle Rectangle::narrowLeft(int in_amount) const
  \return
    The new rectangle.
 */
-Rectangle Rectangle::narrowRight(int in_amount) const
+Rectangle Rectangle::narrowRight(double in_amount) const
 {
     Rectangle newRect = *this;
     newRect.width = newRect.width - in_amount;

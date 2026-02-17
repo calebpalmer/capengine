@@ -246,8 +246,7 @@ Rectangle GameObject::boundingPolygon() const
 
     if (first) {
         // no collider was found.  make a 1x1 rect based off position.
-        return Rectangle{static_cast<int>(std::round(position.getX())), static_cast<int>(std::round(position.getY())),
-                         1, 1};
+        return Rectangle{position.getX(), position.getY(), 1, 1};
     }
 
     return rectangle;

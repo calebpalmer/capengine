@@ -34,55 +34,58 @@ private:
   CapEngine::Rectangle testRect;
 };
 
-void RectangleTest::setUp() { testRect = CapEngine::Rectangle(1, 1, 5, 5); }
+void RectangleTest::setUp()
+{
+    testRect = CapEngine::Rectangle(1.0, 1.0, 5.0, 5.0);
+}
 
 void RectangleTest::testCreateRectangle()
 {
-  CapEngine::Rectangle rect(1, 2, 5, 3);
-  CPPUNIT_ASSERT_EQUAL(1, rect.x);
-  CPPUNIT_ASSERT_EQUAL(2, rect.y);
-  CPPUNIT_ASSERT_EQUAL(5, rect.width);
-  CPPUNIT_ASSERT_EQUAL(3, rect.height);
+    CapEngine::Rectangle rect(1.0, 2.0, 5.0, 3.0);
+    CPPUNIT_ASSERT_EQUAL(1.0, rect.x);
+    CPPUNIT_ASSERT_EQUAL(2.0, rect.y);
+    CPPUNIT_ASSERT_EQUAL(5.0, rect.width);
+    CPPUNIT_ASSERT_EQUAL(3.0, rect.height);
 }
 
 void RectangleTest::testRaiseBottom()
 {
   auto newRect = testRect.raiseBottom(2);
 
-  CPPUNIT_ASSERT_EQUAL(1, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(3, newRect.height);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
+  CPPUNIT_ASSERT_EQUAL(3.0, newRect.height);
 }
 
 void RectangleTest::testLowerTop()
 {
   auto newRect = testRect.lowerTop(2);
 
-  CPPUNIT_ASSERT_EQUAL(1, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(3, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.height);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
+  CPPUNIT_ASSERT_EQUAL(3.0, newRect.y);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
 }
 
 void RectangleTest::testNarrowRight()
 {
   auto newRect = testRect.narrowRight(2);
 
-  CPPUNIT_ASSERT_EQUAL(1, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(3, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.height);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
+  CPPUNIT_ASSERT_EQUAL(3.0, newRect.width);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
 }
 
 void RectangleTest::testNarrowLeft()
 {
   auto newRect = testRect.narrowLeft(2);
 
-  CPPUNIT_ASSERT_EQUAL(3, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5, newRect.height);
+  CPPUNIT_ASSERT_EQUAL(3.0, newRect.x);
+  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
+  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
 }
 
 // Tests intersecting two rectangles

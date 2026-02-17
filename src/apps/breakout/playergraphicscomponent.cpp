@@ -20,8 +20,8 @@ void PlayerGraphicsComponent::render(CapEngine::GameObject& object, const CapEng
 {
     CapEngine::Rect position{.x = static_cast<int>(object.getPosition().getX()),
                              .y = static_cast<int>(object.getPosition().getY()),
-                             .w = kPaddleWidth,
-                             .h = kPaddleHeight};
+                             .w = static_cast<int>(kPaddleWidth),
+                             .h = static_cast<int>(kPaddleHeight)};
     CapEngine::Colour fillColour{255, 255, 255, 255};
     CapEngine::Locator::getVideoManager().drawFillRect(in_windowId, position, fillColour);
 }

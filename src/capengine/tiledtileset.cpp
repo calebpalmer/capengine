@@ -69,7 +69,8 @@ Rectangle TiledTileset::tileRect(int in_tileId) const
     int xTile = in_tileId % (this->imageWidth() / this->tileWidth());
     int yTile = in_tileId / (this->imageWidth() / this->tileWidth());
 
-    return Rectangle{xTile * this->tileWidth(), yTile * this->tileHeight(), this->tileWidth(), this->tileHeight()};
+    return Rectangle{static_cast<double>(xTile * this->tileWidth()), static_cast<double>(yTile * this->tileHeight()),
+                     static_cast<double>(this->tileWidth()), static_cast<double>(this->tileHeight())};
 }
 
 void TiledTileset::drawTile(uint32_t in_gid, Texture* io_texture, int in_x, int in_y, std::optional<int> in_destWidth,

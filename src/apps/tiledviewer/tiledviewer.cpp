@@ -64,81 +64,78 @@ TiledViewerState::TiledViewerState(uint32_t in_windowId, fs::path in_mapPath)
 
 void TiledViewerState::render()
 {
-	auto& videoManager = CapEngine::Locator::getVideoManager();
-	auto [windowWidth, windowHeight] =
-		videoManager.getWindowResolution(m_windowId);
+    auto& videoManager = CapEngine::Locator::getVideoManager();
+    auto [windowWidth, windowHeight] = videoManager.getWindowResolution(m_windowId);
 
-	auto [logicalWidth, logicalHeight] =
-		videoManager.getWindowLogicalResolution(m_windowId);
+    auto [logicalWidth, logicalHeight] = videoManager.getWindowLogicalResolution(m_windowId);
 
-	// render background first
-	videoManager.drawFillRect(
-		m_windowId, CapEngine::Rect{0, 0, logicalWidth, logicalHeight},
-		CapEngine::Colour{0x20, 0x20, 0x20, 0xFF});
+    // render background first
+    videoManager.drawFillRect(m_windowId, CapEngine::Rect{0, 0, logicalWidth, logicalHeight},
+                              CapEngine::Colour{0x20, 0x20, 0x20, 0xFF});
 
-	// render the map
-	m_map.render();
+    // render the map
+    m_map.render();
 
-	CapEngine::Texture* mapTexture = m_map.texture();
-	assert(mapTexture != nullptr);
+    CapEngine::Texture* mapTexture = m_map.texture();
+    assert(mapTexture != nullptr);
 
-	CapEngine::Rectangle mapRect{0, 0, logicalWidth, logicalHeight};
+    CapEngine::Rectangle mapRect{0, 0, static_cast<double>(logicalWidth), static_cast<double>(logicalHeight)};
 
-	mapRect = CapEngine::toScreenCoords(m_camera, mapRect, m_windowId, true);
+    mapRect = CapEngine::toScreenCoords(m_camera, mapRect, m_windowId, true);
 
-	// last scroll position has been set so we need to keep make sure the
-	// location of the map where the scroll wheel was used is still
-	// the same location after zooming
-	// if (m_mouseState.lastScrollPosition != std::nullopt) {
-	//	std::cout << "Handling scroll in render()\n";
-	//	std::cout << "Last render position: " << m_mapRenderPosition << "\n";
-	//	std::cout << "Current render position: " << mapRect << "\n";
-	//	// now we need to make sure x,y is is at last scroll position
-	//	const int currentX =
-	//		static_cast<int>(m_mouseState.lastScrollPosition->x) + mapRect.x;
-	//	const int currentY =
-	//		static_cast<int>(m_mouseState.lastScrollPosition->y) + mapRect.y;
+    // last scroll position has been set so we need to keep make sure the
+    // location of the map where the scroll wheel was used is still
+    // the same location after zooming
+    // if (m_mouseState.lastScrollPosition != std::nullopt) {
+    //	std::cout << "Handling scroll in render()\n";
+    //	std::cout << "Last render position: " << m_mapRenderPosition << "\n";
+    //	std::cout << "Current render position: " << mapRect << "\n";
+    //	// now we need to make sure x,y is is at last scroll position
+    //	const int currentX =
+    //		static_cast<int>(m_mouseState.lastScrollPosition->x) + mapRect.x;
+    //	const int currentY =
+    //		static_cast<int>(m_mouseState.lastScrollPosition->y) + mapRect.y;
 
-	//	// but the render rectangles could be scaled differently so we need to
-	//	// take that into account
-	//	const auto widthRatio = mapRect.width / m_mapRenderPosition.width;
-	//	const auto heightRatio = mapRect.height / m_mapRenderPosition.height;
+    //	// but the render rectangles could be scaled differently so we need to
+    //	// take that into account
+    //	const auto widthRatio = mapRect.width / m_mapRenderPosition.width;
+    //	const auto heightRatio = mapRect.height / m_mapRenderPosition.height;
 
-	//	const int lastX =
-	//		(static_cast<int>(m_mouseState.lastScrollPosition->x) +
-	//		 m_mapRenderPosition.x) *
-	//		widthRatio;
-	//	const int lastY =
-	//		(static_cast<int>(m_mouseState.lastScrollPosition->y) +
-	//		 m_mapRenderPosition.y) *
-	//		heightRatio;
+    //	const int lastX =
+    //		(static_cast<int>(m_mouseState.lastScrollPosition->x) +
+    //		 m_mapRenderPosition.x) *
+    //		widthRatio;
+    //	const int lastY =
+    //		(static_cast<int>(m_mouseState.lastScrollPosition->y) +
+    //		 m_mapRenderPosition.y) *
+    //		heightRatio;
 
-	//	// get the displacement
-	//	const auto displacement = CapEngine::Vector{currentX, currentY} -
-	//							  CapEngine::Vector{lastX, lastY};
+    //	// get the displacement
+    //	const auto displacement = CapEngine::Vector{currentX, currentY} -
+    //							  CapEngine::Vector{lastX, lastY};
 
-	//	m_camera.setPosition(static_cast<int>(displacement.x), static_cast<int>(displacement.y));
+    //	m_camera.setPosition(static_cast<int>(displacement.x), static_cast<int>(displacement.y));
 
-	//	// now translate the current render position
-	//	const auto newPosition =
-	//		CapEngine::Vector{static_cast<double>(mapRect.x),
-	//						  static_cast<double>(mapRect.y)} +
-	//		displacement;
+    //	// now translate the current render position
+    //	const auto newPosition =
+    //		CapEngine::Vector{static_cast<double>(mapRect.x),
+    //						  static_cast<double>(mapRect.y)} +
+    //		displacement;
 
-	//	mapRect.x = static_cast<int>(newPosition.getX());
-	//	mapRect.y = static_cast<int>(newPosition.getY());
-	//	mapRect.width = mapRect.width;
-	//	mapRect.height = mapRect.height;
-	//	std::cout << "After scroll adjustment render position: " << mapRect
-	//			  << "\n";
+    //	mapRect.x = static_cast<int>(newPosition.getX());
+    //	mapRect.y = static_cast<int>(newPosition.getY());
+    //	mapRect.width = mapRect.width;
+    //	mapRect.height = mapRect.height;
+    //	std::cout << "After scroll adjustment render position: " << mapRect
+    //			  << "\n";
 
-	//	m_mouseState.lastScrollPosition = std::nullopt;
-	// }
+    //	m_mouseState.lastScrollPosition = std::nullopt;
+    // }
 
-	m_mapRenderPosition = mapRect;
-	auto destRect = m_mapRenderPosition.toRect();
+    m_mapRenderPosition = mapRect;
+    auto destRect = m_mapRenderPosition.toRect();
 
-	videoManager.drawTexture(m_windowId, destRect, mapTexture);
+    videoManager.drawTexture(m_windowId, destRect, mapTexture);
 }
 
 void TiledViewerState::update(double /*ms*/)

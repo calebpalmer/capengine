@@ -880,10 +880,10 @@ void VideoManager::drawLine(Uint32 windowID, int x1, int y1, int x2, int y2, con
     Viewport viewport = getViewport(windowID);
 
     // Transform the dstRect
-    Point point1{x1, y1};
+    Point point1{static_cast<double>(x1), static_cast<double>(y1)};
     point1 = viewport.transform(point1);
 
-    Point point2{x2, y2};
+    Point point2{static_cast<double>(x2), static_cast<double>(y2)};
     point2 = viewport.transform(point2);
 
     // set the colour

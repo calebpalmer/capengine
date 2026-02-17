@@ -28,8 +28,7 @@ void BallPhysicsComponent::update(CapEngine::GameObject& object, double timestep
 std::optional<CapEngine::Rectangle> BallPhysicsComponent::boundingPolygon(const CapEngine::GameObject& object) const
 {
     CapEngine::Vector position = object.getPosition();
-    return CapEngine::Rectangle{static_cast<int>(position.getX()), static_cast<int>(position.getY()), m_ballDiameter,
-                                m_ballDiameter};
+    return CapEngine::Rectangle{position.getX(), position.getY(), m_ballDiameter, m_ballDiameter};
 }
 
 std::unique_ptr<CapEngine::Component> BallPhysicsComponent::clone() const

@@ -22,7 +22,7 @@ class BallPhysicsComponent : public CapEngine::PhysicsComponent {
    private:
     void handleGameEvent(const CapEngine::GameEvent& in_event);
 
-    int m_ballDiameter = 0;
+    double m_ballDiameter = 0.0;
 };
 }  // namespace Breakout
 

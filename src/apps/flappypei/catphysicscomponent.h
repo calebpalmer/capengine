@@ -23,11 +23,11 @@ class CatPhysicsComponent : public CapEngine::PhysicsComponent {
     [[nodiscard]] CapEngine::CollisionType collides([[maybe_unused]] CapEngine::Rectangle const& in_mbr) const override;
 
     [[nodiscard]] int gapLocation() const;
-    [[nodiscard]] int gapSize() const;
+    [[nodiscard]] double gapSize() const;
 
    private:
     int m_gapLocation = 0;
-    int m_gapSize = 0;
+    double m_gapSize = 0.0;
     CapEngine::Rectangle m_topMbr;
     CapEngine::Rectangle m_bottomMbr;
 };

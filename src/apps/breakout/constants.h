@@ -7,8 +7,8 @@ static constexpr int kLogicalWindowWidth = 320;
 static constexpr int kLogicalWindowHeight = 180;
 
 // paddle
-static constexpr int kPaddleWidth = 32;
-static constexpr int kPaddleHeight = 4;
+static constexpr double kPaddleWidth = 32;
+static constexpr double kPaddleHeight = 4;
 static constexpr int kPaddleVelocity = 125;
 
 // ball

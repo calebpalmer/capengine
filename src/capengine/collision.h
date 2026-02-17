@@ -15,23 +15,23 @@ namespace CapEngine {
 //! class to  represent a 2D rectangle
 class Rectangle {
    public:
-    int x;
-    int y;
-    int width;
-    int height;
+    double x;
+    double y;
+    double width;
+    double height;
 
     Rectangle();
-    Rectangle(int xIn, int yIn, int widthIn, int heightIn);
+    Rectangle(double xIn, double yIn, double widthIn, double heightIn);
     Rectangle(const Rect& rect);
 
     friend bool operator==(const Rectangle& in_lhs, const Rectangle& in_rhs);
 
     Rect toRect() const;
 
-    Rectangle raiseBottom(int in_amount) const;
-    Rectangle lowerTop(int in_amount) const;
-    Rectangle narrowRight(int in_amount) const;
-    Rectangle narrowLeft(int in_amount) const;
+    Rectangle raiseBottom(double in_amount) const;
+    Rectangle lowerTop(double in_amount) const;
+    Rectangle narrowRight(double in_amount) const;
+    Rectangle narrowLeft(double in_amount) const;
 };
 
 Rectangle join(const Rectangle& in_left, const Rectangle& in_right);

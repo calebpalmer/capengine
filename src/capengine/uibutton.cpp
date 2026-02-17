@@ -236,40 +236,39 @@ SDL_Rect Button::getRenderRect() const
 //! \copydoc Widdget::handleMouseMotionEvent
 void Button::handleMouseMotionEvent(SDL_MouseMotionEvent event)
 {
-  SDL_Rect rect = this->getRenderRect();
-  // hovered
-  if (pointInRect(Point{event.x, event.y}, Rectangle(rect)) &&
-      m_state != State::Pressed) {
-    m_state = State::Hovered;
-  }
-  // neutral (not hovered)
-  else if (m_state != State::Pressed)
-    m_state = State::Neutral;
+    SDL_Rect rect = this->getRenderRect();
+    // hovered
+    if (pointInRect(Point{static_cast<double>(event.x), static_cast<double>(event.y)}, Rectangle(rect)) &&
+        m_state != State::Pressed) {
+        m_state = State::Hovered;
+    }
+    // neutral (not hovered)
+    else if (m_state != State::Pressed)
+        m_state = State::Neutral;
 }
 
 //! \copydoc Widget::handleMouseButtonEvent
 void Button::handleMouseButtonEvent(SDL_MouseButtonEvent event)
 {
-  SDL_Rect rect = this->getRenderRect();
+    SDL_Rect rect = this->getRenderRect();
 
-  // button event inside of button
-  if (pointInRect(Point{event.x, event.y}, Rectangle(rect))) {
-    // pressed
-    if (event.type == SDL_MOUSEBUTTONDOWN && m_state != State::Pressed)
-      m_state = State::Pressed;
+    // button event inside of button
+    if (pointInRect(Point{static_cast<double>(event.x), static_cast<double>(event.y)}, Rectangle(rect))) {
+        // pressed
+        if (event.type == SDL_MOUSEBUTTONDOWN && m_state != State::Pressed)
+            m_state = State::Pressed;
 
-    else if (event.type == SDL_MOUSEBUTTONUP && m_state == State::Pressed) {
-      m_doClickCallbacks = true;
-      m_state = State::Hovered;
+        else if (event.type == SDL_MOUSEBUTTONUP && m_state == State::Pressed) {
+            m_doClickCallbacks = true;
+            m_state = State::Hovered;
+        }
     }
 
-  }
-
-  // if its not in the button, then we set the state back and do not call
-  // callback
-  else {
-    m_state = State::Neutral;
-  }
+    // if its not in the button, then we set the state back and do not call
+    // callback
+    else {
+        m_state = State::Neutral;
+    }
 }
 
 //! Registers a button click handler.

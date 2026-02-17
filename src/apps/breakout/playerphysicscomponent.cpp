@@ -73,8 +73,7 @@ void PlayerPhysicsComponent::update(CapEngine::GameObject& object, double timest
 std::optional<CapEngine::Rectangle> PlayerPhysicsComponent::boundingPolygon(const CapEngine::GameObject& object) const
 {
     CapEngine::Vector const& position = object.getPosition();
-    return CapEngine::Rectangle{static_cast<int>(position.getX()), static_cast<int>(position.getY()), kPaddleWidth,
-                                kPaddleHeight};
+    return CapEngine::Rectangle{position.getX(), position.getY(), kPaddleWidth, kPaddleHeight};
 }
 
 /**

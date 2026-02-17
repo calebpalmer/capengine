@@ -37,11 +37,11 @@ void Animator::update(double ms)
 
 void Animator::render(int x, int y, int width, int height)
 {
-  if (m_currentRow != -1) {
-    Rectangle rect = {x, y, width, height};
-    Locator::assetManager->draw(m_windowId, m_textureId, rect, m_currentRow,
-                                m_currentFrame);
-  }
+    if (m_currentRow != -1) {
+        Rectangle rect = {static_cast<double>(x), static_cast<double>(y), static_cast<double>(width),
+                          static_cast<double>(height)};
+        Locator::assetManager->draw(m_windowId, m_textureId, rect, m_currentRow, m_currentFrame);
+    }
 }
 
 void Animator::setRow(const std::string &rowName)

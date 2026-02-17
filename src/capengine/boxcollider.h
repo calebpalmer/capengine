@@ -38,14 +38,12 @@ private:
 };
 
 //! \copydoc PhysicsComponent::boundingPolygon
-inline std::optional<Rectangle>
-    BoxCollider::boundingPolygon(const GameObject &object) const
+inline std::optional<Rectangle> BoxCollider::boundingPolygon(const GameObject& object) const
 {
-  // return m_box;
-  const auto position = object.getPosition();
-  return Rectangle{static_cast<int>(position.getX() - (m_box.width / 2.0)),
-                   static_cast<int>(position.getY() - (m_box.height / 2.0)),
-                   m_box.width, m_box.height};
+    // return m_box;
+    const auto position = object.getPosition();
+    return Rectangle{position.getX() - (m_box.width / 2.0), position.getY() - (m_box.height / 2.0), m_box.width,
+                     m_box.height};
 }
 
 // \copydoc Component::clone

@@ -39,8 +39,8 @@ void CatPhysicsComponent::update(CapEngine::GameObject& object, double timestep)
 std::optional<CapEngine::Rectangle> CatPhysicsComponent::boundingPolygon(const CapEngine::GameObject& object) const
 {
     // todo
-    return CapEngine::Rectangle{static_cast<int>(object.getPosition().getX()),
-                                static_cast<int>(object.getPosition().getY()), m_gapSize, kLogicalWindowHeight};
+    return CapEngine::Rectangle{object.getPosition().getX(), object.getPosition().getY(), m_gapSize,
+                                kLogicalWindowHeight};
 }
 
 std::unique_ptr<CapEngine::Component> CatPhysicsComponent::clone() const
@@ -53,7 +53,7 @@ int CatPhysicsComponent::gapLocation() const
     return m_gapLocation;
 }
 
-int CatPhysicsComponent::gapSize() const
+double CatPhysicsComponent::gapSize() const
 {
     return m_gapSize;
 }
