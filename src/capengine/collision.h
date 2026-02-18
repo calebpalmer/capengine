@@ -3,7 +3,6 @@
 
 #include <SDL2/SDL_keycode.h>
 
-#include <map>
 #include <optional>
 #include <vector>
 
@@ -109,6 +108,9 @@ std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<Collisi
                                                    const Surface* in_bitmapSurface);
 std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
     std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface);
+
+// resolving collisions
+Rectangle resolveInteriorCollision(Rectangle const& r1, Rectangle const& r2, CollisionType collisionType);
 
 // operators
 std::ostream& operator<<(std::ostream& stream, const CapEngine::Point& point);

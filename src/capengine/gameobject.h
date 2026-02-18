@@ -68,6 +68,7 @@ class GameObject {
     static int generateMessageId();
     void render(const Camera2d& in_camera, uint32_t in_windowId);
     [[nodiscard]] std::unique_ptr<GameObject> update(double ms) const;
+    void updateInPlace(double ms);
     [[nodiscard]] Rectangle boundingPolygon() const;
     bool handleCollision(CollisionType, CollisionClass, GameObject* otherObject, Vector const& collisionLocation);
     [[nodiscard]] std::unique_ptr<GameObject> clone() const;

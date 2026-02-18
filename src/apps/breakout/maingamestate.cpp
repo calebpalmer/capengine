@@ -225,7 +225,7 @@ void MainGameState::render()
         renderBanner(m_windowId, renderText);
     };
 
-    auto handleDead = [&]() { renderBanner(m_windowId, "Game Over!"); };
+    auto handleDead = [&]() { renderBanner(m_windowId, "You suck!"); };
 
     auto handleWin = [&]() { renderBanner(m_windowId, "You Win!"); };
 
@@ -271,16 +271,19 @@ void MainGameState::update(double timestepMs)
 
     auto handleActiveState = [&]() {
         // update player
-        std::unique_ptr<CapEngine::GameObject> newPlayerObject = m_playerObject->update(timestepMs);
-        CAP_THROW_NULL(newPlayerObject);
+        assert(m_playerObject != nullptr);
+        m_playerObject->updateInPlace(timestepMs);
 
-        // collision with window
+        assert(m_ballObject != nullptr);
+        m_ballObject->updateInPlace(timestepMs);
+
         const CapEngine::Rectangle windowRect{0, 0, kLogicalWindowWidth, kLogicalWindowHeight};
-        const CapEngine::CollisionType collisionType =
-            CapEngine::detectMBRCollisionInterior(newPlayerObject->boundingPolygon(), windowRect);
+        // collision with window
+        {
+            const CapEngine::CollisionType collisionType =
+                CapEngine::detectMBRCollisionInterior(m_playerObject->boundingPolygon(), windowRect);
 
-        if (collisionType == CapEngine::CollisionType::COLLISION_NONE) {
-            m_playerObject = std::move(newPlayerObject);
+            // handle collision
         }
 
         // check ball and paddle collision
@@ -288,6 +291,15 @@ void MainGameState::update(double timestepMs)
         // check ball and block collisions
 
         // check ball and wall collisions
+        {
+            const CapEngine::CollisionType collisionType =
+                CapEngine::detectMBRCollisionInterior(m_ballObject->boundingPolygon(), windowRect);
+
+            if (collisionType != CapEngine::CollisionType::COLLISION_NONE) {
+                // TODO game over
+                m_gameState.status = GameStatus::Dead;
+            }
+        }
 
         // check ball a bottom collisions
     };

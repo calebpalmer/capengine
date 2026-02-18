@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "CapEngineException.h"
+#include "gameevent.h"
 #include "locator.h"
 #include "logging.h"
 
@@ -208,7 +209,6 @@ void GameObject::render(const Camera2d& in_camera, uint32_t in_windowId)
 std::unique_ptr<GameObject> GameObject::update(double ms) const
 {
     // clone new game object and pas to updates
-
     auto newObject = std::make_unique<GameObject>(*this);
 
     for (auto&& pComponent : newObject->getComponents()) {
@@ -216,6 +216,13 @@ std::unique_ptr<GameObject> GameObject::update(double ms) const
     }
 
     return newObject;
+}
+
+void GameObject::updateInPlace(double ms)
+{
+    for (auto&& pComponent : this->getComponents()) {
+        pComponent->update(*this, ms);
+    }
 }
 
 Rectangle GameObject::boundingPolygon() const
@@ -275,7 +282,10 @@ bool GameObject::handleCollision(CapEngine::CollisionType type, CapEngine::Colli
     // return false;
 }
 
-std::unique_ptr<GameObject> GameObject::clone() const { return std::make_unique<GameObject>(*this); }
+std::unique_ptr<GameObject> GameObject::clone() const
+{
+    return std::make_unique<GameObject>(*this);
+}
 
 ObjectID GameObject::generateID()
 {
@@ -286,7 +296,10 @@ ObjectID GameObject::generateID()
     return nextID++;
 }
 
-std::shared_ptr<ObjectData> GameObject::getObjectData() const { return m_pObjectData; }
+std::shared_ptr<ObjectData> GameObject::getObjectData() const
+{
+    return m_pObjectData;
+}
 
 void GameObject::setObjectData(std::shared_ptr<ObjectData> pObjectData)
 {
@@ -431,9 +444,15 @@ std::ostream& operator<<(std::ostream& stream, GameObject const& gameObject)
     return stream;
 }
 
-GameObject::ObjectType GameObject::getObjectType() const { return m_objectType; }
+GameObject::ObjectType GameObject::getObjectType() const
+{
+    return m_objectType;
+}
 
-void GameObject::setObjectType(GameObject::ObjectType in_objectType) { m_objectType = in_objectType; }
+void GameObject::setObjectType(GameObject::ObjectType in_objectType)
+{
+    m_objectType = in_objectType;
+}
 
 //! Adds a new component
 /**

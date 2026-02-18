@@ -783,6 +783,24 @@ std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
     return pixelCollisionWithTangents;
 }
 
+Rectangle resolveInteriorCollision(Rectangle const& r1, Rectangle const& r2, CollisionType collisionType)
+{
+    if (collisionType == CollisionType::COLLISION_LEFT) {
+        return Rectangle{r2.x, r1.y, r1.width, r1.height};
+    }
+    if (collisionType == CollisionType::COLLISION_RIGHT) {
+        return Rectangle{r2.x - ((r2.x + r2.width) - (r1.x + r1.width)), r1.y, r1.width, r1.height};
+    }
+    if (collisionType == CollisionType::COLLISION_TOP) {
+        return Rectangle{r1.x, r2.y, r1.width, r1.height};
+    }
+    if (collisionType == CollisionType::COLLISION_BOTTOM) {
+        return Rectangle{r1.x, r1.y - ((r2.y + r2.height) - (r1.y + r1.height)), r1.width, r1.height};
+    }
+
+    return Rectangle{};
+}
+
 //! Overload for streaming CollisionType.
 /**
  \param stream
