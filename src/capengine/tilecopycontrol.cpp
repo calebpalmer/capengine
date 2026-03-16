@@ -78,46 +78,42 @@ void TileCopyControl::render()
 //! load the texture that gets drawn with the cursor
 void TileCopyControl::loadTexture()
 {
-  assert(Locator::videoManager != nullptr);
-  assert(m_pTileSet != nullptr);
+    assert(Locator::videoManager != nullptr);
+    assert(m_pTileSet != nullptr);
 
-  auto tileWidth = m_pTileSet->getTileWidth();
-  auto tileHeight = m_pTileSet->getTileHeight();
+    auto tileWidth = m_pTileSet->getTileWidth();
+    auto tileHeight = m_pTileSet->getTileHeight();
 
-  SurfacePtr pSurface =
-      Locator::videoManager->createSurfacePtr(tileWidth, tileHeight);
-  assert(pSurface != nullptr);
+    SurfacePtr pSurface = Locator::videoManager->createSurfacePtr(tileWidth, tileHeight);
+    assert(pSurface != nullptr);
 
-  std::shared_ptr<SDL_Surface> pTileSetSurface = m_pTileSet->getSurface();
-  assert(pTileSetSurface != nullptr);
+    std::shared_ptr<SDL_Surface> pTileSetSurface = m_pTileSet->getSurface();
+    assert(pTileSetSurface != nullptr);
 
-  const std::vector<Tile> &tiles = m_pTileSet->getTiles();
-  if (boost::numeric_cast<unsigned int>(m_index) >= tiles.size()) {
-    BOOST_THROW_EXCEPTION(
-        CapEngineException("Tile index out of bounds:" +
-                           boost::lexical_cast<std::string>(m_index)));
-  }
-
-  const Tile &tile = tiles.at(m_index);
-  Locator::videoManager->blitSurface(pTileSetSurface.get(), tile.xpos,
-                                     tile.ypos, tileWidth, tileHeight,
-                                     pSurface.get(), 0, 0);
-
-  // add alpha for some transparency
-  uint8_t alpha = 128;
-  for (size_t y = 0; y < tileWidth; y++) {
-    for (size_t x = 0; x < tileHeight; x++) {
-      Pixel pixel = getPixelComponents(pSurface.get(), x, y);
-      pixel.a = alpha;
-      writePixel(pSurface.get(), x, y, pixel);
+    const std::vector<Tile>& tiles = m_pTileSet->getTiles();
+    if (boost::numeric_cast<unsigned int>(m_index) >= tiles.size()) {
+        BOOST_THROW_EXCEPTION(
+            CapEngineException("Tile index out of bounds:" + boost::lexical_cast<std::string>(m_index)));
     }
-  }
 
-  m_pTexture = Locator::videoManager->createTextureFromSurfacePtr(
-      m_windowId, pSurface.get());
-  if (m_pTexture == nullptr) {
-    BOOST_THROW_EXCEPTION(CapEngineException("Could not create texture"));
-  }
+    const Tile& tile = tiles.at(m_index);
+    Locator::videoManager->blitSurface(pTileSetSurface.get(), tile.xpos, tile.ypos, tileWidth, tileHeight,
+                                       pSurface.get(), 0, 0);
+
+    // add alpha for some transparency
+    uint8_t alpha = 128;
+    for (size_t y = 0; y < tileWidth; y++) {
+        for (size_t x = 0; x < tileHeight; x++) {
+            Pixel pixel = getPixelComponents(pSurface.get(), x, y, CoordinateSystem::YDOWN);
+            pixel.a = alpha;
+            writePixel(pSurface.get(), x, y, pixel, CoordinateSystem::YDOWN);
+        }
+    }
+
+    m_pTexture = Locator::videoManager->createTextureFromSurfacePtr(m_windowId, pSurface.get());
+    if (m_pTexture == nullptr) {
+        BOOST_THROW_EXCEPTION(CapEngineException("Could not create texture"));
+    }
 }
 
 //! \copydoc Widget::handleMouseButtonEvent

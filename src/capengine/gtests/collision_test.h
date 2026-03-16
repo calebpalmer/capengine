@@ -191,4 +191,191 @@ TEST(CollisionTest, TestDetectBoxCollision_Simple)
         ASSERT_EQ((Point{1.5, 2.0}), collision->representativePoint);
     }
 }
+
+TEST(CollisionTest, TestDetectMBRCollisionInteror)
+{
+    // no collision interior
+    {
+        Rectangle a{2, 2, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_NONE, detectMBRCollisionInterior(a, b));
+    }
+
+    // collision on left
+    {
+        Rectangle a{-1, 0, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_LEFT, detectMBRCollisionInterior(a, b));
+    }
+
+    // collision on right
+    {
+        Rectangle a{4, 0, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_RIGHT, detectMBRCollisionInterior(a, b));
+    }
+
+    // collision on bottom
+    {
+        Rectangle a{0, -1, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_BOTTOM, detectMBRCollisionInterior(a, b));
+    }
+
+    // collision on top
+    {
+        Rectangle a{0, 4, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_TOP, detectMBRCollisionInterior(a, b));
+    }
+
+    // outside left
+    {
+        Rectangle a{-2, 0, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_LEFT, detectMBRCollisionInterior(a, b));
+    }
+
+    // outside right
+    {
+        Rectangle a{5, 0, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_RIGHT, detectMBRCollisionInterior(a, b));
+    }
+
+    // outside top
+    {
+        Rectangle a{0, 5, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_TOP, detectMBRCollisionInterior(a, b));
+    }
+
+    // outside bottom
+    {
+        Rectangle a{0, -2, 2, 2};
+        Rectangle b{0, 0, 5, 5};
+
+        ASSERT_EQ(CollisionType::COLLISION_BOTTOM, detectMBRCollisionInterior(a, b));
+    }
+}
+
+TEST(CollisionTest, TestDetectMBRCollision)
+{
+    // no collision
+    {
+        Rectangle a{0, 0, 2, 2};
+        Rectangle b{3, 3, 2, 2};
+
+        ASSERT_EQ(CollisionType::COLLISION_NONE, detectMBRCollision(a, b));
+    }
+
+    {
+        Rectangle a{0, 0, 4, 4};
+        Rectangle b{3, 0, 4, 4};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_NE(CollisionType::COLLISION_NONE, collision);
+        ASSERT_EQ(CollisionType::COLLISION_GENERAL, collision);
+    }
+
+    {
+        Rectangle a{0, 0, 4, 4};
+        Rectangle b{2, 3, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_NE(CollisionType::COLLISION_NONE, collision);
+        ASSERT_EQ(CollisionType::COLLISION_GENERAL, collision);
+    }
+
+    {
+        Rectangle a{0, 0, 4, 4};
+        Rectangle b{3, 3, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_NE(CollisionType::COLLISION_NONE, collision);
+        ASSERT_EQ(CollisionType::COLLISION_GENERAL, collision);
+    }
+
+    {
+        Rectangle a{0, 0, 4, 4};
+        Rectangle b{4, 4, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_EQ(CollisionType::COLLISION_NONE, collision);
+    }
+
+    {
+        Rectangle a{0, 0, 3, 3};
+        Rectangle b{2, 3, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_EQ(CollisionType::COLLISION_NONE, collision);
+    }
+
+    {
+        Rectangle a{2, 2, 3, 3};
+        Rectangle b{0, 0, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_NE(CollisionType::COLLISION_NONE, collision);
+        ASSERT_EQ(CollisionType::COLLISION_GENERAL, collision);
+    }
+
+    {
+        Rectangle a{1, 2, 3, 3};
+        Rectangle b{0, 0, 3, 3};
+
+        const CollisionType collision = detectMBRCollision(a, b);
+        ASSERT_NE(CollisionType::COLLISION_NONE, collision);
+        ASSERT_EQ(CollisionType::COLLISION_GENERAL, collision);
+    }
+}
+
+TEST(CollisionTest, TestResolveInteriorCollision)
+{
+    // Test bottom collision
+    {
+        Rectangle a{20.0, 2.0, 2.0, 2.0};
+        Rectangle b{18.5, 3.0, 4.0, 4.0};
+
+        Rectangle resolvedA = resolveInteriorCollision(a, b, CollisionType::COLLISION_BOTTOM);
+        ASSERT_EQ((Rectangle{20.0, 3.0, 2.0, 2.0}), resolvedA);
+    }
+
+    // Test top collision
+    {
+        Rectangle a{20.0, 6.0, 2.0, 2.0};
+        Rectangle b{18.5, 3.0, 4.0, 4.0};
+
+        Rectangle resolvedA = resolveInteriorCollision(a, b, CollisionType::COLLISION_TOP);
+        ASSERT_EQ((Rectangle{20.0, 5.0, 2.0, 2.0}), resolvedA);
+    }
+
+    // Test left collision
+    {
+        Rectangle a{18.0, 4.0, 2.0, 2.0};
+        Rectangle b{18.5, 3.0, 4.0, 4.0};
+
+        Rectangle resolvedA = resolveInteriorCollision(a, b, CollisionType::COLLISION_LEFT);
+        ASSERT_EQ((Rectangle{18.5, 4.0, 2.0, 2.0}), resolvedA);
+    }
+
+    // Test right collision
+    {
+        Rectangle a{22.0, 4.0, 2.0, 2.0};
+        Rectangle b{18.0, 3.0, 4.0, 4.0};
+
+        Rectangle resolvedA = resolveInteriorCollision(a, b, CollisionType::COLLISION_RIGHT);
+        ASSERT_EQ((Rectangle{20.0, 4.0, 2.0, 2.0}), resolvedA);
+    }
+}
+
 }  // namespace CapEngine::testing

@@ -29,20 +29,20 @@ SurfacePtr getTestSurfaceWithLine(VideoManager &in_videoManager)
 	return surface;
 }
 
-std::vector<Pixel> getPixels(VideoManager &videoManager, SurfacePtr surface)
+std::vector<Pixel> getPixels(VideoManager& videoManager, SurfacePtr surface)
 {
-	double width = videoManager.getSurfaceWidth(surface.get());
-	double height = videoManager.getSurfaceHeight(surface.get());
+    double width = videoManager.getSurfaceWidth(surface.get());
+    double height = videoManager.getSurfaceHeight(surface.get());
 
-	std::vector<Pixel> pixels(width * height);
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < height; j++) {
-			pixels.push_back(getPixelComponents(surface.get(), i, j));
-		}
-	}
-	return pixels;
+    std::vector<Pixel> pixels(width * height);
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            pixels.push_back(getPixelComponents(surface.get(), i, j, CoordinateSystem::YDOWN));
+        }
+    }
+    return pixels;
 }
-} // namespace
+}  // namespace
 
 class ScanconvertTest : public CppUnit::TestFixture
 {
@@ -60,23 +60,23 @@ class ScanconvertTest : public CppUnit::TestFixture
 
 	void tearDown() { m_videoManager->shutdown(); }
 
-	void testDrawLine()
-	{
-		SurfacePtr surface = m_videoManager->createSurfacePtr(20, 20);
-		drawLine(2, 2, 8, 8, surface.get());
+        void testDrawLine()
+        {
+            SurfacePtr surface = m_videoManager->createSurfacePtr(20, 20);
+            drawLine(2, 2, 8, 8, surface.get());
 
-		Pixel black = {0x00, 0x00, 0x00, 0x00};
+            Pixel black = {0x00, 0x00, 0x00, 0x00};
 
-		Pixel pixel = getPixelComponents(
-			surface.get(), 2, m_videoManager->toScreenCoord(surface.get(), 2));
-		CPPUNIT_ASSERT(comparePixel(black, pixel));
+            Pixel pixel = getPixelComponents(surface.get(), 2, m_videoManager->toScreenCoord(surface.get(), 2),
+                                             CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(black, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 8, m_videoManager->toScreenCoord(surface.get(), 8));
-		CPPUNIT_ASSERT(comparePixel(black, pixel));
-	}
+            pixel = getPixelComponents(surface.get(), 8, m_videoManager->toScreenCoord(surface.get(), 8),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(black, pixel));
+        }
 
-	void testGetSlopeAtPixel()
+        void testGetSlopeAtPixel()
 	{
 		auto surface = getTestSurfaceWithLine(*m_videoManager);
 
@@ -110,43 +110,41 @@ class ScanconvertTest : public CppUnit::TestFixture
 		CPPUNIT_ASSERT(expected == slope.get());
 	}
 
-	void testGetPixel()
-	{
-		SurfacePtr surface =
-			m_videoManager->loadSurfacePtr("testdata/pixel_test.png");
-		CPPUNIT_ASSERT(surface != nullptr);
+        void testGetPixel()
+        {
+            SurfacePtr surface = m_videoManager->loadSurfacePtr("testdata/pixel_test.png");
+            CPPUNIT_ASSERT(surface != nullptr);
 
-		Pixel black = {0x00, 0x00, 0x00, 0x00};
-		Pixel blue = {0x00, 0x05, 0xff, 0x00};
-		Pixel white = {0xff, 0xff, 0xff, 0x00};
+            Pixel black = {0x00, 0x00, 0x00, 0x00};
+            Pixel blue = {0x00, 0x05, 0xff, 0x00};
+            Pixel white = {0xff, 0xff, 0xff, 0x00};
 
-		Pixel pixel = getPixelComponents(
-			surface.get(), 0, m_videoManager->toScreenCoord(surface.get(), 0));
-		CPPUNIT_ASSERT(comparePixel(blue, pixel));
+            Pixel pixel = getPixelComponents(surface.get(), 0, m_videoManager->toScreenCoord(surface.get(), 0),
+                                             CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(blue, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 19,
-			m_videoManager->toScreenCoord(surface.get(), 19));
-		CPPUNIT_ASSERT(comparePixel(blue, pixel));
+            pixel = getPixelComponents(surface.get(), 19, m_videoManager->toScreenCoord(surface.get(), 19),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(blue, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 2, m_videoManager->toScreenCoord(surface.get(), 2));
-		CPPUNIT_ASSERT(comparePixel(black, pixel));
+            pixel = getPixelComponents(surface.get(), 2, m_videoManager->toScreenCoord(surface.get(), 2),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(black, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 6, m_videoManager->toScreenCoord(surface.get(), 6));
-		CPPUNIT_ASSERT(comparePixel(black, pixel));
+            pixel = getPixelComponents(surface.get(), 6, m_videoManager->toScreenCoord(surface.get(), 6),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(black, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 1, m_videoManager->toScreenCoord(surface.get(), 1));
-		CPPUNIT_ASSERT(comparePixel(white, pixel));
+            pixel = getPixelComponents(surface.get(), 1, m_videoManager->toScreenCoord(surface.get(), 1),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(white, pixel));
 
-		pixel = getPixelComponents(
-			surface.get(), 10, m_videoManager->toScreenCoord(surface.get(), 3));
-		CPPUNIT_ASSERT(comparePixel(white, pixel));
-	}
+            pixel = getPixelComponents(surface.get(), 10, m_videoManager->toScreenCoord(surface.get(), 3),
+                                       CoordinateSystem::YDOWN);
+            CPPUNIT_ASSERT(comparePixel(white, pixel));
+        }
 
-	CPPUNIT_TEST_SUITE(ScanconvertTest);
+        CPPUNIT_TEST_SUITE(ScanconvertTest);
 	// CPPUNIT_TEST(testGetSlopeAtPixel);
 	CPPUNIT_TEST(testGetPixel);
 	CPPUNIT_TEST(testDrawLine);

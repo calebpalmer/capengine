@@ -25,12 +25,7 @@ class Rectangle {
 
     friend bool operator==(const Rectangle& in_lhs, const Rectangle& in_rhs);
 
-    Rect toRect() const;
-
-    Rectangle raiseBottom(double in_amount) const;
-    Rectangle lowerTop(double in_amount) const;
-    Rectangle narrowRight(double in_amount) const;
-    Rectangle narrowLeft(double in_amount) const;
+    [[nodiscard]] Rect toRect() const;
 };
 
 Rectangle join(const Rectangle& in_left, const Rectangle& in_right);

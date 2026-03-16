@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "CapEngineException.h"
 #include "locator.h"
 #include "logging.h"
 #include "physics.h"
@@ -57,62 +58,6 @@ Rect Rectangle::toRect() const
     Rect rect = {static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), static_cast<int>(std::round(width)),
                  static_cast<int>(std::round(height))};
     return rect;
-}
-
-//! Raises the bottom of the rectangle.
-/**
- \param in_amount
-   The amount to raise the bottom by.
- \return
-   The new rectangle.
-*/
-Rectangle Rectangle::raiseBottom(double in_amount) const
-{
-    Rectangle newRect = *this;
-    newRect.height = newRect.height - in_amount;
-    return newRect;
-}
-
-//! Lowers the top of the rectangle.
-/**
- \param in_amount
-   The amount to lower the top by.
- \return
-   The new rectangle.
-*/
-Rectangle Rectangle::lowerTop(double in_amount) const
-{
-    Rectangle newRect = *this;
-    newRect.y = newRect.y + in_amount;
-    return newRect;
-}
-
-//! Narrows the rectangle from the left.
-/**
- \param in_amount
-   The amount to narrow by.
- \return
-   The new rectangle.
-*/
-Rectangle Rectangle::narrowLeft(double in_amount) const
-{
-    Rectangle newRect = *this;
-    newRect.x = newRect.x + in_amount;
-    return newRect;
-}
-
-//! Narrows the rectangle from the right.
-/**
- \param in_amount
-   The amount to narrow by.
- \return
-   The new rectangle.
-*/
-Rectangle Rectangle::narrowRight(double in_amount) const
-{
-    Rectangle newRect = *this;
-    newRect.width = newRect.width - in_amount;
-    return newRect;
 }
 
 //! Joins two rectangles together to make a single greater rectangle.
@@ -174,19 +119,18 @@ bool pointInRect(const Point& point, const Rectangle& rect)
 */
 CollisionType detectMBRCollision(const Rectangle& r1, const Rectangle& r2)
 {
-    int top1, top2, bottom1, bottom2, right1, right2, left1, left2;
-    left1 = r1.x;
-    left2 = r2.x;
-    top1 = r1.y;
-    top2 = r2.y;
-    bottom1 = top1 + r1.height;
-    bottom2 = top2 + r2.height;
-    right1 = left1 + r1.width;
-    right2 = left2 + r2.width;
+    const double left1 = r1.x;
+    const double left2 = r2.x;
+    const double top1 = r1.y + r1.height;
+    const double top2 = r2.y + r2.height;
+    const double bottom1 = r1.y;
+    const double bottom2 = r2.y;
+    const double right1 = r1.x + r1.width;
+    const double right2 = r2.x + r2.width;
 
-    if (bottom1 < top2 || bottom2 < top1)
+    if (bottom1 >= top2 || bottom2 >= top1)
         return COLLISION_NONE;
-    if (right1 < left2 || right2 < left1)
+    if (right1 <= left2 || right2 <= left1)
         return COLLISION_NONE;
 
     // objects collided.  What side? TODO
@@ -237,7 +181,6 @@ std::optional<BoxCollision> detectBoxCollision(const Rectangle& a, const Rectang
     double overlapBottom = bYmax - aYmin;  // b hits a's bottom
     double overlapTop = aYmax - bYmin;     // b hits as top
 
-    bool yIsDownSetting = yIsDown();
     BoxCollision boxCollision;
 
     double minOverlap = std::min({overlapLeft, overlapRight, overlapBottom, overlapTop});
@@ -318,7 +261,6 @@ std::optional<BoxCollision> detectBoxCollisionWithContactManifold(
 */
 CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2)
 {
-    // assumes window coordinate system
     if (r1.x < r2.x) {
         return COLLISION_LEFT;
     }
@@ -326,10 +268,10 @@ CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r
         return COLLISION_RIGHT;
     }
     if (r1.y < r2.y) {
-        return COLLISION_TOP;
+        return COLLISION_BOTTOM;
     }
     if (r1.y + r1.height > r2.y + r2.height) {
-        return COLLISION_BOTTOM;
+        return COLLISION_TOP;
     }
 
     return COLLISION_NONE;
@@ -406,15 +348,14 @@ bool detectTopBitmapCollision(const CapEngine::Rectangle& rect, const Surface* b
     const auto width = Locator::videoManager->getSurfaceWidth(bitmapSurface);
     const auto height = Locator::videoManager->getSurfaceHeight(bitmapSurface);
 
-    // start from halfway down rectangle to find lowest rectangle that
-    // "top" collides
-    int y = rect.y + (rect.height / 2);
-    for (; y >= rect.y; y--) {
+    // start from halfway up and scan toward the top to find the first solid pixel
+    int y = static_cast<int>(rect.y + (rect.height / 2.0));
+    for (; y <= rect.y + rect.height; y++) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             if (y < 0 || y >= height || x < 0 or x >= width)
                 continue;
 
-            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a, CoordinateSystem::YUP);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
                 collisionPoint.setX(x);
                 collisionPoint.setY(y);
@@ -450,14 +391,14 @@ bool detectBottomBitmapCollision(const CapEngine::Rectangle& rect, const Surface
     const auto width = Locator::videoManager->getSurfaceWidth(bitmapSurface);
     const auto height = Locator::videoManager->getSurfaceHeight(bitmapSurface);
 
-    // start from halfway up to find the first part the collides
+    // start from halfway down and scan to the bottom
     int y = rect.y + (rect.height / 2);
-    for (; y <= rect.y + rect.height; y++) {
+    for (; y >= rect.y; y--) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             if (y < 0 || y >= height || x < 0 or x >= width)
                 continue;
 
-            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a, CoordinateSystem::YUP);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
                 collisionPoint.setX(x);
                 collisionPoint.setY(y);
@@ -499,7 +440,7 @@ bool detectRightBitmapCollision(const CapEngine::Rectangle& rect, const Surface*
             if (y < 0 || y >= height || x < 0 or x >= width)
                 continue;
 
-            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a, CoordinateSystem::YUP);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
                 collisionPoint.setX(x);
                 collisionPoint.setY(y);
@@ -541,7 +482,7 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* 
             if (y < 0 || y >= height || x < 0 or x >= width)
                 continue;
 
-            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a);
+            getPixelComponents(bitmapSurface, x, y, &r, &g, &b, &a, CoordinateSystem::YUP);
             if (r == 0x00 && g == 0x00 && b == 0x00) {
                 collisionPoint.setX(x);
                 collisionPoint.setY(y);
@@ -568,27 +509,28 @@ bool detectLeftBitmapCollision(const CapEngine::Rectangle& rect, const Surface* 
 std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const CapEngine::Rectangle& rect,
                                                                     const Surface* bitmapSurface)
 {
+    CAP_THROW_NULL(bitmapSurface, "Surface is null");
     std::vector<std::pair<CollisionType, Vector>> collisionTypes;
     Vector collisionPoint;
 
     // check top collision
     if (detectTopBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(std::make_pair(COLLISION_TOP, collisionPoint));
+        collisionTypes.emplace_back(COLLISION_TOP, collisionPoint);
     }
 
     // check bottom collision
     if (detectBottomBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(std::make_pair(COLLISION_BOTTOM, collisionPoint));
+        collisionTypes.emplace_back(COLLISION_BOTTOM, collisionPoint);
     }
 
     // check left side collition
     if (detectLeftBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(std::make_pair(COLLISION_LEFT, collisionPoint));
+        collisionTypes.emplace_back(COLLISION_LEFT, collisionPoint);
     }
 
     // check left side collition
     if (detectRightBitmapCollision(rect, bitmapSurface, collisionPoint)) {
-        collisionTypes.push_back(std::make_pair(COLLISION_RIGHT, collisionPoint));
+        collisionTypes.emplace_back(COLLISION_RIGHT, collisionPoint);
     }
 
     return collisionTypes;
@@ -605,6 +547,7 @@ std::vector<std::pair<CollisionType, Vector>> detectBitmapCollision(const CapEng
 */
 vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surface* bitmapSurface)
 {
+    CAP_THROW_NULL(bitmapSurface, "Surface is null");
     vector<PixelCollision> pixelCollisions;
     Vector collisionPoint;
 
@@ -655,6 +598,7 @@ vector<PixelCollision> detectBitmapCollisions(const Rectangle& rect, const Surfa
 std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<CollisionType, Rectangle>> const& in_rects,
                                                    const Surface* in_bitmapSurface)
 {
+    CAP_THROW_NULL(in_bitmapSurface, "Surface is null");
     std::vector<PixelCollision> pixelCollisions;
 
     Vector collisionPoint;
@@ -711,6 +655,7 @@ std::vector<PixelCollision> detectBitmapCollisions(std::vector<std::pair<Collisi
 std::vector<PixelCollision> detectBitmapCollisionsWithTangents(
     std::vector<std::pair<CollisionType, Rectangle>> const& in_rects, const Surface* in_bitmapSurface)
 {
+    CAP_THROW_NULL(in_bitmapSurface, "Surface is null");
     std::vector<PixelCollision> pixelCollisions = detectBitmapCollisions(in_rects, in_bitmapSurface);
 
     auto findPredicate = [](const CollisionType in_collisionType, const PixelCollision& in_pixelCollision) {
@@ -789,13 +734,13 @@ Rectangle resolveInteriorCollision(Rectangle const& r1, Rectangle const& r2, Col
         return Rectangle{r2.x, r1.y, r1.width, r1.height};
     }
     if (collisionType == CollisionType::COLLISION_RIGHT) {
-        return Rectangle{r2.x - ((r2.x + r2.width) - (r1.x + r1.width)), r1.y, r1.width, r1.height};
+        return Rectangle{r1.x - ((r1.x + r1.width) - (r2.x + r2.width)), r1.y, r1.width, r1.height};
     }
     if (collisionType == CollisionType::COLLISION_TOP) {
-        return Rectangle{r1.x, r2.y, r1.width, r1.height};
+        return Rectangle{r1.x, r1.y - ((r1.y + r1.height) - (r2.y + r2.height)), r1.width, r1.height};
     }
     if (collisionType == CollisionType::COLLISION_BOTTOM) {
-        return Rectangle{r1.x, r1.y - ((r2.y + r2.height) - (r1.y + r1.height)), r1.width, r1.height};
+        return Rectangle{r1.x, r2.y, r1.width, r1.height};
     }
 
     return Rectangle{};

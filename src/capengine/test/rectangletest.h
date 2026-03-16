@@ -10,28 +10,23 @@
 namespace CapEngine
 {
 
-class RectangleTest : public CppUnit::TestFixture
-{
-public:
-  void setUp();
-  void testCreateRectangle();
-  void testRaiseBottom();
-  void testLowerTop();
-  void testNarrowRight();
-  void testNarrowLeft();
-  void testIntersect();
+class RectangleTest : public CppUnit::TestFixture {
+   public:
+    void setUp();
+    void testCreateRectangle();
+    void testRaiseBottom();
+    void testLowerTop();
+    void testNarrowRight();
+    void testNarrowLeft();
+    void testIntersect();
 
-  CPPUNIT_TEST_SUITE(RectangleTest);
-  CPPUNIT_TEST(testCreateRectangle);
-  CPPUNIT_TEST(testRaiseBottom);
-  CPPUNIT_TEST(testLowerTop);
-  CPPUNIT_TEST(testNarrowRight);
-  CPPUNIT_TEST(testNarrowLeft);
-  CPPUNIT_TEST(testIntersect);
-  CPPUNIT_TEST_SUITE_END();
+    CPPUNIT_TEST_SUITE(RectangleTest);
+    CPPUNIT_TEST(testCreateRectangle);
+    CPPUNIT_TEST(testIntersect);
+    CPPUNIT_TEST_SUITE_END();
 
-private:
-  CapEngine::Rectangle testRect;
+   private:
+    CapEngine::Rectangle testRect;
 };
 
 void RectangleTest::setUp()
@@ -46,46 +41,6 @@ void RectangleTest::testCreateRectangle()
     CPPUNIT_ASSERT_EQUAL(2.0, rect.y);
     CPPUNIT_ASSERT_EQUAL(5.0, rect.width);
     CPPUNIT_ASSERT_EQUAL(3.0, rect.height);
-}
-
-void RectangleTest::testRaiseBottom()
-{
-  auto newRect = testRect.raiseBottom(2);
-
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(3.0, newRect.height);
-}
-
-void RectangleTest::testLowerTop()
-{
-  auto newRect = testRect.lowerTop(2);
-
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(3.0, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
-}
-
-void RectangleTest::testNarrowRight()
-{
-  auto newRect = testRect.narrowRight(2);
-
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(3.0, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
-}
-
-void RectangleTest::testNarrowLeft()
-{
-  auto newRect = testRect.narrowLeft(2);
-
-  CPPUNIT_ASSERT_EQUAL(3.0, newRect.x);
-  CPPUNIT_ASSERT_EQUAL(1.0, newRect.y);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.width);
-  CPPUNIT_ASSERT_EQUAL(5.0, newRect.height);
 }
 
 // Tests intersecting two rectangles

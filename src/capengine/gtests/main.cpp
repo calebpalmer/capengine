@@ -1,8 +1,10 @@
 #include <capengine/game_management.h>
 #include <gtest/gtest.h>
 
+#include "bitmapcollision_test.h"
 #include "camera2d_test.h"
 #include "collision_test.h"
+#include "rectangle_test.h"
 #include "test_colour.h"
 #include "test_tiledmap.h"
 #include "test_tiledobjectgroup.h"
