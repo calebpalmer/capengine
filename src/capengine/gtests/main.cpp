@@ -1,7 +1,9 @@
 #include <capengine/game_management.h>
 #include <gtest/gtest.h>
 
+#include "asset_manager_test.h"
 #include "bitmapcollision_test.h"
+#include "bitmapcollisionlayer_test.h"
 #include "camera2d_test.h"
 #include "collision_test.h"
 #include "rectangle_test.h"

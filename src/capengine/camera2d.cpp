@@ -93,32 +93,24 @@ const Rectangle &Camera2d::getViewingRectangle() const { return m_viewRect; }
    The window width.
  \param in_windowHeight
    The window height.
- \param doYFlip
-   Flip the Y coords.
  \return
    The rectangle in screen coordinates.
 */
-Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
-						 int /* in_windowWidth */, int in_windowHeight,
-						 bool doYFlip)
+Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, int /* in_windowWidth */,
+                         int in_windowHeight)
 {
-		const Rectangle &viewingRect = in_camera.getViewingRectangle();
+    const Rectangle& viewingRect = in_camera.getViewingRectangle();
 
-		Rectangle rect(in_rect.x - viewingRect.x, in_rect.y - viewingRect.y,
-					   in_rect.width, in_rect.height);
+    Rectangle rect(in_rect.x - viewingRect.x, in_rect.y - viewingRect.y, in_rect.width, in_rect.height);
 
-		if (doYFlip) {
-			rect.y = (in_windowHeight - rect.y) - rect.height;
-		}
+    // scaling out means decreasing the rectangle size by a scale
+    // scaling in means increasing the rectangle size by a scale
+    if (in_camera.zoom() != 1.0) {
+        rect.width = rect.width * in_camera.zoom();
+        rect.height = rect.height * in_camera.zoom();
+    }
 
-		// scaling out means decreasing the rectangle size by a scale
-		// scaling in means increasing the rectangle size by a scale
-		if (in_camera.zoom() != 1.0) {
-			rect.width = rect.width * in_camera.zoom();
-			rect.height = rect.height * in_camera.zoom();
-		}
-
-		return rect;
+    return rect;
 }
 
 //! Transforms the given rectangle to screen coordinates.
@@ -129,27 +121,18 @@ Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
    The rectangle to transform.
  \param un_windowId
    The id of the window.
- \param doYFlip
-   Flip the Y coords.
  \return
    The Vector in screen coordinates.
 */
-Vector toScreenCoords(const Camera2d &in_camera, const Vector &in_point,
-					  uint32_t in_windowId, bool doYFlip)
+Vector toScreenCoords(const Camera2d& in_camera, const Vector& in_point, uint32_t in_windowId)
 {
-		auto [_, windowHeight] =
-			Locator::videoManager->getWindowLogicalResolution(in_windowId);
+    auto [_, windowHeight] = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 
-		const Rectangle &viewingRect = in_camera.getViewingRectangle();
+    const Rectangle& viewingRect = in_camera.getViewingRectangle();
 
-		Vector ret{in_point.x - static_cast<double>(viewingRect.x),
-				   in_point.y - static_cast<double>(viewingRect.y)};
+    Vector ret{in_point.x - static_cast<double>(viewingRect.x), in_point.y - static_cast<double>(viewingRect.y)};
 
-		if (doYFlip) {
-			ret.y = (static_cast<double>(windowHeight) - ret.y);
-		}
-
-		return ret;
+    return ret;
 }
 
 //! Transforms the given rectangle to screen coordinates.
@@ -160,18 +143,13 @@ Vector toScreenCoords(const Camera2d &in_camera, const Vector &in_point,
    The rectangle to transform.
  \param in_windowId
    The id of the window.
- \param doYFlip
-   Flip the Y coords.
  \return
 */
-Rectangle toScreenCoords(const Camera2d &in_camera, const Rectangle &in_rect,
-						 uint32_t in_windowId, bool doYFlip)
+Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, uint32_t in_windowId)
 {
-		auto [windowWidth, windowHeight] =
-			Locator::videoManager->getWindowLogicalResolution(in_windowId);
+    auto [windowWidth, windowHeight] = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 
-		return toScreenCoords(in_camera, in_rect, windowWidth, windowHeight,
-							  doYFlip);
+    return toScreenCoords(in_camera, in_rect, windowWidth, windowHeight);
 }
 
 //! Get the width of the camera.
@@ -209,19 +187,17 @@ void Camera2d::zoom(float in_amount) { m_zoom += in_amount; }
 void Camera2d::setZoom(float in_amount) { m_zoom = in_amount; }
 
 //! Take a point in window coordates and transform it relative to in_rectangle
-Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point, Rectangle const& in_rect, uint32_t windowId, bool doYFlip) {
-	const Rectangle &viewingRect = in_camera.getViewingRectangle();
+Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point, Rectangle const& in_rect,
+                               uint32_t windowId)
+{
+    const Rectangle& viewingRect = in_camera.getViewingRectangle();
 
-	int x = in_rect.x + viewingRect.x + static_cast<int>(in_point.x);
-	int y = in_rect.y + viewingRect.y + static_cast<int>(in_point.y);
+    int x = in_rect.x + viewingRect.x + static_cast<int>(in_point.x);
+    int y = in_rect.y + viewingRect.y + static_cast<int>(in_point.y);
 
-	auto [_, windowHeight] = Locator::videoManager->getWindowLogicalResolution(windowId);
+    auto [_, windowHeight] = Locator::videoManager->getWindowLogicalResolution(windowId);
 
-	if (doYFlip) {
-		y = (windowHeight - in_rect.y) - in_rect.height;
-	}
-
-	return Vector{static_cast<double>(x), static_cast<double>(y)};
+    return Vector{static_cast<double>(x), static_cast<double>(y)};
 }
 
 } // namespace CapEngine

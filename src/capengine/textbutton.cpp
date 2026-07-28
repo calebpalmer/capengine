@@ -103,12 +103,12 @@ void TextButton::render()
     // if flag is set,
     if (m_activated) {
         Locator::videoManager->drawTexture(m_windowID, m_pTextTextureActive,
-                                           &srcRect, &destRect);
+                                           srcRect, destRect);
     }
     // if flag is not set
     else {
         Locator::videoManager->drawTexture(m_windowID, m_pTextTextureInactive,
-                                           &srcRect, &destRect);
+                                           srcRect, destRect);
     }
 
     if (m_selected) {
@@ -131,7 +131,7 @@ void TextButton::render()
         rect.x = m_position.x - (rect.w * 1.5);
         rect.y = m_position.y + ((m_height - rect.h) / 2);
         Locator::videoManager->drawTexture(m_windowID, m_pSelectedTexture,
-                                           nullptr, &rect);
+                                           std::nullopt, rect);
     }
 }
 

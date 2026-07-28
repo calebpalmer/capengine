@@ -41,7 +41,7 @@ void AnimatorV2::render(uint32_t in_windowId, Rect destRect, std::optional<doubl
     if (destRect.h <= 0)
       destRect.h = frameHeight;
 
-    Locator::videoManager->drawTexture(in_windowId, m_animatedImage.texture.get(), &drawRect, &destRect,
+    Locator::videoManager->drawTexture(in_windowId, m_animatedImage.texture.get(), drawRect, destRect,
                                        rotationDegrees);
   }
 }

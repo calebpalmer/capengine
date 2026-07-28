@@ -58,7 +58,7 @@ int generateRandomNumber(int in_min, int in_max)
 std::unique_ptr<CapEngine::GameObject> createPlayerObject(uint32_t in_windowId)
 {
     auto playerObject = std::make_unique<CapEngine::GameObject>();
-    const double paddleY = 160.0;
+    const double paddleY = 10;
     CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2.0) - (kPaddleWidth / 2.0), paddleY};
     playerObject->setPosition(initialPosition);  // Set initial position
     playerObject->setObjectState(CapEngine::GameObject::ObjectState::Starting);
@@ -79,10 +79,10 @@ std::unique_ptr<CapEngine::GameObject> createPlayerObject(uint32_t in_windowId)
 std::unique_ptr<CapEngine::GameObject> createBallObject(uint32_t in_windowId)
 {
     auto ballObject = std::make_unique<CapEngine::GameObject>();
-    const double ballY = 90;
-    CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2.0) - (kPaddleWidth / 2.0), ballY};
+
+    CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2.0) - (kBallDiameter / 2.0),
+                                      (kLogicalWindowHeight / 2.0) - (kBallDiameter / 2.0)};
     ballObject->setPosition(initialPosition);
-    // ballObject->setObjectState(CapEngine::GameObject::ObjectState::Starting);
 
     ballObject->addComponent(std::make_shared<BallGraphicsComponent>(kBallDiameter, CapEngine::Colour{255, 255, 255}));
     ballObject->addComponent(std::make_shared<BallPhysicsComponent>(kBallDiameter));
@@ -107,9 +107,7 @@ std::unique_ptr<CapEngine::GameObject> createBlockObject(uint32_t in_windowId, c
     auto blockObject = std::make_unique<CapEngine::GameObject>();
     blockObject->addComponent(
         std::make_shared<BlockGraphicsComponent>(in_blockWidth, kBlockHeight, CapEngine::Colour{0, 255, 0}));
-    // blockObject->addComponent(std::make_shared<BlockPhysicsComponent>());
 
-    // CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2.0) - (kPaddleWidth / 2.0), 40.0};
     blockObject->setPosition(in_position);  // Set initial position
     blockObject->setObjectState(CapEngine::GameObject::ObjectState::Starting);
 
@@ -138,8 +136,9 @@ std::vector<std::unique_ptr<CapEngine::GameObject>> createBlockObjects(uint32_t 
 
     for (int row : std::views::iota(0, kNumRows)) {
         for (int col : std::views::iota(0, kNumBlocks)) {
-            CapEngine::Vector position{(col * blockWidth) + (col * kGap) + kGap,
-                                       (row * kBlockHeight) + (row * kGap) + kGap};
+            CapEngine::Vector position{
+                (col * blockWidth) + (col * kGap) + kGap,
+                kLogicalWindowHeight - kGap - kBlockHeight - ((row * kBlockHeight) + (row * kGap))};
             blockObjects.emplace_back(createBlockObject(in_windowId, blockWidth, position));
         }
     }

@@ -38,19 +38,14 @@ std::unique_ptr<Component> PlaceHolderGraphics::clone() const
 }
 
 //! \copydoc GraphicsComponent::render
-void PlaceHolderGraphics::render(GameObject &in_object,
-                                 const Camera2d &in_camera,
-                                 uint32_t in_windowId)
+void PlaceHolderGraphics::render(GameObject& in_object, const Camera2d& in_camera, uint32_t in_windowId)
 {
-  const auto objectRect = in_object.boundingPolygon();
-  const bool doYFlip =
-      in_object.getYAxisOrientation() == YAxisOrientation::BottomZero;
+    const auto objectRect = in_object.boundingPolygon();
 
-  Rectangle drawRect =
-      toScreenCoords(in_camera, objectRect, in_windowId, doYFlip);
+    Rectangle drawRect = toScreenCoords(in_camera, objectRect, in_windowId);
 
-  assert(Locator::videoManager != nullptr);
-  Locator::videoManager->drawFillRect(in_windowId, drawRect.toRect(), m_colour);
+    assert(Locator::videoManager != nullptr);
+    Locator::videoManager->drawFillRect(in_windowId, drawRect.toRect(), m_colour);
 }
 
 //! Construct the component from Json.

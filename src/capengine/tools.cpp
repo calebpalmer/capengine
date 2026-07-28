@@ -24,7 +24,7 @@ std::string surfaceToASCII(Surface* surface)
     std::ostringstream repr;
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
-            Pixel pixel = getPixelComponents(surface, i, vMan.toScreenCoord(surface, j), CoordinateSystem::YDOWN);
+            Pixel pixel = getPixelComponents(surface, i, vMan.toScreenCoords(surface, j), CoordinateSystem::YDOWN);
             repr << std::dec << i << ", " << j << ": 0x" << std::hex << static_cast<int>(pixel.r) << " 0x"
                  << static_cast<int>(pixel.g) << " 0x" << static_cast<int>(pixel.b) << " 0x"
                  << static_cast<int>(pixel.a) << std::endl;

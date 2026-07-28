@@ -1,5 +1,6 @@
 #include "ballgraphicscomponent.h"
 
+#include <capengine/VideoManager.h>
 #include <capengine/gameobject.h>
 #include <capengine/locator.h>
 
@@ -14,11 +15,11 @@ void BallGraphicsComponent::render(CapEngine::GameObject& object, const CapEngin
                                    uint32_t in_windowId)
 {
     CapEngine::Vector position = object.getPosition();
-    CapEngine::Rect rect{.x = static_cast<int>(position.getX()),
-                         .y = static_cast<int>(position.getY()),
-                         .w = m_diameter,
-                         .h = m_diameter};
-    CapEngine::Locator::getVideoManager().drawFillRect(in_windowId, rect, m_colour);
+    CapEngine::Rectangle rect{position.getX(), position.getY(), static_cast<double>(m_diameter),
+                              static_cast<double>(m_diameter)};
+
+    CapEngine::VideoManager& videoManager = CapEngine::Locator::getVideoManager();
+    videoManager.drawFillRect(in_windowId, rect.toRect(), m_colour);
 }
 
 void BallGraphicsComponent::update(CapEngine::GameObject& object, double timestep)

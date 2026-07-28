@@ -66,25 +66,10 @@ void Camera2dTest::testToScreenCoords()
 
     Rectangle rect(2, 0, 2, 2);
 
-    // y flip only
-    Rectangle expected(2, 2, 2, 2);
-    Rectangle actual =
-        toScreenCoords(camera, rect, window.width, window.height, true);
-    CPPUNIT_ASSERT_EQUAL(expected, actual);
-
     // no y flip
-    expected = Rectangle(2, 0, 2, 2);
-    actual = toScreenCoords(camera, rect, window.width, window.height, false);
+    Rectangle expected = Rectangle(2, 0, 2, 2);
+    Rectangle actual = toScreenCoords(camera, rect, window.width, window.height);
     CPPUNIT_ASSERT_EQUAL(expected, actual);
-
-    // translated with y flip
-    // todo: Fix
-    // Rectangle object(0, 3, 2, 2);
-    // camera.center(object, std::nullopt);
-
-    // actual = toScreenCoords(camera, object, window.width, window.height,
-    // true); expected = Rectangle(1, 7, 2, 2); CPPUNIT_ASSERT_EQUAL(expected,
-    // actual);
 }
 
 } // namespace CapEngine

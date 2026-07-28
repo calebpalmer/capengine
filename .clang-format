@@ -12,3 +12,4 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
+SortIncludes:    Never

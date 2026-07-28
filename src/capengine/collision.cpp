@@ -55,9 +55,8 @@ Rectangle::Rectangle(const Rect& rect) : x(rect.x), y(rect.y), width(rect.w), he
 */
 Rect Rectangle::toRect() const
 {
-    Rect rect = {static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), static_cast<int>(std::round(width)),
-                 static_cast<int>(std::round(height))};
-    return rect;
+    return {static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), static_cast<int>(std::round(width)),
+            static_cast<int>(std::round(height))};
 }
 
 //! Joins two rectangles together to make a single greater rectangle.

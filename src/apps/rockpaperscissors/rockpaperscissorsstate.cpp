@@ -164,7 +164,7 @@ void RockPaperScissorsState::renderPlayers()
                              m_state.currentWinner == 1 ? m_victorySprites.get() : *texture,
                              &m_state.player1.tilePosition);
     videoManager.drawTexture(m_windowId, m_state.currentWinner == 2 ? m_victorySprites.get() : *texture,
-                             &m_state.player2.tilePosition, &m_state.player2.drawPosition, std::nullopt,
+                             m_state.player2.tilePosition, m_state.player2.drawPosition, std::nullopt,
                              SDL_FLIP_HORIZONTAL);
 }
 

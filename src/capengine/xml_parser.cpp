@@ -14,7 +14,7 @@ using namespace CapEngine;
 XmlParser::XmlParser(const string xmlPath) : mXmlPath(xmlPath)
 {
     mpDoc = xmlParseFile(xmlPath.c_str());
-    if (mpDoc == NULL) {
+    if (mpDoc == nullptr) {
         ostringstream errorMessage;
         errorMessage << "Unable to parse file " << mXmlPath;
         throw CapEngineException(errorMessage.str());

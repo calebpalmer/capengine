@@ -12,8 +12,8 @@ namespace FlappyPei {
 CatPhysicsComponent::CatPhysicsComponent(int in_gapLocation, int in_gapSize)
     : m_gapLocation(in_gapLocation),
       m_gapSize(in_gapSize),
-      m_topMbr(0, 0, kCatWidth, in_gapLocation),
-      m_bottomMbr(0, in_gapLocation + in_gapSize, kCatWidth, kLogicalWindowHeight - (in_gapLocation + in_gapSize))
+      m_topMbr(0, in_gapLocation + in_gapSize, kCatWidth, kLogicalWindowHeight - (in_gapLocation + in_gapSize)),
+      m_bottomMbr(0, 0, kCatWidth, in_gapLocation)
 {
 }
 

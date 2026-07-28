@@ -22,8 +22,7 @@
 #include "matrix.h"
 #include "viewport.h"
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 enum ScreenMode { ScreenMode_FullScreen, ScreenMode_Windowed };
 
@@ -76,11 +75,11 @@ class VideoManager final {
     // Windows
     Uint32 createNewWindow(WindowParams windowParams);
     void closeWindow(Uint32 windowID);
-    Window getWindow(Uint32 windowID);
+    Window getWindow(Uint32 windowID) const;
     Uint32 getWindowId(const std::string& windowName) const;
     bool isValidWindowId(Uint32 windowId) const;
     std::pair<int, int> getWindowResolution(Uint32 windowID);
-    std::pair<int, int> getWindowLogicalResolution(uint32_t in_windowID);
+    std::pair<int, int> getWindowLogicalResolution(uint32_t in_windowID) const;
     void setWindowLogicalResolution(uint32_t in_windowID, int in_width, int in_height);
     int getWindowWidth(Uint32 windowID);
     int getWindowHeight(Uint32 windowID);
@@ -115,10 +114,10 @@ class VideoManager final {
     void closeTexture(Texture* texture) const;
     void drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, Rect* srcRect = nullptr,
                      bool applyTransform = true);
-    void drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect,
+    void drawTexture(Uint32 windowID, Texture* texture, std::optional<Rect> srcRect, Rect dstRect,
                      std::optional<double> rotationDegrees = std::nullopt, SDL_RendererFlip flip = SDL_FLIP_NONE,
                      bool applyTransform = true);
-    void drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRect);
+    void drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRectYDown);
     double getTextureWidth(Texture* texture) const;
     double getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;
@@ -129,7 +128,7 @@ class VideoManager final {
     Texture* createTextureFromSurface(Uint32 windowID, Surface* surface, bool freeSurface = false);
     TexturePtr createTextureFromSurfacePtr(Surface* surface, bool freeSurface = false);
     TexturePtr createTextureFromSurfacePtr(Uint32 windowId, Surface* surface, bool freeSurface = false);
-    TexturePtr copyTexture(Texture* sourceTexture);
+    TexturePtr copyTexture(Texture* sourceTexture) const;
     void saveTexture(Texture* texture, const std::string& filePath);
     void setClipRect(Uint32 windowId, SDL_Rect const* clipRect);
 
@@ -147,8 +146,12 @@ class VideoManager final {
     void drawRect(Uint32 windowID, Rect rect, Colour fillColour);
 
     // utility
-    int toScreenCoord(const Surface* surface, int y) const;
+    int toScreenCoords(const Surface* surface, int y) const;
+    [[nodiscard]] int toScreenCoords(Uint32 in_windowID, int y) const;
     int fromScreenCoord(const Surface* surface, int y) const;
+    Rect toScreenCoords(Uint32 in_windowID, Rect const& in_rect);
+    Rect toScreenCoords(const Surface* in_surface, Rect const& in_rect);
+    Rect toScreenCoords(Texture* in_texture, Rect const& in_rect);
 
     SDL_Renderer* getRenderer();
 
@@ -172,8 +175,6 @@ class VideoManager final {
     RendererPtr m_renderer;
     std::map<Uint32, Window> m_windows;
     std::map<std::string, Uint32> m_windowNamesToIds;
-
-    Matrix m_transformationMatrix;
 
     std::unique_ptr<Logger> logger;
     static bool instantiated;  // singleton

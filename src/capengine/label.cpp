@@ -152,8 +152,8 @@ void Label::render()
         dstRect.y = m_y + m_height - textureHeight;
     }
 
-    Locator::videoManager->drawTexture(m_windowId, m_texture.get(), &srcRect,
-                                       &dstRect);
+    Locator::videoManager->drawTexture(m_windowId, m_texture.get(), srcRect,
+                                       dstRect);
 }
 
 //! Gets the labels text

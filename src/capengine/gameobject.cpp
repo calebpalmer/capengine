@@ -88,7 +88,6 @@ void GameObject::swap(GameObject& io_other) noexcept
 //     m_objectID = in_other.m_objectID;
 //     m_parentObjectID = in_other.m_parentObjectID;
 //     m_objectType = in_other.m_objectType;
-//     m_yAxisOrientation = in_other.m_yAxisOrientation;
 
 //     m_metadata = in_other.m_metadata;
 
@@ -113,7 +112,6 @@ void GameObject::swap(GameObject& io_other) noexcept
 //     m_objectID = generateID();
 //     m_parentObjectID = in_other.m_parentObjectID;
 //     m_objectType = in_other.m_objectType;
-//     m_yAxisOrientation = in_other.m_yAxisOrientation;
 
 //     m_metadata = in_other.m_metadata;
 
@@ -493,24 +491,6 @@ std::vector<std::shared_ptr<Component>> GameObject::getComponents(ComponentType 
                  [in_type](auto&& in_component) { return in_component->getType() == in_type; });
 
     return components;
-}
-
-/**
- * @brief returns the y axis orientation of the object.
- * @return The y axis orientation.
- */
-YAxisOrientation GameObject::getYAxisOrientation() const
-{
-    return m_yAxisOrientation;
-}
-
-/**
- * @brief Sets the y axis orientation of the object.
- * @param[in] in_orientation The orientation.
- */
-void GameObject::setYAxisOrientation(YAxisOrientation in_orientation)
-{
-    m_yAxisOrientation = in_orientation;
 }
 
 GameObject::Metadata const& GameObject::metadata() const

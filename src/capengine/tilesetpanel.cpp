@@ -109,8 +109,8 @@ void TileSetPanel::render()
 
   for (auto &&tileLocation : m_tiles) {
     Locator::videoManager->drawTexture(m_windowId, m_pTileSetTexture.get(),
-                                       &(tileLocation.srcRect),
-                                       &(tileLocation.dstRect));
+                                       tileLocation.srcRect,
+                                       tileLocation.dstRect);
   }
 }
 

@@ -10,7 +10,7 @@
 namespace CapEngine
 {
 
-typedef xmlNodePtr XmlNode;
+using XmlNode = xmlNodePtr;
 
 // This class is just a thin wrapper over libxml2 just for RAII
 class XmlParser

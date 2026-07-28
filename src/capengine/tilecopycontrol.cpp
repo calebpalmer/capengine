@@ -58,8 +58,8 @@ void TileCopyControl::render()
                       width, height};
 
   assert(Locator::videoManager != nullptr);
-  Locator::videoManager->drawTexture(m_windowId, m_pTexture.get(), &srcRect,
-                                     &dstRect);
+  Locator::videoManager->drawTexture(m_windowId, m_pTexture.get(), srcRect,
+                                     dstRect);
 
   // if dragging draw outline
   if (m_isDragging) {

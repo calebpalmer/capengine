@@ -1,18 +1,25 @@
 // TODO This whole darn file needs refactoring
 #include "asset_manager.h"
 
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/log/trivial.hpp>
 #include <cassert>
+#include <exception>
 #include <filesystem>
 #include <memory>
 #include <optional>
 #include <sstream>
-#include <stdexcept>
+#include <string>
+#include <utility>
 #include <vector>
+
+#include <jsoncons/json.hpp>
 
 #include "CapEngineException.h"
 #include "filesystem.h"
 #include "locator.h"
 #include "xml_parser.h"
+#include "logging.h"
 
 using namespace std;
 
@@ -72,16 +79,74 @@ std::map<string, Frame> parseFrames(XmlParser& parser, XmlNode parentNode)
     return frameMap;
 }
 
+/**
+ * \brief Parse animation frames from a JSON array of frame objects.
+ * \param json A JSON array where each element contains frameName, rowNum, frameWidth,
+ *             frameHeight, numFrames, animationTime, and optionally horizontalPadding
+ *             and verticalPadding.
+ * \return Map of frame name to Frame, skipping duplicates with a warning.
+ */
+std::map<string, Frame> parseFrames(const jsoncons::json& json)
+{
+    std::map<string, Frame> frameMap;
+
+    for (auto&& frame : json.array_range()) {
+        try {
+            const std::string frameName = frame["frameName"].as<std::string>();
+            const int rowNum = frame["rowNume"].as<int>();
+            const int frameWidth = frame["frameWidth"].as<int>();
+            const int frameHeight = frame["frameHeight"].as<int>();
+            const int numFrames = frame["numFrames"].as<int>();
+            const double animationTime = frame["animationTime"].as<double>();
+            const int horizontalPadding = frame.get_value_or<int>("horizontalPadding", 0);
+            const int verticalPadding = frame.get_value_or<int>("verticalPadding", 0);
+
+            if (frameMap.find(frameName) != frameMap.end()) {
+                BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning)
+                    << std::format("Frame with name {} already loaded for Texture.", frameName);
+                continue;
+            }
+
+            frameMap.emplace(frameName, Frame{.frameName = frameName,
+                                              .rowNum = rowNum,
+                                              .frameWidth = frameWidth,
+                                              .frameHeight = frameHeight,
+                                              .numFrames = numFrames,
+                                              .animationTime = animationTime,
+                                              .horizontalPadding = horizontalPadding,
+                                              .verticalPadding = verticalPadding});
+        }
+        catch (const std::exception& err) {
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error)
+                << "Error parsing frame:" << boost::diagnostic_information(err);
+        }
+    }
+
+    return frameMap;
+}
+
 }  // end anonymous namespace
+
+AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, const jsoncons::json& assetsJson,
+                           std::filesystem::path in_basePath)
+    : m_videoManager(videoManager), m_soundPlayer(soundPlayer), m_basePath(in_basePath)
+{
+    this->parseAssetFile(assetsJson);
+}
 
 AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::optional<string> assetFile,
                            std::optional<std::filesystem::path> basePath)
-    : m_videoManager(videoManager), m_soundPlayer(soundPlayer), m_assetFile(assetFile), m_basePath(basePath)
+    : m_videoManager(videoManager), m_soundPlayer(soundPlayer), m_assetFile(assetFile), m_basePath(std::move(basePath))
 {
     if (m_assetFile.has_value()) {
         m_assetFile = std::filesystem::absolute(*assetFile).string();
-        XmlParser parser(*assetFile);
-        parseAssetFile(parser);
+
+        try {
+            XmlParser parser(*assetFile);
+            parseAssetFile(parser);
+        }
+        catch (const CapEngineException& err) {
+        }
     }
 
     // if the asset base path is not provided. try to find it.
@@ -100,6 +165,12 @@ AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
             }
         }
     }
+}
+
+AssetManager::AssetManager(std::optional<std::string> assetFile, std::optional<std::filesystem::path> in_basePath)
+    : AssetManager::AssetManager(Locator::getVideoManager(), Locator::getSoundPlayer(), assetFile,
+                                 std::move(in_basePath))
+{
 }
 
 AssetManager::~AssetManager()
@@ -139,6 +210,21 @@ void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeigh
     image.path = path;
     image.texture = tempTexture;
     m_imageMap[id] = image;
+}
+
+void AssetManager::loadSurface(int id, Surface* surface)
+{
+    CAP_THROW_NULL(surface);
+    if (this->imageExists(id))
+        CAP_THROW(CapEngineException{std::string{"Image with id "} + std::to_string(id) + " exists."});
+
+    auto& videoManager = Locator::getVideoManager();
+    auto staticTexture = videoManager.createTextureFromSurfacePtr(surface);
+
+    // make a copy that has the flag SDL_TEXTUREACCESS_TARGET
+    auto texture = videoManager.copyTexture(staticTexture.get());
+
+    m_imageMap.emplace(id, Image{"", texture.release()});
 }
 
 void AssetManager::parseAssetFile(XmlParser& parser)
@@ -205,6 +291,67 @@ void AssetManager::parseAssetFile(XmlParser& parser)
     }
 }
 
+void AssetManager::parseAssetFile(const jsoncons::json& json)
+{
+    if (json.contains("textures")) {
+        for (auto&& texture : json["textures"].array_range()) {
+            try {
+                const int id = texture["id"].as<int>();
+                std::filesystem::path path = std::filesystem::path{texture["path"].as<std::string>()};
+                if (path.is_relative())
+                    path = *m_basePath / path;
+
+                if (!std::filesystem::exists(path)) {
+                    BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning)
+                        << std::format("{} does not exist", path.string());
+                }
+
+                const string frameWidth = texture["frameWidth"].as<std::string>();
+                const string frameHeight = texture["frameHeight"].as<std::string>();
+                const bool hasFrames = texture.get_value_or<bool>("hasFrames", false);
+                const bool isAnimation = texture.get_value_or<bool>("isAnimation", false);
+
+                // Is an AnimatedImage
+                if (isAnimation) {
+                    const int numFrames = texture["numFrames"].as<int>();
+                    const int animationTimeMs = texture["animationTimeMs"].as<int>();
+                    m_animationMap.emplace(id, AnimatedImage{.path = path,
+                                                             .texture = nullptr,
+                                                             .numFrames = numFrames,
+                                                             .animationTimeMs = animationTimeMs});
+                    continue;
+                }
+
+                // Is a regular Image
+                m_imageMap.emplace(id, Image{.path = path, .texture = nullptr, .frames = {}});
+            }
+            catch (const std::exception& err) {
+                BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error)
+                    << "Error parsing texture:" << boost::diagnostic_information(err);
+            }
+        }
+    }
+
+    if (json.contains("sounds")) {
+        for (auto&& sound : json["sounds"].array_range()) {
+            try {
+                const int id = sound["id"].as<int>();
+                std::filesystem::path path{sound["path"].as<std::string>()};
+                if (!std::filesystem::exists(path)) {
+                    BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning)
+                        << std::format("{} does not exist", path.string());
+                }
+
+                m_soundMap.emplace(id, Sound{.path = path, .pcm = nullptr});
+            }
+            catch (const std::exception& err) {
+                BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error)
+                    << "Error parsing sound:" << boost::diagnostic_information(err);
+            }
+        }
+    }
+}
+
 Image* AssetManager::getImage(int id)
 {
     // throw error if image has not been loaded
@@ -243,10 +390,17 @@ SoftwareImage AssetManager::getSoftwareImage(int id)
         throw AssetDoesNotExistError("image", id);
     }
 
-    Surface* surface = m_videoManager.loadSurface(iter->second.path);
     SoftwareImage softwareImage;
+
+    if (iter->second.texture != nullptr) {
+        SurfacePtr surface = m_videoManager.createSurfaceFromTexture(iter->second.texture);
+        softwareImage.surface = surface.release();
+    }
+    else {
+        Surface* surface = m_videoManager.loadSurface(iter->second.path);
+        softwareImage.surface = surface;
+    }
     softwareImage.path = iter->second.path;
-    softwareImage.surface = surface;
 
     return softwareImage;
 }
@@ -358,7 +512,7 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _srcRect, Rectangle _
     destRect.w = _destRect.width;
     destRect.h = _destRect.height;
 
-    m_videoManager.drawTexture(windowID, image->texture, &srcRect, &destRect, rotationDegrees);
+    m_videoManager.drawTexture(windowID, image->texture, srcRect, destRect, rotationDegrees);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Vector position)
@@ -371,14 +525,14 @@ void AssetManager::draw(Uint32 windowID, int id, Vector position)
     destRect.w = m_videoManager.getTextureWidth(image->texture);
     destRect.h = m_videoManager.getTextureHeight(image->texture);
 
-    m_videoManager.drawTexture(windowID, image->texture, nullptr, &destRect);
+    m_videoManager.drawTexture(windowID, image->texture, std::nullopt, destRect);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle destRect)
 {
     Image* image = this->getImage(id);
     Rect rect = destRect.toRect();
-    m_videoManager.drawTexture(windowID, image->texture, nullptr, &rect);
+    m_videoManager.drawTexture(windowID, image->texture, std::nullopt, rect);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frameNum)
@@ -399,7 +553,7 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, i
     destRect.w = _destRect.width;
     destRect.h = _destRect.height;
 
-    m_videoManager.drawTexture(windowID, image->texture, &srcRect, &destRect);
+    m_videoManager.drawTexture(windowID, image->texture, srcRect, destRect);
 }
 
 int64_t AssetManager::playSound(int id, bool repeat)

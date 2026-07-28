@@ -65,16 +65,21 @@ struct AssetDoesNotExistError : public CapEngineException {
 
 class AssetManager {
    public:
-    AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
-                 std::optional<std::string> assetFile, std::optional<std::filesystem::path> in_basePath = std::nullopt);
+    AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, const jsoncons::json& assetsJson,
+                 std::filesystem::path in_basePath);
+    AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::optional<std::string> assetFile,
+                 std::optional<std::filesystem::path> in_basePath = std::nullopt);
+    AssetManager(std::optional<std::string> assetFile = std::nullopt,
+                 std::optional<std::filesystem::path> in_basePath = std::nullopt);
     ~AssetManager();
+
     void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect,
               std::optional<double> rotationDegrees = std::nullopt);
     void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
     void draw(Uint32 windowID, int id, Vector position);
     void draw(Uint32 windowID, int id, Rectangle dstRect);
-    void loadImage(int id, std::string path, int frameWidth = 0,
-                   int frameHeight = 0);
+    void loadImage(int id, std::string path, int frameWidth = 0, int frameHeight = 0);
+    void loadSurface(int id, Surface* surface);
     Image* getImage(int id);
     std::optional<AnimatedImage> getAnimatedImage(int in_id);
     SoftwareImage getSoftwareImage(int id);
@@ -103,6 +108,7 @@ class AssetManager {
 
    private:  // functions
     void parseAssetFile(XmlParser& parser);
+    void parseAssetFile(const jsoncons::json& json);
 };
 
 }  // namespace CapEngine

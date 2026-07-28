@@ -40,15 +40,7 @@ std::vector<std::pair<CollisionType, Vector>> BitmapCollisionLayer::getCollision
     }
     assert(m_softwareImage->surface != nullptr);
 
-    // std::cout << "Object position: " << in_object.getPosition() << std::endl;
     Rectangle mbr = in_object.boundingPolygon();
-    // std::cout << "Object bounding retangle before y flip: " << mbr << std::endl;
-    if (in_object.getYAxisOrientation() == YAxisOrientation::BottomZero) {
-        mbr.y = Locator::videoManager->toScreenCoord(m_softwareImage->surface, mbr.y) - mbr.height;
-    }
-
-    // std::cout << "Object bounding rectangle: " << mbr << std::endl;
-
     return detectBitmapCollision(mbr, m_softwareImage->surface);
 }
 

@@ -13,8 +13,8 @@ static constexpr char const* kJumpSound = "jump.wav";
 static constexpr int kCatWidth = 32;
 
 // physics
-static constexpr float kGravity = 900.0f;  // Gravity constant
-static constexpr float kJumpVelocity = -300.0f;  // jump velocity
+static constexpr float kGravity = -900.0f;      // Gravity constant
+static constexpr float kJumpVelocity = 300.0f;  // jump velocity
 static constexpr int kStartingCatVelocity = -150;
 static constexpr int kStartingCatInterval = 50;
 

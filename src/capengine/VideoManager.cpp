@@ -6,6 +6,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL_blendmode.h>
 #include <SDL_pixels.h>
+#include <SDL_stdinc.h>
+#include <SDL_surface.h>
 
 #include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/trivial.hpp>
@@ -34,6 +36,17 @@ using namespace std;
 
 namespace CapEngine {
 
+namespace {
+
+Rect rectangleToScreenCoords(Rect const& in_rect, int in_coordSysHeight)
+{
+    return Rect{static_cast<int>(in_rect.x),
+                in_coordSysHeight - static_cast<int>(in_rect.y) - static_cast<int>(in_rect.h),
+                static_cast<int>(in_rect.w), static_cast<int>(in_rect.h)};
+}
+
+}  // namespace
+
 Window::Window()
 {
 }
@@ -50,8 +63,7 @@ VideoManager::VideoManager()
       logger(nullptr),
       m_window(getNullWindowPtr()),
       m_renderer(getNullRendererPtr()),
-      initialized(false),
-      m_transformationMatrix(Matrix::createIdentityMatrix())
+      initialized(false)
 {
     assert(instantiated == false);
     instantiated = true;
@@ -63,8 +75,7 @@ VideoManager::VideoManager(Logger* loggerIn)
       logger(loggerIn),
       m_window(getNullWindowPtr()),
       m_renderer(getNullRendererPtr()),
-      initialized(false),
-      m_transformationMatrix(Matrix::createIdentityMatrix())
+      initialized(false)
 {
     assert(instantiated == false);
     instantiated = true;
@@ -131,7 +142,7 @@ TexturePtr VideoManager::createTextureFromSurfacePtr(Uint32 windowId, Surface* s
  * \param sourceTexture The texture to copy from.
  * \return A new TexturePtr containing a copy of the source texture.
  */
-TexturePtr VideoManager::copyTexture(Texture* sourceTexture)
+TexturePtr VideoManager::copyTexture(Texture* sourceTexture) const
 {
     if (sourceTexture == nullptr) {
         CAP_THROW(CapEngineException{"Cannot copy null texture"});
@@ -237,6 +248,8 @@ Texture* VideoManager::loadImage(string filePath) const
         errorMsg << "Unable to load surface " << filePath << " - " << SDL_GetError();
         throw CapEngineException(errorMsg.str());
     }
+    Defer freeSurface{[tempSurface]() { SDL_FreeSurface(tempSurface); }};
+
     ostringstream logString;
     logString << "Loaded surface from file " << filePath;
     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << logString.str();
@@ -250,9 +263,11 @@ Texture* VideoManager::loadImage(string filePath) const
         errorMsg << "Unable to load texture from file " << filePath << " - " << SDL_GetError();
         throw CapEngineException(errorMsg.str());
     }
+    Defer freeTexture{[texture]() { SDL_DestroyTexture(texture); }};
 
-    SDL_FreeSurface(tempSurface);
-    return texture;
+    auto texturePtr = this->copyTexture(texture);
+
+    return texturePtr.release();
 }
 
 void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, Rect* srcRect, bool applyTransform)
@@ -267,6 +282,8 @@ void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, 
         dstRect = viewport.transformRect(dstRect);
     }
 
+    dstRect = this->toScreenCoords(windowID, dstRect);
+
     auto [w, h] = getWindowLogicalResolution(windowID);
     Rect windowRect = {0, 0, w, h};
 
@@ -279,7 +296,7 @@ void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, 
     }
 }
 
-void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect, Rect* dstRect,
+void VideoManager::drawTexture(Uint32 windowID, Texture* texture, std::optional<Rect> srcRect, Rect dstRect,
                                std::optional<double> rotationDegrees, SDL_RendererFlip flip, bool applyTransform)
 {
     assert(texture != nullptr);
@@ -289,30 +306,29 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture, Rect* srcRect,
 
     Viewport viewport = getViewport(windowID);
 
-    // Transform the dstRect
-    if (dstRect) {
-        Rect newDstRect = *dstRect;
-        if (applyTransform)
-            newDstRect = viewport.transformRect(*dstRect);
-        *dstRect = newDstRect;
-    }
+    if (applyTransform)
+        dstRect = viewport.transformRect(dstRect);
 
     auto [w, h] = getWindowResolution(windowID);
     Rect windowRect = {0, 0, w, h};
 
+    const Rect* pSrcRect = srcRect ? &(*srcRect) : nullptr;
+
     // only draw things that are in the window
-    if (!dstRect || detectMBRCollision(*dstRect, windowRect) != COLLISION_NONE) {
+    if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE) {
+        dstRect = this->toScreenCoords(windowID, dstRect);
+
         if (rotationDegrees) {
             const SDL_Point* center = nullptr;
-            SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, *rotationDegrees, center, flip);
+            SDL_RenderCopyEx(pRenderer, texture, pSrcRect, &dstRect, *rotationDegrees, center, flip);
         }
         else {
-            SDL_RenderCopyEx(pRenderer, texture, srcRect, dstRect, 0, nullptr, flip);
+            SDL_RenderCopyEx(pRenderer, texture, pSrcRect, &dstRect, 0, nullptr, flip);
         }
     }
 }
 
-void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRect)
+void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRectYDown)
 {
     // set the rendering target to the current texture to have everything
     // rendered to m_texture
@@ -336,7 +352,11 @@ void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, R
         BOOST_THROW_EXCEPTION(CapEngineException(SDL_GetError()));
     }
 
-    SDL_RenderCopy(renderer, in_srcTexture, &in_srcRect, &in_dstRect);
+    // get the height of the dst texture
+    auto [width, height] = this->getTextureDims(in_dstTexture);
+    auto dstRect = this->toScreenCoords(in_dstTexture, in_dstRect);
+
+    SDL_RenderCopy(renderer, in_srcTexture, &in_srcRectYDown, &dstRect);
 }
 
 //! Sets the clip rect for a window
@@ -442,7 +462,7 @@ std::pair<int, int> VideoManager::getWindowResolution(Uint32 windowID)
 \return
  A pair of ints containing the width and height respectively.
 */
-std::pair<int, int> VideoManager::getWindowLogicalResolution(uint32_t in_windowID)
+std::pair<int, int> VideoManager::getWindowLogicalResolution(uint32_t in_windowID) const
 {
     const Window window = getWindow(in_windowID);
     assert(window.m_renderer != nullptr);
@@ -856,9 +876,11 @@ void VideoManager::drawLine(Uint32 windowID, int x1, int y1, int x2, int y2, con
     // Transform the dstRect
     Point point1{static_cast<double>(x1), static_cast<double>(y1)};
     point1 = viewport.transform(point1);
+    point1.y = this->toScreenCoords(windowID, point1.y);
 
     Point point2{static_cast<double>(x2), static_cast<double>(y2)};
     point2 = viewport.transform(point2);
+    point2.y = this->toScreenCoords(windowID, point2.y);
 
     // set the colour
     Uint8 r, g, b, a;
@@ -903,25 +925,25 @@ void VideoManager::drawFillRect(Texture* in_texture, Rect rect, Colour fillColou
     this->drawFillRect(windowId, rect, fillColour);
 }
 
-void VideoManager::drawFillRect(Uint32 windowID, Rect rect, Colour fillColour)
+void VideoManager::drawFillRect(Uint32 windowID, Rect dstRect, Colour fillColour)
 {
     auto window = getWindow(windowID);
     auto pRenderer = window.m_renderer;
     assert(pRenderer != nullptr);
 
     Viewport viewport = getViewport(windowID);
+    dstRect = viewport.transformRect(dstRect);
 
-    // Transform the dstRect
-    Rect newDstRect = viewport.transformRect(rect);
+    dstRect = this->toScreenCoords(windowID, dstRect);
 
     auto [w, h] = getWindowResolution(windowID);
     Rect windowRect = {0, 0, w, h};
 
     // only draw things that are in the window
-    if (detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE) {
+    if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE) {
         // Draw the rect
         SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_b, fillColour.m_a);
-        if (SDL_RenderFillRect(pRenderer, &newDstRect) != 0) {
+        if (SDL_RenderFillRect(pRenderer, &dstRect) != 0) {
             string errorMessage(SDL_GetError());
             logger->log(errorMessage, Logger::CWARNING, __FILE__, __LINE__);
         }
@@ -935,13 +957,14 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour)
     Viewport viewport = getViewport(windowID);
 
     // Transform the dstRect
-    Rect newDstRect = viewport.transformRect(rect);
+    rect = viewport.transformRect(rect);
+    rect = this->toScreenCoords(windowID, rect);
 
     auto [w, h] = getWindowResolution(windowID);
     Rect windowRect = {0, 0, w, h};
 
     // only draw things that are in the window
-    if (detectMBRCollision(newDstRect, windowRect) != COLLISION_NONE) {
+    if (detectMBRCollision(rect, windowRect) != COLLISION_NONE) {
         // render the the rect
         SDL_SetRenderDrawColor(pRenderer, fillColour.m_r, fillColour.m_g, fillColour.m_g, fillColour.m_a);
         if (SDL_RenderDrawRect(pRenderer, &rect) != 0) {
@@ -951,16 +974,41 @@ void VideoManager::drawRect(Uint32 windowID, Rect rect, Colour fillColour)
     }
 }
 
-int VideoManager::toScreenCoord(const Surface* surface, int y) const
+int VideoManager::toScreenCoords(const Surface* surface, int y) const
 {
     CAP_THROW_NULL(surface, "surface is null");
     return surface->h - 1 - y;
+}
+
+int VideoManager::toScreenCoords(Uint32 in_windowID, int y) const
+{
+    auto [windowWidth, windowHeight] = this->getWindowLogicalResolution(in_windowID);
+    return windowHeight - 1 - y;
 }
 
 int VideoManager::fromScreenCoord(const Surface* surface, int y) const
 {
     CAP_THROW_NULL(surface, "surface is null");
     return surface->h - 1 - y;
+}
+
+Rect VideoManager::toScreenCoords(Uint32 windowId, Rect const& in_rect)
+{
+    auto [windowWidth, windowHeight] = this->getWindowLogicalResolution(windowId);
+    return rectangleToScreenCoords(in_rect, windowHeight);
+}
+
+Rect VideoManager::toScreenCoords(const Surface* surface, Rect const& in_rect)
+{
+    CAP_THROW_NULL(surface, "surface is null");
+    return rectangleToScreenCoords(in_rect, surface->h);
+}
+
+Rect VideoManager::toScreenCoords(Texture* in_texture, Rect const& in_rect)
+{
+    CAP_THROW_NULL(in_texture, "texture is null");
+    const int textureHeight = static_cast<int>(this->getTextureHeight(in_texture));
+    return rectangleToScreenCoords(in_rect, textureHeight);
 }
 
 void VideoManager::setBackgroundColour(Colour colour)
@@ -1107,7 +1155,7 @@ void VideoManager::setWindowFullScreen(Uint32 windowId, bool fullScreen)
 /**
  Returns the Window for a given window ID
 */
-Window VideoManager::getWindow(Uint32 windowID)
+Window VideoManager::getWindow(Uint32 windowID) const
 {
     auto window = m_windows.find(windowID);
     if (window == m_windows.end()) {

@@ -40,9 +40,6 @@ class ObjectData {
 
 using ObjectID = int64_t;
 
-//! Whether coordinate system as top is 0 or bottom is 0
-enum class YAxisOrientation { TopZero, BottomZero };
-
 class GameObject {
    public:
     enum ObjectState { Inactive, Starting, Active, Dying, Dead };
@@ -105,9 +102,6 @@ class GameObject {
     [[nodiscard]] ObjectType getObjectType() const;
     void setObjectType(ObjectType in_objectType);
 
-    [[nodiscard]] YAxisOrientation getYAxisOrientation() const;
-    void setYAxisOrientation(YAxisOrientation in_orientation);
-
     friend std::ostream& operator<<(std::ostream& stream, GameObject const& object);
 
     using Metadata = std::map<std::string, MetadataType>;
@@ -122,7 +116,6 @@ class GameObject {
     ObjectID m_objectID = -1;
     ObjectID m_parentObjectID = -1;
     ObjectType m_objectType = ObjectType_AI;
-    YAxisOrientation m_yAxisOrientation = YAxisOrientation::BottomZero;
 
     //! metadata
     Metadata m_metadata;

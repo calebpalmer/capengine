@@ -81,7 +81,7 @@ void TiledViewerState::render()
 
     CapEngine::Rectangle mapRect{0, 0, static_cast<double>(logicalWidth), static_cast<double>(logicalHeight)};
 
-    mapRect = CapEngine::toScreenCoords(m_camera, mapRect, m_windowId, true);
+    mapRect = CapEngine::toScreenCoords(m_camera, mapRect, m_windowId);
 
     // last scroll position has been set so we need to keep make sure the
     // location of the map where the scroll wheel was used is still

@@ -167,7 +167,7 @@ void MapPanel::render()
         ScopeGuard guard([&]() { videoManager->setClipRect(m_windowId, nullptr); });
         videoManager->setClipRect(m_windowId, &clipRect);
 
-        Locator::videoManager->drawTexture(m_windowId, texture.get(), &srcRect, &dstRect, false);
+        Locator::videoManager->drawTexture(m_windowId, texture.get(), srcRect, dstRect, false);
 
         // draw outlines over tiles (drag?)
         this->drawTileOutlines(m_outlinedTiles, Colour(0, 0, 0, 255));
