@@ -8,20 +8,13 @@
 namespace CapEngine
 {
 
-Animator::Animator(Uint32 windowId, int textureId,
-                   const std::string &startingRow)
+Animator::Animator(Uint32 windowId, int textureId, const std::string& startingRow)
     : m_windowId(windowId), m_textureId(textureId)
 {
-  m_pImage = Locator::assetManager->getImage(m_textureId);
-  if (!m_pImage) {
-    std::ostringstream msg;
-    msg << "Texture Id " << m_textureId << " does not exist";
-    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
-  }
-
-  if (startingRow != "") {
-    setRow(startingRow);
-  }
+    m_image = Locator::assetManager->getImage(m_textureId);
+    if (startingRow != "") {
+        setRow(startingRow);
+    }
 }
 
 void Animator::update(double ms)
@@ -44,22 +37,21 @@ void Animator::render(int x, int y, int width, int height)
     }
 }
 
-void Animator::setRow(const std::string &rowName)
+void Animator::setRow(const std::string& rowName)
 {
-  m_timeMS = 0.0;
+    m_timeMS = 0.0;
 
-  // update the frame info
-  auto frameInfo = m_pImage->frames.find(rowName);
-  if (frameInfo == m_pImage->frames.end()) {
-    std::ostringstream msg;
-    msg << "Frame " << rowName << " not found";
-    BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
-  }
-  m_currentFrameInfo = frameInfo->second;
-  m_timePerFrameMS =
-      m_currentFrameInfo.animationTime / m_currentFrameInfo.numFrames;
-  ;
-  m_currentRow = m_currentFrameInfo.rowNum;
+    // update the frame info
+    auto frameInfo = m_image.frames.find(rowName);
+    if (frameInfo == m_image.frames.end()) {
+        std::ostringstream msg;
+        msg << "Frame " << rowName << " not found";
+        BOOST_THROW_EXCEPTION(CapEngineException(msg.str()));
+    }
+    m_currentFrameInfo = frameInfo->second;
+    m_timePerFrameMS = m_currentFrameInfo.animationTime / m_currentFrameInfo.numFrames;
+    ;
+    m_currentRow = m_currentFrameInfo.rowNum;
 }
 
 } // namespace CapEngine

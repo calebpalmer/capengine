@@ -41,7 +41,7 @@ std::vector<std::pair<CollisionType, Vector>> BitmapCollisionLayer::getCollision
     assert(m_softwareImage->surface != nullptr);
 
     Rectangle mbr = in_object.boundingPolygon();
-    return detectBitmapCollision(mbr, m_softwareImage->surface);
+    return detectBitmapCollision(mbr, m_softwareImage->surface.get());
 }
 
 //! Register the layer constructor with a factory.

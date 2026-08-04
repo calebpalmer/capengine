@@ -16,7 +16,7 @@ class PlatformerMap {
                                                                       int in_arenaId);
 
     PlatformerMap(int mapAssetID, int collisionMapAssetID, int in_finishLineX);
-    ~PlatformerMap();
+    ~PlatformerMap() = default;
 
     void update(double ms);
     void render(Uint32 in_windowId);
@@ -31,7 +31,7 @@ class PlatformerMap {
    private:
     int m_mapAssetID = -1;
     int m_collisionMapAssetID = -1;
-    Surface* m_collisionMapSurface;
+    std::shared_ptr<Surface> m_collisionMapSurface;
     std::vector<Vector> m_spawnPoints;
     std::vector<CapEngine::MapObjectDescriptor> m_objectDescriptors;
     int m_finishLineX = -1;

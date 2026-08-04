@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
+#include "CapEngineException.h"
 #include "VideoManager.h"
 #include "asset_manager.h"
 #include "locator.h"
@@ -63,14 +64,9 @@ PlatformerMap::PlatformerMap(int mapAssetID, int collisionMapAssetID,
 {
 }
 
-PlatformerMap::~PlatformerMap()
+void PlatformerMap::update(double ms)
 {
-  if (m_collisionMapSurface != nullptr) {
-	Locator::videoManager->closeSurface(m_collisionMapSurface);
-  }
 }
-
-void PlatformerMap::update(double ms) {}
 
 void PlatformerMap::render(Uint32 in_windowId)
 {
@@ -84,14 +80,14 @@ void PlatformerMap::addSpawnPoint(Vector spawnPoint)
   m_spawnPoints.push_back(spawnPoint);
 }
 
-Surface *PlatformerMap::getCollisionMap()
+Surface* PlatformerMap::getCollisionMap()
 {
-  if (m_collisionMapSurface == nullptr) {
-	SoftwareImage softwareImage =
-		Locator::assetManager->getSoftwareImage(m_collisionMapAssetID);
-	m_collisionMapSurface = softwareImage.surface;
-  }
-  return m_collisionMapSurface;
+    if (m_collisionMapSurface == nullptr) {
+        SoftwareImage softwareImage = Locator::assetManager->getSoftwareImage(m_collisionMapAssetID);
+        CAP_THROW_NULL(softwareImage.surface);
+        m_collisionMapSurface = softwareImage.surface;
+    }
+    return m_collisionMapSurface.get();
 }
 
 int PlatformerMap::getWidth()

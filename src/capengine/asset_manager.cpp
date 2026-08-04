@@ -1,8 +1,10 @@
 // TODO This whole darn file needs refactoring
 #include "asset_manager.h"
+#include <SDL_surface.h>
 
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <cassert>
 #include <exception>
 #include <filesystem>
@@ -173,30 +175,10 @@ AssetManager::AssetManager(std::optional<std::string> assetFile, std::optional<s
 {
 }
 
-AssetManager::~AssetManager()
-{
-    // free textures in image map
-    auto tIter = m_imageMap.begin();
-    while (tIter != m_imageMap.end()) {
-        if (tIter->second.texture != nullptr) {
-            m_videoManager.closeTexture(tIter->second.texture);
-        }
-        tIter++;
-    }
-    // free sounds in sound map
-    auto sIter = m_soundMap.begin();
-    while (sIter != m_soundMap.end()) {
-        if (sIter->second.pcm != nullptr) {
-            delete sIter->second.pcm;
-        }
-        sIter++;
-    }
-}
-
 void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeight)
 {
-    Texture* tempTexture = m_videoManager.loadImage(path);
-    if (tempTexture == nullptr) {
+    std::shared_ptr<Texture> texture = m_videoManager.loadSharedImage(path);
+    if (texture == nullptr) {
         throw CapEngineException("Unable to load image at " + path);
     }
 
@@ -208,7 +190,7 @@ void AssetManager::loadImage(int id, string path, int frameWidth, int frameHeigh
 
     Image image;
     image.path = path;
-    image.texture = tempTexture;
+    image.texture = texture;
     m_imageMap[id] = image;
 }
 
@@ -224,7 +206,7 @@ void AssetManager::loadSurface(int id, Surface* surface)
     // make a copy that has the flag SDL_TEXTUREACCESS_TARGET
     auto texture = videoManager.copyTexture(staticTexture.get());
 
-    m_imageMap.emplace(id, Image{"", texture.release()});
+    m_imageMap.emplace(id, Image{"", std::shared_ptr<Texture>(texture.release(), SDL_DestroyTexture)});
 }
 
 void AssetManager::parseAssetFile(XmlParser& parser)
@@ -352,7 +334,7 @@ void AssetManager::parseAssetFile(const jsoncons::json& json)
     }
 }
 
-Image* AssetManager::getImage(int id)
+Image AssetManager::getImage(int id)
 {
     // throw error if image has not been loaded
     auto iter = m_imageMap.find(id);
@@ -361,12 +343,12 @@ Image* AssetManager::getImage(int id)
     }
 
     if (iter->second.texture == nullptr) {
-        iter->second.texture = m_videoManager.loadImage(iter->second.path);
+        iter->second.texture = m_videoManager.loadSharedImage(iter->second.path);
         if (iter->second.texture == nullptr) {
-            throw CapEngineException("Unable to load image at " + iter->second.path);
+            CAP_THROW(CapEngineException("Unable to load image at " + iter->second.path));
         }
     }
-    return &(iter->second);
+    return iter->second;
 }
 
 std::optional<AnimatedImage> AssetManager::getAnimatedImage(int in_id)
@@ -393,12 +375,12 @@ SoftwareImage AssetManager::getSoftwareImage(int id)
     SoftwareImage softwareImage;
 
     if (iter->second.texture != nullptr) {
-        SurfacePtr surface = m_videoManager.createSurfaceFromTexture(iter->second.texture);
-        softwareImage.surface = surface.release();
+        SurfacePtr surface = m_videoManager.createSurfaceFromTexture(iter->second.texture.get());
+        softwareImage.surface = std::move(surface);
     }
     else {
-        Surface* surface = m_videoManager.loadSurface(iter->second.path);
-        softwareImage.surface = surface;
+        SurfacePtr surface = m_videoManager.loadSurfacePtr(iter->second.path);
+        softwareImage.surface = std::move(surface);
     }
     softwareImage.path = iter->second.path;
 
@@ -407,29 +389,30 @@ SoftwareImage AssetManager::getSoftwareImage(int id)
 
 int AssetManager::getImageWidth(int id)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture);
 
-    int width;
-    width = m_videoManager.getTextureWidth(image->texture);
-    return width;
+    double width = m_videoManager.getTextureWidth(image.texture.get());
+    // TODO this should probably return a double to prevent narrowing
+    return boost::numeric_cast<int>(width);
 }
 
 int AssetManager::getImageHeight(int id)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture)
 
-    int height;
-    height = m_videoManager.getTextureHeight(image->texture);
-    return height;
+    double height = m_videoManager.getTextureHeight(image.texture.get());
+    // TODO this should probably return a double to prevent narrowing
+    return boost::numeric_cast<int>(height);
 }
 
 Frame AssetManager::getFrame(int assetID, std::string frameName)
 {
-    Image* pImage = this->getImage(assetID);
-    assert(pImage != nullptr);
+    Image image = this->getImage(assetID);
 
-    auto frameIter = pImage->frames.find(frameName);
-    if (frameIter == pImage->frames.end()) {
+    auto frameIter = image.frames.find(frameName);
+    if (frameIter == image.frames.end()) {
         std::ostringstream msg;
         msg << "Frame " << frameName << " does not exist";
         throw CapEngineException(msg.str());
@@ -440,12 +423,11 @@ Frame AssetManager::getFrame(int assetID, std::string frameName)
 
 Frame AssetManager::getFrame(int assetID, int rowNum)
 {
-    Image* pImage = this->getImage(assetID);
-    assert(pImage != nullptr);
+    Image image = this->getImage(assetID);
 
     Frame frame;
     bool found = false;
-    for (auto&& i : pImage->frames) {
+    for (auto&& i : image.frames) {
         if (i.second.rowNum == rowNum) {
             frame = i.second;
             found = true;
@@ -461,7 +443,7 @@ Frame AssetManager::getFrame(int assetID, int rowNum)
     return frame;
 }
 
-Sound* AssetManager::getSound(int id)
+Sound AssetManager::getSound(int id)
 {
     // throw error if image has not been loaded
     auto iter = m_soundMap.find(id);
@@ -470,18 +452,17 @@ Sound* AssetManager::getSound(int id)
     }
 
     if (iter->second.pcm == nullptr) {
-        unique_ptr<PCM> upPcm(new PCM(iter->second.path));
-        iter->second.pcm = upPcm.release();
+        std::shared_ptr<PCM> pcm(new PCM(iter->second.path));
         if (iter->second.pcm == nullptr) {
             throw CapEngineException("Unable to load image at " + iter->second.path);
         }
     }
-    return &(iter->second);
+    return iter->second;
 }
 
 void AssetManager::loadSound(int id, string path)
 {
-    unique_ptr<PCM> upTempPCM(new PCM(path));  // throws exception if failure
+    std::shared_ptr<PCM> pcm(new PCM(path));  // throws exception if failure
 
     if (m_soundMap.find(id) != m_soundMap.end()) {
         ostringstream errorStream;
@@ -491,53 +472,49 @@ void AssetManager::loadSound(int id, string path)
 
     Sound sound;
     sound.path = path;
-    sound.pcm = upTempPCM.release();
+    sound.pcm = pcm;
     m_soundMap[id] = sound;
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle _srcRect, Rectangle _destRect,
                         std::optional<double> rotationDegrees)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
 
-    Rect srcRect;
-    srcRect.x = _srcRect.x;
-    srcRect.y = _srcRect.y;
-    srcRect.w = _srcRect.width;
-    srcRect.h = _srcRect.height;
+    Rect srcRect = _srcRect.toRect();
+    Rect destRect = _destRect.toRect();
 
-    Rect destRect;
-    destRect.x = _destRect.x;
-    destRect.y = _destRect.y;
-    destRect.w = _destRect.width;
-    destRect.h = _destRect.height;
-
-    m_videoManager.drawTexture(windowID, image->texture, srcRect, destRect, rotationDegrees);
+    CAP_THROW_NULL(image.texture);
+    m_videoManager.drawTexture(windowID, image.texture.get(), srcRect, destRect, rotationDegrees);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Vector position)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture);
 
     Rect destRect;
-    destRect.x = position.x;
-    destRect.y = position.y;
-    destRect.w = m_videoManager.getTextureWidth(image->texture);
-    destRect.h = m_videoManager.getTextureHeight(image->texture);
+    destRect.x = boost::numeric_cast<int>(position.x);
+    destRect.y = boost::numeric_cast<int>(position.y);
+    destRect.w = m_videoManager.getTextureWidth(image.texture.get());
+    destRect.h = m_videoManager.getTextureHeight(image.texture.get());
 
-    m_videoManager.drawTexture(windowID, image->texture, std::nullopt, destRect);
+    m_videoManager.drawTexture(windowID, image.texture.get(), std::nullopt, destRect);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle destRect)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture);
     Rect rect = destRect.toRect();
-    m_videoManager.drawTexture(windowID, image->texture, std::nullopt, rect);
+    m_videoManager.drawTexture(windowID, image.texture.get(), std::nullopt, rect);
 }
 
 void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, int frameNum)
 {
-    Image* image = this->getImage(id);
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture);
+
     Frame frame = this->getFrame(id, row);
     // need to add some checkingto make sure row and frames exists
 
@@ -547,20 +524,16 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, i
     srcRect.w = frame.frameWidth;
     srcRect.h = frame.frameHeight;
 
-    Rect destRect;
-    destRect.x = _destRect.x;
-    destRect.y = _destRect.y;
-    destRect.w = _destRect.width;
-    destRect.h = _destRect.height;
+    Rect destRect = _destRect.toRect();
 
-    m_videoManager.drawTexture(windowID, image->texture, srcRect, destRect);
+    m_videoManager.drawTexture(windowID, image.texture.get(), srcRect, destRect);
 }
 
 int64_t AssetManager::playSound(int id, bool repeat)
 {
     // TODO implement repeat functionality
-    Sound* sound = getSound(id);
-    auto pcm = std::make_unique<PCM>(*sound->pcm);
+    Sound sound = getSound(id);
+    auto pcm = std::make_unique<PCM>(*sound.pcm);
     int64_t soundID = m_soundPlayer.addSound(std::move(pcm), repeat);
     return soundID;
 }

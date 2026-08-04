@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "CapEngineException.h"
@@ -30,7 +31,7 @@ struct Frame {
 
 struct Image {
     std::string path;
-    Texture* texture;
+    std::shared_ptr<Texture> texture;
     std::map<std::string, Frame> frames;
 };
 
@@ -43,20 +44,19 @@ struct AnimatedImage {
 
 struct SoftwareImage {
     std::string path;
-    Surface* surface;
+    std::shared_ptr<Surface> surface;
 };
 
 struct Sound {
     std::string path;
-    PCM* pcm;
+    std::shared_ptr<PCM> pcm;
 };
 
 struct AssetDoesNotExistError : public CapEngineException {
     AssetDoesNotExistError(std::string_view in_type, int in_assetId)
         : CapEngineException([&]() {
               std::stringstream stream;
-              stream << "The " << in_type << " with id " << in_assetId
-                     << " does not exist.";
+              stream << "The " << in_type << " with id " << in_assetId << " does not exist.";
               return stream.str();
           }())
     {
@@ -69,9 +69,9 @@ class AssetManager {
                  std::filesystem::path in_basePath);
     AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer, std::optional<std::string> assetFile,
                  std::optional<std::filesystem::path> in_basePath = std::nullopt);
-    AssetManager(std::optional<std::string> assetFile = std::nullopt,
-                 std::optional<std::filesystem::path> in_basePath = std::nullopt);
-    ~AssetManager();
+    explicit AssetManager(std::optional<std::string> assetFile = std::nullopt,
+                          std::optional<std::filesystem::path> in_basePath = std::nullopt);
+    ~AssetManager() = default;
 
     void draw(Uint32 windowID, int id, Rectangle srcRect, Rectangle dstRect,
               std::optional<double> rotationDegrees = std::nullopt);
@@ -80,7 +80,7 @@ class AssetManager {
     void draw(Uint32 windowID, int id, Rectangle dstRect);
     void loadImage(int id, std::string path, int frameWidth = 0, int frameHeight = 0);
     void loadSurface(int id, Surface* surface);
-    Image* getImage(int id);
+    Image getImage(int id);
     std::optional<AnimatedImage> getAnimatedImage(int in_id);
     SoftwareImage getSoftwareImage(int id);
     [[nodiscard]] bool imageExists(int id) const;
@@ -92,12 +92,15 @@ class AssetManager {
     int64_t playSound(int id, bool repeat = false);
     void stopSound(int id);
     void loadSound(int id, std::string path);
-    Sound* getSound(int id);
+    Sound getSound(int id);
     [[nodiscard]] bool soundExists(int id) const;
 
     [[nodiscard]] std::optional<std::filesystem::path> getBasePath() const;
 
    private:
+    void parseAssetFile(XmlParser& parser);
+    void parseAssetFile(const jsoncons::json& json);
+
     std::map<int, Image> m_imageMap;
     std::map<int, AnimatedImage> m_animationMap;
     std::map<int, Sound> m_soundMap;
@@ -105,10 +108,6 @@ class AssetManager {
     SoundPlayer& m_soundPlayer;
     std::optional<std::string> m_assetFile;
     std::optional<std::filesystem::path> m_basePath;
-
-   private:  // functions
-    void parseAssetFile(XmlParser& parser);
-    void parseAssetFile(const jsoncons::json& json);
 };
 
 }  // namespace CapEngine
