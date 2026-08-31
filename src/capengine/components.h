@@ -14,6 +14,9 @@ class GameObject;
 //! The component type.
 enum class ComponentType { Physics, Graphics, Input, Custom, AI };
 
+//! And anchor to use for frame of reference when creating MBRs from vector positions.
+enum class Anchor { BottomLeft, Center };
+
 //! interface class for components.
 class Component {
    public:

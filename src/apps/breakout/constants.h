@@ -13,6 +13,8 @@ static constexpr int kPaddleVelocity = 125;
 
 // ball
 static constexpr int kBallDiameter = 4;
+static constexpr int kBallVelocity = 100;
+static constexpr int kBallFarAngleDegrees = 5;
 
 // blocks
 static constexpr int kBlockWidth = 16;
@@ -25,5 +27,9 @@ static constexpr int kGap = 4;
 static constexpr int kGameWaitTimeMs = 3000;
 static constexpr char const* kDefaultFont = "tahoma.ttf";
 static constexpr int kBannerFontSize = 72;
+
+// assets
+static constexpr int kCollisionSound = 1000;
+static constexpr int kBlockCollisionSound = 1001;
 
 }  // namespace Breakout

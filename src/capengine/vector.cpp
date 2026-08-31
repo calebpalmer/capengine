@@ -297,10 +297,10 @@ Vector projectedPerpendicularVector(const Vector& vec1, const Vector& vec2)
 */
 double angle(const Vector& vec1, const Vector& vec2)
 {
-    // acos (vec.x - x / distance)
-    double distance = CapEngine::distance(vec1, vec2);
     double xDelta = vec1.getX() - vec2.getX();
-    double radAngle = acos(distance / xDelta);
+    double yDelta = vec1.getY() - vec2.getY();
+    double radAngle = atan2(yDelta, xDelta);
+
     return RADTODEG(radAngle);
 }
 
@@ -311,6 +311,18 @@ Vector surfaceNormal(const Vector& vec1, const Vector& vec2)
 {
     Vector v = CapEngine::crossProduct(vec1, vec2);
     return v.normalize();
+}
+
+/**
+ * \brief Converts this vector to its polar representation.
+ * \return A PolarVector containing the magnitude and the angle in degrees.
+ */
+PolarVector Vector::toPolar() const
+{
+    auto magnitude = this->magnitude();
+    auto angle_ = angle(*this, Vector{0.0, 0.0, 0.0});
+
+    return PolarVector{.mag = magnitude, .deg = angle_};
 }
 
 /**

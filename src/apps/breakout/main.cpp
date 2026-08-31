@@ -11,6 +11,7 @@
 #include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/trivial.hpp>
 #include <cstdlib>
+#include <filesystem>
 
 #include "constants.h"
 #include "maingamestate.h"
@@ -49,7 +50,19 @@ int main(int argc, char* argv[])
                 std::filesystem::path{CapEngine::getCurrentExecutablePath()}.parent_path().parent_path() / "resources";
         }
         BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loading assets from folder " << *assetFolder;
-        CapEngine::loadAssetFile(std::nullopt, assetFolder);
+
+        // asset file?
+        std::optional<std::string> assetFile;
+        if (std::filesystem::exists(std::filesystem::path{*assetFolder} / "assets.json")) {
+            assetFile = std::filesystem::path{*assetFolder} / "assets.json";
+        }
+
+        if (assetFile)
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loading assets from " << *assetFile;
+        else
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loading assets from " << *assetFolder;
+
+        CapEngine::loadAssetFile(assetFile, assetFolder);
 
         // load custom components
 

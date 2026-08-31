@@ -346,6 +346,7 @@ Vector const& GameObject::getPosition() const
 
 void GameObject::setPosition(Vector positionIn)
 {
+    previousPosition = position;
     position = positionIn;
 }
 

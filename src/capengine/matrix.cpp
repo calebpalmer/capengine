@@ -150,17 +150,16 @@ Matrix Matrix::createYRotationMatrix(double degrees)
 
 Matrix Matrix::createZRotationMatrix(double degrees)
 {
-	double radAngle = DEGTORAD(degrees);
-	double cosAngle = cos(radAngle);
-	double sinAngle = sin(radAngle);
+    double radAngle = DEGTORAD(degrees);
+    double cosAngle = cos(radAngle);
+    double sinAngle = sin(radAngle);
 
-	// Vector vec1(cosAngle, sinAngle, sinAngle, 0.0);
-	Vector vec1(cosAngle, sinAngle, 0.0, 0.0);
-	Vector vec2(-sinAngle, cosAngle, 0.0, 0.0);
-	Vector vec3(0.0, 0.0, 1.0, 0.0);
-	Vector vec4(0.0, 0.0, 0.0, 1.0);
-	Matrix matrix(vec1, vec2, vec3, vec4);
-	return matrix;
+    Vector vec1(cosAngle, sinAngle, 0.0, 0.0);
+    Vector vec2(-sinAngle, cosAngle, 0.0, 0.0);
+    Vector vec3(0.0, 0.0, 1.0, 0.0);
+    Vector vec4(0.0, 0.0, 0.0, 1.0);
+    Matrix matrix(vec1, vec2, vec3, vec4);
+    return matrix;
 }
 
 const MatrixContainer &Matrix::getVectors() const { return vectors; }

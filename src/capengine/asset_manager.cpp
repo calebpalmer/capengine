@@ -14,11 +14,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
 
 #include <jsoncons/json.hpp>
 
 #include "CapEngineException.h"
 #include "filesystem.h"
+#include "jsoncons/json_exception.hpp"
 #include "locator.h"
 #include "xml_parser.h"
 #include "logging.h"
@@ -140,17 +142,6 @@ AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
                            std::optional<std::filesystem::path> basePath)
     : m_videoManager(videoManager), m_soundPlayer(soundPlayer), m_assetFile(assetFile), m_basePath(std::move(basePath))
 {
-    if (m_assetFile.has_value()) {
-        m_assetFile = std::filesystem::absolute(*assetFile).string();
-
-        try {
-            XmlParser parser(*assetFile);
-            parseAssetFile(parser);
-        }
-        catch (const CapEngineException& err) {
-        }
-    }
-
     // if the asset base path is not provided. try to find it.
     if (!m_basePath.has_value()) {
         // set it relative to the asset file if there is one.
@@ -164,6 +155,41 @@ AssetManager::AssetManager(VideoManager& videoManager, SoundPlayer& soundPlayer,
                 std::filesystem::path{CapEngine::getCurrentExecutablePath()}.parent_path().parent_path() / "resources";
             if (std::filesystem::exists(basePath) && std::filesystem::is_directory(basePath)) {
                 m_basePath = basePath;
+            }
+        }
+    }
+
+    // make it absolute
+    if (m_basePath && !m_basePath->is_absolute()) {
+        m_basePath = std::filesystem::absolute(*m_basePath);
+    }
+
+    if (m_assetFile.has_value()) {
+        m_assetFile = std::filesystem::absolute(*assetFile).string();
+
+        bool parsed = false;
+        // first try to parse it as json
+        try {
+            std::ifstream f{*assetFile, std::ios::in};
+            if (!f) {
+                CAP_THROW(CapEngineException{"Unable to open file " + *assetFile});
+            }
+
+            jsoncons::json assetsJson = jsoncons::json::parse(f);
+            parseAssetFile(assetsJson);
+            parsed = true;
+        }
+        catch (const jsoncons::ser_error& e) {
+        }
+
+        // after try to parse as xml
+        if (!parsed) {
+            try {
+                XmlParser parser(*assetFile);
+                parseAssetFile(parser);
+                parsed = true;
+            }
+            catch (const CapEngineException& err) {
             }
         }
     }
@@ -319,6 +345,12 @@ void AssetManager::parseAssetFile(const jsoncons::json& json)
             try {
                 const int id = sound["id"].as<int>();
                 std::filesystem::path path{sound["path"].as<std::string>()};
+
+                // if the path is relative make it absolute relative to base path
+                if (m_basePath && !path.is_absolute()) {
+                    path = *m_basePath / path;
+                }
+
                 if (!std::filesystem::exists(path)) {
                     BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning)
                         << std::format("{} does not exist", path.string());
@@ -452,9 +484,9 @@ Sound AssetManager::getSound(int id)
     }
 
     if (iter->second.pcm == nullptr) {
-        std::shared_ptr<PCM> pcm(new PCM(iter->second.path));
+        iter->second.pcm = std::make_shared<PCM>(iter->second.path);
         if (iter->second.pcm == nullptr) {
-            throw CapEngineException("Unable to load image at " + iter->second.path);
+            throw CapEngineException("Unable to load sound at " + iter->second.path);
         }
     }
     return iter->second;

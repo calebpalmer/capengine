@@ -51,8 +51,6 @@ class MainGameState final : public CapEngine::GameState {
     void handleKeyboardEvent(const SDL_KeyboardEvent& event);
 
    private:
-    void generateCats();
-
     uint32_t m_windowId;                                                 //!< The id of the window.
     Timing m_timing;                                                     //!< The telemetry data for the game state.
     GameState m_gameState;                                               //!< The current game state.

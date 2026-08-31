@@ -14,8 +14,7 @@ namespace CapEngine
  \param in_rectangle
    The rectangle.
 */
-BoxCollider::BoxCollider(Rectangle in_rectangle)
-    : m_box(std::move(in_rectangle))
+BoxCollider::BoxCollider(Rectangle in_rectangle, Anchor in_anchor) : m_box(in_rectangle), m_anchor(in_anchor)
 {
 }
 
@@ -26,18 +25,17 @@ BoxCollider::BoxCollider(Rectangle in_rectangle)
  \return
    The constructed BoxCollider
 */
-std::unique_ptr<BoxCollider>
-    BoxCollider::makeComponent(const jsoncons::json &in_json)
+std::unique_ptr<BoxCollider> BoxCollider::makeComponent(const jsoncons::json& in_json)
 {
-  try {
-    Rectangle rect =
-        JSONUtils::readRectangle(in_json[Schema::Components::kBox]);
-    return std::make_unique<BoxCollider>(std::move(rect));
-  } catch (jsoncons::json_exception &e) {
-    throw ComponentCreationException(
-        ComponentUtils::componentTypeToString(ComponentType::Physics), kType,
-        in_json, e.what());
-  }
+    try {
+        Rectangle rect = JSONUtils::readRectangle(in_json[Schema::Components::kBox]);
+        // TODO read in an anchor position
+        return std::make_unique<BoxCollider>(std::move(rect));
+    }
+    catch (jsoncons::json_exception& e) {
+        throw ComponentCreationException(ComponentUtils::componentTypeToString(ComponentType::Physics), kType, in_json,
+                                         e.what());
+    }
 }
 
 //! Registers this component with the Component Factory

@@ -1,0 +1,11 @@
+{
+    "textures": [
+	{
+	    "id": 1,
+	    "path": "singleframe.png",
+	    "frameWidth": 32,
+	    "frameHeight": 32
+	}
+    ]
+}
+

@@ -6,18 +6,26 @@
 #include <capengine/CapEngineException.h>
 #include <capengine/collision.h>
 #include <capengine/colour.h>
+#include <capengine/components.h>
 #include <capengine/gameobject.h>
 #include <capengine/gamestate.h>
 #include <capengine/locator.h>
+#include <capengine/logger.h>
+#include <capengine/matrix.h>
 #include <capengine/vector.h>
+#include <capengine/logging.h>
+#include <capengine/boxcollider.h>
 
 #include <algorithm>
+#include <boost/log/trivial.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstdint>
 #include <memory>
 #include <random>
 #include <ranges>
 #include <string>
+#include <algorithm>
+#include <vector>
 
 #include "ballgraphicscomponent.h"
 #include "ballphysicscomponent.h"
@@ -83,6 +91,10 @@ std::unique_ptr<CapEngine::GameObject> createBallObject(uint32_t in_windowId)
     CapEngine::Vector initialPosition{(kLogicalWindowWidth / 2.0) - (kBallDiameter / 2.0),
                                       (kLogicalWindowHeight / 2.0) - (kBallDiameter / 2.0)};
     ballObject->setPosition(initialPosition);
+    // set the initial velocity vector randomly in the downward directiion
+    double angle = generateRandomNumber(225, 315);
+    CapEngine::PolarVector polarVector{kBallVelocity, angle};
+    ballObject->setVelocity(CapEngine::Vector{polarVector});
 
     ballObject->addComponent(std::make_shared<BallGraphicsComponent>(kBallDiameter, CapEngine::Colour{255, 255, 255}));
     ballObject->addComponent(std::make_shared<BallPhysicsComponent>(kBallDiameter));
@@ -107,6 +119,9 @@ std::unique_ptr<CapEngine::GameObject> createBlockObject(uint32_t in_windowId, c
     auto blockObject = std::make_unique<CapEngine::GameObject>();
     blockObject->addComponent(
         std::make_shared<BlockGraphicsComponent>(in_blockWidth, kBlockHeight, CapEngine::Colour{0, 255, 0}));
+    blockObject->addComponent(std::make_shared<CapEngine::BoxCollider>(
+        CapEngine::Rectangle{in_position.getX(), in_position.getY(), static_cast<double>(in_blockWidth), kBlockHeight},
+        CapEngine::Anchor::BottomLeft));
 
     blockObject->setPosition(in_position);  // Set initial position
     blockObject->setObjectState(CapEngine::GameObject::ObjectState::Starting);
@@ -269,25 +284,117 @@ void MainGameState::update(double timestepMs)
     };
 
     auto handleActiveState = [&]() {
-        // update player
+        // update objects
         assert(m_playerObject != nullptr);
         m_playerObject->updateInPlace(timestepMs);
 
         assert(m_ballObject != nullptr);
         m_ballObject->updateInPlace(timestepMs);
 
+        for (auto&& block : m_blockObjects) {
+            CAP_THROW_NULL(block);
+            block->updateInPlace(timestepMs);
+        }
+
+        // do collision detections
         const CapEngine::Rectangle windowRect{0, 0, kLogicalWindowWidth, kLogicalWindowHeight};
-        // collision with window
+        // paddle collision with window
         {
             const CapEngine::CollisionType collisionType =
                 CapEngine::detectMBRCollisionInterior(m_playerObject->boundingPolygon(), windowRect);
 
-            // handle collision
+            // handle collisions
+            // out of bounds collision detection
+            if (collisionType != CapEngine::CollisionType::COLLISION_NONE)
+                m_playerObject->setPosition(m_playerObject->getPreviousPosition());
         }
 
         // check ball and paddle collision
+        {
+            auto boxCollision =
+                CapEngine::detectBoxCollision(m_playerObject->boundingPolygon(), m_ballObject->boundingPolygon(),
+                                              CapEngine::RepresentativePointMethod::Simple);
+            if (boxCollision) {
+                if (boxCollision->collisionType == CapEngine::CollisionType::COLLISION_TOP ||
+                    boxCollision->collisionType == CapEngine::CollisionType::COLLISION_BOTTOM) {
+                    auto ballVelocity = m_ballObject->getVelocity();
+                    ballVelocity.setY(ballVelocity.getY() * (-1.0));
+
+                    // change x?
+                    auto paddleRect = m_playerObject->boundingPolygon();
+                    auto ballRect = m_ballObject->boundingPolygon();
+
+                    auto paddleCenter = paddleRect.x + (paddleRect.width / 2.0);
+                    auto paddleLeft = paddleCenter - (paddleRect.width / 2.0 / 2.0);
+                    auto paddleRight = paddleCenter + (paddleRect.width / 2.0 / 2.0);
+                    auto ballCenter = ballRect.x + (ballRect.width / 2.0);
+
+                    std::optional<CapEngine::Matrix> rotationMatrix;
+                    if (ballCenter < paddleLeft) {
+                        rotationMatrix = CapEngine::Matrix::createZRotationMatrix(kBallFarAngleDegrees);
+                    }
+                    else if (ballCenter > paddleRight) {
+                        rotationMatrix = CapEngine::Matrix::createZRotationMatrix((-1) * kBallFarAngleDegrees);
+                    }
+
+                    if (rotationMatrix) {
+                        ballVelocity = *rotationMatrix * ballVelocity;
+
+                        // make sure the angle doesn't get too much
+                        auto polarVector = ballVelocity.toPolar();
+                        if (polarVector.deg > 145) {
+                            polarVector.deg = 145;
+                            ballVelocity = CapEngine::Vector{polarVector};
+                        }
+                        if (polarVector.deg < 45) {
+                            polarVector.deg = 45;
+                            ballVelocity = CapEngine::Vector{polarVector};
+                        }
+                    }
+                    m_ballObject->setVelocity(ballVelocity);
+
+                    // play collision sound
+                    try {
+                        CapEngine::Locator::getAssetManager().playSound(kCollisionSound);
+                    }
+                    catch (const CapEngine::CapEngineException& e) {
+                        CapEngine::logException(e);
+                    }
+                }
+            }
+        }
 
         // check ball and block collisions
+        for (auto&& block : m_blockObjects) {
+            CAP_THROW_NULL(block);
+            auto boxCollision =
+                CapEngine::detectBoxCollision(block->boundingPolygon(), m_ballObject->boundingPolygon());
+
+            if (boxCollision && boxCollision->collisionType != CapEngine::CollisionType::COLLISION_NONE) {
+                // destroy the block
+                block->setObjectState(CapEngine::GameObject::ObjectState::Dead);
+
+                // change the balls vector
+                auto ballVelocity = m_ballObject->getVelocity();
+                if (boxCollision->collisionType == CapEngine::CollisionType::COLLISION_BOTTOM ||
+                    boxCollision->collisionType == CapEngine::CollisionType::COLLISION_TOP) {
+                    ballVelocity.setY(ballVelocity.getY() * (-1.0));
+                }
+                else if (boxCollision->collisionType == CapEngine::CollisionType::COLLISION_LEFT ||
+                         boxCollision->collisionType == CapEngine::CollisionType::COLLISION_RIGHT) {
+                    ballVelocity.setX(ballVelocity.getX() * (-1.0));
+                }
+                m_ballObject->setVelocity(ballVelocity);
+
+                // play collision sound
+                try {
+                    CapEngine::Locator::getAssetManager().playSound(kBlockCollisionSound);
+                }
+                catch (const CapEngine::CapEngineException& e) {
+                    CapEngine::logException(e);
+                }
+            }
+        }
 
         // check ball and wall collisions
         {
@@ -295,12 +402,46 @@ void MainGameState::update(double timestepMs)
                 CapEngine::detectMBRCollisionInterior(m_ballObject->boundingPolygon(), windowRect);
 
             if (collisionType != CapEngine::CollisionType::COLLISION_NONE) {
-                // TODO game over
-                m_gameState.status = GameStatus::Dead;
+                CapEngine::Vector velocity = m_ballObject->getVelocity();
+                switch (collisionType) {
+                    case CapEngine::CollisionType::COLLISION_LEFT:
+                    case CapEngine::CollisionType::COLLISION_RIGHT:
+                        velocity.setX(velocity.getX() * (-1.0));
+                        break;
+                    case CapEngine::CollisionType::COLLISION_BOTTOM:
+                        m_gameState.status = GameStatus::Dead;
+                    case CapEngine::CollisionType::COLLISION_TOP:
+                        velocity.setY(velocity.getY() * (-1.0));
+                        break;
+                    case CapEngine::CollisionType::COLLISION_GENERAL:
+                    case CapEngine::CollisionType::COLLISION_ONX:
+                    case CapEngine::CollisionType::COLLISION_ONY:
+                    case CapEngine::CollisionType::COLLISION_NONE:
+                    default:
+                        BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::warning)
+                            << "Unexpected collision detected betwen ball and wall.";
+                        break;
+                }
+                m_ballObject->setVelocity(velocity);
+
+                // play collision sound
+                try {
+                    CapEngine::Locator::getAssetManager().playSound(kCollisionSound);
+                }
+                catch (const CapEngine::CapEngineException& e) {
+                    CapEngine::logException(e);
+                }
             }
         }
 
-        // check ball a bottom collisions
+        // clean up objects
+        std::erase_if(m_blockObjects, [](const std::unique_ptr<CapEngine::GameObject>& block) {
+            return block->getObjectState() == CapEngine::GameObject::ObjectState::Dead;
+        });
+
+        if (m_blockObjects.size() == 0) {
+            m_gameState.status = GameStatus::Win;
+        }
     };
 
     auto handleWinState = [&]() {

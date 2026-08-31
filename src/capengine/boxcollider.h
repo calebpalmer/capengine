@@ -6,35 +6,31 @@
 #include "gameobject.h"
 
 #include <jsoncons/json.hpp>
-#include <string>
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 // forward declaration
 class ComponentFactory;
 
-class BoxCollider : public PhysicsComponent
-{
-public:
-  BoxCollider(Rectangle in_rectangle);
-  ~BoxCollider() override = default;
+class BoxCollider : public PhysicsComponent {
+   public:
+    BoxCollider(Rectangle in_rectangle, Anchor in_anchor = Anchor::Center);
+    ~BoxCollider() override = default;
 
-  std::unique_ptr<Component> clone() const override;
+    std::unique_ptr<Component> clone() const override;
 
-  static std::unique_ptr<BoxCollider>
-      makeComponent(const jsoncons::json &in_json);
-  static void registerConstructor(ComponentFactory &in_factory);
+    static std::unique_ptr<BoxCollider> makeComponent(const jsoncons::json& in_json);
+    static void registerConstructor(ComponentFactory& in_factory);
 
-  void update(GameObject &object, double timestep) override;
-  std::optional<Rectangle>
-      boundingPolygon(const GameObject &object) const override;
+    void update(GameObject& object, double timestep) override;
+    std::optional<Rectangle> boundingPolygon(const GameObject& object) const override;
 
-public:
-  static inline constexpr char kType[] = "BoxCollider";
+   public:
+    static inline constexpr char kType[] = "BoxCollider";
 
-private:
-  Rectangle m_box; //!< The box.
+   private:
+    Rectangle m_box;  //!< The box.
+    Anchor m_anchor;  //!< The anchor for the box relative to position
 };
 
 //! \copydoc PhysicsComponent::boundingPolygon
@@ -42,16 +38,23 @@ inline std::optional<Rectangle> BoxCollider::boundingPolygon(const GameObject& o
 {
     // return m_box;
     const auto position = object.getPosition();
-    return Rectangle{position.getX() - (m_box.width / 2.0), position.getY() - (m_box.height / 2.0), m_box.width,
-                     m_box.height};
+
+    // assume bottom left anchor
+    Rectangle rect{position.getX(), position.getY(), m_box.width, m_box.height};
+    // check if center anchor
+    if (m_anchor == Anchor::Center) {
+        rect.x = position.getX() - (m_box.width / 2.0);
+        rect.y = position.getY() - (m_box.height / 2.0);
+    }
+    return rect;
 }
 
 // \copydoc Component::clone
 inline std::unique_ptr<Component> BoxCollider::clone() const
 {
-  return std::make_unique<BoxCollider>(*this);
+    return std::make_unique<BoxCollider>(*this);
 }
 
-} // namespace CapEngine
+}  // namespace CapEngine
 
 #endif // CAPENGINE_BOXCOLLIDERCOMPONENT_H

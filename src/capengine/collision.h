@@ -87,11 +87,14 @@ std::optional<BoxCollision> detectBoxCollision(
     const Rectangle& a, const Rectangle& b,
     RepresentativePointMethod in_representativePointMethod = RepresentativePointMethod::Simple,
     bool preferLeftRight = true);
+
 std::optional<BoxCollision> detectBoxCollisionWithContactManifold(
     const Rectangle& a, const Rectangle& b,
     RepresentativePointMethod in_representativePointMethod = RepresentativePointMethod::Simple,
     bool preferLeftRight = true);
+
 CollisionType detectMBRCollisionInterior(const Rectangle& r1, const Rectangle& r2);
+
 Relation MBRRelate(const Rectangle& r1, const Rectangle& r2);
 Relation MBRRelate(int x, int y, const Rectangle& r);
 

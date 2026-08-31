@@ -1,10 +1,10 @@
 #include "xml_parser.h"
+#include <libxml/parser.h>
 
 #include "CapEngineException.h"
 #include "capcommon.h"
 #include "libxml/xpath.h"
 
-#include <iostream>
 #include <memory>
 #include <sstream>
 

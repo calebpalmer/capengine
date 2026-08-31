@@ -48,6 +48,7 @@ class Vector {
     Vector& operator/=(double scalar);
     double operator*(const Vector& vec) const;
 
+    PolarVector toPolar() const;
     void scale(double factor);
     [[nodiscard]] double magnitude() const;
     [[nodiscard]] Vector normalize() const;
