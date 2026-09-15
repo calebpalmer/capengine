@@ -6,11 +6,12 @@
        (eval . (setq cap/build-dir (concat projectile-project-root "/build")))
        (eval . (setq compile-command (concat  "cmake --build " (cap/find-dir-locals-folder) "build")))
        (eval . (setq gdb-command-name (concat "gdb -i=mi " cap/build-dir "/bin/rps")))
-       ;; debug function
+       ;; debug functions
        (eval . (defun cap/debug ()
 		 (interactive)
 		 (progn
-		   (gdb (concat "gdb -i=mi --cd " projectile-project-root "/build/src --args tiledtest " (projectile-project-root) "/res/raw/map.tmj")))))
+		   (setenv "CP_ASSETFOLDER" (concat cap/build-dir "/postapoc_resources"))
+		   (gdb (concat "gdb -i=mi --cd " cap/build-dir "/bin --args postapoc")))))
 
        (eval . (defun cap/debug-tests ()
 		 (interactive)

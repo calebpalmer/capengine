@@ -162,7 +162,7 @@ void RockPaperScissorsState::renderPlayers()
 
     videoManager.drawTexture(m_windowId, m_state.player1.drawPosition,
                              m_state.currentWinner == 1 ? m_victorySprites.get() : *texture,
-                             &m_state.player1.tilePosition);
+                             m_state.player1.tilePosition);
     videoManager.drawTexture(m_windowId, m_state.currentWinner == 2 ? m_victorySprites.get() : *texture,
                              m_state.player2.tilePosition, m_state.player2.drawPosition, std::nullopt,
                              SDL_FLIP_HORIZONTAL);
@@ -180,7 +180,8 @@ void RockPaperScissorsState::renderScore()
     std::optional<std::reference_wrapper<const CapEngine::TiledObjectGroup>> positions =
         m_map->objectGroupByName(kPositionsObjectsGroupName);
 
-    if (!positions) CAP_THROW(CapEngine::CapEngineException{"Could not find Positions ObjectGroup"});
+    if (!positions)
+        CAP_THROW(CapEngine::CapEngineException{"Could not find Positions ObjectGroup"});
 
     // get the player 1 score position from the object group
     auto player1ScorePosition = positions->get().objectByName(kPlayer1ScoreObjectName);
@@ -223,7 +224,7 @@ void RockPaperScissorsState::renderScore()
         CapEngine::Rect srcRect{0, 0, srcWidth, srcHeight};
         CapEngine::Rect dstRect{static_cast<int>(in_object.x), static_cast<int>(in_object.y), srcWidth, srcHeight};
 
-        videoManager.drawTexture(m_windowId, dstRect, texture.get(), &srcRect);
+        videoManager.drawTexture(m_windowId, dstRect, texture.get(), srcRect);
     };
 
     renderFont(*player1ScorePosition, m_state.player1.score);
@@ -281,7 +282,7 @@ void RockPaperScissorsState::renderVictoryBanner()
     CapEngine::Rect dstRect{static_cast<int>(victoryBannerPosition->x), static_cast<int>(victoryBannerPosition->y),
                             srcWidth, srcHeight};
 
-    videoManager.drawTexture(m_windowId, dstRect, texture.get(), &srcRect);
+    videoManager.drawTexture(m_windowId, dstRect, texture.get(), srcRect);
 }
 
 /**

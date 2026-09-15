@@ -9,23 +9,21 @@
 namespace CapEngine
 {
 
-class Camera2d
-{
+class Camera2d {
    public:
     Camera2d(int in_width, int in_height);
 
-    std::pair<int, int> getPosition() const;
+    [[nodiscard]] std::pair<int, int> getPosition() const;
     void setPosition(int in_x, int in_y);
 
-    int getWidth() const;
+    [[nodiscard]] int getWidth() const;
     void setWidth(int in_width);
-    int getHeight() const;
+    [[nodiscard]] int getHeight() const;
     void setHeight(int in_height);
 
-    void center(const Rectangle &in_rectangle,
-                std::optional<Rectangle> in_outerBounds);
-    const Rectangle &getViewingRectangle() const;
-    float zoom() const;
+    void center(const Rectangle& in_rectangle, std::optional<Rectangle> in_outerBounds);
+    [[nodiscard]] const Rectangle& getViewingRectangle() const;
+    [[nodiscard]] float zoom() const;
     void zoom(float in_amount);
     void setZoom(float in_amount);
 

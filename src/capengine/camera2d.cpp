@@ -35,45 +35,41 @@ void Camera2d::setPosition(int in_x, int in_y)
    The rectangle to center on.
  \param in_outerBounds
    An optional outer boundary rectangle that the camera cannot view outside.
- \param in_point
-   An optional point to center on.
 */
-void Camera2d::center(const Rectangle &in_rectangle,
-					  std::optional<Rectangle> in_outerBounds)
+void Camera2d::center(const Rectangle& in_rectangle, std::optional<Rectangle> in_outerBounds)
 {
-		unsigned int xCenter = in_rectangle.x + (in_rectangle.width / 2);
-		unsigned int yCenter = in_rectangle.y + (in_rectangle.height / 2);
+    unsigned int xCenter = in_rectangle.x + (in_rectangle.width / 2);
+    unsigned int yCenter = in_rectangle.y + (in_rectangle.height / 2);
 
-		m_viewRect.x = xCenter - (m_viewRect.width / 2);
-		m_viewRect.y = yCenter - (m_viewRect.height / 2);
+    m_viewRect.x = xCenter - (m_viewRect.width / 2);
+    m_viewRect.y = yCenter - (m_viewRect.height / 2);
 
-		if (in_outerBounds != std::nullopt) {
-			// make sure it doesn't exceed the right hand side of the outer
-			// bounds
-			int xExcess = (in_outerBounds->x + in_outerBounds->width) -
-						  (m_viewRect.x + m_viewRect.width);
-			if (xExcess > 0) {
-				m_viewRect.x -= xExcess;
-			}
+    if (in_outerBounds != std::nullopt) {
+        // make sure it doesn't exceed the right hand side of the outer
+        // bounds
+        int xExcess = static_cast<int>((m_viewRect.x + m_viewRect.width) - (in_outerBounds->x + in_outerBounds->width));
+        if (xExcess > 0) {
+            m_viewRect.x -= xExcess;
+        }
 
-			// make sure it doesn't exceed the left hand side of the outer
-			// bounds
-			if (m_viewRect.x < in_outerBounds->x) {
-				m_viewRect.x = in_outerBounds->x;
-			}
+        // make sure it doesn't exceed the left hand side of the outer
+        // bounds
+        if (m_viewRect.x < in_outerBounds->x) {
+            m_viewRect.x = in_outerBounds->x;
+        }
 
-			// make sure it doesn't exceed the top of the outer bounds
-			int yExcess = (in_outerBounds->y + in_outerBounds->height) -
-						  (m_viewRect.y + m_viewRect.height);
-			if (yExcess > 0) {
-				m_viewRect.y -= yExcess;
-			}
+        // make sure it doesn't exceed the top of the outer bounds
+        int yExcess =
+            static_cast<int>((m_viewRect.y + m_viewRect.height) - (in_outerBounds->y + in_outerBounds->height));
+        if (yExcess > 0) {
+            m_viewRect.y -= yExcess;
+        }
 
-			// make sure it doesn't exceed the bottom of the outer bounds
-			if (m_viewRect.y < in_outerBounds->y) {
-				m_viewRect.y = in_outerBounds->y;
-			}
-		}
+        // make sure it doesn't exceed the bottom of the outer bounds
+        if (m_viewRect.y < in_outerBounds->y) {
+            m_viewRect.y = in_outerBounds->y;
+        }
+    }
 }
 
 //! Gets the viewing rectangle.

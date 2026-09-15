@@ -120,13 +120,29 @@ int TiledMap::width() const { return m_width; }
  * \brief Gets the height of the map in tiles.
  * \return The map height in tiles.
  */
-int TiledMap::height() const { return m_height; }
+int TiledMap::height() const
+{
+    return m_height;
+}
+
+int TiledMap::pixelWidth() const
+{
+    return m_tileWidth * m_width;
+}
+
+int TiledMap::pixelHeight() const
+{
+    return m_tileHeight * m_height;
+}
 
 /**
  * \brief Gets all tilesets used by this map.
  * \return A vector of unique pointers to TiledTileset objects.
  */
-const std::vector<std::unique_ptr<TiledTileset>>& TiledMap::tilesets() const { return m_tilesets; }
+const std::vector<std::unique_ptr<TiledTileset>>& TiledMap::tilesets() const
+{
+    return m_tilesets;
+}
 
 /**
  * \brief Gets all tile layers in this map.
@@ -150,8 +166,9 @@ void TiledMap::render()
         auto* texture = layer.texture();
         assert(texture != nullptr);
 
-        SDL_Rect rect{0, 0, m_width * m_tileWidth, m_height * m_tileHeight};
-        Locator::getVideoManager().drawTexture(m_texture.get(), texture, rect, rect);
+        SDL_Rect srcRect{0, 0, m_width * m_tileWidth, m_height * m_tileHeight};
+        SDL_Rect dstRect = srcRect;
+        Locator::getVideoManager().drawTexture(m_texture.get(), texture, dstRect, srcRect);
     });
 
     // // render objects

@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -40,9 +41,17 @@ namespace {
 
 Rect rectangleToScreenCoords(Rect const& in_rect, int in_coordSysHeight)
 {
-    return Rect{static_cast<int>(in_rect.x),
-                in_coordSysHeight - static_cast<int>(in_rect.y) - static_cast<int>(in_rect.h),
-                static_cast<int>(in_rect.w), static_cast<int>(in_rect.h)};
+    Rect rect{static_cast<int>(in_rect.x),
+              in_coordSysHeight - static_cast<int>(in_rect.y) - static_cast<int>(in_rect.h),
+              static_cast<int>(in_rect.w), static_cast<int>(in_rect.h)};
+
+    // if the rectangle height (height - y) is greater than the coordsysheight
+    // then could end up with a negative y.
+    if (rect.y < 0) {
+        rect.y = 0;
+    }
+
+    return rect;
 }
 
 }  // namespace
@@ -270,7 +279,8 @@ Texture* VideoManager::loadImage(string filePath) const
     return texturePtr.release();
 }
 
-void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, Rect* srcRect, bool applyTransform)
+void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, std::optional<Rect> srcRect,
+                               bool applyTransform)
 {
     auto window = getWindow(windowID);
     auto pRenderer = window.m_renderer;
@@ -283,13 +293,16 @@ void VideoManager::drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, 
     }
 
     dstRect = this->toScreenCoords(windowID, dstRect);
+    if (srcRect) {
+        srcRect = this->toScreenCoords(texture, *srcRect);
+    }
 
     auto [w, h] = getWindowLogicalResolution(windowID);
     Rect windowRect = {0, 0, w, h};
 
     // only draw things that are in the window
     if (detectMBRCollision(dstRect, windowRect) != COLLISION_NONE) {
-        int result = SDL_RenderCopy(pRenderer, texture, srcRect, &dstRect);
+        int result = SDL_RenderCopy(pRenderer, texture, srcRect ? &(*srcRect) : nullptr, &dstRect);
         if (result != 0) {
             logger->log("Unable to render texture", Logger::CERROR, __FILE__, __LINE__);
         }
@@ -328,7 +341,12 @@ void VideoManager::drawTexture(Uint32 windowID, Texture* texture, std::optional<
     }
 }
 
-void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRectYDown)
+//! Blit two textures
+/*
+  Unlike other texture drawing functions this one takes both src and dst rectangles in y-dow
+*/
+void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRectYDown,
+                               Rect& in_srcRectYDown)
 {
     // set the rendering target to the current texture to have everything
     // rendered to m_texture
@@ -354,9 +372,8 @@ void VideoManager::drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, R
 
     // get the height of the dst texture
     auto [width, height] = this->getTextureDims(in_dstTexture);
-    auto dstRect = this->toScreenCoords(in_dstTexture, in_dstRect);
 
-    SDL_RenderCopy(renderer, in_srcTexture, &in_srcRectYDown, &dstRect);
+    SDL_RenderCopy(renderer, in_srcTexture, &in_srcRectYDown, &in_dstRectYDown);
 }
 
 //! Sets the clip rect for a window
@@ -425,7 +442,7 @@ void VideoManager::drawScreen(Uint32 windowID)
 
         // draw fpsTexture to the screen at x, y
         drawTexture(windowID, Rect{x, y, x + static_cast<int>(textureWidth), y + static_cast<int>(textureHeight)},
-                    fpsTexture, nullptr, false);
+                    fpsTexture, std::nullopt, false);
 
         this->closeTexture(fpsTexture);
     }

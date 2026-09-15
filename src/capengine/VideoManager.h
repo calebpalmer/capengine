@@ -112,12 +112,12 @@ class VideoManager final {
     TexturePtr loadImagePtr(std::string const& in_filePath) const;
     std::shared_ptr<Texture> loadSharedImage(std::string const& in_filePath) const;
     void closeTexture(Texture* texture) const;
-    void drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, Rect* srcRect = nullptr,
+    void drawTexture(Uint32 windowID, Rect dstRect, Texture* texture, std::optional<Rect> srcRect = std::nullopt,
                      bool applyTransform = true);
     void drawTexture(Uint32 windowID, Texture* texture, std::optional<Rect> srcRect, Rect dstRect,
                      std::optional<double> rotationDegrees = std::nullopt, SDL_RendererFlip flip = SDL_FLIP_NONE,
                      bool applyTransform = true);
-    void drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRect, Rect& in_srcRectYDown);
+    void drawTexture(Texture* in_dstTexture, Texture* in_srcTexture, Rect& in_dstRectYDown, Rect& in_srcRectYDown);
     double getTextureWidth(Texture* texture) const;
     double getTextureHeight(Texture* texture) const;
     void getTextureDims(Texture* texture, int* x, int* y) const;
@@ -152,6 +152,7 @@ class VideoManager final {
     Rect toScreenCoords(Uint32 in_windowID, Rect const& in_rect);
     Rect toScreenCoords(const Surface* in_surface, Rect const& in_rect);
     Rect toScreenCoords(Texture* in_texture, Rect const& in_rect);
+    Rect srcRectToScreenRect(const Rect& in_rect);
 
     SDL_Renderer* getRenderer();
 

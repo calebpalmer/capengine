@@ -27,6 +27,8 @@ class TiledMap final {
     [[nodiscard]] int tileWidth() const;
     [[nodiscard]] int width() const;
     [[nodiscard]] int height() const;
+    [[nodiscard]] int pixelWidth() const;
+    [[nodiscard]] int pixelHeight() const;
     [[nodiscard]] const std::vector<std::unique_ptr<TiledTileset>>& tilesets() const;
     [[nodiscard]] const std::vector<TiledTileLayer>& layers() const;
     [[nodiscard]] const std::vector<TiledObjectGroup>& objectGroups() const;
