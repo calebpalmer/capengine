@@ -43,11 +43,6 @@ std::optional<CapEngine::Rectangle> CatPhysicsComponent::boundingPolygon(const C
                                 kLogicalWindowHeight};
 }
 
-std::unique_ptr<CapEngine::Component> CatPhysicsComponent::clone() const
-{
-    return std::make_unique<CatPhysicsComponent>(*this);
-}
-
 int CatPhysicsComponent::gapLocation() const
 {
     return m_gapLocation;

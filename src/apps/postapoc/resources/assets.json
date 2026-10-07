@@ -1,14 +1,8 @@
 {
     "textures": [
 	{
-	    "id": 1,
-	    "path": "singleframe.png",
-	    "frameWidth": 32,
-	    "frameHeight": 32
-	},
-	{
-	    "id": 2,
-	    "path": "multiframe.png",
+	    "id": 1000,
+	    "path": "sprites/player.png",
 	    "frameWidth": 16,
 	    "frameHeight": 24,
 	    "hasFrames": true,
@@ -19,11 +13,10 @@
 		    "frameWidth": 16,
 		    "frameHeight": 24,
 		    "numFrames": 1,
-		    "animationTime": 0.0,
+		    "animationTime": 0,
 		    "comment": "Just an idle frame. No animation."
 		}
 	    ]
 	}
     ]
 }
-

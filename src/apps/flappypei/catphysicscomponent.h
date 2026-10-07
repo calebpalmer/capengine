@@ -19,7 +19,6 @@ class CatPhysicsComponent : public CapEngine::PhysicsComponent {
     void update(CapEngine::GameObject& object, double timestep) override;
     [[nodiscard]] std::optional<CapEngine::Rectangle> boundingPolygon(
         const CapEngine::GameObject& object) const override;
-    [[nodiscard]] std::unique_ptr<CapEngine::Component> clone() const override;
     [[nodiscard]] CapEngine::CollisionType collides([[maybe_unused]] CapEngine::Rectangle const& in_mbr) const override;
 
     [[nodiscard]] int gapLocation() const;

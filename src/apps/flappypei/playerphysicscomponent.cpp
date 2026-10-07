@@ -90,15 +90,6 @@ std::optional<CapEngine::Rectangle> PlayerPhysicsComponent::boundingPolygon(cons
     return CapEngine::Rectangle{position.getX(), position.getY(), kSpriteWidth, kSpriteHeight};
 }
 
-/**
- * \brief Clones the component.
- * \return A unique pointer to the new component.
- */
-std::unique_ptr<CapEngine::Component> PlayerPhysicsComponent::clone() const
-{
-    return std::make_unique<PlayerPhysicsComponent>(*this);
-}
-
 void PlayerPhysicsComponent::handleGameEvent(CapEngine::GameEvent const& in_event)
 {
     try {

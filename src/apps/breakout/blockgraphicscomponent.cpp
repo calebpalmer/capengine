@@ -26,9 +26,4 @@ void BlockGraphicsComponent::render(CapEngine::GameObject& object, const CapEngi
     CapEngine::Locator::getVideoManager().drawFillRect(in_windowId, rect, m_colour);
 }
 
-std::unique_ptr<CapEngine::Component> BlockGraphicsComponent::clone() const
-{
-    return std::make_unique<BlockGraphicsComponent>(*this);
-}
-
 }  // namespace Breakout

@@ -26,9 +26,4 @@ void BallGraphicsComponent::update(CapEngine::GameObject& object, double timeste
 {
 }
 
-std::unique_ptr<CapEngine::Component> BallGraphicsComponent::clone() const
-{
-    return std::make_unique<BallGraphicsComponent>(*this);
-}
-
 }  // namespace Breakout

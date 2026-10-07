@@ -17,12 +17,12 @@ class Camera2dTest : public CppUnit::TestFixture
    public:
     void testGetViewingRectangle();
     void testCenter();
-    void testToScreenCoords();
+    void testWorldToCameraCoords();
 
     CPPUNIT_TEST_SUITE(Camera2dTest);
     CPPUNIT_TEST(testGetViewingRectangle);
     CPPUNIT_TEST(testCenter);
-    CPPUNIT_TEST(testToScreenCoords);
+    CPPUNIT_TEST(testWorldToCameraCoords);
     CPPUNIT_TEST_SUITE_END();
 
    private:
@@ -58,8 +58,8 @@ void Camera2dTest::testCenter()
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
-//! tests converting a rect to screen coordinates via the camera
-void Camera2dTest::testToScreenCoords()
+//! tests converting a world-space rect to camera-relative coordinates
+void Camera2dTest::testWorldToCameraCoords()
 {
     Camera2d camera(5, 5);
     Rectangle window(0, 0, 5, 5);
@@ -68,7 +68,7 @@ void Camera2dTest::testToScreenCoords()
 
     // no y flip
     Rectangle expected = Rectangle(2, 0, 2, 2);
-    Rectangle actual = toScreenCoords(camera, rect, window.width, window.height);
+    Rectangle actual = worldToCameraCoords(camera, rect, window.width, window.height);
     CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 

@@ -78,6 +78,7 @@ class TiledObjectGroup {
 
     std::optional<Object> objectByName(std::string_view in_name) const;
     void render(Texture* io_texture);
+    [[nodiscard]] double tiledToWorldY(double in_y) const;
 
    private:
     std::optional<std::filesystem::path> m_path;          //!< Optional path to the object group file

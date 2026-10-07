@@ -58,9 +58,7 @@ int main(int argc, char* argv[])
         }
 
         if (assetFile)
-            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loading assets from " << *assetFile;
-        else
-            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Loading assets from " << *assetFolder;
+            BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::debug) << "Asset file found:  " << *assetFile;
 
         CapEngine::loadAssetFile(assetFile, assetFolder);
 

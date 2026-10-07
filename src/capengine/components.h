@@ -28,8 +28,6 @@ class Component {
     }
     [[nodiscard]] virtual ComponentType getType() const = 0;
 
-    [[nodiscard]] virtual std::unique_ptr<Component> clone() const = 0;
-
     //! Metadata collection type
     using Metadata = std::map<std::string, MetadataType>;
 

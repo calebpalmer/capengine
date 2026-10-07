@@ -32,11 +32,11 @@ class Camera2d {
     float m_zoom = 1.0;
 };
 
-Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, uint32_t in_windowId);
+Rectangle worldToCameraCoords(const Camera2d& in_camera, const Rectangle& in_rect, uint32_t in_windowId);
 
-Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, int windowWidth, int windowHeight);
+Rectangle worldToCameraCoords(const Camera2d& in_camera, const Rectangle& in_rect, int windowWidth, int windowHeight);
 
-Vector toScreenCoords(const Camera2d& in_camera, const Vector& in_point, uint32_t in_windowId);
+Vector worldToCameraCoords(const Camera2d& in_camera, const Vector& in_point, uint32_t in_windowId);
 
 Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point, Rectangle const& in_rectangle,
                                uint32_t windowId);

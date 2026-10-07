@@ -16,8 +16,6 @@ public:
   RigidBodyComponent(double in_mass);
   ~RigidBodyComponent() override = default;
 
-  std::unique_ptr<Component> clone() const override;
-
   static std::unique_ptr<RigidBodyComponent>
       makeComponent(const jsoncons::json &in_json);
   static void registerConstructor(ComponentFactory &in_factory);

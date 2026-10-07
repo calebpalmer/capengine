@@ -35,13 +35,4 @@ void PlayerGraphicsComponent::update(CapEngine::GameObject& object, double times
 {
 }
 
-/**
- * \brief Clones the component.
- * \return A unique pointer to the new component.
- */
-std::unique_ptr<CapEngine::Component> PlayerGraphicsComponent::clone() const
-{
-    return std::make_unique<PlayerGraphicsComponent>(*this);
-}
-
 }  // namespace FlappyPei

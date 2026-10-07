@@ -1,9 +1,9 @@
-#ifndef FLAPPYPEI_PLAYERGRAPHICSCOMPONENT_H
-#define FLAPPYPEI_PLAYERGRAPHICSCOMPONENT_H
+#ifndef PA_PLAYERGRAPHICSCOMPONENT_H
+#define PA_PLAYERGRAPHICSCOMPONENT_H
 
 #include <capengine/components.h>
 
-namespace FlappyPei {
+namespace PA {
 
 class PlayerGraphicsComponent final : public CapEngine::GraphicsComponent {
    public:
@@ -19,6 +19,6 @@ class PlayerGraphicsComponent final : public CapEngine::GraphicsComponent {
     void update(CapEngine::GameObject& object, double timestep) override;
 };
 
-}  // namespace FlappyPei
+}  // namespace PA
 
-#endif  // FLAPPYPEI_PLAYERGRAPHICSCOMPONENT_H
+#endif /* PA_PLAYERGRAPHICSCOMPONENT_H */

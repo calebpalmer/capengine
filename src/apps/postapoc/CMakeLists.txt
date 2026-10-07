@@ -2,6 +2,10 @@
 add_executable(postapoc
   main.cpp
   levelgamestate.cpp
+  playergraphicscomponent.cpp
+  playerphysicscomponent.cpp
+  playerinputcomponent.cpp
+  inputcontroller.cpp
 )
 
 # submodule dependencies

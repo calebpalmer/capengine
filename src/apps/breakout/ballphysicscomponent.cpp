@@ -31,11 +31,6 @@ std::optional<CapEngine::Rectangle> BallPhysicsComponent::boundingPolygon(const 
     return CapEngine::Rectangle{position.getX(), position.getY(), m_ballDiameter, m_ballDiameter};
 }
 
-std::unique_ptr<CapEngine::Component> BallPhysicsComponent::clone() const
-{
-    return std::make_unique<BallPhysicsComponent>(*this);
-}
-
 void BallPhysicsComponent::handleGameEvent(const CapEngine::GameEvent& in_event)
 {
 }

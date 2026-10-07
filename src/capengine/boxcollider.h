@@ -17,8 +17,6 @@ class BoxCollider : public PhysicsComponent {
     BoxCollider(Rectangle in_rectangle, Anchor in_anchor = Anchor::Center);
     ~BoxCollider() override = default;
 
-    std::unique_ptr<Component> clone() const override;
-
     static std::unique_ptr<BoxCollider> makeComponent(const jsoncons::json& in_json);
     static void registerConstructor(ComponentFactory& in_factory);
 
@@ -47,12 +45,6 @@ inline std::optional<Rectangle> BoxCollider::boundingPolygon(const GameObject& o
         rect.y = position.getY() - (m_box.height / 2.0);
     }
     return rect;
-}
-
-// \copydoc Component::clone
-inline std::unique_ptr<Component> BoxCollider::clone() const
-{
-    return std::make_unique<BoxCollider>(*this);
 }
 
 }  // namespace CapEngine

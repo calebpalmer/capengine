@@ -19,8 +19,6 @@ class BallGraphicsComponent final : public CapEngine::GraphicsComponent {
 
     void render(CapEngine::GameObject& object, const CapEngine::Camera2d& in_camera, uint32_t in_windowId) override;
     void update(CapEngine::GameObject& object, double timestep) override;
-    [[nodiscard]] std::unique_ptr<CapEngine::Component> clone() const override;
-
    private:
     int m_diameter;
     CapEngine::Colour m_colour;

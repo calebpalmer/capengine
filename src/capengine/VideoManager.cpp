@@ -177,6 +177,11 @@ TexturePtr VideoManager::copyTexture(Texture* sourceTexture) const
         CAP_THROW(CapEngineException{error.str()});
     }
 
+    SDL_SetTextureBlendMode(destTexture, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+
     // Set destination texture as render target
     SDL_Texture* originalTarget = SDL_GetRenderTarget(renderer);
     Defer deferSetRenderTarget([renderer, originalTarget]() { SDL_SetRenderTarget(renderer, originalTarget); });

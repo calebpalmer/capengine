@@ -52,9 +52,4 @@ void CatGraphicsComponent::update(CapEngine::GameObject& object, double timestep
 {
 }
 
-std::unique_ptr<CapEngine::Component> CatGraphicsComponent::clone() const
-{
-    return std::make_unique<CatGraphicsComponent>(*this);
-}
-
 }  // namespace FlappyPei

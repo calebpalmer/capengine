@@ -18,8 +18,6 @@ public:
   PlaceHolderGraphics(int in_width, int in_height, Colour in_colour);
   ~PlaceHolderGraphics() override = default;
 
-  std::unique_ptr<Component> clone() const override;
-
   static PlaceHolderGraphics makeComponent(const jsoncons::json &in_json);
   static void registerConstructor(ComponentFactory &in_factory);
 

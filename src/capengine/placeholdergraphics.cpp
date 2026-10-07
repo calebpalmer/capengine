@@ -31,18 +31,12 @@ PlaceHolderGraphics::PlaceHolderGraphics(int in_width, int in_height,
 {
 }
 
-//! \copydoc Component::cloneoi
-std::unique_ptr<Component> PlaceHolderGraphics::clone() const
-{
-  return std::make_unique<PlaceHolderGraphics>(*this);
-}
-
 //! \copydoc GraphicsComponent::render
 void PlaceHolderGraphics::render(GameObject& in_object, const Camera2d& in_camera, uint32_t in_windowId)
 {
     const auto objectRect = in_object.boundingPolygon();
 
-    Rectangle drawRect = toScreenCoords(in_camera, objectRect, in_windowId);
+    Rectangle drawRect = worldToCameraCoords(in_camera, objectRect, in_windowId);
 
     assert(Locator::videoManager != nullptr);
     Locator::videoManager->drawFillRect(in_windowId, drawRect.toRect(), m_colour);

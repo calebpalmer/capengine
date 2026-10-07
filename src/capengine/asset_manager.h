@@ -1,6 +1,7 @@
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
+#include <SDL_stdinc.h>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -78,6 +79,8 @@ class AssetManager {
     void draw(Uint32 windowID, int id, Rectangle dstRect, int row, int frame);
     void draw(Uint32 windowID, int id, Vector position);
     void draw(Uint32 windowID, int id, Rectangle dstRect);
+    void drawFrame(Uint32 windowId, int id, std::string frameName, int frameNumber, Rectangle destRect);
+
     void loadImage(int id, std::string path, int frameWidth = 0, int frameHeight = 0);
     void loadSurface(int id, Surface* surface);
     Image getImage(int id);

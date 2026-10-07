@@ -29,6 +29,10 @@ TEST(AssetManagerTests, TestJsonConstructor)
 
     auto image = assetManager.getImage(1);
     ASSERT_NE(image.texture, nullptr);
+
+    {
+        auto frame = assetManager.getFrame(2, "idle");
+    }
 }
 
 TEST(AssetManagerTests, TestLoadSurface)

@@ -97,7 +97,7 @@ std::map<string, Frame> parseFrames(const jsoncons::json& json)
     for (auto&& frame : json.array_range()) {
         try {
             const std::string frameName = frame["frameName"].as<std::string>();
-            const int rowNum = frame["rowNume"].as<int>();
+            const int rowNum = frame["rowNum"].as<int>();
             const int frameWidth = frame["frameWidth"].as<int>();
             const int frameHeight = frame["frameHeight"].as<int>();
             const int numFrames = frame["numFrames"].as<int>();
@@ -330,8 +330,13 @@ void AssetManager::parseAssetFile(const jsoncons::json& json)
                     continue;
                 }
 
+                std::map<std::string, Frame> frames{};
+                if (hasFrames) {
+                    frames = parseFrames(texture.at("frames"));
+                }
+
                 // Is a regular Image
-                m_imageMap.emplace(id, Image{.path = path, .texture = nullptr, .frames = {}});
+                m_imageMap.emplace(id, Image{.path = path, .texture = nullptr, .frames = frames});
             }
             catch (const std::exception& err) {
                 BOOST_LOG_SEV(CapEngine::log, boost::log::trivial::error)
@@ -559,6 +564,22 @@ void AssetManager::draw(Uint32 windowID, int id, Rectangle _destRect, int row, i
     Rect destRect = _destRect.toRect();
 
     m_videoManager.drawTexture(windowID, image.texture.get(), srcRect, destRect);
+}
+
+void AssetManager::drawFrame(Uint32 windowId, int id, std::string frameName, int frameNumber, Rectangle destRect)
+{
+    Image image = this->getImage(id);
+    CAP_THROW_NULL(image.texture);
+
+    Frame frame = this->getFrame(id, frameName);
+
+    Rect srcRect;
+    srcRect.x = frameNumber * frame.frameWidth;
+    srcRect.y = frame.rowNum * frame.frameHeight;
+    srcRect.w = frame.frameWidth;
+    srcRect.h = frame.frameHeight;
+
+    m_videoManager.drawTexture(windowId, image.texture.get(), srcRect, destRect.toRect());
 }
 
 int64_t AssetManager::playSound(int id, bool repeat)

@@ -1,10 +1,8 @@
 #include "camera2d.h"
 
-#include "CapEngineException.h"
 #include "locator.h"
 
-namespace CapEngine
-{
+namespace CapEngine {
 
 //! Constructor
 /**
@@ -13,20 +11,19 @@ namespace CapEngine
  \param in_height
    The height of the camera view.
 */
-Camera2d::Camera2d(int in_width, int in_height)
-	: m_viewRect(Rectangle(0, 0, in_width, in_height))
+Camera2d::Camera2d(int in_width, int in_height) : m_viewRect(Rectangle(0, 0, in_width, in_height))
 {
 }
 
 std::pair<int, int> Camera2d::getPosition() const
 {
-	return std::make_pair(m_viewRect.x, m_viewRect.y);
+    return std::make_pair(m_viewRect.x, m_viewRect.y);
 }
 
 void Camera2d::setPosition(int in_x, int in_y)
 {
-	m_viewRect.x = in_x;
-	m_viewRect.y = in_y;
+    m_viewRect.x = in_x;
+    m_viewRect.y = in_y;
 }
 
 //! Center camera on rectangle.
@@ -41,9 +38,11 @@ void Camera2d::center(const Rectangle& in_rectangle, std::optional<Rectangle> in
     unsigned int xCenter = in_rectangle.x + (in_rectangle.width / 2);
     unsigned int yCenter = in_rectangle.y + (in_rectangle.height / 2);
 
+    // first center the camera on the middle of the input rectangle
     m_viewRect.x = xCenter - (m_viewRect.width / 2);
     m_viewRect.y = yCenter - (m_viewRect.height / 2);
 
+    // If there is an outer bounds (a map?) then we need to adjust for that
     if (in_outerBounds != std::nullopt) {
         // make sure it doesn't exceed the right hand side of the outer
         // bounds
@@ -77,9 +76,12 @@ void Camera2d::center(const Rectangle& in_rectangle, std::optional<Rectangle> in
  \return
    The viewing rectangle.
 */
-const Rectangle &Camera2d::getViewingRectangle() const { return m_viewRect; }
+const Rectangle& Camera2d::getViewingRectangle() const
+{
+    return m_viewRect;
+}
 
-//! Transforms the given rectangle to screen coordinates.
+//! Transforms the given world-space rectangle to camera-relative coordinates.
 /**
  \param in_camera
    The camera.
@@ -90,10 +92,10 @@ const Rectangle &Camera2d::getViewingRectangle() const { return m_viewRect; }
  \param in_windowHeight
    The window height.
  \return
-   The rectangle in screen coordinates.
+   The rectangle relative to the camera.
 */
-Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, int /* in_windowWidth */,
-                         int in_windowHeight)
+Rectangle worldToCameraCoords(const Camera2d& in_camera, const Rectangle& in_rect, int /* in_windowWidth */,
+                              int in_windowHeight)
 {
     const Rectangle& viewingRect = in_camera.getViewingRectangle();
 
@@ -109,7 +111,7 @@ Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, in
     return rect;
 }
 
-//! Transforms the given rectangle to screen coordinates.
+//! Transforms the given world-space vector to camera-relative coordinates.
 /**
  \param in_camera
    The camera.
@@ -118,9 +120,9 @@ Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, in
  \param un_windowId
    The id of the window.
  \return
-   The Vector in screen coordinates.
+   The vector relative to the camera.
 */
-Vector toScreenCoords(const Camera2d& in_camera, const Vector& in_point, uint32_t in_windowId)
+Vector worldToCameraCoords(const Camera2d& in_camera, const Vector& in_point, uint32_t in_windowId)
 {
     auto [_, windowHeight] = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 
@@ -131,7 +133,7 @@ Vector toScreenCoords(const Camera2d& in_camera, const Vector& in_point, uint32_
     return ret;
 }
 
-//! Transforms the given rectangle to screen coordinates.
+//! Transforms the given world-space rectangle to camera-relative coordinates.
 /**
  \param in_camera
    The camera.
@@ -141,11 +143,11 @@ Vector toScreenCoords(const Camera2d& in_camera, const Vector& in_point, uint32_
    The id of the window.
  \return
 */
-Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, uint32_t in_windowId)
+Rectangle worldToCameraCoords(const Camera2d& in_camera, const Rectangle& in_rect, uint32_t in_windowId)
 {
     auto [windowWidth, windowHeight] = Locator::videoManager->getWindowLogicalResolution(in_windowId);
 
-    return toScreenCoords(in_camera, in_rect, windowWidth, windowHeight);
+    return worldToCameraCoords(in_camera, in_rect, windowWidth, windowHeight);
 }
 
 //! Get the width of the camera.
@@ -153,34 +155,55 @@ Rectangle toScreenCoords(const Camera2d& in_camera, const Rectangle& in_rect, ui
  \return
    The width.
 */
-int Camera2d::getWidth() const { return m_viewRect.width; }
+int Camera2d::getWidth() const
+{
+    return m_viewRect.width;
+}
 
 //! Sets the width of the camera.
 /**
  \param in_width
    The width of the camera.
 */
-void Camera2d::setWidth(int in_width) { m_viewRect.width = in_width; }
+void Camera2d::setWidth(int in_width)
+{
+    m_viewRect.width = in_width;
+}
 
 //! Get the height of the camera.
 /**
  \return
    The height.
 */
-int Camera2d::getHeight() const { return m_viewRect.height; }
+int Camera2d::getHeight() const
+{
+    return m_viewRect.height;
+}
 
 //! Sets the height of the camera.
 /**
  \param in_height
    The height of the camera.
 */
-void Camera2d::setHeight(int in_height) { m_viewRect.height = in_height; }
+void Camera2d::setHeight(int in_height)
+{
+    m_viewRect.height = in_height;
+}
 
-float Camera2d::zoom() const { return m_zoom; }
+float Camera2d::zoom() const
+{
+    return m_zoom;
+}
 
-void Camera2d::zoom(float in_amount) { m_zoom += in_amount; }
+void Camera2d::zoom(float in_amount)
+{
+    m_zoom += in_amount;
+}
 
-void Camera2d::setZoom(float in_amount) { m_zoom = in_amount; }
+void Camera2d::setZoom(float in_amount)
+{
+    m_zoom = in_amount;
+}
 
 //! Take a point in window coordates and transform it relative to in_rectangle
 Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point, Rectangle const& in_rect,
@@ -191,9 +214,7 @@ Vector windowToLocalCoordinate(Camera2d const& in_camera, Vector const& in_point
     int x = in_rect.x + viewingRect.x + static_cast<int>(in_point.x);
     int y = in_rect.y + viewingRect.y + static_cast<int>(in_point.y);
 
-    auto [_, windowHeight] = Locator::videoManager->getWindowLogicalResolution(windowId);
-
     return Vector{static_cast<double>(x), static_cast<double>(y)};
 }
 
-} // namespace CapEngine
+}  // namespace CapEngine

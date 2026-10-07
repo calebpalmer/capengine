@@ -33,7 +33,7 @@ void ImageLayer::render(const Camera2d& in_camera, uint32_t in_windowId)
     const Relation relation = MBRRelate(m_position, viewport);
     if (relation == INSIDE || relation == TOUCH) {
         // translate the position according to the position of the camera
-        const Rectangle translatedPosition = toScreenCoords(in_camera, m_position, in_windowId);
+        const Rectangle translatedPosition = worldToCameraCoords(in_camera, m_position, in_windowId);
         // let SDL crop what isn't visible
         Locator::assetManager->draw(in_windowId, m_assetId, translatedPosition);
     }

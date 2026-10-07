@@ -244,6 +244,12 @@ std::optional<std::string> TiledObjectGroup::name() const { return m_name; }
  * \brief Gets whether the object group is visible.
  * \return True if the object group should be rendered, false otherwise.
  */
-bool TiledObjectGroup::visible() const { return m_visible; }
+bool TiledObjectGroup::visible() const { return m_visible;
+}
+
+double TiledObjectGroup::tiledToWorldY(double in_y) const
+{
+    return static_cast<double>(m_mapHeight) - in_y;
+}
 
 }  // namespace CapEngine

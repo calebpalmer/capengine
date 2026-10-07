@@ -13,12 +13,6 @@ namespace CapEngine
 */
 RigidBodyComponent::RigidBodyComponent(double in_mass) : m_mass(in_mass) {}
 
-//! \copydoc Component::clone
-std::unique_ptr<Component> RigidBodyComponent::clone() const
-{
-  return std::make_unique<RigidBodyComponent>(*this);
-}
-
 //! \copydoc Component::update
 void RigidBodyComponent::update(GameObject &object, double timestep)
 {
