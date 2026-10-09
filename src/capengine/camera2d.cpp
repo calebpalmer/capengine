@@ -35,19 +35,19 @@ void Camera2d::setPosition(int in_x, int in_y)
 */
 void Camera2d::center(const Rectangle& in_rectangle, std::optional<Rectangle> in_outerBounds)
 {
-    unsigned int xCenter = in_rectangle.x + (in_rectangle.width / 2);
-    unsigned int yCenter = in_rectangle.y + (in_rectangle.height / 2);
+    double xCenter = in_rectangle.x + (in_rectangle.width / 2.0);
+    double yCenter = in_rectangle.y + (in_rectangle.height / 2.0);
 
     // first center the camera on the middle of the input rectangle
-    m_viewRect.x = xCenter - (m_viewRect.width / 2);
-    m_viewRect.y = yCenter - (m_viewRect.height / 2);
+    m_viewRect.x = xCenter - (m_viewRect.width / 2.0);
+    m_viewRect.y = yCenter - (m_viewRect.height / 2.0);
 
     // If there is an outer bounds (a map?) then we need to adjust for that
     if (in_outerBounds != std::nullopt) {
         // make sure it doesn't exceed the right hand side of the outer
         // bounds
-        int xExcess = static_cast<int>((m_viewRect.x + m_viewRect.width) - (in_outerBounds->x + in_outerBounds->width));
-        if (xExcess > 0) {
+        double xExcess = (m_viewRect.x + m_viewRect.width) - (in_outerBounds->x + in_outerBounds->width);
+        if (xExcess > 0.0) {
             m_viewRect.x -= xExcess;
         }
 
@@ -58,8 +58,7 @@ void Camera2d::center(const Rectangle& in_rectangle, std::optional<Rectangle> in
         }
 
         // make sure it doesn't exceed the top of the outer bounds
-        int yExcess =
-            static_cast<int>((m_viewRect.y + m_viewRect.height) - (in_outerBounds->y + in_outerBounds->height));
+        double yExcess = (m_viewRect.y + m_viewRect.height) - (in_outerBounds->y + in_outerBounds->height);
         if (yExcess > 0) {
             m_viewRect.y -= yExcess;
         }

@@ -94,16 +94,17 @@ void LevelGameState::update(double in_ms)
     m_player->updateInPlace(in_ms);
 
     // do collision detection
-
-    // center the camera on the player
-    CapEngine::Rectangle playerRect = m_player->boundingPolygon();
-    CapEngine::Rectangle mapRect{0.0, 0.0, static_cast<double>(m_map->pixelWidth()),
-                                 static_cast<double>(m_map->pixelHeight())};
-    m_camera.center(playerRect, mapRect);
 }
 
 void LevelGameState::render()
 {
+    // center the camera on the player
+    CapEngine::Rectangle playerRect = m_player->boundingPolygon();
+    CapEngine::Rectangle mapRect{0.0, 0.0, static_cast<double>(m_map->pixelWidth()),
+                                 static_cast<double>(m_map->pixelHeight())};
+
+    m_camera.center(playerRect, mapRect);
+
     auto& videoManager = CapEngine::Locator::getVideoManager();
     auto [windowWidth, windowHeight] = videoManager.getWindowResolution(m_windowId);
 
